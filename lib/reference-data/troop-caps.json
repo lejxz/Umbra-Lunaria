@@ -1,0 +1,13 @@
+{
+  "_comment": "Max troop level achievable at each Town Hall level. Not provided by the CoC API — sourced manually from public game-data references and updated after balance patches. See concept/06-members.md and concept/12-roadmap-and-modularity.md. STUB — needs real data filled in before rushed % can be built.",
+  "Barbarian": {},
+  "Archer": {},
+  "Giant": {},
+  "Goblin": {},
+  "Wall Breaker": {},
+  "Balloon": {},
+  "Wizard": {},
+  "Healer": {},
+  "Dragon": {},
+  "P.E.K.K.A": {}
+}

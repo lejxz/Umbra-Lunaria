@@ -67,6 +67,20 @@ The Clash of Clans API is free, but every key is locked to specific IP addresses
 
 Full schema, all fields explained, in [`concept/11-config-specification.md`](./concept/11-config-specification.md). Summary: a non-secret `config/clan.config.ts` file (clan tag, timezone, retention days, feature toggles) plus secret environment variables (API token, database URL, ingestion/cron secrets) that never get committed. No user authentication — the dashboard and all actions are open access.
 
+## Local development
+
+```bash
+git clone https://github.com/lejxz/Umbra-Lunaria.git
+cd Umbra-Lunaria
+npm install
+cp .env.example .env.local   # fill in COC_API_TOKEN, DATABASE_URL, etc.
+npm run db:generate          # generates a migration from lib/db/schema.ts
+npm run db:migrate           # applies it to the DATABASE_URL in .env.local
+npm run dev                  # http://localhost:3000
+```
+
+`npm run build` runs the same production build Vercel runs — worth checking locally after any schema or route change, since a build failure on Vercel is slower to debug than one here.
+
 ## Mobile support
 
 This is planned as a single responsive web app (no separate native app or codebase), designed mobile-first, since most members will check it on a phone. Full reasoning and the specific places it affects earlier design decisions (drag-and-drop, charts, tables, modals) are in [`concept/10-mobile-support.md`](./concept/10-mobile-support.md).
