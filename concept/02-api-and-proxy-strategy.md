@@ -42,13 +42,15 @@ Vercel now sells a native Static IPs add-on. It is real and it does work, but it
 
 | Endpoint | Used for |
 |---|---|
-| `GET /clans/{clanTag}` | Clan-level stats: level, points, capital league, war league, member count. |
+| `GET /clans/{clanTag}` | Clan-level stats: level, points, capital league, war league, member count, `warWins`/`warTies`/`warLosses`/`warWinStreak`, join requirements, location, labels, and the `clanCapital` object (`capitalHallLevel` + `districts[].districtHallLevel`). |
 | `GET /clans/{clanTag}/members` | Roster: tags, roles, donations, trophies — polled repeatedly for activity inference. |
-| `GET /players/{playerTag}` | Full member detail: troop/hero/spell/pet levels, Town Hall level, Builder Base stats, achievements. |
-| `GET /clans/{clanTag}/currentwar` | Live current war state — attacks used/left, both rosters, per-attack stars. |
+| `GET /players/{playerTag}` | Full member detail: troop/hero/spell/pet levels, Town Hall level, Builder Base stats, `warPreference`, career totals (`warStars`, `attackWins`, `defenseWins`, `bestTrophies`), `achievements[]`. |
+| `GET /clans/{clanTag}/currentwar` | Live current war state — `attacksPerMember`, both rosters, per-attack stars. Also the source for the war-prep scouting view during `preparation` state. |
 | `GET /clans/{clanTag}/warlog` | Regular war history — **only if the clan's `isWarLogPublic` flag is true.** If it's private, historical war outcomes before this tool existed are simply unavailable; only wars fought after ingestion starts can be recorded from `currentwar` snapshots. |
 | `GET /clans/{clanTag}/currentwar/leaguegroup` and `GET /clanwarleagues/wars/{warTag}` | CWL round data. |
 | `GET /clans/{clanTag}/capitalraidseasons` | Clan Capital raid weekend results and per-member contribution. |
+
+Tag encoding: player and clan tags start with `#`, which must be URL-encoded as `%23` in the request path (e.g. `#2Y8V8VGQ` → `%232Y8V8VGQ`). `lib/coc-client` should do this encoding internally so callers pass the human-readable tag.
 
 ## Rate limits and polling budget
 
@@ -60,6 +62,6 @@ Supercell does not publish an exact numeric rate limit for this API tier, but it
 
 This keeps steady-state usage low and leaves headroom for manual "refresh" actions triggered by users.
 
-## A note on player tags vs. Discord/website identity
+## Player tags as the stable identity key
 
-The CoC API identifies people by **player tag**, not name (names can be changed in-game, tags cannot). Every table in the database keyed to a person should use player tag as the stable identifier. Display names are cached but never used as a join key.
+The CoC API identifies people by **player tag**, not name (names can be changed in-game, tags cannot). Every table in the database keyed to a person should use player tag as the stable identifier/foreign key. Display names are cached but never used as a join key.

@@ -27,7 +27,7 @@ An earlier, simpler design could try to just call the CoC API live on every page
 1. **Activity and war-performance history are things the CoC API does not store on your behalf.** If Umbra Lunaria doesn't record snapshots itself, that history doesn't exist anywhere and can never be recovered. A database is not an optimization here — it is the only way most of section 2 (Members) and section 5 (War Planning) of the feature list can exist at all.
 2. **The CoC API is rate-limited.** Rendering the dashboard by live-calling the API on every visitor's page load, for every member, would burn through rate limits fast with more than a couple of concurrent users, and would make the site fall over during exactly the moment people want to check it — a few hours before war ends.
 
-The database is written to by the poller (GitHub Actions job) and read by the Next.js app. The app itself rarely calls the live CoC API directly except for a few "refresh now" actions (e.g., the current-war refresh button), which are explicitly rate-limit-aware (see `06-clan-war.md`).
+The database is written to by the poller (GitHub Actions job) and read by the Next.js app. The app itself rarely calls the live CoC API directly except for a few "refresh now" actions (e.g., the current-war refresh button), which are explicitly rate-limit-aware (see `07-clan-war.md`).
 
 ## Package/repo layout (proposed)
 
@@ -55,3 +55,17 @@ The database is written to by the poller (GitHub Actions job) and read by the Ne
 ```
 
 This is a proposal, not a mandate — but the separation between `lib/coc-client` (talks to Supercell) and `lib/scoring` (talks to our own database) matters. Keep them decoupled so a change in the API response shape doesn't ripple into the scoring logic. See `12-roadmap-and-modularity.md` for more on this boundary.
+
+## API routes
+
+Most reads (dashboard, members list, war history) go straight from a Next.js Server Component to the database — no API route needed for those, so this list is short and deliberately so. Only genuine writes and machine-to-machine calls get a route:
+
+| Route | Method | Called by | Purpose |
+|---|---|---|---|
+| `/api/ingest` | `POST` | GitHub Actions workflow, with `INGEST_SECRET` bearer token | Runs one poll cycle: fetch `members` (+ `currentwar` if a war is on, + daily batch if due), diff, write snapshots. This is where the actual CoC API calls happen — the GitHub Action itself never talks to CoC or the proxy directly, it just triggers this route on a schedule. |
+| `/api/cron/purge` | `GET` | Vercel Cron, authenticated via Vercel's own `CRON_SECRET` | Hard-deletes members past `purge_at` and dependents. |
+| `/api/war/refresh` | `POST` | Browser, when a user presses the refresh button on the war page | Fetches `currentwar` fresh, updates `wars`/`war_participants`, returns the latest state. Server-side TTL cache (30–60s) so concurrent refresh clicks don't multiply API calls. |
+| `/api/rosters` | `POST` / `PATCH` | Browser, from the war planning page | Save/update a draft `war_rosters` row. |
+| `/api/rosters/[id]/finalize` | `POST` | Browser | Mark a roster draft as finalized. |
+
+No auth on any of these from the browser's side except the two machine routes (`/api/ingest`, `/api/cron/purge`) — consistent with the open-access decision above.

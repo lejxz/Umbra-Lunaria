@@ -6,6 +6,16 @@
 
 Setup: Vercel Dashboard → project → Storage → Marketplace Database Providers → Neon → Create. Vercel injects `DATABASE_URL` automatically.
 
+## Column type conventions
+
+Not restated in every table below — apply these defaults unless a table says otherwise:
+
+- Tags (`player_tag`, opponent tags) → `text`, primary/foreign key, stored with the leading `#`.
+- Timestamps (`captured_at`, `joined_at`, `left_at`, `purge_at`) → `timestamptz`, always UTC in storage; convert to `clanConfig.timezone` only at render time.
+- Counts and levels (`donations`, `trophies`, `town_hall_level`, `stars_earned`) → `integer`.
+- Flags (`activity_flag`, `missed`) → `boolean`.
+- Free-form/nested data (`career_stats`, `unit_levels`, `labels`) → `jsonb`.
+
 ## Core tables
 
 ### `clans`

@@ -62,13 +62,24 @@ export const clanConfig = {
 } satisfies ClanConfig;
 ```
 
+## GitHub Actions repo secrets
+
+Set under the repo's Settings → Secrets and variables → Actions — these are separate from Vercel's env vars, since the workflow runs on GitHub's infrastructure, not Vercel's:
+
+```
+VERCEL_APP_URL=              # e.g. https://umbra-lunaria.vercel.app — the deployed app the workflow calls
+INGEST_SECRET=               # must match the same value set in Vercel's env vars, so /api/ingest accepts the call
+```
+
+`.github/workflows/poll.yml` reads both and sends `Authorization: Bearer ${{ secrets.INGEST_SECRET }}` to `${{ secrets.VERCEL_APP_URL }}/api/ingest`.
+
 ## Runtime settings (database-backed, editable from a Settings page)
 
 Not exhaustive, but the settings that plausibly change often enough that a redeploy would be annoying:
 
 - Inactivity threshold (days) used for the dashboard's "needs attention" panel.
-- Auto-select scoring weights, if the clan wants to tune how heavily rushed % vs. activity vs. 3-star rate count — expose this as sliders/inputs rather than a code change, since it's a judgment call the clan should own, not one this plan should hardcode permanently.
+- Auto-select scoring weights (`09-war-planning-and-auto-select.md`) — the five weights in the composite formula, exposed as sliders/inputs rather than a code change, since it's a judgment call the clan should own, not one this plan should hardcode permanently. Must sum to 1.0; validate on save.
 
 ## A note on multi-clan, even though it's out of scope
 
-The brief is explicitly single-clan, and `clanConfig.clanTag` reflects that as a single value, not an array. If this ever needs to support more than one clan, that's a real architecture change (multi-tenant DB schema, per-clan config resolution, per-clan auth scoping) — not a small tweak. Worth knowing now so nobody's surprised later; not worth building for today.
+The brief is explicitly single-clan, and `clanConfig.clanTag` reflects that as a single value, not an array. If this ever needs to support more than one clan, that's a real architecture change (multi-tenant DB schema, per-clan config resolution) — not a small tweak. Worth knowing now so nobody's surprised later; not worth building for today.

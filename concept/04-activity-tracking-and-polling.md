@@ -15,7 +15,18 @@ Each cycle:
 4. Update `members.left_at`/`purge_at` for anyone missing from the response.
 5. Poll `currentwar` on the same cadence whenever war state is `preparation` or `inWar` (checked cheaply via a cached `wars.state`) — preparation day is included since the war-prep scouting view (`07-clan-war.md`) needs opponent roster data before attacks open. Skip entirely when there's no war.
 
-Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base) is fetched on a slower daily batch cycle, plus on demand with a short cache TTL when a leader opens a member's detail popup.
+Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base, `warPreference`, career stats) is fetched on a slower **daily batch cycle**, not every 10–15 min poll — plus on demand with a short cache TTL when a leader opens a member's detail popup. The same daily batch also refreshes the clan-level cached fields (`clans` table: war record, capital hall level, about-panel fields) and takes the `capital_district_snapshots` reading — none of these change often enough to justify the 10–15 min cadence.
+
+`.github/workflows/poll.yml` — two schedules in one workflow, both calling `/api/ingest` with a query param or body flag distinguishing a light poll from the daily batch:
+
+```yaml
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # light poll: members + currentwar if a war is on
+    - cron: '17 4 * * *'     # daily batch: full player detail, clan cache, capital districts
+```
+
+GitHub Actions cron has a 5-minute floor and isn't guaranteed to fire exactly on time under load — treat "every 10 minutes" as a target, not a guarantee, and don't build UI that assumes gap-free data.
 
 ## Login activity graph
 

@@ -37,7 +37,16 @@ rushed_% = (Σ weight_i × max(0, cap_at_TH(i) − current_level_i))
            Σ weight_i × cap_at_TH(i)
 ```
 
-- `cap_at_TH(i)`: statically maintained reference table (the API doesn't expose per-TH max level). Update after balance patches — `12-roadmap-and-modularity.md`.
+- `cap_at_TH(i)`: statically maintained reference table, keyed by unit `name` (matching the API's field) and Town Hall level — the API doesn't expose per-TH max level, so this has to be sourced once from public game-data references and checked in as static JSON:
+
+```json
+// lib/reference-data/troop-caps.json — shape, not full data
+{
+  "Barbarian": { "12": 9, "13": 10, "14": 10, "15": 11, "16": 11, "17": 11 },
+  "Archer":    { "12": 9, "13": 10, "14": 10, "15": 11, "16": 11, "17": 11 }
+}
+```
+  Same pattern for heroes, spells, pets, and equipment — separate JSON files under `lib/reference-data/`, one per unit category, since they're updated independently and it keeps diffs small when a balance patch changes one file.
 - `weight_i`: flat/equal weighting is the Phase 1 default; per-category weighting is a later refinement if the clan wants it.
 - Show both the overall percentage and a per-category breakdown (elixir troops, dark elixir troops, heroes, spells, pets, siege machines).
 

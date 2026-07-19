@@ -11,7 +11,7 @@ List view: opponent, result (win/loss/tie), war size, own stars vs opponent star
 
 ## Current war — live detail view, refreshed on demand
 
-Per the brief: **refreshed by an explicit refresh button**, not continuously polled by the browser. This is a deliberate rate-limit-friendly choice — see the note below.
+Refreshed by an explicit refresh button (`/api/war/refresh`, `01-tech-stack.md`), not continuously polled by the browser.
 
 Contents:
 - War state (preparation / in war / war over), time remaining.
