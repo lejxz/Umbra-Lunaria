@@ -1,43 +1,37 @@
 # 04 — Activity Tracking & the Polling Engine
 
-This is the piece almost every other feature depends on, so it gets its own document instead of being buried inside "dashboard" or "members."
+## Activity flag
 
-## What "activity" actually means here
-
-The Clash of Clans API never tells you when someone was last online. What it gives you is a snapshot of mutable state. Activity, in this project, is defined as:
-
-> Between two consecutive polls, did any of a member's trackable stats change?
-
-Trackable stats: donations given, donations received, trophies, versus (Builder Base) trophies, and — during a raid weekend — clan capital gold contributed. If any of these differ between snapshot *N* and snapshot *N-1* for a member, that member is marked active for that interval.
-
-**This is a proxy, not a fact.** A member could open the app, scout bases, and close it without donating or attacking, and this system will not see that as activity. Conversely, a single donation gives a full "active" mark for a window that might be hours long, depending on poll frequency. The UI should describe this as "activity signal" or "estimated activity," not "online status," so leadership doesn't over-trust a single flag.
+Between two consecutive polls, if any of a member's trackable stats changed — donations given, donations received, trophies, versus trophies, capital gold contributed during a raid weekend — that member is marked active for that interval. Presented in the UI as "activity," not "online status."
 
 ## Poll frequency
 
-Target: **every 10–15 minutes**, via the GitHub Actions workflow described in `01-tech-stack.md`. Reasoning:
-
-- Frequent enough that the hour-by-hour activity graph (a stated requirement) actually has resolution — a once-a-day poll would make an "hourly" graph meaningless.
-- Infrequent enough to stay well inside CoC API rate limits and not hammer the RoyaleAPI proxy.
+Every 10–15 minutes, via the GitHub Actions workflow (`01-tech-stack.md`).
 
 Each cycle:
-1. `GET /clans/{clanTag}/members` (one call, gets the whole roster's donation/trophy state).
+1. `GET /clans/{clanTag}/members` — one call, whole roster.
 2. Diff against the most recent snapshot per member.
-3. Insert new `member_snapshots` rows, set `activity_flag` per member.
-4. Update `members.left_at`/`purge_at` for anyone missing from the response (see `03-data-model-and-database.md`).
-5. Only during an active war (checked cheaply via a cached `wars.state`), also poll `currentwar` on this same cadence — otherwise skip it, no need to poll war state when there is no war.
+3. Insert `member_snapshots` rows, set `activity_flag` and detect login days (below).
+4. Update `members.left_at`/`purge_at` for anyone missing from the response.
+5. Poll `currentwar` on the same cadence only while a war is active.
 
-Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base) is **not** fetched every cycle for every member — that's 50 extra API calls every 10 minutes for data that changes rarely (upgrades take hours to days). Instead:
-- Fetched on a slower daily batch cycle, **and**
-- Fetched on demand, with a short cache TTL, when a leader opens that specific member's detail popup and the cached copy is more than a few hours old.
+Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base) is fetched on a slower daily batch cycle, plus on demand with a short cache TTL when a leader opens a member's detail popup.
 
-## Handling the weekly donation reset
+## Login activity graph
 
-Supercell resets donation counts to 0 at the end of each Clan Games / weekly cycle. A naive diff would read that reset as "donations decreased by 400," which is nonsense and must not be logged as negative activity or thrown into the activity graph as a dip. The ingestion logic explicitly detects a reset (current value less than previous, combined with a small tolerance/heuristic around the known weekly reset window) and records it as a reset event, not a real decrease. Get this wrong and the whole donation graph produces a misleading weekly cliff.
+Built from daily donation deltas specifically, not the general activity flag. A donation (given or received) requires the player to be online and act, so it's a stronger signal than a passive stat change. Logic:
 
-## Why there's no login-streak feature
+- Track `donations` and `donations_received` per poll.
+- A calendar day is marked as a **login day** if either value increased since the last poll captured that day.
+- Supercell resets both counters to 0 weekly. A reset (value drops) is never counted as a login day by itself; only an *increase* after the reset counts.
+- Rendered as a calendar/graph of login days per member — dates, not a streak count.
 
-A login streak was in the original brief. It's been dropped, not softened into an "estimate," because there is no API field — direct or indirect — that reflects when someone opened the app. The activity flag above is grounded in things that genuinely change value in the API response (donations, trophies, capital contributions); a streak claims something the data can't actually back up, since attacking and donating five times in one polling window is indistinguishable from doing it once. See the fuller reasoning in `00-overview.md`. What stays is the honest version: activity graphs and activity-based war-roster ranking, both built on real field changes, both clearly labeled as inferred activity rather than confirmed logins.
+This is still an inference (a login without any donation activity won't show up), but it's a real, verifiable signal, not a guess. Labeled "estimated login activity" in the UI.
 
-## The cold-start problem
+## Weekly donation reset handling
 
-On day one of deployment, there is no history. The activity graph is empty, and the war-planning auto-select (`09-war-planning-and-auto-select.md`) has nothing to rank on except live troop levels. This is expected and should be communicated in the UI (e.g., "Activity tracking started on [date] — data before this is not available") rather than showing a confusing blank chart with no explanation.
+Same reset logic applies to the donation totals shown on the dashboard (`05-dashboard.md`) — a reset must not be read as a drop in activity.
+
+## Cold start
+
+No history exists before the tool starts polling. Activity graphs, login graphs, and `09-war-planning-and-auto-select.md` scoring are all empty on day one and build up from there. UI should state the tracking start date rather than show an unexplained blank chart.

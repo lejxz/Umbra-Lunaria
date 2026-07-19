@@ -6,24 +6,17 @@ This is a single-clan tool. It is configured once, for one clan tag, and used by
 
 ## Status
 
-Planning stage. See [`/concept`](./concept) for the full design — start with [`concept/00-overview.md`](./concept/00-overview.md), which lays out three real technical constraints (API IP whitelisting, no native "activity" data, Vercel's cron limits) that shape everything else in the plan. Read that first; the rest of the concept docs assume it.
+Planning stage. See [`/concept`](./concept) for the full design — start with [`concept/00-overview.md`](./concept/00-overview.md).
 
 ## Planned features
 
 1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, clan-level stats.
-2. **Clan Members List** — sortable/filterable roster; per-member popup with activity history, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
+2. **Clan Members List** — sortable/filterable roster; per-member popup with activity history, login activity graph, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
 3. **Clan War Details** — war history (regular + league), a live current-war view with a manual refresh button.
-4. **Clan Capital Details** — raid-weekend activity dashboard and per-member contributions. Live district/building upgrade tracking was in the original brief but has been dropped entirely — the API has no field or endpoint for it at all, see [`concept/08-clan-capital.md`](./concept/08-clan-capital.md).
+4. **Clan Capital Details** — raid-weekend activity dashboard and per-member contributions.
 5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war-size selection, and an auto-suggest ranking based on accumulated activity and war-performance history.
 
 Full detail for each of these is in the corresponding file under [`/concept`](./concept).
-
-## Dropped from the original brief
-
-Two requested features are not in this plan at all, because there is no API path for them — not even an approximate one:
-
-- **Daily login streak.** There is no login log in the Clash of Clans API, direct or indirect. General activity tracking (donations, trophies, capital contributions changing between polls) stays, since that's grounded in real fields — but "streak" claimed something stronger the data can't support. Full reasoning in [`concept/00-overview.md`](./concept/00-overview.md) and [`concept/04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md).
-- **Live Clan Capital district/building upgrade progress.** No endpoint exposes a clan's in-progress upgrade queue or remaining cost. Reasoning and what's kept instead (raid-weekend results, which the API does support) in [`concept/08-clan-capital.md`](./concept/08-clan-capital.md).
 
 ## Concept docs
 
@@ -35,7 +28,7 @@ Two requested features are not in this plan at all, because there is no API path
 | [`03-data-model-and-database.md`](./concept/03-data-model-and-database.md) | Schema and the 2-week member-data retention policy |
 | [`04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md) | How "activity" is inferred and polled |
 | [`05-dashboard.md`](./concept/05-dashboard.md) | Main Dashboard |
-| [`06-members.md`](./concept/06-members.md) | Members List + rushed % methodology |
+| [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, rushed % methodology |
 | [`07-clan-war.md`](./concept/07-clan-war.md) | Clan War Details |
 | [`08-clan-capital.md`](./concept/08-clan-capital.md) | Clan Capital Details |
 | [`09-war-planning-and-auto-select.md`](./concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking |
