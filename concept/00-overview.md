@@ -9,9 +9,9 @@ It is **not** a multi-clan SaaS product. It is built around one `clanTag`, confi
 ## Feature scope (from planning discussion)
 
 1. **Main Dashboard** — donation totals (24h / week / month), an activity graph (hourly / weekly / monthly), and room for more dashboard widgets later.
-2. **Clan Members List** — sortable/filterable member table plus a detail popup per member: activity history, login-streak estimate, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
+2. **Clan Members List** — sortable/filterable member table plus a detail popup per member: activity history, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
 3. **Clan War Details** — war history (regular + league), a live current-war view refreshed on demand.
-4. **Clan Capital Details** — capital activity dashboard, per-member contribution, current district upgrade progress.
+4. **Clan Capital Details** — capital activity dashboard, per-member contribution.
 5. **Next Clan War Planning** — drag-and-drop roster builder, member detail popups, war size selection, and an auto-suggest ranking based on activity and war performance history.
 6. **General system qualities** — modular enough to survive Supercell balance patches and API changes, with a real database and a real, documented config.
 
@@ -33,7 +33,9 @@ Vercel Serverless Functions on the **Hobby (free) plan** run on a shared, rotati
 
 There is no endpoint that tells you when a player last opened the app, and no login log. What the API gives you is a **snapshot** of current state: donations given/received, trophies, versus trophies, clan capital contributions this raid weekend, war attacks used.
 
-Every "activity" feature in this plan — the activity graph, login-streak estimate, and the activity component of war-roster ranking — works by **polling the API on a schedule and diffing successive snapshots**. If a member's donation count, trophy count, or capital contribution changed since the last poll, we count that as a sign of activity in that window. This is an inference, not a certainty, and the docs below say so explicitly rather than presenting it as a real login log.
+Every "activity" feature in this plan — the activity graph and the activity component of war-roster ranking — works by **polling the API on a schedule and diffing successive snapshots**. If a member's donation count, trophy count, or capital contribution changed since the last poll, we count that as a sign of activity in that window. This is an inference, not a certainty, and the docs below say so explicitly rather than presenting it as a real login log.
+
+**A "login streak" feature was in the original brief and has been dropped entirely, not just softened.** The distinction matters: activity inference (above) is grounded in real API fields that genuinely change value — donations, trophies, capital contributions. A login streak claims something stronger — that the member opened the app on a given calendar day — and there is no API field, direct or indirect, that supports that claim. A member can attack, donate, and close the app within one polling window and look identical to someone who logged in five times that day; the reverse is also true if a poll lands awkwardly. Dressing that up as a "streak" implies precision the underlying data cannot back up, so it's removed rather than shipped as a soft estimate.
 
 This has a direct consequence: **the system only knows what it has observed since it started running.** It cannot retroactively reconstruct six months of history for a clan that just installed it. Day one, the activity graph is empty. It fills in over the following days and weeks. This is disclosed in `04-activity-tracking-and-polling.md` and again in `09-war-planning-and-auto-select.md`, because it directly limits how good the auto-select feature can be early on.
 

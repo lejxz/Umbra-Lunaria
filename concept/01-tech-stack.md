@@ -21,7 +21,7 @@
 
 An earlier, simpler design could try to just call the CoC API live on every page load and skip a database. This does not work for this feature set, for two separable reasons:
 
-1. **Activity, login streaks, and war-performance history are all things the CoC API does not store on your behalf.** If Umbra Lunaria doesn't record snapshots itself, that history doesn't exist anywhere and can never be recovered. A database is not an optimization here — it is the only way most of section 2 (Members) and section 5 (War Planning) of the feature list can exist at all.
+1. **Activity and war-performance history are things the CoC API does not store on your behalf.** If Umbra Lunaria doesn't record snapshots itself, that history doesn't exist anywhere and can never be recovered. A database is not an optimization here — it is the only way most of section 2 (Members) and section 5 (War Planning) of the feature list can exist at all.
 2. **The CoC API is rate-limited.** Rendering the dashboard by live-calling the API on every visitor's page load, for every member, would burn through rate limits fast with more than a couple of concurrent users, and would make the site fall over during exactly the moment people want to check it — a few hours before war ends.
 
 The database is written to by the poller (GitHub Actions job) and read by the Next.js app. The app itself rarely calls the live CoC API directly except for a few "refresh now" actions (e.g., the current-war refresh button), which are explicitly rate-limit-aware (see `06-clan-war.md`).

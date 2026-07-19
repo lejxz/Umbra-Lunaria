@@ -36,9 +36,9 @@ export const clanConfig = {
   // this so callers just pass the human-readable tag).
   clanTag: "#2Y8V8VGQ",
 
-  // IANA timezone used for "daily" boundaries in the activity graph, login
-  // streak calculation, and donation-window buckets. Not necessarily UTC —
-  // pick whatever the clan's leadership actually operates in.
+  // IANA timezone used for "daily" boundaries in the activity graph and
+  // donation-window buckets. Not necessarily UTC — pick whatever the
+  // clan's leadership actually operates in.
   timezone: "Asia/Manila",
 
   // How long a departed member's data is retained before the daily purge
@@ -71,7 +71,6 @@ export const clanConfig = {
 
 Not exhaustive, but the settings that plausibly change often enough that a redeploy would be annoying:
 
-- Manual Clan Capital "currently upgrading" district + gold target (see the honesty note in `08-clan-capital.md` — this is inherently manual, not API-sourced).
 - Inactivity threshold (days) used for the dashboard's "needs attention" panel.
 - Auto-select scoring weights, if the clan wants to tune how heavily rushed % vs. activity vs. 3-star rate count — expose this as sliders/inputs rather than a code change, since it's a judgment call the clan should own, not one this plan should hardcode permanently.
 - Leadership allow-list (which Discord users, if using Discord OAuth, are permitted to edit rosters/settings).

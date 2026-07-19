@@ -14,10 +14,6 @@ Table/grid of the roster, with filtering and sorting mirroring the in-game clan 
 
 Reuses the same activity-flag data and windowing as the main dashboard graph (`04-activity-tracking-and-polling.md`), scoped to this one member.
 
-### Login streak
-
-The estimated streak described in `04-activity-tracking-and-polling.md`, labeled clearly as an estimate, plus best/longest streak on record.
-
 ### Rushed / non-rushed analysis
 
 **Definition used here (standard community approach, not a Supercell-provided stat):** for a member at Town Hall level *T*, compare each troop/hero/spell/pet's *current level* against the *maximum level achievable at Town Hall T* (not the global max level, which may require a higher Town Hall than the member currently has). A unit under that TH-specific cap counts as "rushed" for that unit.

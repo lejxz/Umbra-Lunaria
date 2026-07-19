@@ -17,13 +17,12 @@ The feature list in the brief is roughly in priority order already, but two thin
 
 **Phase 1 — Read-only core**
 - Main Dashboard (donations, activity graph, clan-level stat cards).
-- Members List + detail popup, *without* rushed % yet if the reference table (below) isn't ready — ship troop/hero cards and activity/streak first, add rushed % once the static data exists.
+- Members List + detail popup, *without* rushed % yet if the reference table (below) isn't ready — ship troop/hero cards and activity first, add rushed % once the static data exists.
 - Clan War: history list + live current-war view with manual refresh.
-- Clan Capital: raid-weekend dashboard (the API-real part; skip the manual district tracker for now).
+- Clan Capital: raid-weekend dashboard — this is now the entire Clan Capital feature; see `08-clan-capital.md` for why district-upgrade tracking was dropped rather than deferred.
 
 **Phase 2 — Depth and planning**
 - Rushed % analysis, once the TH-level-cap reference table is built and verified.
-- Clan Capital manual district/gold tracker.
 - War Planning: drag-and-drop roster builder (manual mode — no auto-select yet), saved drafts.
 - Leadership auth (Discord OAuth) gating write actions.
 

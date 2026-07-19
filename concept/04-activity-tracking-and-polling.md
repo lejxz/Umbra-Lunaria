@@ -34,10 +34,10 @@ Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base) is **not
 
 Supercell resets donation counts to 0 at the end of each Clan Games / weekly cycle. A naive diff would read that reset as "donations decreased by 400," which is nonsense and must not be logged as negative activity or thrown into the activity graph as a dip. The ingestion logic explicitly detects a reset (current value less than previous, combined with a small tolerance/heuristic around the known weekly reset window) and records it as a reset event, not a real decrease. Get this wrong and the whole donation graph produces a misleading weekly cliff.
 
-## Login-streak estimate
+## Why there's no login-streak feature
 
-Built directly on the activity flag described above: a "streak" is the count of consecutive calendar days (in the clan's configured timezone — see `11-config-specification.md`) that had at least one `activity_flag = true` snapshot. Label this in the UI as an **estimated** streak, for the same reason as above — it is a downstream product of an inference, and should be presented with that honesty rather than as a certainty pulled straight from Supercell.
+A login streak was in the original brief. It's been dropped, not softened into an "estimate," because there is no API field — direct or indirect — that reflects when someone opened the app. The activity flag above is grounded in things that genuinely change value in the API response (donations, trophies, capital contributions); a streak claims something the data can't actually back up, since attacking and donating five times in one polling window is indistinguishable from doing it once. See the fuller reasoning in `00-overview.md`. What stays is the honest version: activity graphs and activity-based war-roster ranking, both built on real field changes, both clearly labeled as inferred activity rather than confirmed logins.
 
 ## The cold-start problem
 
-On day one of deployment, there is no history. The activity graph is empty, the login streak is "day 1 or unknown," and the war-planning auto-select (`09-war-planning-and-auto-select.md`) has nothing to rank on except live troop levels. This is expected and should be communicated in the UI (e.g., "Activity tracking started on [date] — data before this is not available") rather than showing a confusing blank chart with no explanation.
+On day one of deployment, there is no history. The activity graph is empty, and the war-planning auto-select (`09-war-planning-and-auto-select.md`) has nothing to rank on except live troop levels. This is expected and should be communicated in the UI (e.g., "Activity tracking started on [date] — data before this is not available") rather than showing a confusing blank chart with no explanation.
