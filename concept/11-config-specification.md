@@ -20,11 +20,6 @@ DATABASE_URL=
 # Ingestion security
 INGEST_SECRET=              # shared secret the GitHub Actions poller must send; rejects unauthenticated calls to /api/ingest
 CRON_SECRET=                # auto-provisioned by Vercel for the /api/cron/purge route
-
-# Auth (if using Discord OAuth for leadership login, see 01-tech-stack.md)
-AUTH_DISCORD_CLIENT_ID=
-AUTH_DISCORD_CLIENT_SECRET=
-AUTH_SECRET=
 ```
 
 ## Static config — `config/clan.config.ts` (checked into the repo, non-secret)
@@ -73,7 +68,6 @@ Not exhaustive, but the settings that plausibly change often enough that a redep
 
 - Inactivity threshold (days) used for the dashboard's "needs attention" panel.
 - Auto-select scoring weights, if the clan wants to tune how heavily rushed % vs. activity vs. 3-star rate count — expose this as sliders/inputs rather than a code change, since it's a judgment call the clan should own, not one this plan should hardcode permanently.
-- Leadership allow-list (which Discord users, if using Discord OAuth, are permitted to edit rosters/settings).
 
 ## A note on multi-clan, even though it's out of scope
 

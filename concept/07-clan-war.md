@@ -21,7 +21,15 @@ Contents:
 
 **Why a manual refresh button and not live polling from the browser:** if 15 members all have the war page open and it live-polls the CoC API every few seconds, that's a rate-limit problem multiplied by concurrent viewers, on top of the background ingestion poll already running. A manual refresh button that calls a server route (which itself might serve a cached response if called again within a short TTL, e.g. 30–60 seconds, to protect against several people mashing refresh at once) is the right tradeoff for a feature that genuinely needs fresh data but doesn't need sub-minute live updates for a war that runs over a full day or two.
 
+## War prep / opponent scouting view
+
+Shown during the preparation-day window (war `state = preparation`), before attacks open. `currentwar` returns the opponent clan's full roster (tag, name, Town Hall level, map position) — the same call already used for the live view above, no extra endpoint needed.
+
+- Two-column roster: own clan vs. opponent, both ordered by map position, Town Hall level shown per member.
+- TH mismatch highlighting: flag own members whose TH is notably below the opponent they'd be matched against by position, so attack assignment discussions have something concrete to point at.
+- Feeds directly into `09-war-planning-and-auto-select.md` if the roster planning tool is used to pre-assign attackers to specific opponent bases — same underlying opponent data, no duplication.
+
 ## Other war features (candidates)
 
 - CWL: round-by-round view across the league group, not just the current round.
-- Per-member historical war stats surfaced here too, pulling from the same `war_attacks` table the planning tool uses (`09-war-planning-and-auto-select.md`) — average stars per attack, 3-star rate, participation rate.
+- Per-member historical war stats surfaced here too, pulling from `war_attacks`/`war_participants` (`09-war-planning-and-auto-select.md`) — average stars per attack, 3-star rate, participation rate.

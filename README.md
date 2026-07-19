@@ -12,7 +12,7 @@ Planning stage. See [`/concept`](./concept) for the full design — start with [
 
 1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, clan-level stats.
 2. **Clan Members List** — sortable/filterable roster (including wars missed); per-member popup with activity history, login activity graph, war participation (missed attacks), rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
-3. **Clan War Details** — war history (regular + league), a live current-war view with a manual refresh button.
+3. **Clan War Details** — war history (regular + league), a live current-war view with a manual refresh button, and a preparation-day opponent scouting view.
 4. **Clan Capital Details** — raid-weekend activity dashboard and per-member contributions.
 5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war-size selection, and an auto-suggest ranking based on accumulated activity and war-performance history.
 
@@ -29,7 +29,7 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 | [`04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md) | How "activity" is inferred and polled |
 | [`05-dashboard.md`](./concept/05-dashboard.md) | Main Dashboard |
 | [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, missed-attack tracking, rushed % methodology |
-| [`07-clan-war.md`](./concept/07-clan-war.md) | Clan War Details |
+| [`07-clan-war.md`](./concept/07-clan-war.md) | Clan War Details, war-prep opponent scouting |
 | [`08-clan-capital.md`](./concept/08-clan-capital.md) | Clan Capital Details |
 | [`09-war-planning-and-auto-select.md`](./concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking |
 | [`10-mobile-support.md`](./concept/10-mobile-support.md) | Mobile support planning |
@@ -65,7 +65,7 @@ The Clash of Clans API is free, but every key is locked to specific IP addresses
 
 ## Configuration
 
-Full schema, all fields explained, in [`concept/11-config-specification.md`](./concept/11-config-specification.md). Summary: a non-secret `config/clan.config.ts` file (clan tag, timezone, retention days, feature toggles) plus secret environment variables (API token, database URL, ingestion/cron secrets, auth credentials) that never get committed.
+Full schema, all fields explained, in [`concept/11-config-specification.md`](./concept/11-config-specification.md). Summary: a non-secret `config/clan.config.ts` file (clan tag, timezone, retention days, feature toggles) plus secret environment variables (API token, database URL, ingestion/cron secrets) that never get committed. No user authentication — the dashboard and all actions are open access.
 
 ## Mobile support
 
@@ -73,4 +73,4 @@ This is planned as a single responsive web app (no separate native app or codeba
 
 ## License
 
-Not yet decided — add one before making the repo public if it isn't already private.
+[MIT](./LICENSE)

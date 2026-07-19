@@ -17,7 +17,6 @@
 **Phase 2 — Depth and planning**
 - Rushed % analysis.
 - War Planning: drag-and-drop roster builder (manual mode), saved drafts.
-- Leadership auth (Discord OAuth) gating write actions.
 
 **Phase 3 — Auto-select and polish**
 - War-planning auto-select ranking, once enough war history has accumulated (`09-war-planning-and-auto-select.md`) — a data gate, not a code-readiness gate.

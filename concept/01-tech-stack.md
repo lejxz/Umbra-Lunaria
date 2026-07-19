@@ -14,8 +14,11 @@
 | CoC API access | RoyaleAPI proxy (`cocproxy.royaleapi.dev`) | Solves the static-IP requirement for free. See `02-api-and-proxy-strategy.md`. |
 | Charts | Recharts or a lightweight canvas-based chart lib | Activity graphs and donation graphs are the core visual product here; pick a library that renders well on mobile widths too (see `10-mobile-support.md`). |
 | Drag-and-drop (war planning) | `@dnd-kit` | Actively maintained, accessible, works on touch — important since the roster planner needs to be usable on a phone, not just desktop. |
-| Auth (leadership-only actions) | Discord OAuth (via NextAuth/Auth.js) or a simple shared-password gate | The dashboard itself (read-only views) can be public or link-shared; **write actions** (war planning, config changes) should require login. Discord OAuth is a natural fit if the clan already coordinates on Discord — see `11-config-specification.md`. |
 | Deployment | Vercel | Given, since the whole plan is scoped around it. |
+
+## Access
+
+No authentication. Every view and every write action (war roster edits, planning) is open to anyone with the URL — the `/api/ingest` and `/api/cron/purge` routes are the only things gated, by shared secrets, since those are machine-to-machine and not user-facing (`11-config-specification.md`).
 
 ## Why not a "no-database" approach
 

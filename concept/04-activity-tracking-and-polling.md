@@ -13,7 +13,7 @@ Each cycle:
 2. Diff against the most recent snapshot per member.
 3. Insert `member_snapshots` rows, set `activity_flag` and detect login days (below).
 4. Update `members.left_at`/`purge_at` for anyone missing from the response.
-5. Poll `currentwar` on the same cadence only while a war is active.
+5. Poll `currentwar` on the same cadence whenever war state is `preparation` or `inWar` (checked cheaply via a cached `wars.state`) — preparation day is included since the war-prep scouting view (`07-clan-war.md`) needs opponent roster data before attacks open. Skip entirely when there's no war.
 
 Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base) is fetched on a slower daily batch cycle, plus on demand with a short cache TTL when a leader opens a member's detail popup.
 
