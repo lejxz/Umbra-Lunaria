@@ -1,0 +1,33 @@
+name: Poll Clash of Clans data
+
+on:
+  schedule:
+    # Light poll: members + currentwar if a war is on. 10 min target — GitHub
+    # Actions cron has a 5-min floor and isn't guaranteed to fire exactly on
+    # time under load. See concept/04-activity-tracking-and-polling.md.
+    - cron: "*/10 * * * *"
+    # Daily batch: full player detail, clan cache refresh, capital districts.
+    # Time is UTC — adjust if you want it to land at a specific local hour.
+    - cron: "17 4 * * *"
+  workflow_dispatch: {} # allows manually triggering a run from the Actions tab
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine if this run is the daily batch
+        id: batch
+        run: |
+          if [ "${{ github.event.schedule }}" = "17 4 * * *" ]; then
+            echo "is_batch=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_batch=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Call /api/ingest
+        run: |
+          curl --fail-with-body -sS -X POST \
+            -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"batch\": ${{ steps.batch.outputs.is_batch }}}" \
+            "${{ secrets.VERCEL_APP_URL }}/api/ingest"
