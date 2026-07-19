@@ -10,11 +10,11 @@ Planning stage. See [`/concept`](./concept) for the full design — start with [
 
 ## Planned features
 
-1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, clan-level stats.
-2. **Clan Members List** — sortable/filterable roster (including wars missed); per-member popup with activity history, login activity graph, war participation (missed attacks), rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
+1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, an all-time war record card, a clan info panel, and a needs-attention panel.
+2. **Clan Members List** — sortable/filterable roster (wars missed, war preference); per-member popup with activity history, login activity graph, war participation (missed attacks), career/lifetime stats, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
 3. **Clan War Details** — war history (regular + league), a live current-war view with a manual refresh button, and a preparation-day opponent scouting view.
-4. **Clan Capital Details** — raid-weekend activity dashboard and per-member contributions.
-5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war-size selection, and an auto-suggest ranking based on accumulated activity and war-performance history.
+4. **Clan Capital Details** — raid-weekend activity dashboard, per-member contributions, and district-level upgrade tracking.
+5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war-size selection, and an auto-suggest ranking based on accumulated activity and war-performance history, with war-preference-aware filtering.
 
 Full detail for each of these is in the corresponding file under [`/concept`](./concept).
 
@@ -28,10 +28,10 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 | [`03-data-model-and-database.md`](./concept/03-data-model-and-database.md) | Schema and the 2-week member-data retention policy |
 | [`04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md) | How "activity" is inferred and polled |
 | [`05-dashboard.md`](./concept/05-dashboard.md) | Main Dashboard |
-| [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, missed-attack tracking, rushed % methodology |
+| [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, missed-attack tracking, career stats, rushed % methodology |
 | [`07-clan-war.md`](./concept/07-clan-war.md) | Clan War Details, war-prep opponent scouting |
-| [`08-clan-capital.md`](./concept/08-clan-capital.md) | Clan Capital Details |
-| [`09-war-planning-and-auto-select.md`](./concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking |
+| [`08-clan-capital.md`](./concept/08-clan-capital.md) | Clan Capital Details, district-level upgrade tracking |
+| [`09-war-planning-and-auto-select.md`](./concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking, war-preference filtering |
 | [`10-mobile-support.md`](./concept/10-mobile-support.md) | Mobile support planning |
 | [`11-config-specification.md`](./concept/11-config-specification.md) | Config schema — clan tag, settings, env vars |
 | [`12-roadmap-and-modularity.md`](./concept/12-roadmap-and-modularity.md) | Build order, and staying resilient to game updates |

@@ -5,7 +5,8 @@
 Table/grid of the roster, filtering and sorting mirroring the in-game clan member screen:
 
 - **Sort by:** role, donations (given/received), trophies, Town Hall level, name, join date, activity, wars missed.
-- **Filter by:** role, Town Hall level range, activity threshold, rushed % range, wars missed (e.g. "2+ missed in last 5 wars") — this is the direct way to spot inactive members from the list itself.
+- **Filter by:** role, Town Hall level range, activity threshold, rushed % range, wars missed (e.g. "2+ missed in last 5 wars"), war preference (in/out) — this is the direct way to spot inactive members from the list itself.
+- War preference (`in`/`out`, from the player object) shown as a small badge per row — members set to "out" shouldn't need a click to identify.
 - Row click opens the member detail popup.
 
 ## Member detail popup
@@ -21,6 +22,10 @@ Calendar/graph of estimated login dates, built from daily donation deltas (`04-a
 ### War participation
 
 From `war_participants` (`03-data-model-and-database.md`): wars missed (0 attacks used) out of wars since tracked, attack-slot usage rate (attacks used ÷ attacks allowed, across all wars), and a recent-wars strip (last 10 wars, attacked/missed per war) for a fast visual read. This is exact data pulled from each war's roster, not inferred.
+
+### Career stats
+
+Lifetime totals from the player object and `achievements[]`, refreshed daily (`career_stats`, `03-data-model-and-database.md`): war stars, attack wins, defense wins, best trophies, plus a couple of achievement totals worth showing (lifetime capital gold looted, lifetime troops donated). These are Supercell-tracked since the account existed — not limited by when this tool started polling, unlike everything else on this page. Labeled clearly as "career" / "lifetime" so it isn't confused with the tracked-since-here stats above.
 
 ### Rushed / non-rushed analysis
 

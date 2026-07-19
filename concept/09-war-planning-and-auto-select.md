@@ -2,7 +2,7 @@
 
 ## Drag-and-drop roster builder
 
-- Two-panel layout: available roster (left) → war lineup slots (right), ordered by war-map position.
+- Two-panel layout: available roster (left) → war lineup slots (right), ordered by war-map position. Members with `warPreference = out` are shown but visually deprioritized (bottom of the list, muted), not hidden — leadership can still add them if needed.
 - `@dnd-kit` for interaction, with a tap-to-add fallback for touch (`10-mobile-support.md`).
 - Member detail popup (same component as `06-members.md`) reachable from within the planner.
 - War size selection: standard game sizes; warn before truncating a partially filled roster on a size change.
@@ -10,7 +10,7 @@
 
 ## Auto-select scoring
 
-Ranks members using only data observed since the tool started polling — no retroactive history.
+Ranks members using only data observed since the tool started polling — no retroactive history. Members with `warPreference = out` (`members.war_preference`, `03-data-model-and-database.md`) are excluded from the suggested roster automatically, not just deprioritized — the auto-select is meant to be a fast fill from people who've opted in.
 
 | Factor | Source |
 |---|---|

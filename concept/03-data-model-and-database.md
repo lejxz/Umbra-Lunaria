@@ -9,7 +9,14 @@ Setup: Vercel Dashboard → project → Storage → Marketplace Database Provide
 ## Core tables
 
 ### `clans`
-One row: clan tag, cached name/badge/level, last successful poll timestamp, feature toggles.
+One row: clan tag, cached name/badge/level, last successful poll timestamp, feature toggles. Also caches clan-level fields refreshed each poll, not worth their own tables since they're single values, not time-series:
+
+| column | notes |
+|---|---|
+| `capital_hall_level` | current, from `clanCapital.capitalHallLevel` |
+| `war_wins`, `war_ties`, `war_losses`, `war_win_streak` | all-time, from the clan object directly — not limited by when this tool started polling |
+| `required_trophies`, `required_town_hall_level`, `required_builder_base_trophies` | join requirements, for the about panel |
+| `location`, `labels`, `war_frequency` | about panel |
 
 ### `members`
 | column | notes |
@@ -18,6 +25,8 @@ One row: clan tag, cached name/badge/level, last successful poll timestamp, feat
 | `name` | Cached display name, refreshed each poll. |
 | `role` | leader / coLeader / admin / member |
 | `town_hall_level` | |
+| `war_preference` | `in` / `out`, from the player object. Drives auto-select exclusion in `09-war-planning-and-auto-select.md`. |
+| `career_stats` | JSONB, refreshed on the daily full `players/{tag}` batch: `warStars`, `attackWins`, `defenseWins`, `bestTrophies`, plus a small set of achievement totals (e.g. lifetime capital gold looted, lifetime troops donated). These are Supercell-tracked career totals, not limited by when this tool started — see `06-members.md`. |
 | `joined_at` | First observed by this tool — not necessarily the real in-game join date. |
 | `left_at` | NULL while in clan; set when missing from a poll's `members` response. |
 | `purge_at` | `left_at + 14 days`. Row and dependents hard-deleted once passed. |
@@ -45,6 +54,9 @@ One row per roster member per war — this is what makes missed-attack tracking 
 
 ### `capital_raid_seasons` and `capital_contributions`
 Mirrors the API's raid season structure; per-member offense/defense contribution.
+
+### `capital_district_snapshots`
+One row per district per poll — daily cadence is enough, district levels change over days/weeks, not minutes. `district_name`, `district_hall_level`, `captured_at`, sourced from `clanCapital.districts[].districtHallLevel`. Diffed the same way as activity: a level increase between snapshots is logged as an upgrade event with a date. Corrects an earlier version of `08-clan-capital.md`, which assumed no district-level data existed at all — it does, just not a live in-progress/remaining-cost view.
 
 ### `war_rosters` and `war_roster_slots`
 Draft/finalized rosters from the planning tool.
