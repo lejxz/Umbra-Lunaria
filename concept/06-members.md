@@ -4,8 +4,8 @@
 
 Table/grid of the roster, filtering and sorting mirroring the in-game clan member screen:
 
-- **Sort by:** role, donations (given/received), trophies, Town Hall level, name, join date, activity.
-- **Filter by:** role, Town Hall level range, activity threshold, rushed % range.
+- **Sort by:** role, donations (given/received), trophies, Town Hall level, name, join date, activity, wars missed.
+- **Filter by:** role, Town Hall level range, activity threshold, rushed % range, wars missed (e.g. "2+ missed in last 5 wars") — this is the direct way to spot inactive members from the list itself.
 - Row click opens the member detail popup.
 
 ## Member detail popup
@@ -17,6 +17,10 @@ Daily / weekly / monthly activity, from `04-activity-tracking-and-polling.md`, s
 ### Login activity graph
 
 Calendar/graph of estimated login dates, built from daily donation deltas (`04-activity-tracking-and-polling.md`). Dates, not a streak count. Labeled as estimated.
+
+### War participation
+
+From `war_participants` (`03-data-model-and-database.md`): wars missed (0 attacks used) out of wars since tracked, attack-slot usage rate (attacks used ÷ attacks allowed, across all wars), and a recent-wars strip (last 10 wars, attacked/missed per war) for a fast visual read. This is exact data pulled from each war's roster, not inferred.
 
 ### Rushed / non-rushed analysis
 

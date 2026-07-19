@@ -16,7 +16,7 @@ Per the brief: **refreshed by an explicit refresh button**, not continuously pol
 Contents:
 - War state (preparation / in war / war over), time remaining.
 - Both clans' attack progress: attacks used / attacks remaining, total stars, destruction %.
-- Full roster with per-member attack status: attacks used (0/1/2), stars earned, best attack so far, "has not attacked yet" flag prominently surfaced (this is the thing leaders actually check for mid-war).
+- Full roster with per-member attack status: attacks used (0/1/2), stars earned, best attack so far, "has not attacked yet" flag prominently surfaced (this is the thing leaders actually check for mid-war). Every poll during a war writes this roster into `war_participants` (`03-data-model-and-database.md`), which is what powers the missed-attacks stat on the Members page.
 - Attack log: attacker, defender, stars, destruction %, timestamp, in order.
 
 **Why a manual refresh button and not live polling from the browser:** if 15 members all have the war page open and it live-polls the CoC API every few seconds, that's a rate-limit problem multiplied by concurrent viewers, on top of the background ingestion poll already running. A manual refresh button that calls a server route (which itself might serve a cached response if called again within a short TTL, e.g. 30–60 seconds, to protect against several people mashing refresh at once) is the right tradeoff for a feature that genuinely needs fresh data but doesn't need sub-minute live updates for a war that runs over a full day or two.

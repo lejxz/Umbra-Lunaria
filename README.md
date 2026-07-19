@@ -11,7 +11,7 @@ Planning stage. See [`/concept`](./concept) for the full design — start with [
 ## Planned features
 
 1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, clan-level stats.
-2. **Clan Members List** — sortable/filterable roster; per-member popup with activity history, login activity graph, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
+2. **Clan Members List** — sortable/filterable roster (including wars missed); per-member popup with activity history, login activity graph, war participation (missed attacks), rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
 3. **Clan War Details** — war history (regular + league), a live current-war view with a manual refresh button.
 4. **Clan Capital Details** — raid-weekend activity dashboard and per-member contributions.
 5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war-size selection, and an auto-suggest ranking based on accumulated activity and war-performance history.
@@ -28,7 +28,7 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 | [`03-data-model-and-database.md`](./concept/03-data-model-and-database.md) | Schema and the 2-week member-data retention policy |
 | [`04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md) | How "activity" is inferred and polled |
 | [`05-dashboard.md`](./concept/05-dashboard.md) | Main Dashboard |
-| [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, rushed % methodology |
+| [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, missed-attack tracking, rushed % methodology |
 | [`07-clan-war.md`](./concept/07-clan-war.md) | Clan War Details |
 | [`08-clan-capital.md`](./concept/08-clan-capital.md) | Clan Capital Details |
 | [`09-war-planning-and-auto-select.md`](./concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking |

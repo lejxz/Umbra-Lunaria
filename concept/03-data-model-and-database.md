@@ -31,6 +31,18 @@ Normalized tables, or a single JSONB `unit_levels` column per member. JSONB is t
 ### `wars` and `war_attacks`
 One row per war observed via `currentwar`/`warlog`; one row per attack (attacker, defender, stars, destruction %, order). Only covers wars fought since this tool started polling.
 
+### `war_participants`
+One row per roster member per war — this is what makes missed-attack tracking possible. `war_attacks` only logs attacks that happened; a member who used 0 attacks has no row there at all. `war_participants` covers the full roster regardless of whether they attacked.
+
+| column | notes |
+|---|---|
+| `war_id` | FK → wars |
+| `player_tag` | FK → members |
+| `attacks_allowed` | from the war's `attacksPerMember` API field |
+| `attacks_used` | count of entries in that member's `attacks` array |
+| `stars_earned` | sum across their attacks |
+| `missed` | `attacks_used = 0` — the flag driving the "did not attack" stat |
+
 ### `capital_raid_seasons` and `capital_contributions`
 Mirrors the API's raid season structure; per-member offense/defense contribution.
 

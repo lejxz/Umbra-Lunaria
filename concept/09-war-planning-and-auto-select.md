@@ -15,7 +15,7 @@ Ranks members using only data observed since the tool started polling — no ret
 | Factor | Source |
 |---|---|
 | Recent activity | `member_snapshots.activity_flag`, trailing 14 days |
-| War attack participation rate | `war_attacks` since tracked |
+| War attack participation rate | `war_participants` since tracked |
 | Average stars per attack | `war_attacks` since tracked |
 | 3-star rate | `war_attacks` since tracked |
 | Rushed % | `06-members.md` methodology |
