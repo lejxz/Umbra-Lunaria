@@ -1,10 +1,5 @@
+import { ComingSoon, PageScaffold } from "@/components/page-scaffold";
+
 export default function MembersPage() {
-  return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold capitalize">members</h1>
-      <p className="mt-2 text-neutral-400">
-        Placeholder — see concept/ for this page's spec. Built in Phase 1/2.
-      </p>
-    </main>
-  );
+  return <PageScaffold section="Roster" title="Members" description="A clear read on activity, contribution, and war readiness." eyebrow="member browser"><ComingSoon label="Roster signal" description="The sortable roster and member detail sheet will be built here next, using the same quiet hierarchy and compact card language as the dashboard." /></PageScaffold>;
 }

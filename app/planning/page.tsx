@@ -1,10 +1,5 @@
+import { ComingSoon, PageScaffold } from "@/components/page-scaffold";
+
 export default function PlanningPage() {
-  return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold capitalize">planning</h1>
-      <p className="mt-2 text-neutral-400">
-        Placeholder — see concept/ for this page's spec. Built in Phase 1/2.
-      </p>
-    </main>
-  );
+  return <PageScaffold section="War planning" title="Planning" description="Prepare the next roster with transparent, human-controlled decisions." eyebrow="roster builder"><ComingSoon label="Planning signal" description="The planner will use the shared member sheet, war-preference-aware roster slots, and touch-friendly interactions described in the concept folder." /></PageScaffold>;
 }

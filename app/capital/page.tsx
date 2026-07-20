@@ -1,10 +1,5 @@
+import { ComingSoon, PageScaffold } from "@/components/page-scaffold";
+
 export default function CapitalPage() {
-  return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold capitalize">capital</h1>
-      <p className="mt-2 text-neutral-400">
-        Placeholder — see concept/ for this page's spec. Built in Phase 1/2.
-      </p>
-    </main>
-  );
+  return <PageScaffold section="Clan capital" title="Capital" description="Track district growth and raid-weekend contribution over time." eyebrow="district observatory"><ComingSoon label="Capital signal" description="Capital overview, district upgrade history, and the future raid-weekend summary will be developed here without implying unsupported in-progress upgrade data." /></PageScaffold>;
 }

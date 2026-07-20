@@ -1,10 +1,5 @@
+import { ComingSoon, PageScaffold } from "@/components/page-scaffold";
+
 export default function WarPage() {
-  return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold capitalize">war</h1>
-      <p className="mt-2 text-neutral-400">
-        Placeholder — see concept/ for this page's spec. Built in Phase 1/2.
-      </p>
-    </main>
-  );
+  return <PageScaffold section="War center" title="Clan war" description="See the current battle clearly, without unnecessary noise." eyebrow="live readiness"><ComingSoon label="War signal" description="War history, current-war progress, attack status, and preparation scouting will appear here with a deliberate mobile-first layout." /></PageScaffold>;
 }
