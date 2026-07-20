@@ -51,9 +51,9 @@ Do these in order — later steps need values from earlier ones.
 1. **Get a CoC API key** — see the step-by-step below. You'll come out of this with a token and your clan tag.
 2. **Set `config/clan.config.ts`** — replace the placeholder `clanTag: "#CHANGEME"` with your real tag.
 3. **Create the Vercel project and Neon database** — see "Vercel & database" below. You'll come out of this with a deployment URL and a `DATABASE_URL`.
-4. **Set Vercel environment variables** — `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET` (see "Configuration").
+4. **Set Vercel environment variables** — `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET` (see "Configuration"). Not optional — the app throws immediately at runtime without these, by design (`lib/db/index.ts`, `lib/coc-client/client.ts`), and only you can set them since they live in your Vercel project.
 5. **Set GitHub repo secrets** — see "GitHub Actions & repo secrets" below. `INGEST_SECRET` here must be the **same value** as in Vercel.
-6. **Run the database migration** against `DATABASE_URL` — see "Local development" below.
+6. **Deploy.** The build itself runs the database migration (`"build": "drizzle-kit migrate && next build"` in `package.json`), so there's no separate manual migration step — it happens automatically against whatever `DATABASE_URL` is set in Vercel at build time, every deploy. Safe to run repeatedly: already-applied migrations are skipped.
 7. **Verify it's working** — Actions tab → "Poll Clash of Clans data" → Run workflow (manual trigger via `workflow_dispatch`, don't need to wait for the schedule). Check the run succeeded, then check the `members` and `member_snapshots` tables in Neon for rows.
 
 ## Getting a Clash of Clans API key — step by step
@@ -105,10 +105,10 @@ git clone https://github.com/lejxz/Umbra-Lunaria.git
 cd Umbra-Lunaria
 npm install
 cp .env.example .env.local   # fill in COC_API_TOKEN, DATABASE_URL, etc.
-npm run db:generate          # generates a migration from lib/db/schema.ts
-npm run db:migrate           # applies it to the DATABASE_URL in .env.local
 npm run dev                  # http://localhost:3000
 ```
+
+Migrations run automatically as part of `npm run build` (and therefore on every Vercel deploy — see the Setup checklist). Only run `npm run db:migrate` by hand if you're pointing at a separate local/dev database and want to apply migrations without doing a full build.
 
 `npm run build` runs the same production build Vercel runs — worth checking locally after any schema or route change, since a build failure on Vercel is slower to debug than one here.
 
