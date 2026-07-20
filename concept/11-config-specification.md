@@ -19,7 +19,7 @@ DATABASE_URL=
 
 # Ingestion security
 INGEST_SECRET=              # shared secret the GitHub Actions poller must send; rejects unauthenticated calls to /api/ingest
-CRON_SECRET=                # auto-provisioned by Vercel for the /api/cron/purge route
+CRON_SECRET=                # you set this yourself (openssl rand -hex 32) — Vercel does not generate it, only forwards it as the Authorization header for /api/cron/purge
 ```
 
 ## Static config — `config/clan.config.ts` (checked into the repo, non-secret)

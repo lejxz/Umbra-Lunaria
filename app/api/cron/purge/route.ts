@@ -9,6 +9,11 @@ import { members, memberSnapshots, unitLevels } from "@/lib/db/schema";
  * whose purge_at has passed and their dependent rows. See the retention
  * policy in concept/03-data-model-and-database.md.
  *
+ * CRON_SECRET must be set as a Vercel environment variable by hand — Vercel
+ * does NOT generate this value for you, it only forwards whatever you set
+ * as the Authorization header when it invokes this route. See
+ * concept/11-config-specification.md.
+ *
  * war_attacks rows are intentionally left untouched here — they keep the
  * war outcome with the tag intact rather than being deleted, per the
  * "anonymize, don't erase the war record" note in that doc. A full
@@ -16,8 +21,9 @@ import { members, memberSnapshots, unitLevels } from "@/lib/db/schema";
  * not required for Phase 0 to function.
  */
 export async function GET(req: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
   const authHeader = req.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

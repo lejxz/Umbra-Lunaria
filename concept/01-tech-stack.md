@@ -63,7 +63,7 @@ Most reads (dashboard, members list, war history) go straight from a Next.js Ser
 | Route | Method | Called by | Purpose |
 |---|---|---|---|
 | `/api/ingest` | `POST` | GitHub Actions workflow, with `INGEST_SECRET` bearer token | Runs one poll cycle: fetch `members` (+ `currentwar` if a war is on, + daily batch if due), diff, write snapshots. This is where the actual CoC API calls happen — the GitHub Action itself never talks to CoC or the proxy directly, it just triggers this route on a schedule. |
-| `/api/cron/purge` | `GET` | Vercel Cron, authenticated via Vercel's own `CRON_SECRET` | Hard-deletes members past `purge_at` and dependents. |
+| `/api/cron/purge` | `GET` | Vercel Cron, authenticated via a `CRON_SECRET` you set yourself (Vercel forwards it, doesn't generate it) | Hard-deletes members past `purge_at` and dependents. |
 | `/api/war/refresh` | `POST` | Browser, when a user presses the refresh button on the war page | Fetches `currentwar` fresh, updates `wars`/`war_participants`, returns the latest state. Server-side TTL cache (30–60s) so concurrent refresh clicks don't multiply API calls. |
 | `/api/rosters` | `POST` / `PATCH` | Browser, from the war planning page | Save/update a draft `war_rosters` row. |
 | `/api/rosters/[id]/finalize` | `POST` | Browser | Mark a roster draft as finalized. |
