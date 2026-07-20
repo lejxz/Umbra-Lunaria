@@ -377,7 +377,7 @@ This is the complete readable clan reference from the live API response. The com
 
 ## Leader reference
 
-The clan response identifies Yeon (`#YPCC8QYU2`) as the leader. The readable player reference below keeps two representative achievements; the complete player response, including every troop, hero, equipment, spell, and achievement item, is preserved in the raw snapshot.
+The clan response identifies Yeon (`#YPCC8QYU2`) as the leader. The readable player reference below includes the main profile fields plus three representative entries for troops, heroes, hero equipment, spells, and pets. The complete player response, including every progression and achievement item, is preserved in the raw snapshot.
 
 ```json
 {
@@ -389,8 +389,42 @@ The clan response identifies Yeon (`#YPCC8QYU2`) as the leader. The readable pla
   "warStars": 1889,
   "attackWins": 0,
   "defenseWins": 0,
+  "expLevel": 214,
+  "trophies": 0,
   "bestTrophies": 5558,
   "builderHallLevel": 10,
+  "builderBaseTrophies": 3199,
+  "bestBuilderBaseTrophies": 3316,
+  "donations": 59,
+  "donationsReceived": 469,
+  "clanCapitalContributions": 1511514,
+  "progressionExamples": {
+    "troops": [
+      { "name": "Barbarian", "level": 12, "maxLevel": 13, "village": "home" },
+      { "name": "Archer", "level": 12, "maxLevel": 14, "village": "home" },
+      { "name": "Dragon", "level": 12, "maxLevel": 13, "village": "home" }
+    ],
+    "heroes": [
+      { "name": "Barbarian King", "level": 87, "maxLevel": 110, "village": "home" },
+      { "name": "Archer Queen", "level": 97, "maxLevel": 110, "village": "home" },
+      { "name": "Grand Warden", "level": 58, "maxLevel": 85, "village": "home" }
+    ],
+    "heroEquipment": [
+      { "name": "Giant Gauntlet", "level": 20, "maxLevel": 27, "village": "home" },
+      { "name": "Rocket Spear", "level": 27, "maxLevel": 27, "village": "home" },
+      { "name": "Spiky Ball", "level": 27, "maxLevel": 27, "village": "home" }
+    ],
+    "spells": [
+      { "name": "Lightning Spell", "level": 11, "maxLevel": 13, "village": "home" },
+      { "name": "Healing Spell", "level": 8, "maxLevel": 12, "village": "home" },
+      { "name": "Rage Spell", "level": 6, "maxLevel": 7, "village": "home" }
+    ],
+    "pets": [
+      { "name": "L.A.S.S.I", "level": 15, "maxLevel": 15, "village": "home" },
+      { "name": "Mighty Yak", "level": 14, "maxLevel": 15, "village": "home" },
+      { "name": "Electro Owl", "level": 10, "maxLevel": 15, "village": "home" }
+    ]
+  },
   "versusTrophies": null,
   "bestVersusTrophies": null,
   "achievements": [
@@ -406,4 +440,4 @@ The clan response identifies Yeon (`#YPCC8QYU2`) as the leader. The readable pla
 - `warTies` and `warLosses` were null/absent in the captured clan response; they must not be guessed as zero.
 - `isWarLogPublic` was `false` in the captured clan response. The raw snapshot contains the separate war-log response returned during capture.
 - The player response contains complete progression arrays; use the raw snapshot when implementing the full member detail view.
-
+- In this captured response, pets appear as entries in the `troops` array. The `progressionExamples.pets` grouping above is documentation-only to make the member detail categories easier to read; the raw API payload remains authoritative.
