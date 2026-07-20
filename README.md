@@ -6,7 +6,7 @@ This is a single-clan tool. It is configured once, for one clan tag, and used by
 
 ## Status
 
-**Phase 0 in progress.** The project scaffold (Next.js + TypeScript + Tailwind, Drizzle schema, CoC API client, ingestion routes, GitHub Actions poller) is live on `main`. What's left before it's actually running: a real API key, a deployed Vercel project with a Neon database, and repo/env secrets — see **Setup checklist** below. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
+**Phase 0 complete. Phase 1 starting.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), GitHub Actions poller (every ~10 min + daily batch), Vercel Cron purge job, and all environment/repo secrets — data is flowing into the Neon database. Phase 1 (read-only core UI) is next: dashboard, members list, war center, and capital tracker. See [`concept/12-roadmap-and-modularity.md`](./concept/12-roadmap-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
 
 ## Planned features
 
@@ -49,7 +49,7 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 Do these in order — later steps need values from earlier ones.
 
 1. **Get a CoC API key** — see the step-by-step below. You'll come out of this with a token and your clan tag.
-2. **Set `config/clan.config.ts`** — replace the placeholder `clanTag: "#CHANGEME"` with your real tag.
+2. **Set `config/clan.config.ts`** — ✅ already configured with the clan tag `#2Y8V8VGQ`.
 3. **Create the Vercel project and Neon database** — see "Vercel & database" below. You'll come out of this with a deployment URL and a `DATABASE_URL`.
 4. **Set Vercel environment variables** — `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET` **and `CRON_SECRET`** (see "Configuration"). Not optional — the app throws immediately at runtime without these, by design (`lib/db/index.ts`, `lib/coc-client/client.ts`), and only you can set them since they live in your Vercel project. `CRON_SECRET` specifically: Vercel does **not** generate this for you — generate one yourself (`openssl rand -hex 32`) and set it like any other variable, then Vercel automatically forwards it as the Authorization header when it calls `/api/cron/purge`.
 5. **Set GitHub repo secrets** — see "GitHub Actions & repo secrets" below. `INGEST_SECRET` here must be the **same value** as in Vercel. `CRON_SECRET` is Vercel-only — GitHub never calls the purge route, so it doesn't need this one.

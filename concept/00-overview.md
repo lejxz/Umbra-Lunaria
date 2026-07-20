@@ -15,7 +15,7 @@ Single clan only. One `clanTag`, configured once. No user authentication — ope
 5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war size selection, auto-suggest ranking (war-preference-aware).
 6. **General system** — modular, database-backed, documented config.
 
-Build order: `12-roadmap-and-modularity.md`.
+Build order and current status: `12-roadmap-and-modularity.md`. Phase 0 (foundation) is complete — data pipeline running, database populated. Phase 1 (read-only core UI) is next.
 
 ## Constraints
 
