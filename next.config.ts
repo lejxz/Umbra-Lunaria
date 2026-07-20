@@ -1,9 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Kept intentionally minimal for Phase 0. Image domains for troop/hero
-  // icon sourcing (see concept/06-members.md) get added here once an
-  // icon source is picked.
+  // The repo lives inside a parent workspace that has its own bun.lock.
+  // Pin the workspace root to this directory so Next.js doesn't get
+  // confused by the multiple lockfiles.
+  outputFileTracingRoot: import.meta.dirname,
 };
 
 export default nextConfig;
