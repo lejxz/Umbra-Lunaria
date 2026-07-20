@@ -71,13 +71,13 @@ export function MemberDetailSheet({
             )}
           </div>
 
-          {/* League + league tier icons */}
-          {(member.league || member.leagueTier) && (
+          {/* League tier (new ranking system) — primary league display */}
+          {member.leagueTier && (
             <div className="flex items-center gap-4 rounded-lg bg-white/[.035] p-3">
-              {member.league?.iconUrls?.small && (
+              {member.leagueTier.iconUrls?.small && (
                 <Image
-                  src={member.league.iconUrls.small}
-                  alt={member.league.name ?? "League"}
+                  src={member.leagueTier.iconUrls.small}
+                  alt={member.leagueTier.name}
                   width={36}
                   height={36}
                   className="h-9 w-9"
@@ -86,16 +86,11 @@ export function MemberDetailSheet({
               )}
               <div className="min-w-0">
                 <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-                  League
+                  League tier
                 </p>
                 <p className="truncate text-sm font-semibold text-white">
-                  {member.league?.name ?? <UnavailableValue />}
+                  {member.leagueTier.name}
                 </p>
-                {member.leagueTier?.name && (
-                  <p className="truncate text-xs text-umbra-muted">
-                    {member.leagueTier.name}
-                  </p>
-                )}
               </div>
             </div>
           )}

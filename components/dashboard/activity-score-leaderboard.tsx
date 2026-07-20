@@ -53,9 +53,9 @@ export function ActivityScoreLeaderboard({
                   <span className="font-mono text-xs text-umbra-purple">
                     {entry.rank.toString().padStart(2, "0")}
                   </span>
-                  {entry.league?.iconUrls?.small && (
+                  {entry.leagueTier?.iconUrls?.small && (
                     <Image
-                      src={entry.league.iconUrls.small}
+                      src={entry.leagueTier.iconUrls.small}
                       alt=""
                       width={20}
                       height={20}
@@ -72,7 +72,7 @@ export function ActivityScoreLeaderboard({
                     </p>
                     <p className="truncate text-xs text-umbra-muted">
                       {entry.townHallLevel ? `TH${entry.townHallLevel}` : ""}
-                      {entry.league?.name && ` · ${entry.league.name}`}
+                      {entry.leagueTier?.name && ` · ${entry.leagueTier.name}`}
                       {entry.limitedData && " · limited data"}
                     </p>
                   </div>
