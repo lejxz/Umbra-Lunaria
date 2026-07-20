@@ -15,7 +15,7 @@ export const clanConfig = {
   // The single clan this deployment tracks. Format: "#XXXXXXXX".
   // REPLACE THIS with your real clan tag before deploying — see
   // README.md "Getting a Clash of Clans API key" step 7 for how to find it.
-  clanTag: "#CHANGEME",
+  clanTag: "#2JPCYP98L",
 
   // IANA timezone used for "daily" boundaries in the activity graph and
   // donation-window buckets. Not necessarily UTC — pick whatever the
