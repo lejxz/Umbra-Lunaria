@@ -1,278 +1,91 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!doctype html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Umbra Lunaria — Complete Design Proposal</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-  :root {
-    --umbra-purple: #A964FF;
-    --umbra-purple-soft: rgba(169, 100, 255, 0.15);
-    --umbra-indigo: #7645D9;
-    --umbra-lilac: #E2D4F6;
-    
-    --bg-base: #0B0914;
-    --bg-surface: #151124;
-    --bg-surface-2: #1E1833;
-    --bg-glass: rgba(21, 17, 36, 0.7);
-    
-    --border-light: rgba(169, 100, 255, 0.15);
-    --border-strong: rgba(169, 100, 255, 0.3);
-    
-    --text-primary: #E2D4F6;
-    --text-secondary: #8C81A8;
-    --text-muted: #5B5277;
-    
-    --success: #10B981; --success-soft: rgba(16,185,129,0.15);
-    --warning: #F59E0B; --warning-soft: rgba(245,158,11,0.15);
-    --danger:  #EF4444; --danger-soft:  rgba(239,68,68,0.15);
-    --info:    #3B82F6; --info-soft:    rgba(59,130,246,0.15);
-
-    --gradient-brand: linear-gradient(135deg, #A964FF 0%, #7645D9 100%);
-    --gradient-mesh: radial-gradient(at 0% 0%, rgba(169, 100, 255, 0.2) 0px, transparent 50%),
-                     radial-gradient(at 100% 100%, rgba(118, 69, 217, 0.2) 0px, transparent 50%);
-
-    --font-display: 'Cinzel', serif;
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-
-    --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px;
-    --s-8:32px; --s-10:40px; --s-12:48px; --s-16:64px; --s-24:96px;
-
-    --r-sm:6px; --r-md:12px; --r-lg:16px; --r-xl:24px;
-
-    --shadow-glow: 0 0 15px rgba(169, 100, 255, 0.4);
-    --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(226, 212, 246, 0.05);
-
-    --dur: 0.25s; --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-    --max-w: 1200px; --nav-h: 64px;
-  }
-
-  html { scroll-behavior: smooth; background: var(--bg-base); }
-  body {
-    font-family: var(--font-sans); color: var(--text-primary);
-    line-height: 1.6; font-size: 15px;
-    background: radial-gradient(circle at top right, var(--bg-surface) 0%, var(--bg-base) 100%);
-    background-attachment: fixed;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  ::selection { background: var(--umbra-purple); color: white; }
-
-  /* NAV */
-  .nav { position: sticky; top: 0; z-index: 100; height: var(--nav-h);
-    backdrop-filter: blur(16px); background: rgba(11, 9, 20, 0.7); border-bottom: 1px solid var(--border-light); }
-  .nav-inner { max-width: var(--max-w); margin: 0 auto; height: 100%; padding: 0 var(--s-6);
-    display: flex; align-items: center; gap: var(--s-6); }
-  .nav-brand { display: flex; align-items: center; gap: var(--s-3); text-decoration: none; }
-  .nav-brand-mark { width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
-    filter: drop-shadow(0 0 8px rgba(169, 100, 255, 0.5)); }
-  .nav-brand-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.05em; color: var(--text-primary); text-shadow: var(--shadow-glow); }
-  .nav-links { display: flex; gap: var(--s-2); margin-left: auto; align-items: center; }
-  .nav-link { font-size: 13px; font-weight: 500; color: var(--text-secondary); padding: var(--s-2) var(--s-3);
-    border-radius: var(--r-sm); text-decoration: none; transition: all var(--dur) var(--ease-out); }
-  .nav-link:hover { color: var(--text-primary); background: var(--bg-surface-2); text-shadow: var(--shadow-glow); }
-
-  /* LAYOUT */
-  .container { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--s-6); }
-  .section { padding: var(--s-24) 0; border-top: 1px solid var(--border-light); }
-  .section:first-of-type { border-top: none; }
-  
-  .eyebrow { display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--umbra-purple); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--umbra-purple-soft); border: 1px solid var(--border-strong); margin-bottom: var(--s-4); }
-  .section-title { font-family: var(--font-display); font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: 0.02em; line-height: 1.1; color: var(--umbra-lilac); margin-bottom: var(--s-3); text-shadow: var(--shadow-glow); }
-  .section-lead { font-size: 16px; color: var(--text-secondary); max-width: 640px; line-height: 1.6; margin-bottom: var(--s-10); }
-
-  /* HERO */
-  .hero { position: relative; overflow: hidden; padding: var(--s-24) 0; border-bottom: 1px solid var(--border-light); text-align: center; }
-  .hero-mesh { position: absolute; inset: 0; background: var(--gradient-mesh); filter: blur(60px); opacity: 0.6; pointer-events: none; }
-  .hero-content { position: relative; max-width: 800px; margin: 0 auto; padding: 0 var(--s-6); display: flex; flex-direction: column; align-items: center; }
-  .hero-mark { width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
-    filter: drop-shadow(0 0 15px rgba(169, 100, 255, 0.5)); margin-bottom: var(--s-6); }
-  
-  .hero h1 { font-family: var(--font-display); font-size: clamp(40px, 7vw, 72px); font-weight: 700;
-    letter-spacing: 0.05em; line-height: 1.1; color: var(--umbra-lilac); margin-bottom: var(--s-6); text-shadow: var(--shadow-glow); text-transform: uppercase; }
-  .hero h1 .grad { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero-sub { font-size: 18px; color: var(--text-secondary); max-width: 580px; line-height: 1.55; margin-bottom: var(--s-8); }
-  
-  .hero-meta { display: flex; gap: var(--s-8); margin-top: var(--s-10); padding-top: var(--s-8); border-top: 1px solid var(--border-light); flex-wrap: wrap; justify-content: center; width: 100%; max-width: 600px; }
-  .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
-  .hero-meta-num { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--umbra-purple); text-shadow: var(--shadow-glow); }
-  .hero-meta-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
-
-  /* BENTO / CARDS */
-  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--s-4); }
-  .card { background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: var(--r-xl); padding: var(--s-6); box-shadow: var(--shadow-card); transition: all var(--dur) var(--ease-out); }
-  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(226, 212, 246, 0.1); }
-  .card-eyebrow { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-3); }
-  
-  .col-4{grid-column:span 4} .col-6{grid-column:span 6} .col-8{grid-column:span 8} .col-12{grid-column:span 12}
-  @media (max-width:900px){ .col-4,.col-6,.col-8{grid-column:span 12} }
-
-  /* COLOR TOKENS */
-  .swatch { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border-light); background: var(--bg-surface); }
-  .swatch-color { height: 100px; }
-  .swatch-info { padding: var(--s-4); }
-  .swatch-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-  .swatch-hex { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-  
-  .token-row { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--border-light); }
-  .token-row:last-child { border-bottom: none; }
-  .token-swatch { width: 48px; height: 32px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); flex-shrink: 0; }
-  .token-info { flex: 1; }
-  .token-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-  .token-role { font-size: 11px; color: var(--text-secondary); }
-  .token-hex { font-family: var(--font-mono); font-size: 12px; color: var(--umbra-purple); background: var(--umbra-purple-soft); padding: 2px 8px; border-radius: var(--r-sm); }
-
-  /* TYPOGRAPHY */
-  .type-row { display: flex; align-items: baseline; gap: var(--s-5); padding: var(--s-4) 0; border-bottom: 1px solid var(--border-light); }
-  .type-row:last-child { border-bottom: none; }
-  .type-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); width: 140px; flex-shrink: 0; }
-  .t-h1 { font-family: var(--font-display); font-size: 36px; font-weight: 700; letter-spacing: 0.02em; color: var(--umbra-lilac); text-shadow: var(--shadow-glow); }
-  .t-h2 { font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: 0.02em; color: var(--umbra-lilac); }
-  .t-body { font-family: var(--font-sans); font-size: 15px; color: var(--text-primary); }
-  .t-mono { font-family: var(--font-mono); font-size: 13px; color: var(--umbra-purple); }
-
-  /* BUTTONS & BADGES */
-  .btn { font-family: var(--font-sans); font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: var(--r-md); border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: var(--s-2); transition: all var(--dur) var(--ease-out); }
-  .btn-primary { background: var(--gradient-brand); color: white; box-shadow: var(--shadow-glow); }
-  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 25px rgba(169, 100, 255, 0.6); }
-  .btn-secondary { background: var(--bg-surface-2); color: var(--text-primary); border-color: var(--border-strong); }
-  .btn-secondary:hover { border-color: var(--umbra-purple); color: white; }
-  
-  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
-  .badge-brand { background: var(--umbra-purple-soft); color: var(--umbra-purple); border: 1px solid var(--border-strong); }
-  .badge-success { background: var(--success-soft); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
-  .badge-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
-
-  /* WEB APP MOCKUP */
-  .web-app { display: grid; grid-template-columns: 240px 1fr; min-height: 600px; border: 1px solid var(--border-strong); border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-card); background: var(--bg-base); position: relative; }
-  .web-app::before { content: ""; position: absolute; top: 0; right: 25%; width: 400px; height: 400px; background: var(--umbra-purple-soft); filter: blur(100px); border-radius: 50%; pointer-events: none; }
-  
-  .web-side { background: rgba(8, 6, 14, 0.85); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; z-index: 10; backdrop-filter: blur(20px); }
-  .web-side-head { padding: var(--s-6); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: var(--s-3); }
-  .web-side-mark { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; 
-    filter: drop-shadow(0 0 6px rgba(169, 100, 255, 0.5)); }
-  .web-side-title { font-family: var(--font-display); font-weight: 700; color: var(--umbra-lilac); letter-spacing: 0.05em; text-shadow: var(--shadow-glow); }
-  
-  .web-nav { padding: var(--s-4); flex: 1; display: flex; flex-direction: column; gap: var(--s-2); }
-  .web-nav-item { padding: 12px 16px; border-radius: var(--r-md); font-size: 14px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: var(--s-3); transition: all 0.2s; }
-  .web-nav-item.active { background: var(--umbra-purple-soft); color: var(--umbra-purple); border: 1px solid var(--border-light); }
-  
-  .web-main { padding: var(--s-10); z-index: 5; }
-  .web-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--s-8); }
-  .web-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--umbra-lilac); letter-spacing: 0.02em; text-shadow: var(--shadow-glow); }
-  .web-subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
-  .web-tag { display: inline-flex; align-items: center; gap: var(--s-2); padding: 6px 16px; border-radius: 999px; background: var(--bg-surface-2); border: 1px solid var(--border-light); font-family: var(--font-mono); font-size: 12px; color: var(--umbra-lilac); }
-
-  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); margin-bottom: var(--s-8); }
-  .stat-card { background: var(--bg-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: var(--s-5); box-shadow: var(--shadow-card); }
-  .stat-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--s-2); }
-  .stat-val { font-size: 32px; font-weight: 700; color: white; margin-bottom: 4px; }
-  .stat-val.grad { background: linear-gradient(180deg, #FFFFFF 0%, #E2D4F6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .stat-meta { font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px; }
-
-  .panel-grid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--s-5); }
-  .panel { background: var(--bg-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: var(--s-6); min-height: 300px; box-shadow: var(--shadow-card); }
-  .panel-head { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--umbra-lilac); margin-bottom: var(--s-4); }
-
-  @media (max-width: 900px) { 
-    .web-app { grid-template-columns: 1fr; } 
-    .web-side { display: none; }
-    .stat-grid, .panel-grid { grid-template-columns: 1fr; }
-  }
-
-  /* UTILS */
-  .stack > * + * { margin-top: var(--s-4); }
-  .row { display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Umbra Lunaria — Product Design Direction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #090811; --surface: #12101c; --surface-2: #181527; --surface-3: #211b34;
+      --purple: #b678ff; --violet: #7552df; --lilac: #eee5ff; --muted: #9287ad;
+      --line: rgba(190, 151, 255, .15); --good: #54d6a2; --warn: #f4b75f;
+      --display: Cinzel, Georgia, serif; --body: Inter, system-ui, sans-serif; --mono: "JetBrains Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { background: var(--ink); }
+    body { margin: 0; color: var(--lilac); background: radial-gradient(circle at 76% 0%, #211747 0, transparent 35%), var(--ink); font: 14px/1.5 var(--body); }
+    a { color: inherit; text-decoration: none; }
+    .proposal-bar { border-bottom: 1px solid var(--line); color: var(--muted); font: 11px var(--mono); letter-spacing: .12em; padding: 16px 28px; text-transform: uppercase; }
+    .app { display: grid; grid-template-columns: 244px minmax(0, 1fr); margin: 32px auto; max-width: 1380px; min-height: 820px; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: rgba(12, 10, 20, .86); box-shadow: 0 32px 90px rgba(0, 0, 0, .42); }
+    .sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: rgba(8, 7, 14, .82); }
+    .brand { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 24px 22px; }
+    .brand img { width: 38px; height: 38px; border-radius: 50%; box-shadow: 0 0 22px rgba(182, 120, 255, .42); object-fit: cover; }
+    .brand strong { font: 600 15px/1.2 var(--display); letter-spacing: .08em; }
+    .brand small { display: block; color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; margin-top: 4px; }
+    .nav { display: grid; gap: 5px; padding: 24px 14px; }
+    .nav a { align-items: center; border: 1px solid transparent; border-radius: 10px; color: var(--muted); display: flex; gap: 12px; padding: 11px 13px; }
+    .nav a:hover, .nav a.active { background: rgba(182, 120, 255, .11); border-color: var(--line); color: var(--lilac); }
+    .nav i { color: var(--purple); font-style: normal; width: 18px; }
+    .sidebar-foot { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: auto; padding: 18px 22px; }
+    .sidebar-foot span { color: var(--good); font: 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    main { min-width: 0; padding: 40px 46px 52px; }
+    .topline { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 34px; gap: 20px; }
+    .kicker { color: var(--purple); font: 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font: 600 clamp(28px, 4vw, 42px)/1.15 var(--display); letter-spacing: .01em; margin-top: 7px; }
+    .sub { color: var(--muted); margin-top: 8px; }
+    .pulse { border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: 11px var(--mono); padding: 9px 13px; white-space: nowrap; }
+    .pulse b { color: var(--good); font-weight: 500; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .card { border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, rgba(33, 27, 52, .76), rgba(18, 16, 28, .8)); padding: 19px; }
+    .stat-label { color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+    .stat-value { color: #fff; font: 600 31px var(--display); margin-top: 9px; }
+    .stat-note { color: var(--good); font-size: 11px; margin-top: 5px; }
+    .grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .9fr); gap: 18px; margin-top: 18px; }
+    .card-head { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 22px; }
+    h2 { font: 600 19px var(--display); margin-top: 5px; }
+    .tabs { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 8px; display: flex; gap: 2px; padding: 3px; }
+    .tabs span { border-radius: 6px; color: var(--muted); font: 10px var(--mono); padding: 6px 8px; }
+    .tabs span.active { background: rgba(182,120,255,.18); color: var(--lilac); }
+    .donation-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .number { background: rgba(255,255,255,.035); border-radius: 10px; padding: 14px; }
+    .number b { display: block; font-size: 26px; margin-top: 4px; }
+    .chart { align-items: end; display: flex; gap: 8px; height: 160px; padding-top: 8px; }
+    .bar { background: linear-gradient(to top, var(--violet), var(--purple)); border-radius: 5px 5px 2px 2px; flex: 1; min-width: 8px; opacity: .9; }
+    .chart-labels { color: var(--muted); display: flex; font: 9px var(--mono); justify-content: space-between; margin-top: 10px; }
+    .attention { display: grid; gap: 9px; }
+    .row { align-items: center; background: rgba(255,255,255,.035); border-radius: 10px; display: flex; justify-content: space-between; padding: 12px; }
+    .row small { color: var(--muted); display: block; margin-top: 2px; }
+    .badge { border: 1px solid var(--line); border-radius: 999px; color: var(--purple); font: 10px var(--mono); padding: 4px 7px; text-transform: uppercase; }
+    .profile { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .profile span { color: var(--muted); display: block; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+    .profile b { display: block; font-weight: 500; margin-top: 5px; }
+    .strip { align-items: center; display: flex; gap: 14px; justify-content: space-between; }
+    .strip + .strip { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+    .strip p { color: var(--muted); }
+    @media (max-width: 900px) { .app { grid-template-columns: 1fr; margin: 0; border-radius: 0; } .sidebar { border-bottom: 1px solid var(--line); border-right: 0; } .nav { grid-template-columns: repeat(5, 1fr); padding: 10px; } .nav a { flex-direction: column; font-size: 10px; gap: 4px; justify-content: center; padding: 8px 3px; } .sidebar-foot { display: none; } main { padding: 28px 20px 40px; } .stats { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } }
+    @media (max-width: 500px) { .topline { display: block; } .pulse { display: inline-block; margin-top: 18px; } .stats { gap: 8px; } .card { padding: 15px; } .profile { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+  </style>
 </head>
 <body>
-
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-inner">
-    <a href="#top" class="nav-brand">
-      <img src="../public/assets/Logo.png" alt="Umbra Lunaria Logo" class="nav-brand-mark" />
-      <span class="nav-brand-name">Umbra Lunaria</span>
-    </a>
-    <div class="nav-links">
-      <a href="#brand" class="nav-link">Brand & Colors</a>
-      <a href="#typography" class="nav-link">Typography</a>
-    </div>
+  <div class="proposal-bar">Umbra Lunaria / Product design direction / Dashboard-first</div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand"><img src="../public/assets/Logo.png" alt="Umbra Lunaria logo" /><div><strong>UMBRA<br />LUNARIA</strong><small>CLAN OBSERVATORY</small></div></div>
+      <nav class="nav"><a class="active" href="#dashboard"><i>◈</i>Dashboard</a><a href="#members"><i>♙</i>Members</a><a href="#war"><i>⚔</i>War center</a><a href="#capital"><i>✦</i>Capital</a><a href="#planning"><i>≡</i>Planning</a></nav>
+      <div class="sidebar-foot"><span>● Systems nominal</span><br />Tracking the clan quietly in the background.<br /><br />Last poll · 2 minutes ago</div>
+    </aside>
+    <main id="dashboard">
+      <header class="topline"><div><div class="kicker">Command center / overview</div><h1>The clan observatory</h1><p class="sub">A calm, high-signal view of Umbra Lunaria.</p></div><div class="pulse"><b>● LIVE</b>&nbsp; synced 2 min ago</div></header>
+      <section class="stats"><div class="card"><div class="stat-label">Clan level</div><div class="stat-value">11</div><div class="stat-note">Established</div></div><div class="card"><div class="stat-label">War wins</div><div class="stat-value">—</div><div class="stat-note">Awaiting history</div></div><div class="card"><div class="stat-label">Members</div><div class="stat-value">5</div><div class="stat-note">Roster observed</div></div><div class="card"><div class="stat-label">Capital hall</div><div class="stat-value">—</div><div class="stat-note">Not recorded</div></div></section>
+      <section class="grid"><article class="card"><div class="card-head"><div><div class="kicker">Contribution pulse</div><h2>Clan donations</h2></div><div class="tabs"><span class="active">24h</span><span>7d</span><span>30d</span></div></div><div class="donation-numbers"><div class="number"><span class="stat-label">Given</span><b>—</b></div><div class="number"><span class="stat-label">Received</span><b>—</b></div></div><p class="sub" style="margin-top:18px">Donation history will appear as polling snapshots accumulate.</p></article><article class="card"><div class="card-head"><div><div class="kicker">Roster signal</div><h2>Activity timeline</h2></div><span class="badge">24 hours</span></div><div class="chart"><i class="bar" style="height:18%"></i><i class="bar" style="height:30%"></i><i class="bar" style="height:22%"></i><i class="bar" style="height:48%"></i><i class="bar" style="height:36%"></i><i class="bar" style="height:68%"></i><i class="bar" style="height:42%"></i><i class="bar" style="height:76%"></i><i class="bar" style="height:52%"></i><i class="bar" style="height:88%"></i></div><div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span></div></article></section>
+      <section class="card" style="margin-top:18px"><div class="card-head"><div><div class="kicker">Clan profile</div><h2>About the clan</h2></div><span class="badge">#2Y8V8VGQ</span></div><div class="profile"><div><span>Location</span><b>—</b></div><div><span>War frequency</span><b>—</b></div><div><span>Join trophies</span><b>—</b></div><div><span>Town hall minimum</span><b>—</b></div></div></section>
+      <section class="grid"><article class="card"><div class="card-head"><div><div class="kicker">Attention queue</div><h2>Needs attention</h2></div><span class="badge">0 opted out</span></div><div class="attention"><div class="row"><div>Nothing urgent<small>Members needing attention will appear here.</small></div><span style="color:var(--good)">✓</span></div></div></article><article class="card"><div class="card-head"><div><div class="kicker">Roster history</div><h2>Clan log</h2></div><a class="badge" href="#members">View all</a></div><div class="attention"><div class="row"><div>Yeon<small>Joined the clan · today</small></div><span class="badge">joined</span></div><div class="row"><div>KnieleGurow<small>Joined the clan · today</small></div><span class="badge">joined</span></div></div></article></section>
+      <section class="card" style="margin-top:18px"><div class="strip"><div><div class="kicker">Navigation</div><h2>Current war</h2></div><p>No active war recorded →</p></div><div class="strip"><div><h2>Capital raid weekend</h2></div><p>District overview →</p></div></section>
+    </main>
   </div>
-</nav>
-
-<!-- HERO -->
-<header class="hero" id="top">
-  <div class="hero-mesh"></div>
-  <div class="hero-content">
-    <img src="../public/assets/Logo.png" alt="Umbra Lunaria Logo" class="hero-mark" />
-    <h1>Umbra <br><span class="grad">Lunaria</span></h1>
-    <p class="hero-sub">Data-driven clan management. A dark, glassmorphic aesthetic inspired by the mystic moon, designed specifically for Clash of Clans tracking.</p>
-    <div class="hero-meta">
-      <div class="hero-meta-item"><span class="hero-meta-num">Dark</span><span class="hero-meta-label">Theme Only</span></div>
-      <div class="hero-meta-item"><span class="hero-meta-num">Glass</span><span class="hero-meta-label">Morphism UI</span></div>
-      <div class="hero-meta-item"><span class="hero-meta-num">Neon</span><span class="hero-meta-label">Data Stack</span></div>
-    </div>
-  </div>
-</header>
-
-<!-- BRAND -->
-<section class="section" id="brand">
-  <div class="container">
-    <span class="eyebrow">01 — Colors</span>
-    <h2 class="section-title">Mystic Night.</h2>
-    <p class="section-lead">The color palette is built entirely on deep midnight blues and vibrant glowing purples, extracted directly from the reference logo art.</p>
-
-    <div class="bento" style="margin-bottom: var(--s-6);">
-      <div class="card col-12" style="padding: var(--s-8);">
-        <div class="card-eyebrow">Signature Glow · Purple → Deep Indigo</div>
-        <div style="height: 120px; border-radius: var(--r-md); background: var(--gradient-brand); box-shadow: var(--shadow-glow); position: relative; margin-top: var(--s-4);">
-          <div style="position: absolute; bottom: 16px; left: 20px; display: flex; gap: 24px; font-family: var(--font-mono); font-size: 12px; color: white; font-weight: 500;"><span>#A964FF</span><span>#7645D9</span></div>
-        </div>
-      </div>
-      <div class="swatch col-4"><div class="swatch-color" style="background: #A964FF;"></div><div class="swatch-info"><div class="swatch-name">Umbra Purple</div><div class="swatch-hex">#A964FF · Primary accent, glows</div></div></div>
-      <div class="swatch col-4"><div class="swatch-color" style="background: #7645D9;"></div><div class="swatch-info"><div class="swatch-name">Umbra Indigo</div><div class="swatch-hex">#7645D9 · Secondary gradients</div></div></div>
-      <div class="swatch col-4"><div class="swatch-color" style="background: #E2D4F6;"></div><div class="swatch-info"><div class="swatch-name">Umbra Lilac</div><div class="swatch-hex">#E2D4F6 · Primary headings</div></div></div>
-    </div>
-
-    <div class="bento">
-      <div class="card col-6" style="padding: 0; overflow: hidden;">
-        <div style="padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border-light);"><div class="card-eyebrow" style="margin:0;">Midnight Canvas</div></div>
-        <div class="token-row"><div class="token-swatch" style="background: #0B0914;"></div><div class="token-info"><div class="token-name">Base Background</div><div class="token-role">Deepest space</div></div><div class="token-hex">#0B0914</div></div>
-        <div class="token-row"><div class="token-swatch" style="background: #151124;"></div><div class="token-info"><div class="token-name">Surface</div><div class="token-role">Cards & panels</div></div><div class="token-hex">#151124</div></div>
-        <div class="token-row"><div class="token-swatch" style="border: 1px solid rgba(169,100,255,0.3); background: transparent;"></div><div class="token-info"><div class="token-name">Glass Border</div><div class="token-role">Subtle dividers</div></div><div class="token-hex">RGBA</div></div>
-      </div>
-      <div class="card col-6" style="padding: 0; overflow: hidden;">
-        <div style="padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border-light);"><div class="card-eyebrow" style="margin:0;">Status Accents</div></div>
-        <div class="token-row"><div class="token-swatch" style="background: #10B981;"></div><div class="token-info"><div class="token-name">Success</div><div class="token-role">Active, 100% attacks</div></div><div class="token-hex">#10B981</div></div>
-        <div class="token-row"><div class="token-swatch" style="background: #F59E0B;"></div><div class="token-info"><div class="token-name">Warning</div><div class="token-role">Needs attention</div></div><div class="token-hex">#F59E0B</div></div>
-        <div class="token-row"><div class="token-swatch" style="background: #EF4444;"></div><div class="token-info"><div class="token-name">Danger</div><div class="token-role">Missed war</div></div><div class="token-hex">#EF4444</div></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TYPOGRAPHY -->
-<section class="section" id="typography">
-  <div class="container">
-    <span class="eyebrow">02 — Typography</span>
-    <h2 class="section-title">Elegance meets Utility.</h2>
-    <p class="section-lead">We use <strong>Cinzel</strong> to capture the elegant, high-fantasy feel of the brand, while falling back to <strong>Inter</strong> for clean, readable data tables and stats.</p>
-
-    <div class="card">
-      <div class="type-row"><span class="type-meta">Display (Cinzel)</span><span class="t-h1">The Clan Roster</span></div>
-      <div class="type-row"><span class="type-meta">Header (Cinzel)</span><span class="t-h2">Activity Overview</span></div>
-      <div class="type-row"><span class="type-meta">Body (Inter)</span><span class="t-body">We track member donations and war participation automatically over a 14-day rolling window.</span></div>
-      <div class="type-row"><span class="type-meta">Data (Mono)</span><span class="t-mono">#2Y8V8VGQ</span></div>
-    </div>
-  </div>
-</section>
-
 </body>
 </html>
