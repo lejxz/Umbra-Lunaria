@@ -25,9 +25,11 @@ Everything here is done, deployed, and verified running:
 
 All UI pages. The database is populated; this phase reads it and renders it.
 
-### Step 1.0: Shared foundation
+### Step 1.0: Shared foundation ✅ COMPLETE
 
 Build the design system, layout shell, and data access layer that every page depends on.
+
+- [x] Shared dark/glass design tokens, responsive shell/navigation, reusable UI primitives, and initial read query boundary implemented.
 
 1. **Install UI dependencies** — `recharts` (charts), `date-fns` (date formatting/math), `lucide-react` (icons). No component library — build from Tailwind.
 2. **Tailwind theme** — dark-mode-first color palette, CoC-inspired accent colors (gold, purple, blue tiers). Typography scale. Define in `tailwind.config.ts`.

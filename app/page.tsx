@@ -1,13 +1,6 @@
 import { clanConfig } from "@/config/clan.config";
 
 export default function DashboardPage() {
-  return (
-    <main className="mx-auto max-w-4xl p-6">
-      <h1 className="text-2xl font-semibold">Umbra Lunaria</h1>
-      <p className="mt-2 text-neutral-400">
-        Tracking clan {clanConfig.clanTag}. Dashboard widgets land in Phase 1
-        — see concept/05-dashboard.md.
-      </p>
-    </main>
-  );
+  const cards = [["Clan level", "—"], ["War wins", "—"], ["Members", "—"], ["Capital hall", "—"]];
+  return <div className="mx-auto max-w-7xl p-5 sm:p-8"><header className="mb-8"><p className="mb-2 font-mono text-xs uppercase tracking-[0.18em] text-umbra-purple">Command center</p><h1 className="font-display text-3xl font-bold tracking-wide text-umbra-lilac sm:text-4xl">Dashboard</h1><p className="mt-2 text-sm text-umbra-muted">A quiet overview of Umbra Lunaria · {clanConfig.clanTag}</p></header><section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards.map(([label, value]) => <div className="glass rounded-2xl p-5" key={label}><p className="text-xs uppercase tracking-wider text-umbra-muted">{label}</p><p className="mt-3 font-display text-3xl text-white">{value}</p><p className="mt-2 text-xs text-umbra-muted">Awaiting first dashboard query</p></div>)}</section><section className="mt-6 glass rounded-2xl p-6"><p className="font-mono text-xs uppercase tracking-wider text-umbra-purple">Shared foundation ready</p><h2 className="mt-3 font-display text-xl text-umbra-lilac">The observatory is prepared.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-umbra-muted">Dashboard data widgets arrive in Step 1.1. This shell now provides the responsive navigation, design tokens, and reusable interaction patterns they will share.</p></section></div>;
 }

@@ -1,0 +1,4 @@
+"use client";
+import type { ReactNode } from "react";
+export function Modal({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) { if (!open) return null; return <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm" onClick={onClose}><div className="glass max-h-[90vh] w-full max-w-lg overflow-auto rounded-2xl p-6" onClick={(event) => event.stopPropagation()}>{children}</div></div>; }
+export function Sheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) { if (!open) return null; return <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" onClick={onClose}><div className="glass absolute inset-x-0 bottom-0 max-h-[90vh] overflow-auto rounded-t-2xl p-6 sm:inset-y-0 sm:left-auto sm:w-full sm:max-w-lg sm:rounded-none sm:rounded-l-2xl" onClick={(event) => event.stopPropagation()}>{children}</div></div>; }

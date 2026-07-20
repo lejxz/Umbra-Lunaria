@@ -1,0 +1,2 @@
+import type { ReactNode } from "react";
+export function StatCard({ label, value, icon, trend }: { label: string; value: ReactNode; icon?: ReactNode; trend?: string }) { return <div className="glass rounded-2xl p-5"><div className="flex items-center justify-between text-umbra-muted"><span className="text-xs font-semibold uppercase tracking-wider">{label}</span>{icon}</div><div className="mt-3 text-3xl font-bold text-white">{value}</div>{trend && <p className="mt-2 text-xs text-emerald-400">{trend}</p>}</div>; }
