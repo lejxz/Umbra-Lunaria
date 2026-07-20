@@ -56,9 +56,11 @@ Build the design system, layout shell, and data access layer that every page dep
    - `getCapitalDistricts()` — latest from `capital_district_snapshots`.
    - `getDistrictUpgradeHistory()` — diffed level changes over time.
 
-### Step 1.1: Main Dashboard — `app/page.tsx`
+### Step 1.1: Main Dashboard ✅ COMPLETE — `app/page.tsx`
 
 Build order within this step follows the visual layout top-to-bottom:
+
+- [x] Dashboard summary, donation windows, activity cold-start state, attention queue, clan log, clan profile, and war/capital navigation strips implemented against the shared foundation.
 
 1. **Clan info panel** — clan level, points, capital league, capital hall level, join requirements, location, labels, war frequency. Read from `clans` row. Server component.
 2. **All-time war record card** — `warWins`, `warTies`, `warLosses`, `warWinStreak`, computed win rate. Four `StatCard`s in a row. From `clans`.
