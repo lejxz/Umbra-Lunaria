@@ -19,7 +19,7 @@ export function DonationPanel({
   const current = data[window];
 
   return (
-    <section className="glass rounded-2xl p-6">
+    <section className="glass flex min-h-[320px] flex-col rounded-2xl p-6">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="font-mono text-[11px] uppercase tracking-wider text-umbra-purple">Contribution pulse</p>
