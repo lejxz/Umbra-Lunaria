@@ -10,7 +10,7 @@ Fetched the live Clash of Clans API responses for the configured Umbra Lunaria c
 ## Work Completed
 - Fetched `GET /clans/%232JPCYP98L` through the configured RoyaleAPI proxy.
 - Identified leader Yeon (`#YPCC8QYU2`) from the clan response and fetched `GET /players/%23YPCC8QYU2`.
-- Added `docs/api-snapshots/2026-07-20-clan-and-leader-api-response.md` with the complete structured clan, leader, and war-log request payloads, plus live values and raw-fetch instructions.
+- Added `docs/api-snapshots/2026-07-20-clan-and-leader-api-response.md` with the complete raw clan, leader, and war-log response bodies, kept separate by endpoint.
 - Confirmed the live clan response has `warWins: 22` but null/absent `warTies` and `warLosses`.
 
 ## Decisions Made
@@ -18,7 +18,7 @@ Fetched the live Clash of Clans API responses for the configured Umbra Lunaria c
 - Never store `COC_API_TOKEN` or other credentials in the snapshot.
 
 ## Deviations and Verification
-- The full raw payload is preserved inline as JSON; the documented command remains available for refreshing the snapshot after the clan log visibility setting changes.
+- The raw response bodies are preserved inline without reshaping or value edits; the documented command remains available for refreshing the snapshot after the clan log visibility setting changes.
 - The live request succeeded through the configured proxy and returned the expected clan and leader records.
 - No application runtime code or secrets were changed.
 
