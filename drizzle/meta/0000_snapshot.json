@@ -1,0 +1,946 @@
+{
+  "id": "ffabd000-0c87-45c5-a026-dc54003a2f92",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.capital_contributions": {
+      "name": "capital_contributions",
+      "schema": "",
+      "columns": {
+        "raid_season_id": {
+          "name": "raid_season_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_tag": {
+          "name": "player_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attacks_used": {
+          "name": "attacks_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "capital_resources_looted": {
+          "name": "capital_resources_looted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "capital_contributions_raid_season_id_capital_raid_seasons_id_fk": {
+          "name": "capital_contributions_raid_season_id_capital_raid_seasons_id_fk",
+          "tableFrom": "capital_contributions",
+          "tableTo": "capital_raid_seasons",
+          "columnsFrom": [
+            "raid_season_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "capital_contributions_player_tag_members_player_tag_fk": {
+          "name": "capital_contributions_player_tag_members_player_tag_fk",
+          "tableFrom": "capital_contributions",
+          "tableTo": "members",
+          "columnsFrom": [
+            "player_tag"
+          ],
+          "columnsTo": [
+            "player_tag"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "capital_contributions_raid_season_id_player_tag_pk": {
+          "name": "capital_contributions_raid_season_id_player_tag_pk",
+          "columns": [
+            "raid_season_id",
+            "player_tag"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.capital_district_snapshots": {
+      "name": "capital_district_snapshots",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "capital_district_snapshots_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "district_name": {
+          "name": "district_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "district_hall_level": {
+          "name": "district_hall_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "captured_at": {
+          "name": "captured_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.capital_raid_seasons": {
+      "name": "capital_raid_seasons",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "capital_raid_seasons_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capital_total_loot": {
+          "name": "capital_total_loot",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "offensive_reward": {
+          "name": "offensive_reward",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "defensive_reward": {
+          "name": "defensive_reward",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.clans": {
+      "name": "clans",
+      "schema": "",
+      "columns": {
+        "clan_tag": {
+          "name": "clan_tag",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "badge_url": {
+          "name": "badge_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "clan_level": {
+          "name": "clan_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "last_polled_at": {
+          "name": "last_polled_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "capital_hall_level": {
+          "name": "capital_hall_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_wins": {
+          "name": "war_wins",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_ties": {
+          "name": "war_ties",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_losses": {
+          "name": "war_losses",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_win_streak": {
+          "name": "war_win_streak",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required_trophies": {
+          "name": "required_trophies",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required_town_hall_level": {
+          "name": "required_town_hall_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "required_builder_base_trophies": {
+          "name": "required_builder_base_trophies",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "location": {
+          "name": "location",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "labels": {
+          "name": "labels",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_frequency": {
+          "name": "war_frequency",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.member_snapshots": {
+      "name": "member_snapshots",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "member_snapshots_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "player_tag": {
+          "name": "player_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "captured_at": {
+          "name": "captured_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "donations": {
+          "name": "donations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "donations_received": {
+          "name": "donations_received",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trophies": {
+          "name": "trophies",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "versus_trophies": {
+          "name": "versus_trophies",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activity_flag": {
+          "name": "activity_flag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "login_day_flag": {
+          "name": "login_day_flag",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "member_snapshots_player_tag_members_player_tag_fk": {
+          "name": "member_snapshots_player_tag_members_player_tag_fk",
+          "tableFrom": "member_snapshots",
+          "tableTo": "members",
+          "columnsFrom": [
+            "player_tag"
+          ],
+          "columnsTo": [
+            "player_tag"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.members": {
+      "name": "members",
+      "schema": "",
+      "columns": {
+        "player_tag": {
+          "name": "player_tag",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "town_hall_level": {
+          "name": "town_hall_level",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_preference": {
+          "name": "war_preference",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "career_stats": {
+          "name": "career_stats",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "joined_at": {
+          "name": "joined_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "left_at": {
+          "name": "left_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "purge_at": {
+          "name": "purge_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.unit_levels": {
+      "name": "unit_levels",
+      "schema": "",
+      "columns": {
+        "player_tag": {
+          "name": "player_tag",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "captured_at": {
+          "name": "captured_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "troops": {
+          "name": "troops",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "heroes": {
+          "name": "heroes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "hero_equipment": {
+          "name": "hero_equipment",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "spells": {
+          "name": "spells",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pets": {
+          "name": "pets",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "builder_base": {
+          "name": "builder_base",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "unit_levels_player_tag_members_player_tag_fk": {
+          "name": "unit_levels_player_tag_members_player_tag_fk",
+          "tableFrom": "unit_levels",
+          "tableTo": "members",
+          "columnsFrom": [
+            "player_tag"
+          ],
+          "columnsTo": [
+            "player_tag"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.war_attacks": {
+      "name": "war_attacks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "war_attacks_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "war_id": {
+          "name": "war_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attacker_tag": {
+          "name": "attacker_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "defender_tag": {
+          "name": "defender_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "stars": {
+          "name": "stars",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destruction_percentage": {
+          "name": "destruction_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attack_order": {
+          "name": "attack_order",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attacked_at": {
+          "name": "attacked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "war_attacks_war_id_wars_id_fk": {
+          "name": "war_attacks_war_id_wars_id_fk",
+          "tableFrom": "war_attacks",
+          "tableTo": "wars",
+          "columnsFrom": [
+            "war_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.war_participants": {
+      "name": "war_participants",
+      "schema": "",
+      "columns": {
+        "war_id": {
+          "name": "war_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_tag": {
+          "name": "player_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attacks_allowed": {
+          "name": "attacks_allowed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "attacks_used": {
+          "name": "attacks_used",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "stars_earned": {
+          "name": "stars_earned",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "missed": {
+          "name": "missed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "war_participants_war_id_wars_id_fk": {
+          "name": "war_participants_war_id_wars_id_fk",
+          "tableFrom": "war_participants",
+          "tableTo": "wars",
+          "columnsFrom": [
+            "war_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "war_participants_player_tag_members_player_tag_fk": {
+          "name": "war_participants_player_tag_members_player_tag_fk",
+          "tableFrom": "war_participants",
+          "tableTo": "members",
+          "columnsFrom": [
+            "player_tag"
+          ],
+          "columnsTo": [
+            "player_tag"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "war_participants_war_id_player_tag_pk": {
+          "name": "war_participants_war_id_player_tag_pk",
+          "columns": [
+            "war_id",
+            "player_tag"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.war_roster_slots": {
+      "name": "war_roster_slots",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "war_roster_slots_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "roster_id": {
+          "name": "roster_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "player_tag": {
+          "name": "player_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map_position": {
+          "name": "map_position",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "war_roster_slots_roster_id_war_rosters_id_fk": {
+          "name": "war_roster_slots_roster_id_war_rosters_id_fk",
+          "tableFrom": "war_roster_slots",
+          "tableTo": "war_rosters",
+          "columnsFrom": [
+            "roster_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "war_roster_slots_player_tag_members_player_tag_fk": {
+          "name": "war_roster_slots_player_tag_members_player_tag_fk",
+          "tableFrom": "war_roster_slots",
+          "tableTo": "members",
+          "columnsFrom": [
+            "player_tag"
+          ],
+          "columnsTo": [
+            "player_tag"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.war_rosters": {
+      "name": "war_rosters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "war_rosters_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_size": {
+          "name": "war_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'draft'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.wars": {
+      "name": "wars",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "wars_id_seq",
+            "schema": "public",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "opponent_tag": {
+          "name": "opponent_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opponent_name": {
+          "name": "opponent_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "war_type": {
+          "name": "war_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "state": {
+          "name": "state",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "team_size": {
+          "name": "team_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "attacks_per_member": {
+          "name": "attacks_per_member",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "own_stars": {
+          "name": "own_stars",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "opponent_stars": {
+          "name": "opponent_stars",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "result": {
+          "name": "result",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
