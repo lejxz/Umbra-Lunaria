@@ -1,21 +1,44 @@
-# 10 — Mobile Support Planning
+# 10 — Responsive, Mobile, and Accessibility Contract
 
-Clan members will overwhelmingly check this on a phone, not a desktop — it's a companion to a mobile game. Mobile is not an afterthought pass at the end; it shapes a few decisions made earlier in this plan.
+## Product stance
 
-## Approach: responsive web, not a separate app
+Umbra Lunaria is a responsive web app, not a separate native app. Most clan use happens beside a mobile game, so phone behavior is a core product requirement rather than a final polish pass.
 
-A single responsive Next.js app, not a separate native app or a separate mobile codebase. Justification: the feature set (tables, cards, charts, one drag-and-drop screen) is well within what responsive web handles well, and a second codebase would double the maintenance burden for a hobby clan project. If usage later justifies a PWA (installable, offline-tolerant shell) that's a cheap incremental step on top of this — not a rebuild — but it is not a Phase 1 commitment.
+## Layout rules
 
-## Places this affects earlier decisions in this plan
+1. Design the 375–430px layout first, then expand to tablet and desktop.
+2. Use a compact bottom navigation on mobile and sidebar navigation on larger screens.
+3. Preserve the dashboard hierarchy: clan identity first, donation analytics primary, secondary panels stacked below.
+4. Convert wide member tables to concise member cards below the medium breakpoint.
+5. Let charts simplify labels, scroll, or switch density rather than compressing unreadable bars into a narrow viewport.
+6. Use a full-screen sheet for member detail on mobile and a centered modal on desktop.
+7. Keep current-war refresh and planner actions comfortably reachable one-handed.
 
-- **Drag-and-drop roster builder (`09-war-planning-and-auto-select.md`):** `@dnd-kit` was picked specifically because it supports touch, and the plan explicitly calls for a tap-to-add fallback, not drag as the only interaction. Free-drag reordering on a small touchscreen is a known pain point.
-- **Charts (`05-dashboard.md`, `04-activity-tracking-and-polling.md`):** hourly/daily bar or line charts need to degrade gracefully at narrow widths — fewer visible labels, horizontal scroll or a "zoom to a range" interaction rather than cramming 30 daily bars into 360px.
-- **Member cards/tables (`06-members.md`):** the troop/hero/spell card grid needs a genuine mobile layout (fewer columns, larger tap targets), not just a shrunk desktop grid. Table views (sortable member list) should collapse to a card-per-member layout below a breakpoint rather than a horizontally-scrolling table, which is a common and avoidable mobile-web mistake.
-- **Popups/modals:** on mobile, the member detail "popup" should behave like a full-screen sheet, not a small centered dialog — small centered modals on a phone are cramped and hard to dismiss cleanly.
+## Touch and interaction
 
-## Practical build guidance
+1. Every hover-only detail has a tap and keyboard equivalent.
+2. Tap-to-add is required alongside drag-and-drop planning.
+3. Buttons and row targets meet a practical 44px minimum touch target.
+4. Dropdowns, score explanations, filters, and chart tooltips remain usable without a mouse.
+5. Avoid horizontal page overflow; a controlled table/card transition is preferred to a shrinking desktop table.
 
-- Design mobile-first (build the 375–430px layout first, then expand up), rather than designing desktop and retrofitting — retrofitting is where most of the above problems come from in practice.
-- Tailwind's breakpoint system (`sm`/`md`/`lg`) is sufficient; no need for a separate mobile detection library.
-- Test on an actual phone, not just a resized browser window, at least once per major feature — browser dev-tool device emulation misses real touch-target and scroll-behavior issues.
-- Keep the manual war-refresh button (`07-clan-war.md`) large and unambiguous — this is the single most likely action someone takes one-handed, mid-war, on a phone.
+## Accessibility
+
+1. Use semantic headings, buttons, links, tables, and lists.
+2. Make tabs, dialogs, sheets, and dropdowns keyboard operable with visible focus.
+3. Trap focus in a modal/sheet and restore it to the triggering control on close.
+4. Provide text equivalents for color-only states such as war preference, activity, and alert severity.
+5. Maintain sufficient contrast for purple/lilac accents on the dark surface.
+6. Respect reduced-motion settings for animated charts and panel transitions.
+
+## Performance and resilience
+
+1. Render server-side page data where possible and hydrate only interactive controls.
+2. Load member progression grids and large charts only when their containing surface is opened or visible.
+3. Optimize local unit icons and use responsive image sizes for API-provided badges.
+4. Show cached capture time and resilient empty/error states when a data source is delayed.
+5. A PWA manifest and offline shell are optional later enhancements, not a requirement for the initial responsive product.
+
+## Verification
+
+Test every major surface on a real iOS Safari device and Android Chrome device, not only browser emulation. Verify navigation, sheets, filters, chart controls, planner interactions, and current-war refresh with a one-handed touch flow.

@@ -1,85 +1,87 @@
-# 11 — Config Specification
+# 11 — Final Configuration & Administration Specification
 
-Two layers, deliberately kept separate (see the note at the end of `03-data-model-and-database.md`):
+## Configuration layers
 
-- **Static config** — things that rarely change, checked into the repo (minus secrets) or set as environment variables. Requires a redeploy to change.
-- **Runtime settings** — things leadership may want to change without touching code or redeploying, stored in the database and editable from a settings screen.
+Configuration has three deliberately separate layers:
 
-## Static config — environment variables
+1. **Secrets** — environment variables, never committed.
+2. **Static clan configuration** — version-controlled non-secret defaults requiring deployment to change.
+3. **Runtime settings** — administrator-editable database values for operational behavior and scoring.
 
-These go in Vercel's Project → Settings → Environment Variables, never committed to the repo:
+## Environment variables
 
-```
-# Clash of Clans
-COC_API_TOKEN=              # the JWT token from developer.clashofclans.com
-COC_API_BASE_URL=https://cocproxy.royaleapi.dev/v1   # RoyaleAPI proxy, see 02-api-and-proxy-strategy.md
+Set these in Vercel; copy only the non-secret references to GitHub Actions where needed.
 
-# Database (auto-populated by the Vercel + Neon marketplace integration)
+```text
+# Clash of Clans API
+COC_API_TOKEN=
+COC_API_BASE_URL=https://cocproxy.royaleapi.dev/v1
+
+# Database
 DATABASE_URL=
 
-# Ingestion security
-INGEST_SECRET=              # shared secret the GitHub Actions poller must send; rejects unauthenticated calls to /api/ingest
-CRON_SECRET=                # you set this yourself (openssl rand -hex 32) — Vercel does not generate it, only forwards it as the Authorization header for /api/cron/purge
+# Machine-to-machine route security
+INGEST_SECRET=
+CRON_SECRET=
+
+# Administrator session protection for roster and settings writes
+ADMIN_SESSION_SECRET=
+ADMIN_PASSWORD_HASH=
 ```
 
-## Static config — `config/clan.config.ts` (checked into the repo, non-secret)
+`COC_API_TOKEN`, `DATABASE_URL`, `INGEST_SECRET`, `CRON_SECRET`, `ADMIN_SESSION_SECRET`, and `ADMIN_PASSWORD_HASH` are secrets. They must not be checked into source control, exposed in browser code, or copied into session logs.
 
-```ts
-export const clanConfig = {
-  // The single clan this deployment tracks. Format: "#XXXXXXXX" (URL-encode the
-  // '#' as %23 when building raw API URLs; the coc-client wrapper should handle
-  // this so callers just pass the human-readable tag).
-  clanTag: "#2Y8V8VGQ",
+## GitHub Actions secrets
 
-  // IANA timezone used for "daily" boundaries in the activity graph and
-  // donation-window buckets. Not necessarily UTC — pick whatever the
-  // clan's leadership actually operates in.
-  timezone: "Asia/Manila",
-
-  // How long a departed member's data is retained before the daily purge
-  // job deletes it. Matches the 2-week requirement by default; exposed as
-  // config rather than hardcoded in case that number needs revisiting.
-  memberRetentionDays: 14,
-
-  // Poll cadence target for the GitHub Actions workflow, in minutes.
-  // This value alone does not change the schedule — .github/workflows/poll.yml
-  // must be edited to match, since GitHub Actions schedules are static cron
-  // expressions, not read from this file at runtime.
-  pollIntervalMinutes: 10,
-
-  // Minimum number of observed wars before a member's auto-select ranking
-  // is shown with full confidence rather than a "limited data" flag.
-  // See 09-war-planning-and-auto-select.md.
-  minWarsForConfidentRanking: 3,
-
-  // Feature toggles — lets a clan turn off a section it doesn't use
-  // (e.g., a clan that never touches Clan Capital) without deleting code.
-  features: {
-    clanCapital: true,
-    builderBaseSummary: true,
-    warPlanningAutoSelect: true,
-  },
-} satisfies ClanConfig;
+```text
+VERCEL_APP_URL=
+INGEST_SECRET=
 ```
 
-## GitHub Actions repo secrets
+The workflow calls `/api/ingest` with `Authorization: Bearer ${{ secrets.INGEST_SECRET }}`. Its secret must exactly match the Vercel environment value.
 
-Set under the repo's Settings → Secrets and variables → Actions — these are separate from Vercel's env vars, since the workflow runs on GitHub's infrastructure, not Vercel's:
+## Static clan configuration
 
-```
-VERCEL_APP_URL=              # e.g. https://umbra-lunaria.vercel.app — the deployed app the workflow calls
-INGEST_SECRET=               # must match the same value set in Vercel's env vars, so /api/ingest accepts the call
-```
+`config/clan.config.ts` contains versioned, non-secret defaults:
 
-`.github/workflows/poll.yml` reads both and sends `Authorization: Bearer ${{ secrets.INGEST_SECRET }}` to `${{ secrets.VERCEL_APP_URL }}/api/ingest`.
+| Setting | Current/default value | Purpose |
+|---|---|---|
+| `clanTag` | `#2JPCYP98L` | The one clan tracked by this deployment. |
+| `timezone` | `Asia/Manila` | Day boundaries and rendered timestamps. |
+| `memberRetentionDays` | `14` | Retained departed-member data duration. |
+| `pollIntervalMinutes` | `10` | Target light-poll cadence; workflow cron must match it. |
+| `minWarsForConfidentRanking` | `3` | Threshold for a full-confidence auto-select score. |
+| `features` | per feature | Enable/disable incomplete or optional surfaces. |
 
-## Runtime settings (database-backed, editable from a Settings page)
+Static config changes require review and redeploy. The clan tag is intentionally a single value, not an array.
 
-Not exhaustive, but the settings that plausibly change often enough that a redeploy would be annoying:
+## Runtime settings
 
-- Inactivity threshold (days) used for the dashboard's "needs attention" panel.
-- Auto-select scoring weights (`09-war-planning-and-auto-select.md`) — the five weights in the composite formula, exposed as sliders/inputs rather than a code change, since it's a judgment call the clan should own, not one this plan should hardcode permanently. Must sum to 1.0; validate on save.
+Administrators can change the following without a deploy:
 
-## A note on multi-clan, even though it's out of scope
+1. Inactivity threshold for the dashboard attention panel.
+2. Member Activity Score window and component weights.
+3. War auto-select component weights.
+4. Minimum tracked data threshold for score confidence.
+5. Dashboard alert timing for attacks remaining.
+6. Feature visibility toggles for optional Capital, Builder Base, and planning surfaces.
+7. Display limits for clan-log and leaderboard windows.
 
-The brief is explicitly single-clan, and `clanConfig.clanTag` reflects that as a single value, not an array. If this ever needs to support more than one clan, that's a real architecture change (multi-tenant DB schema, per-clan config resolution) — not a small tweak. Worth knowing now so nobody's surprised later; not worth building for today.
+Every score-weight set is validated before save:
+
+1. Values are non-negative.
+2. Required configured weights sum to 1.0.
+3. A version and update timestamp are stored with the setting.
+4. Data-unavailable reweighting follows the product rules, not a hidden manual override.
+
+## Administrative protection
+
+1. The app uses a small administrator session for roster and settings writes.
+2. Session credentials are validated server-side and stored in secure, HTTP-only cookies.
+3. Read-only pages remain public.
+4. Write routes reject unauthenticated access and log an auditable actor/time/result without storing secrets.
+5. Machine route secrets and administrator credentials are independent; one must never be reused as the other.
+
+## Future multi-clan note
+
+Multi-clan support remains out of scope. Adding it later requires tenant-scoped data, configuration, permissions, and routing; it is not a safe one-line extension of `clanTag`.

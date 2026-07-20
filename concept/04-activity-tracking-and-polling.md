@@ -1,48 +1,73 @@
-# 04 — Activity Tracking & the Polling Engine
+# 04 — Polling, Historical Tracking, and Data Quality
 
-## Activity flag
+## Polling schedule
 
-Between two consecutive polls, if any of a member's trackable stats changed — donations given, donations received, trophies, versus trophies, capital gold contributed during a raid weekend — that member is marked active for that interval. Presented in the UI as "activity," not "online status."
+Umbra Lunaria uses two capture modes:
 
-## Poll frequency
+| Mode | Target cadence | Work |
+|---|---|---|
+| Light poll | Every 10 minutes | Roster, member snapshots, join/leave detection, and current war while preparation/battle is active. |
+| Daily batch | Once daily | Clan cache, full player details, Capital districts, completed raid seasons, and stale reference refreshes. |
 
-Every 10–15 minutes, via the GitHub Actions workflow (`01-tech-stack.md`).
+GitHub Actions schedules the light poll because Vercel Hobby Cron is daily only. Vercel Cron runs the daily retention purge. Scheduled delivery is best effort: the UI must tolerate delayed or missed samples and show the latest successful capture time.
 
-Each cycle:
-1. `GET /clans/{clanTag}/members` — one call, whole roster.
-2. Diff against the most recent snapshot per member.
-3. Insert `member_snapshots` rows, set `activity_flag` and detect login days (below).
-4. Update `members.left_at`/`purge_at` for anyone missing from the response.
-5. Poll `currentwar` on the same cadence whenever war state is `preparation` or `inWar` (checked cheaply via a cached `wars.state`) — preparation day is included since the war-prep scouting view (`07-clan-war.md`) needs opponent roster data before attacks open. Skip entirely when there's no war.
+## Light-poll sequence
 
-Full `players/{tag}` detail (troop/hero/spell/pet levels, Builder Base, `warPreference`, career stats) is fetched on a slower **daily batch cycle**, not every 10–15 min poll — plus on demand with a short cache TTL when a leader opens a member's detail popup. The same daily batch also refreshes the clan-level cached fields (`clans` table: war record, capital hall level, about-panel fields) and takes the `capital_district_snapshots` reading — none of these change often enough to justify the 10–15 min cadence.
+1. Fetch the clan member roster.
+2. Upsert current member display values by stable player tag.
+3. Compare each observed counter with the prior snapshot.
+4. Insert a new member snapshot with reset-aware donation and activity evidence.
+5. Mark absent retained members as left and set their purge deadline.
+6. Clear departure state for a rejoined player.
+7. If a war is in `preparation` or `inWar`, fetch and upsert current-war, participants, and attacks.
 
-`.github/workflows/poll.yml` — two schedules in one workflow, both calling `/api/ingest` with a query param or body flag distinguishing a light poll from the daily batch:
+## Daily-batch sequence
 
-```yaml
-on:
-  schedule:
-    - cron: '*/10 * * * *'   # light poll: members + currentwar if a war is on
-    - cron: '17 4 * * *'     # daily batch: full player detail, clan cache, capital districts
+1. Refresh the clan cache and its full identity/war/Capital fields.
+2. Fetch complete player details for retained members on a safe, rate-aware cadence.
+3. Refresh unit-level and career-detail payloads.
+4. Capture Capital district levels.
+5. Fetch completed Capital raid seasons and per-member contributions.
+6. Refresh any stale reference mapping required for presentation, without replacing audited raw values.
+
+## Reset-aware donation accounting
+
+Donation totals are calculated from consecutive snapshots, never from only the first and last counter in a window.
+
+For each consecutive pair for a member:
+
+```text
+if current_counter >= previous_counter:
+  contribution = current_counter - previous_counter
+else:
+  contribution = current_counter  // weekly reset occurred
 ```
 
-GitHub Actions cron has a 5-minute floor and isn't guaranteed to fire exactly on time under load — treat "every 10 minutes" as a target, not a guarantee, and don't build UI that assumes gap-free data.
+The selected 24-hour, 7-day, or 30-day total is the sum of each pair’s contribution in that window. This preserves donations made after a weekly reset instead of turning them into a false zero. The first sample has no prior delta and contributes no inferred history.
 
-## Login activity graph
+The same rule applies independently to donations given and received. Time-window boundaries are calculated in the clan timezone, then queried as UTC timestamps.
 
-Built from daily donation deltas specifically, not the general activity flag. A donation (given or received) requires the player to be online and act, so it's a stronger signal than a passive stat change. Logic:
+## Activity and estimated login evidence
 
-- Track `donations` and `donations_received` per poll.
-- A calendar day is marked as a **login day** if either value increased since the last poll captured that day.
-- Supercell resets both counters to 0 weekly. A reset (value drops) is never counted as a login day by itself; only an *increase* after the reset counts.
-- Rendered as a calendar/graph of login days per member — dates, not a streak count.
+### Activity flag
 
-This is still an inference (a login without any donation activity won't show up), but it's a real, verifiable signal, not a guess. Labeled "estimated login activity" in the UI.
+A member is marked active for a poll interval when an observable state changed, such as:
 
-## Weekly donation reset handling
+1. Donations given or received.
+2. Trophies or Builder Base trophies.
+3. A current Capital contribution value when it is observed.
+4. Other explicitly tracked player fields added in future migrations.
 
-Same reset logic applies to the donation totals shown on the dashboard (`05-dashboard.md`) — a reset must not be read as a drop in activity.
+This is activity evidence, not online presence. The UI must never call it “online now.”
 
-## Cold start
+### Estimated login days
 
-No history exists before the tool starts polling. Activity graphs, login graphs, and `09-war-planning-and-auto-select.md` scoring are all empty on day one and build up from there. UI should state the tracking start date rather than show an unexplained blank chart.
+A calendar day receives estimated login evidence when donations given or received increase during that day. A weekly counter reset alone does not count as a login. The view is labeled “estimated login activity,” presents dates rather than a fake streak, and is absent until enough snapshots exist.
+
+## Cold starts, partial data, and failures
+
+1. All tracked history begins at the first successful capture; the product cannot reconstruct prior activity or donation trends.
+2. Charts show a tracking-start date and a useful partial-data state.
+3. A failed poll retains existing data and records a failure for observability; it must not mark members inactive or departed.
+4. A member detail view can show current API data even when historical sections are not ready.
+5. Rank and auto-select views show “limited data” when their required observation period is incomplete.

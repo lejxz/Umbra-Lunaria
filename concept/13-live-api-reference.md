@@ -436,8 +436,8 @@ The clan response identifies Yeon (`#YPCC8QYU2`) as the leader. The readable pla
 
 ## Important behavior
 
-- `warWins` is currently `22`.
-- `warTies` and `warLosses` were null/absent in the captured clan response; they must not be guessed as zero.
-- `isWarLogPublic` was `false` in the captured clan response. The raw snapshot contains the separate war-log response returned during capture.
+- The captured clan response reports `warWins: 22`, `warTies: 1`, and `warLosses: 34`.
+- The captured clan response reports `isWarLogPublic: true`; its raw snapshot also preserves the separate war-log response returned during capture.
+- These values are a dated capture, not permanent assumptions. Runtime UI must still treat absent future fields as unavailable rather than guessing zero.
 - The player response contains complete progression arrays; use the raw snapshot when implementing the full member detail view.
 - In this captured response, pets appear as entries in the `troops` array. The `progressionExamples.pets` grouping above is documentation-only to make the member detail categories easier to read; the raw API payload remains authoritative.

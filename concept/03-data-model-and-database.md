@@ -1,83 +1,107 @@
-# 03 — Data Model & Database
+# 03 — Final Data Model & Retention Contract
 
-## Provider
+## Database role
 
-**PostgreSQL via Neon**, installed through the Vercel Marketplace (Storage tab in the Vercel dashboard). Free tier is enough for a single clan (~50 members) with snapshots every 10–15 minutes.
+Neon PostgreSQL is the product memory. Supercell supplies the latest state; the database stores the state needed to render fast pages and the observations needed to explain change over time.
 
-Setup: Vercel Dashboard → project → Storage → Marketplace Database Providers → Neon → Create. Vercel injects `DATABASE_URL` automatically.
+All timestamps are stored as `timestamptz` in UTC and rendered in `clanConfig.timezone`. Tags are stored as text with the leading `#`. Integer values are used for counts and levels; JSONB is reserved for nested API payloads that are read together rather than queried independently.
 
-## Column type conventions
-
-Not restated in every table below — apply these defaults unless a table says otherwise:
-
-- Tags (`player_tag`, opponent tags) → `text`, primary/foreign key, stored with the leading `#`.
-- Timestamps (`captured_at`, `joined_at`, `left_at`, `purge_at`) → `timestamptz`, always UTC in storage; convert to `clanConfig.timezone` only at render time.
-- Counts and levels (`donations`, `trophies`, `town_hall_level`, `stars_earned`) → `integer`.
-- Flags (`activity_flag`, `missed`) → `boolean`.
-- Free-form/nested data (`career_stats`, `unit_levels`, `labels`) → `jsonb`.
-
-## Core tables
+## Core entities
 
 ### `clans`
-One row: clan tag, cached name/badge/level, last successful poll timestamp, feature toggles. Also caches clan-level fields refreshed each poll, not worth their own tables since they're single values, not time-series:
 
-| column | notes |
-|---|---|
-| `capital_hall_level` | current, from `clanCapital.capitalHallLevel` |
-| `war_wins`, `war_ties`, `war_losses`, `war_win_streak` | all-time, from the clan object directly — not limited by when this tool started polling |
-| `required_trophies`, `required_town_hall_level`, `required_builder_base_trophies` | join requirements, for the about panel |
-| `location`, `labels`, `war_frequency` | about panel |
+One row for the configured clan. It caches all current clan facts used by the identity, war-record, and Capital cards:
+
+1. Identity: tag, name, description, type, badge URLs, location, chat language, family-friendly status.
+2. Status: clan level, member count, clan points, Builder Base points, Capital points, leagues, labels, and requirements.
+3. War facts: frequency, wins, ties, losses, and win streak.
+4. Capital facts: Capital Hall level and latest districts payload.
+5. Freshness: last successful clan capture time.
+
+Missing API fields remain nullable. A nullable war-loss count is not equivalent to zero.
 
 ### `members`
-| column | notes |
-|---|---|
-| `player_tag` | Primary key. |
-| `name` | Cached display name, refreshed each poll. |
-| `role` | leader / coLeader / admin / member |
-| `town_hall_level` | |
-| `war_preference` | `in` / `out`, from the player object. Drives auto-select exclusion in `09-war-planning-and-auto-select.md`. |
-| `career_stats` | JSONB, refreshed on the daily full `players/{tag}` batch: `warStars`, `attackWins`, `defenseWins`, `bestTrophies`, plus a small set of achievement totals (e.g. lifetime capital gold looted, lifetime troops donated). These are Supercell-tracked career totals, not limited by when this tool started — see `06-members.md`. |
-| `joined_at` | First observed by this tool — not necessarily the real in-game join date. |
-| `left_at` | NULL while in clan; set when missing from a poll's `members` response. |
-| `purge_at` | `left_at + 14 days`. Row and dependents hard-deleted once passed. |
+
+One row per currently retained player tag. It holds the latest display profile and membership lifecycle:
+
+1. Current name, role, Town Hall, experience, league, trophies, Builder Base fields, and clan rank.
+2. Current war preference and daily-refreshed player detail summary.
+3. Career totals and selected achievement values in a structured JSONB payload.
+4. `joined_at`, `left_at`, and `purge_at` observations made by Umbra Lunaria.
+
+`joined_at` means “first observed by this tracker,” not the player’s true historic clan-join date.
 
 ### `member_snapshots`
-Time-series backbone, one row per member per poll cycle: `player_tag`, `captured_at`, `donations`, `donations_received`, `trophies`, `versus_trophies`, `activity_flag`. Reset detection for weekly donation resets happens at ingestion (`04-activity-tracking-and-polling.md`).
 
-### `troop_levels`, `hero_levels`, `spell_levels`, `pet_levels`
-Normalized tables, or a single JSONB `unit_levels` column per member. JSONB is the Phase 1 default — normalize later only if cross-member unit queries are actually needed.
+One row per observed member per light poll. It contains the counters required to derive historical trends:
 
-### `wars` and `war_attacks`
-One row per war observed via `currentwar`/`warlog`; one row per attack (attacker, defender, stars, destruction %, order). Only covers wars fought since this tool started polling.
+1. Donations given and received.
+2. Home and Builder Base trophies when available.
+3. Activity flag.
+4. Login-day evidence flag.
+5. Capture timestamp.
+
+This table is the source for donation windows, activity timelines, estimated login days, and the activity component of Member Activity Score.
+
+### `unit_levels`
+
+The latest complete player progression payload keyed by player tag:
+
+1. Troops and siege machines.
+2. Heroes and hero equipment.
+3. Spells.
+4. Pets.
+5. Builder Base progression.
+6. Capture timestamp.
+
+The captured API currently represents pets among troop-like progression entries. The persistence layer may expose a normalized `pets` presentation field, but it must preserve the original API category mapping for refreshes and audits.
+
+### Optional `member_name_observations`
+
+If name history is surfaced, store `(player_tag, name, observed_at)` whenever the current API name changes. This creates history only after tracking begins; the API cannot backfill prior names.
+
+## War entities
+
+### `wars`
+
+One row per regular war or CWL war. It stores opponent identity, war type, state, team size, attacks per member, stars, destruction, result, and lifecycle times.
 
 ### `war_participants`
-One row per roster member per war — this is what makes missed-attack tracking possible. `war_attacks` only logs attacks that happened; a member who used 0 attacks has no row there at all. `war_participants` covers the full roster regardless of whether they attacked.
 
-| column | notes |
-|---|---|
-| `war_id` | FK → wars |
-| `player_tag` | FK → members |
-| `attacks_allowed` | from the war's `attacksPerMember` API field |
-| `attacks_used` | count of entries in that member's `attacks` array |
-| `stars_earned` | sum across their attacks |
-| `missed` | `attacks_used = 0` — the flag driving the "did not attack" stat |
+One row for every rostered member in a tracked war, including members with zero attacks. It holds attack allowance, attacks used, stars earned, and missed status. This is the authoritative source for missed-war and attack-slot-use metrics.
 
-### `capital_raid_seasons` and `capital_contributions`
-Mirrors the API's raid season structure; per-member offense/defense contribution.
+### `war_attacks`
+
+One row per attack with attacker, defender, stars, destruction, attack order, and timestamp. It supports attack logs, average stars, and three-star rate.
+
+## Capital entities
 
 ### `capital_district_snapshots`
-One row per district per poll — daily cadence is enough, district levels change over days/weeks, not minutes. `district_name`, `district_hall_level`, `captured_at`, sourced from `clanCapital.districts[].districtHallLevel`. Diffed the same way as activity: a level increase between snapshots is logged as an upgrade event with a date. Corrects an earlier version of `08-clan-capital.md`, which assumed no district-level data existed at all — it does, just not a live in-progress/remaining-cost view.
 
-### `war_rosters` and `war_roster_slots`
-Draft/finalized rosters from the planning tool.
+One row per district per daily clan capture. Diffs between consecutive snapshots create completed district-upgrade events; no record should claim live remaining cost or percentage progress.
 
-## Retention policy
+### `capital_raid_seasons` and `capital_contributions`
 
-1. Every poll cycle, any `player_tag` in the DB missing from the live `members` response gets `left_at = now()`, `purge_at = now() + 14 days`.
-2. Rejoining before `purge_at` clears both fields.
-3. A daily Vercel Cron job (`/api/cron/purge`) hard-deletes the `members` row and dependent `member_snapshots`/unit-level rows once `purge_at` passes.
-4. `war_attacks` rows for a purged member keep the war outcome but anonymize the tag (hashed), so clan-level war win/loss and star totals stay intact instead of silently drifting every time someone leaves.
+Completed raid seasons retain totals, rewards, attacks used, resources looted, and per-member contribution. These tables drive Capital history, zero-attack attention, participation, and the Capital component of Member Activity Score.
 
-## Config table vs. config file
+## Planning and settings entities
 
-Static settings (clan tag, feature toggles) live in the checked-in config file (`11-config-specification.md`). Settings that change at runtime through the UI (war roster drafts, leader notes) live in the database.
+1. `war_rosters` stores draft/finalized roster metadata, creator, title, and war size.
+2. `war_roster_slots` stores player tags and selected map positions.
+3. `runtime_settings` stores administrator-editable thresholds and score weights with an update timestamp and validation version.
+4. A minimal administrator-session/audit record may be added when write protection is implemented; it must never store plaintext secrets.
+
+## Derived data rules
+
+1. Derived values are calculated from source tables at read time or through explicit materialized summaries.
+2. The source window and tracking start date must accompany derived values when data is partial.
+3. A score or percentage never overwrites the original API facts used to produce it.
+4. New persistent requirements require a Drizzle migration; undocumented schema drift is not permitted.
+
+## Retention and privacy contract
+
+1. A member absent from a live roster receives `left_at = now()` and `purge_at = left_at + memberRetentionDays`.
+2. Rejoining before purge clears both lifecycle fields.
+3. The daily purge deletes the retained member profile, snapshots, progression, and name observations after the retention deadline.
+4. Historic war outcomes remain useful after a purge. Attack and participant data must retain aggregate war meaning while the departed player identity is anonymized where required.
+5. The clan log keeps enough immutable event information to render a clear “left on [date]; data removed” state after profile data has been purged.

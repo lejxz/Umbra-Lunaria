@@ -1,35 +1,81 @@
-# 07 — Clan War Details
+# 07 — Final Clan War Center
 
-## War history (regular + league)
+## Purpose
 
-Backed by `wars` (see `03-data-model-and-database.md`), populated two ways:
+The War Center combines all-time/current clan war context with tracked per-member execution. It supports regular wars, CWL, current battle management, and preparation-day scouting without pretending to have history the API cannot provide.
 
-1. **Backfill from `GET /clans/{clanTag}/warlog`** — only works if the clan's `isWarLogPublic` is `true`. If it's private, this endpoint returns nothing useful and history starts from zero. This is a Supercell/clan-setting limitation, not something the app can work around — surface it in the UI ("war log is private — history will build up from wars fought after [date]") rather than showing a silently empty list with no explanation.
-2. **Ongoing capture from `currentwar`/CWL endpoints** while polling — this is what actually builds rich, per-attack history over time, independent of the public/private warlog setting, since `currentwar` is always visible to a clan member's API key regardless of that setting.
+## War Center landing state
 
-List view: opponent, result (win/loss/tie), war size, own stars vs opponent stars, date, type (regular/CWL). Click through to a detail page reusing the same attack-table component as the live view below.
+The top of the page always answers:
 
-## Current war — live detail view, refreshed on demand
+1. Is the clan in preparation, battle, or no war?
+2. When does preparation end or battle end?
+3. What are each clan’s stars, destruction, attacks used, and attacks remaining?
+4. Who still has attacks available?
+5. When was the displayed state last refreshed?
 
-Refreshed by an explicit refresh button (`/api/war/refresh`, `01-tech-stack.md`), not continuously polled by the browser.
+When no war is active, show the most recent completed war and a clear no-active-war state.
 
-Contents:
-- War state (preparation / in war / war over), time remaining.
-- Both clans' attack progress: attacks used / attacks remaining, total stars, destruction %.
-- Full roster with per-member attack status: attacks used (0/1/2), stars earned, best attack so far, "has not attacked yet" flag prominently surfaced (this is the thing leaders actually check for mid-war). Every poll during a war writes this roster into `war_participants` (`03-data-model-and-database.md`), which is what powers the missed-attacks stat on the Members page.
-- Attack log: attacker, defender, stars, destruction %, timestamp, in order.
+## Current war detail
 
-**Why a manual refresh button and not live polling from the browser:** if 15 members all have the war page open and it live-polls the CoC API every few seconds, that's a rate-limit problem multiplied by concurrent viewers, on top of the background ingestion poll already running. A manual refresh button that calls a server route (which itself might serve a cached response if called again within a short TTL, e.g. 30–60 seconds, to protect against several people mashing refresh at once) is the right tradeoff for a feature that genuinely needs fresh data but doesn't need sub-minute live updates for a war that runs over a full day or two.
+### Summary
 
-## War prep / opponent scouting view
+1. War type, state, team size, and attacks per member.
+2. Preparation and battle timers using API times.
+3. Own and opponent clan identity, badges, levels, stars, destruction, and attack progress.
+4. Current war capture time.
 
-Shown during the preparation-day window (war `state = preparation`), before attacks open. `currentwar` returns the opponent clan's full roster (tag, name, Town Hall level, map position) — the same call already used for the live view above, no extra endpoint needed.
+### Roster and attack status
 
-- Two-column roster: own clan vs. opponent, both ordered by map position, Town Hall level shown per member.
-- TH mismatch highlighting: flag own members whose TH is notably below the opponent they'd be matched against by position, so attack assignment discussions have something concrete to point at.
-- Feeds directly into `09-war-planning-and-auto-select.md` if the roster planning tool is used to pre-assign attackers to specific opponent bases — same underlying opponent data, no duplication.
+1. Both clan rosters ordered by map position.
+2. Member Town Hall level and role where supplied.
+3. Attacks used versus allowed.
+4. Best stars/destruction earned.
+5. Prominent no-attack/attacks-left state.
+6. Link from a clan member to the reusable member detail sheet.
 
-## Other war features (candidates)
+### Attack log
 
-- CWL: round-by-round view across the league group, not just the current round.
-- Per-member historical war stats surfaced here too, pulling from `war_attacks`/`war_participants` (`09-war-planning-and-auto-select.md`) — average stars per attack, 3-star rate, participation rate.
+1. Attacker and defender.
+2. Map positions where known.
+3. Stars, destruction, attack order, and time.
+4. Sort by attack order by default.
+
+## Refresh behavior
+
+1. The page exposes a large manual refresh control.
+2. `/api/war/refresh` fetches server-side and updates the stored current-war state.
+3. A 30–60 second shared TTL prevents concurrent refresh bursts.
+4. The result reports the capture time and any safe error state.
+5. Browser polling directly against Supercell is prohibited.
+
+## War history
+
+### Regular wars
+
+Show opponent, result, war size, stars, destruction, end date, and a link to a detail view. Historical backfill from `warlog` is permitted only while the clan’s `isWarLogPublic` value permits it.
+
+If the war log is private or a historic record is unavailable, say so directly: history before tracking may be incomplete and new rich records build from captured current wars.
+
+### Clan War League
+
+Show league group, rounds, war status, opponent, result, and round-level detail. CWL uses the league-group and war-tag endpoints; it is not inferred from the regular-war log.
+
+## Preparation-day scouting
+
+When state is `preparation`, render a side-by-side own/opponent roster:
+
+1. Map position.
+2. Player name and Town Hall level.
+3. League information where available.
+4. Town Hall mismatch and likely matchup cues.
+5. Link to the Planning page for manual lineup construction.
+
+These cues support leader discussion; they do not dictate attack assignments.
+
+## Data-quality rules
+
+1. A war is only “live” to the latest successful capture time.
+2. Participant data is exact for wars observed by the tracker.
+3. Missed-attack metrics do not claim pre-tracker history.
+4. All times are converted from API UTC values to the clan timezone for display.

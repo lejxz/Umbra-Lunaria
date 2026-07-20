@@ -1,47 +1,108 @@
-# 05 — Main Dashboard
+# 05 — Final Dashboard Specification
 
-## 1. Clan donations (24h / week / month)
+## Purpose
 
-Computed from `member_snapshots` diffs (see `04-activity-tracking-and-polling.md`), summed across the clan, with the weekly-reset detection already handled at ingestion time so this view never has to special-case it.
+The dashboard is the clan’s command center: a readable summary of current state and recent signals, not a duplicate of the Members, War, or Capital pages. It follows the visual direction in `design_proposal.html` and uses the live API reference only for real fields, never invented values.
 
-- Three toggle-able windows: last 24h, last 7 days, last 30 days.
-- Total given, total received, and a leaderboard (top donors / top receivers) for the selected window.
-- Ratio view (given:received) per member is a natural, cheap addition — flag as a "nice to have" for Phase 1 rather than core.
+## Information hierarchy
 
-## 2. Clan activity graph
+### 1. Clan identity card
 
-- **24h view:** hour-by-hour bucket of the count of members flagged active in that hour (or a % of roster active).
-- **Week view:** day-by-day.
-- **Month view:** day-by-day, or week-by-week if 30 daily bars gets visually noisy on mobile — test both, mobile-usability wins the tiebreak (see `10-mobile-support.md`).
-- Every view should show a clear empty/partial state for the cold-start period described in `04-activity-tracking-and-polling.md` — don't render an empty chart with no explanation.
+The first, most prominent card contains:
 
-## 3. All-time clan war record
+1. Clan badge, name, and tag.
+2. Description, type, location, and family-friendly status.
+3. Clan level and member count.
+4. Label icons and labels.
+5. War frequency, war league, Capital league, and required trophies.
+6. A clear capture-time indicator and link to the Members page.
 
-Stat card row: `warWins`, `warTies`, `warLosses`, `warWinStreak` — pulled directly from the clan object, all-time totals tracked by Supercell. Not limited by the cold-start problem the rest of this dashboard has, since Supercell has always been counting these regardless of when this tool started polling. Win rate computed as `warWins / (warWins + warTies + warLosses)`.
+### 2. All-time war record card
 
-## 4. Clan info panel
+Show API-provided wins, ties, losses, and current win streak. Compute win rate only when all required totals are available:
 
-Small reference panel, cached from the clan object (`03-data-model-and-database.md`): clan level, clan points, capital league, capital hall level, join requirements (`requiredTrophies`, `requiredTownhallLevel`, `requiredBuilderBaseTrophies`), location, labels, war frequency setting. Useful as a quick "about this clan" reference and if the dashboard link is ever shared for recruitment.
+```text
+wins / (wins + ties + losses)
+```
 
-## 5. Needs-attention panel
+If an API value is absent, show `Unavailable` and suppress a misleading win-rate calculation. Link the card to the War Center.
 
-- Members inactive for N+ days (configurable threshold, `11-config-specification.md`).
-- Members with 0 war attacks used and little time left in an active war.
-- Members with `warPreference = out` (`06-members.md`) — informational, not a problem, but useful to see at a glance who's opted out before planning a roster.
+### 3. Clan Capital card
 
-## 6. Clan log
+Show Capital Hall level, Capital points, Capital league, district count, and the latest district snapshot. Include a raid-weekend status:
 
-Chronological feed of recent roster changes — joins and leaves merged into one timeline, most recent first. Built entirely from `members.joined_at` and `members.left_at`, both already populated by the ingest route (`04-activity-tracking-and-polling.md`) — no new schema needed.
+1. Countdown to the next expected raid weekend when inactive.
+2. Time remaining when a weekend is active and the endpoint provides the needed state.
+3. A clear pending-data state before raid-season ingestion is available.
+4. Link to the Capital page.
 
-- Each entry: name, tag, event type (joined / left), timestamp. A member who left and rejoined shows both events, not collapsed into one.
-- Click an entry → opens the member detail popup (`06-members.md`), same component used everywhere else. Two cases:
-  - **Still in the clan, or left less than 14 days ago:** full popup — the row still exists (retention policy, `03-data-model-and-database.md`).
-  - **Left 14+ days ago:** the member row has been purged. The popup can't show troop levels, activity history, etc., because that data no longer exists — show "left the clan on [date]; data removed per the 2-week retention policy" instead of a broken/empty profile. Don't silently fail or show empty charts.
-- Reasonable default window: last 30 days, or last 20 events, whichever is shorter — this is a recent-activity feed, not a full membership history browser.
+### 4. Donation analytics — primary dashboard panel
 
-## 7. Navigation strips
+This is the largest analytical panel. It contains:
 
-- Current war status strip (state, time remaining, stars/attacks used) — links to the full War page.
-- Capital raid weekend countdown/status strip — links to the full Capital page.
+1. A 24-hour / 7-day / 30-day control.
+2. Total donations given and received for the selected window.
+3. Donation ratio and selected-window comparison.
+4. Hourly buckets for 24 hours; daily buckets for 7 and 30 days.
+5. Accessible hover/focus detail for each bucket.
+6. Reset-aware totals from `04-activity-tracking-and-polling.md`.
+7. A tracking-start or partial-history state when data is insufficient.
 
-Keep the dashboard a **summary and navigation hub**, not a place where every table lives — the dedicated pages (Members, War, Capital) are where the depth belongs.
+### 5. Member Activity Score leaderboard
+
+The dashboard’s companion ranking panel is named **Member Activity Score**. It is a transparent, rolling 30-day measure of observed clan support—not a claim about player skill or worth.
+
+Initial score components total 100 points:
+
+| Component | Weight | Source |
+|---|---:|---|
+| Donations given | 35 | Reset-aware member donation totals. |
+| Observed activity | 25 | Active-day/interval rate from snapshots. |
+| War commitment | 25 | Attacks used ÷ attacks allowed in tracked wars. |
+| Capital contribution | 15 | Completed raid-season contribution. |
+
+Rules:
+
+1. Donations received are shown as a separate leaderboard metric; they do not earn contribution points.
+2. A temporarily unavailable component is excluded and the available component weights are re-normalized rather than scored as zero.
+3. Each row shows its component breakdown, selected period, and limited-data state.
+4. Members marked `warPreference = out` are not penalized by the score; war preference is an explicit planning decision.
+5. Rankings are clickable and open the reusable member detail sheet.
+
+### 6. Activity timeline
+
+Show active-member count and percent of the retained roster for 24-hour, 7-day, and 30-day windows. Label it as observed activity and use an explicit empty/partial state rather than an empty graph.
+
+### 7. Needs attention
+
+Use separate, readable lists for:
+
+1. Members inactive beyond the administrator-configured threshold.
+2. Members in an active war with attacks remaining.
+3. Members whose war preference is `out`.
+
+Every member item opens the same detail sheet. An opt-out is informational, not an error state.
+
+### 8. Clan activity log
+
+Render a most-recent-first feed of joins and departures with name, player tag, event type, and timestamp. A click opens:
+
+1. The normal member detail sheet for a retained player.
+2. A purpose-built “left on [date]; data removed under the retention policy” state for a purged player.
+
+The default feed is the latest 20 events or 30 days, whichever is smaller.
+
+### 9. Navigation summaries
+
+The dashboard ends with two clear navigation strips:
+
+1. **Current war** — state, preparation/battle countdown, stars, attacks, and link to `/war`.
+2. **Capital raid weekend** — current/countdown state and link to `/capital`.
+
+## Interaction and state rules
+
+1. Tabs, tooltips, rows, and cards are keyboard accessible.
+2. Hover interactions always have a touch and keyboard equivalent.
+3. Missing values use an em dash or an explicit unavailable label, never a fake zero.
+4. The dashboard does not contain the full member table, full war log, or full Capital history.
+5. Mobile layout preserves the donation panel as the primary analytical card and stacks secondary panels beneath it.

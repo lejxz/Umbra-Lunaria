@@ -3,88 +3,375 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Umbra Lunaria — Product Design Direction</title>
+  <title>Umbra Lunaria — Final Dashboard Design Direction</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #090811; --surface: #12101c; --surface-2: #181527; --surface-3: #211b34;
-      --purple: #b678ff; --violet: #7552df; --lilac: #eee5ff; --muted: #9287ad;
-      --line: rgba(190, 151, 255, .15); --good: #54d6a2; --warn: #f4b75f;
-      --display: Cinzel, Georgia, serif; --body: Inter, system-ui, sans-serif; --mono: "JetBrains Mono", monospace;
+      --ink: #090811;
+      --surface: #12101c;
+      --surface-2: #181527;
+      --surface-3: #211b34;
+      --purple: #b678ff;
+      --violet: #7552df;
+      --lilac: #eee5ff;
+      --muted: #9287ad;
+      --line: rgba(190, 151, 255, .15);
+      --good: #54d6a2;
+      --warn: #f4b75f;
+      --danger: #ed7f9a;
+      --display: Cinzel, Georgia, serif;
+      --body: Inter, system-ui, sans-serif;
+      --mono: "JetBrains Mono", monospace;
     }
+
     * { box-sizing: border-box; }
     html { background: var(--ink); }
-    body { margin: 0; color: var(--lilac); background: radial-gradient(circle at 76% 0%, #211747 0, transparent 35%), var(--ink); font: 14px/1.5 var(--body); }
+    body {
+      margin: 0;
+      color: var(--lilac);
+      background: radial-gradient(circle at 76% 0%, #211747 0, transparent 35%), var(--ink);
+      font: 14px/1.5 var(--body);
+    }
+
     a { color: inherit; text-decoration: none; }
-    .proposal-bar { border-bottom: 1px solid var(--line); color: var(--muted); font: 11px var(--mono); letter-spacing: .12em; padding: 16px 28px; text-transform: uppercase; }
-    .app { display: grid; grid-template-columns: 244px minmax(0, 1fr); margin: 32px auto; max-width: 1380px; min-height: 820px; overflow: hidden; border: 1px solid var(--line); border-radius: 22px; background: rgba(12, 10, 20, .86); box-shadow: 0 32px 90px rgba(0, 0, 0, .42); }
-    .sidebar { display: flex; flex-direction: column; border-right: 1px solid var(--line); background: rgba(8, 7, 14, .82); }
-    .brand { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); padding: 24px 22px; }
-    .brand img { width: 38px; height: 38px; border-radius: 50%; box-shadow: 0 0 22px rgba(182, 120, 255, .42); object-fit: cover; }
-    .brand strong { font: 600 15px/1.2 var(--display); letter-spacing: .08em; }
-    .brand small { display: block; color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; margin-top: 4px; }
-    .nav { display: grid; gap: 5px; padding: 24px 14px; }
-    .nav a { align-items: center; border: 1px solid transparent; border-radius: 10px; color: var(--muted); display: flex; gap: 12px; padding: 11px 13px; }
-    .nav a:hover, .nav a.active { background: rgba(182, 120, 255, .11); border-color: var(--line); color: var(--lilac); }
-    .nav i { color: var(--purple); font-style: normal; width: 18px; }
-    .sidebar-foot { border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.5; margin-top: auto; padding: 18px 22px; }
-    .sidebar-foot span { color: var(--good); font: 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
-    main { min-width: 0; padding: 40px 46px 52px; }
-    .topline { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 34px; gap: 20px; }
-    .kicker { color: var(--purple); font: 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; }
     h1, h2, h3, p { margin: 0; }
-    h1 { font: 600 clamp(28px, 4vw, 42px)/1.15 var(--display); letter-spacing: .01em; margin-top: 7px; }
-    .sub { color: var(--muted); margin-top: 8px; }
-    .pulse { border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: 11px var(--mono); padding: 9px 13px; white-space: nowrap; }
+
+    .proposal-bar {
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font: 11px var(--mono);
+      letter-spacing: .12em;
+      padding: 16px 28px;
+      text-transform: uppercase;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 244px minmax(0, 1fr);
+      max-width: 1440px;
+      min-height: 920px;
+      margin: 32px auto;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(12, 10, 20, .86);
+      box-shadow: 0 32px 90px rgba(0, 0, 0, .42);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--line);
+      background: rgba(8, 7, 14, .82);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 24px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand img,
+    .clan-badge {
+      object-fit: cover;
+      border-radius: 50%;
+      box-shadow: 0 0 22px rgba(182, 120, 255, .42);
+    }
+
+    .brand img { width: 38px; height: 38px; }
+    .brand strong { font: 600 15px/1.2 var(--display); letter-spacing: .08em; }
+    .brand small { display: block; margin-top: 4px; color: var(--muted); font: 10px var(--mono); letter-spacing: .12em; }
+
+    .nav { display: grid; gap: 5px; padding: 24px 14px; }
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 13px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+    }
+
+    .nav a:hover,
+    .nav a.active {
+      border-color: var(--line);
+      background: rgba(182, 120, 255, .11);
+      color: var(--lilac);
+    }
+
+    .nav i { width: 18px; color: var(--purple); font-style: normal; }
+    .sidebar-foot { margin-top: auto; padding: 18px 22px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+    .sidebar-foot span { color: var(--good); font: 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+
+    main { min-width: 0; padding: 40px 46px 52px; }
+    .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+    .kicker { color: var(--purple); font: 10px var(--mono); letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin-top: 7px; font: 600 clamp(28px, 4vw, 42px)/1.15 var(--display); letter-spacing: .01em; }
+    h2 { margin-top: 5px; font: 600 19px var(--display); }
+    .sub { margin-top: 8px; color: var(--muted); }
+    .pulse,
+    .badge {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--purple);
+      font: 10px var(--mono);
+      letter-spacing: .04em;
+      padding: 5px 8px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pulse { padding: 9px 13px; color: var(--muted); }
     .pulse b { color: var(--good); font-weight: 500; }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
-    .card { border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, rgba(33, 27, 52, .76), rgba(18, 16, 28, .8)); padding: 19px; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: linear-gradient(145deg, rgba(33, 27, 52, .76), rgba(18, 16, 28, .8));
+      padding: 19px;
+    }
+
+    .identity {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .clan-badge { width: 68px; height: 68px; }
+    .identity h2 { margin-top: 2px; font-size: 24px; }
+    .identity-copy { max-width: 660px; }
+    .identity-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .identity-facts { display: grid; grid-template-columns: repeat(3, auto); gap: 18px; text-align: right; }
+    .fact-label { display: block; color: var(--muted); font: 9px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+    .fact-value { display: block; margin-top: 3px; color: #fff; font-weight: 600; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
     .stat-label { color: var(--muted); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
-    .stat-value { color: #fff; font: 600 31px var(--display); margin-top: 9px; }
-    .stat-note { color: var(--good); font-size: 11px; margin-top: 5px; }
-    .grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, .9fr); gap: 18px; margin-top: 18px; }
-    .card-head { align-items: flex-start; display: flex; justify-content: space-between; margin-bottom: 22px; }
-    h2 { font: 600 19px var(--display); margin-top: 5px; }
-    .tabs { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 8px; display: flex; gap: 2px; padding: 3px; }
-    .tabs span { border-radius: 6px; color: var(--muted); font: 10px var(--mono); padding: 6px 8px; }
-    .tabs span.active { background: rgba(182,120,255,.18); color: var(--lilac); }
-    .donation-numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .number { background: rgba(255,255,255,.035); border-radius: 10px; padding: 14px; }
-    .number b { display: block; font-size: 26px; margin-top: 4px; }
-    .chart { align-items: end; display: flex; gap: 8px; height: 160px; padding-top: 8px; }
-    .bar { background: linear-gradient(to top, var(--violet), var(--purple)); border-radius: 5px 5px 2px 2px; flex: 1; min-width: 8px; opacity: .9; }
-    .chart-labels { color: var(--muted); display: flex; font: 9px var(--mono); justify-content: space-between; margin-top: 10px; }
+    .stat-value { margin-top: 9px; color: #fff; font: 600 30px var(--display); }
+    .stat-note { margin-top: 5px; color: var(--good); font-size: 11px; }
+    .stat-note.muted { color: var(--muted); }
+
+    .primary-grid,
+    .secondary-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(285px, .9fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .tabs { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255, 255, 255, .04); }
+    .tabs span { padding: 6px 8px; border-radius: 6px; color: var(--muted); font: 10px var(--mono); }
+    .tabs span.active { background: rgba(182, 120, 255, .18); color: var(--lilac); }
+    .donation-numbers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .number { padding: 13px; border-radius: 10px; background: rgba(255, 255, 255, .035); }
+    .number b { display: block; margin-top: 4px; font-size: 23px; }
+    .number small { display: block; margin-top: 2px; color: var(--good); }
+
+    .chart { display: flex; align-items: end; gap: 8px; height: 124px; margin-top: 20px; }
+    .bar { flex: 1; min-width: 8px; border-radius: 5px 5px 2px 2px; background: linear-gradient(to top, var(--violet), var(--purple)); opacity: .9; }
+    .chart-labels { display: flex; justify-content: space-between; margin-top: 10px; color: var(--muted); font: 9px var(--mono); }
+
+    .leaderboard { display: grid; gap: 8px; }
+    .leader,
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .035);
+    }
+
+    .leader-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .rank { color: var(--purple); font: 11px var(--mono); }
+    .leader small,
+    .row small { display: block; margin-top: 2px; color: var(--muted); }
+    .score { color: var(--good); font: 600 13px var(--mono); }
+    .score-note { margin-top: 13px; color: var(--muted); font-size: 11px; }
+
+    .activity-chart { display: flex; align-items: end; gap: 8px; height: 122px; }
+    .activity-dot { flex: 1; min-width: 8px; border-radius: 5px 5px 2px 2px; background: linear-gradient(to top, #4b7cf5, #87b7ff); }
     .attention { display: grid; gap: 9px; }
-    .row { align-items: center; background: rgba(255,255,255,.035); border-radius: 10px; display: flex; justify-content: space-between; padding: 12px; }
-    .row small { color: var(--muted); display: block; margin-top: 2px; }
-    .badge { border: 1px solid var(--line); border-radius: 999px; color: var(--purple); font: 10px var(--mono); padding: 4px 7px; text-transform: uppercase; }
-    .profile { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-    .profile span { color: var(--muted); display: block; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
-    .profile b { display: block; font-weight: 500; margin-top: 5px; }
-    .strip { align-items: center; display: flex; gap: 14px; justify-content: space-between; }
-    .strip + .strip { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 14px; }
+    .warn { color: var(--warn); }
+    .good { color: var(--good); }
+    .danger { color: var(--danger); }
+
+    .capital-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .district { padding: 10px; border-radius: 9px; background: rgba(255, 255, 255, .035); color: var(--muted); font-size: 11px; }
+    .district b { display: block; margin-top: 4px; color: var(--lilac); font-size: 13px; }
+
+    .strip { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .strip + .strip { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
     .strip p { color: var(--muted); }
-    @media (max-width: 900px) { .app { grid-template-columns: 1fr; margin: 0; border-radius: 0; } .sidebar { border-bottom: 1px solid var(--line); border-right: 0; } .nav { grid-template-columns: repeat(5, 1fr); padding: 10px; } .nav a { flex-direction: column; font-size: 10px; gap: 4px; justify-content: center; padding: 8px 3px; } .sidebar-foot { display: none; } main { padding: 28px 20px 40px; } .stats { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } }
-    @media (max-width: 500px) { .topline { display: block; } .pulse { display: inline-block; margin-top: 18px; } .stats { gap: 8px; } .card { padding: 15px; } .profile { grid-template-columns: repeat(2, 1fr); gap: 16px; } }
+
+    @media (max-width: 1050px) {
+      .identity { grid-template-columns: auto minmax(0, 1fr); }
+      .identity-facts { grid-column: 1 / -1; justify-content: start; text-align: left; }
+    }
+
+    @media (max-width: 900px) {
+      .app { grid-template-columns: 1fr; margin: 0; border-radius: 0; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .nav { grid-template-columns: repeat(5, 1fr); padding: 10px; }
+      .nav a { flex-direction: column; justify-content: center; gap: 4px; padding: 8px 3px; font-size: 10px; }
+      .sidebar-foot { display: none; }
+      main { padding: 28px 20px 40px; }
+      .primary-grid, .secondary-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .topline { display: block; }
+      .pulse { display: inline-block; margin-top: 18px; }
+      .identity { display: block; }
+      .clan-badge { float: left; margin: 0 14px 8px 0; }
+      .identity-facts { clear: both; grid-template-columns: repeat(2, 1fr); margin-top: 18px; }
+      .card { padding: 15px; }
+      .donation-numbers { grid-template-columns: 1fr; }
+      .capital-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
-  <div class="proposal-bar">Umbra Lunaria / Product design direction / Dashboard-first</div>
+  <div class="proposal-bar">Umbra Lunaria / finalized dashboard direction / illustrative static mock</div>
+
   <div class="app">
     <aside class="sidebar">
-      <div class="brand"><img src="../public/assets/Logo.png" alt="Umbra Lunaria logo" /><div><strong>UMBRA<br />LUNARIA</strong><small>CLAN OBSERVATORY</small></div></div>
-      <nav class="nav"><a class="active" href="#dashboard"><i>◈</i>Dashboard</a><a href="#members"><i>♙</i>Members</a><a href="#war"><i>⚔</i>War center</a><a href="#capital"><i>✦</i>Capital</a><a href="#planning"><i>≡</i>Planning</a></nav>
-      <div class="sidebar-foot"><span>● Systems nominal</span><br />Tracking the clan quietly in the background.<br /><br />Last poll · 2 minutes ago</div>
+      <div class="brand">
+        <img src="../public/assets/Logo.png" alt="Umbra Lunaria logo" />
+        <div><strong>UMBRA<br />LUNARIA</strong><small>CLAN OBSERVATORY</small></div>
+      </div>
+
+      <nav class="nav" aria-label="Primary navigation">
+        <a class="active" href="#dashboard"><i>◈</i>Dashboard</a>
+        <a href="#members"><i>♙</i>Members</a>
+        <a href="#war"><i>⚔</i>War center</a>
+        <a href="#capital"><i>✦</i>Capital</a>
+        <a href="#planning"><i>≡</i>Planning</a>
+      </nav>
+
+      <div class="sidebar-foot"><span>● Tracked data</span><br />Current facts, observed history, and transparent derived scores.<br /><br />Static concept preview</div>
     </aside>
+
     <main id="dashboard">
-      <header class="topline"><div><div class="kicker">Command center / overview</div><h1>The clan observatory</h1><p class="sub">A calm, high-signal view of Umbra Lunaria.</p></div><div class="pulse"><b>● LIVE</b>&nbsp; synced 2 min ago</div></header>
-      <section class="stats"><div class="card"><div class="stat-label">Clan level</div><div class="stat-value">11</div><div class="stat-note">Established</div></div><div class="card"><div class="stat-label">War wins</div><div class="stat-value">—</div><div class="stat-note">Awaiting history</div></div><div class="card"><div class="stat-label">Members</div><div class="stat-value">5</div><div class="stat-note">Roster observed</div></div><div class="card"><div class="stat-label">Capital hall</div><div class="stat-value">—</div><div class="stat-note">Not recorded</div></div></section>
-      <section class="grid"><article class="card"><div class="card-head"><div><div class="kicker">Contribution pulse</div><h2>Clan donations</h2></div><div class="tabs"><span class="active">24h</span><span>7d</span><span>30d</span></div></div><div class="donation-numbers"><div class="number"><span class="stat-label">Given</span><b>—</b></div><div class="number"><span class="stat-label">Received</span><b>—</b></div></div><p class="sub" style="margin-top:18px">Donation history will appear as polling snapshots accumulate.</p></article><article class="card"><div class="card-head"><div><div class="kicker">Roster signal</div><h2>Activity timeline</h2></div><span class="badge">24 hours</span></div><div class="chart"><i class="bar" style="height:18%"></i><i class="bar" style="height:30%"></i><i class="bar" style="height:22%"></i><i class="bar" style="height:48%"></i><i class="bar" style="height:36%"></i><i class="bar" style="height:68%"></i><i class="bar" style="height:42%"></i><i class="bar" style="height:76%"></i><i class="bar" style="height:52%"></i><i class="bar" style="height:88%"></i></div><div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span></div></article></section>
-      <section class="card" style="margin-top:18px"><div class="card-head"><div><div class="kicker">Clan profile</div><h2>About the clan</h2></div><span class="badge">#2Y8V8VGQ</span></div><div class="profile"><div><span>Location</span><b>—</b></div><div><span>War frequency</span><b>—</b></div><div><span>Join trophies</span><b>—</b></div><div><span>Town hall minimum</span><b>—</b></div></div></section>
-      <section class="grid"><article class="card"><div class="card-head"><div><div class="kicker">Attention queue</div><h2>Needs attention</h2></div><span class="badge">0 opted out</span></div><div class="attention"><div class="row"><div>Nothing urgent<small>Members needing attention will appear here.</small></div><span style="color:var(--good)">✓</span></div></div></article><article class="card"><div class="card-head"><div><div class="kicker">Roster history</div><h2>Clan log</h2></div><a class="badge" href="#members">View all</a></div><div class="attention"><div class="row"><div>Yeon<small>Joined the clan · today</small></div><span class="badge">joined</span></div><div class="row"><div>KnieleGurow<small>Joined the clan · today</small></div><span class="badge">joined</span></div></div></article></section>
-      <section class="card" style="margin-top:18px"><div class="strip"><div><div class="kicker">Navigation</div><h2>Current war</h2></div><p>No active war recorded →</p></div><div class="strip"><div><h2>Capital raid weekend</h2></div><p>District overview →</p></div></section>
+      <header class="topline">
+        <div>
+          <div class="kicker">Command center / overview</div>
+          <h1>The clan observatory</h1>
+          <p class="sub">Identity first. Donations and member contribution at the center.</p>
+        </div>
+        <div class="pulse"><b>● CAPTURED</b>&nbsp; illustrative design state</div>
+      </header>
+
+      <section class="card identity" aria-labelledby="clan-identity-title">
+        <img class="clan-badge" src="../public/assets/Logo.png" alt="Umbra Lunaria badge placeholder" />
+        <div class="identity-copy">
+          <div class="kicker">Clan identity</div>
+          <h2 id="clan-identity-title">Umbra Lunaria</h2>
+          <p class="sub">Moon’s Shadow · International · Open clan</p>
+          <div class="identity-tags"><span class="badge">Clan Wars</span><span class="badge">Clan War League</span><span class="badge">Competitive</span></div>
+        </div>
+        <div class="identity-facts">
+          <div><span class="fact-label">Clan tag</span><span class="fact-value">#2JPCYP98L</span></div>
+          <div><span class="fact-label">War league</span><span class="fact-value">Crystal II</span></div>
+          <div><span class="fact-label">Capital league</span><span class="fact-value">Bronze III</span></div>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Clan summary">
+        <article class="card"><div class="stat-label">Clan level</div><div class="stat-value">11</div><div class="stat-note">Current API fact</div></article>
+        <article class="card"><div class="stat-label">War wins</div><div class="stat-value">22</div><div class="stat-note">All-time record</div></article>
+        <article class="card"><div class="stat-label">Win rate</div><div class="stat-value">39%</div><div class="stat-note muted">Derived from record</div></article>
+        <article class="card"><div class="stat-label">Capital hall</div><div class="stat-value">8</div><div class="stat-note">8 tracked districts</div></article>
+      </section>
+
+      <section class="primary-grid">
+        <article class="card">
+          <div class="card-head">
+            <div><div class="kicker">Contribution pulse</div><h2>Clan donations</h2></div>
+            <div class="tabs" aria-label="Donation window"><span class="active">24h</span><span>7d</span><span>30d</span></div>
+          </div>
+          <div class="donation-numbers">
+            <div class="number"><span class="stat-label">Given</span><b>1,248</b><small>tracked total</small></div>
+            <div class="number"><span class="stat-label">Received</span><b>921</b><small>tracked total</small></div>
+            <div class="number"><span class="stat-label">Ratio</span><b>1.35</b><small>given / received</small></div>
+          </div>
+          <div class="chart" aria-label="Illustrative hourly donation chart">
+            <i class="bar" style="height:22%"></i><i class="bar" style="height:36%"></i><i class="bar" style="height:28%"></i><i class="bar" style="height:58%"></i><i class="bar" style="height:44%"></i><i class="bar" style="height:72%"></i><i class="bar" style="height:48%"></i><i class="bar" style="height:86%"></i><i class="bar" style="height:61%"></i><i class="bar" style="height:93%"></i>
+          </div>
+          <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span></div>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><div><div class="kicker">Observed clan support</div><h2>Member Activity Score</h2></div><span class="badge">30 days</span></div>
+          <div class="leaderboard">
+            <div class="leader"><div class="leader-left"><span class="rank">01</span><div>Yeon<small>Donation · activity · war · Capital</small></div></div><span class="score">92.4</span></div>
+            <div class="leader"><div class="leader-left"><span class="rank">02</span><div>Yeon’s Slave<small>Donation · activity · war · Capital</small></div></div><span class="score">87.1</span></div>
+            <div class="leader"><div class="leader-left"><span class="rank">03</span><div>Juskepz<small>Donation · activity · war · Capital</small></div></div><span class="score">73.8</span></div>
+          </div>
+          <p class="score-note">Transparent components reweight when tracked history is unavailable.</p>
+        </article>
+      </section>
+
+      <section class="secondary-grid">
+        <article class="card">
+          <div class="card-head"><div><div class="kicker">Roster signal</div><h2>Activity timeline</h2></div><span class="badge">24 hours</span></div>
+          <div class="activity-chart" aria-label="Illustrative activity timeline">
+            <i class="activity-dot" style="height:24%"></i><i class="activity-dot" style="height:40%"></i><i class="activity-dot" style="height:34%"></i><i class="activity-dot" style="height:54%"></i><i class="activity-dot" style="height:44%"></i><i class="activity-dot" style="height:70%"></i><i class="activity-dot" style="height:62%"></i><i class="activity-dot" style="height:88%"></i><i class="activity-dot" style="height:58%"></i><i class="activity-dot" style="height:74%"></i>
+          </div>
+          <div class="chart-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>Now</span></div>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><div><div class="kicker">Attention queue</div><h2>Needs attention</h2></div><span class="badge">3 signals</span></div>
+          <div class="attention">
+            <div class="row"><div><span class="warn">1 attack remaining</span><small>Active-war member attention item</small></div><span class="badge">War</span></div>
+            <div class="row"><div><span class="danger">2 inactive members</span><small>Threshold configured by leadership</small></div><span class="badge">Activity</span></div>
+            <div class="row"><div><span class="good">1 opted out</span><small>Informational, not an error</small></div><span class="badge">Roster</span></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="secondary-grid">
+        <article class="card" id="capital">
+          <div class="card-head"><div><div class="kicker">Capital signal</div><h2>District overview</h2></div><span class="badge">Hall 8</span></div>
+          <div class="capital-grid">
+            <div class="district">Capital Peak<b>Level 8</b></div>
+            <div class="district">Barbarian Camp<b>Level 4</b></div>
+            <div class="district">Wizard Valley<b>Level 4</b></div>
+            <div class="district">Balloon Lagoon<b>Level 4</b></div>
+          </div>
+          <p class="sub">Full district history and raid-weekend contribution live on the Capital page.</p>
+        </article>
+
+        <article class="card" id="members">
+          <div class="card-head"><div><div class="kicker">Roster history</div><h2>Clan log</h2></div><a class="badge" href="#members">View members</a></div>
+          <div class="attention">
+            <div class="row"><div>Yeon<small>Joined the clan · tracked event</small></div><span class="badge">Joined</span></div>
+            <div class="row"><div>KnieieGurow<small>Joined the clan · tracked event</small></div><span class="badge">Joined</span></div>
+            <div class="row"><div>Purged record<small>Data removed under retention policy</small></div><span class="badge">Left</span></div>
+          </div>
+        </article>
+      </section>
+
+      <section class="card" style="margin-top:18px" id="war">
+        <div class="strip"><div><div class="kicker">Navigation summary</div><h2>Current war</h2><p>Preparation/battle timer, stars, attacks remaining, and full roster detail.</p></div><a class="badge" href="#war">Open War Center →</a></div>
+        <div class="strip"><div><h2>Capital raid weekend</h2><p>Countdown/status, district history, and completed-season contribution.</p></div><a class="badge" href="#capital">Open Capital →</a></div>
+      </section>
     </main>
   </div>
 </body>

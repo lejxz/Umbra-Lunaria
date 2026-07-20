@@ -1,41 +1,102 @@
-# 00 — Overview & Guiding Constraints
+# 00 — Finalized Product Concept
 
-## What this project is
+## Purpose
 
-Umbra Lunaria is a dedicated web dashboard for a single Clash of Clans clan, hosted on Vercel. It pulls data from the official Clash of Clans API, stores a history of that data over time, and presents it as a dashboard, member browser, war center, capital tracker, and a war-planning tool.
+Umbra Lunaria is a single-clan Clash of Clans observatory. It turns the current state returned by the official API into a calm, high-signal web experience, and records snapshots so clan leaders can understand activity, donations, war participation, Capital contribution, and member progression over time.
 
-Single clan only. One `clanTag`, configured once. No user authentication — open access.
+The app has five primary surfaces:
 
-## Feature scope
+1. **Dashboard** — a summary of clan identity, health, donations, activity, member contribution, current war, and Capital status.
+2. **Members** — a filterable roster and detailed member records.
+3. **War Center** — regular war, CWL, current-war, preparation, and attack information.
+4. **Capital** — district progress, raid-weekend results, and contribution history.
+5. **Planning** — a manual roster builder with transparent automatic suggestions.
 
-1. **Main Dashboard** — donation totals (24h/week/month), activity graph, all-time war record, clan info panel, needs-attention panel.
-2. **Clan Members List** — sortable/filterable table (wars missed, war preference); detail popup per member: activity history, login activity graph, war participation, career stats, rushed/non-rushed analysis, troop/hero/spell/pet cards, minimal Builder Base summary.
-3. **Clan War Details** — war history (regular + league), live current-war view refreshed on demand, preparation-day opponent scouting.
-4. **Clan Capital Details** — capital activity dashboard, per-member contribution, district-level upgrade tracking.
-5. **Next Clan War Planning** — drag-and-drop roster builder, member popups, war size selection, auto-suggest ranking (war-preference-aware).
-6. **General system** — modular, database-backed, documented config.
+This is a single-clan product. The configured clan tag is `#2JPCYP98L`; multi-clan support is deliberately out of scope.
 
-Build order and current status: `12-roadmap-and-modularity.md`. Phase 0 (foundation) is complete — data pipeline running, database populated. Phase 1 (read-only core UI) is next.
+## Product contract
 
-## Constraints
+Every value shown by the product must belong to one of these categories:
 
-### 1. Static IP required, Vercel Hobby doesn't have one
+| Category | Meaning | Examples |
+|---|---|---|
+| **API fact** | Returned directly by Supercell for the current state. | Clan level, badge, war wins, player tag, troop level. |
+| **Tracked history** | Observed and stored by Umbra Lunaria after polling begins. | Donation trend, joins/leaves, activity history, war participation. |
+| **Derived metric** | Calculated by the application from facts and tracked history. | Win rate, rushed percentage, Member Activity Score. |
+| **Unavailable** | Not returned, not yet tracked, or not sufficiently reliable. | True last-login time, pre-tracker donation history, live Capital upgrade cost. |
 
-CoC API keys are locked to specific IP addresses; Vercel Hobby functions run on a rotating IP range. Fix: route all calls through RoyaleAPI's proxy (`cocproxy.royaleapi.dev`), whitelist their fixed IP (`45.79.218.79`) instead of trying to whitelist Vercel. Detail: `02-api-and-proxy-strategy.md`.
+The UI must label estimated or derived data, show a useful cold-start state, and render unavailable data as unavailable—not as zero or a fabricated value.
 
-### 2. No activity/last-login field — inferred from snapshots
+## Access model
 
-The API exposes state, not events: donations, trophies, versus trophies, capital contributions, war attacks used. No login timestamp anywhere in the response.
+Read-only clan information is public to anyone with the URL. Administrative mutations are protected:
 
-- **Activity graph/flag:** poll on a schedule, diff snapshots. Any change in donations, trophies, or capital contribution between polls marks that window active.
-- **Login activity graph:** built specifically from daily donation deltas — a donation requires being online. Shown as a graph of dates, not a streak count. Detail: `04-activity-tracking-and-polling.md`.
+1. Ingestion and purge routes use machine secrets.
+2. Saving/finalizing roster plans and editing runtime settings require an administrator session.
+3. No player account system is required; a lightweight clan-admin gate is sufficient.
 
-Consequence: the system only knows what it has observed since it started running. Day one, these graphs and `09-war-planning-and-auto-select.md` scoring are empty and fill in over time.
+## Final information architecture
 
-### 3. Vercel Hobby Cron caps at once/day
+### Dashboard
 
-Activity graphs need polling every 10–15 minutes; Hobby Cron can't go below 24h. Fix: GitHub Actions scheduled workflow hits a protected Vercel API route on that cadence. Vercel Cron is used only for the daily 2-week-retention purge (`03-data-model-and-database.md`).
+1. Clan identity and profile card.
+2. All-time war record card.
+3. Clan Capital summary card.
+4. Large donation analytics panel with 24-hour, 7-day, and 30-day views.
+5. Member Activity Score leaderboard.
+6. Activity timeline.
+7. Needs-attention groups.
+8. Clickable clan join/leave log.
+9. Current-war and Capital navigation summaries.
 
-### 4. Not everything requested is obtainable from the API
+### Members
 
-Two things dropped from scope entirely because no API field or endpoint supports them, even indirectly: a true login streak (no login log exists — replaced by the donation-based login graph above), and live in-progress Clan Capital building-upgrade cost/progress (only the *completed* district level is exposed, which is enough for district-level-up tracking but not a "3,200/9,000 gold" progress bar — see `08-clan-capital.md`).
+1. Sortable and filterable roster.
+2. Reusable member detail sheet.
+3. Activity, donation, war, career, progression, and Builder Base sections.
+4. Rushed-account analysis and maxed-for-Town-Hall indicators.
+
+### War
+
+1. Regular-war and CWL history.
+2. Current-war progress and attack log.
+3. Preparation-day opponent scouting.
+4. Manual, rate-limit-aware refresh.
+
+### Capital
+
+1. Current Capital and district overview.
+2. District upgrade timeline.
+3. Raid-weekend history and participation once the endpoint is ingested.
+
+### Planning
+
+1. Manual drag-and-drop/tap-to-add roster builder.
+2. Draft and finalized rosters.
+3. Explainable auto-select ranking, never an autonomous final decision.
+
+## Design direction
+
+The interface is a dark, moonlit clan observatory: restrained purple/lilac accents, strong hierarchy, quiet empty states, and dense information without visual noise. The dashboard is a summary and navigation hub; long tables and complete historical detail belong on dedicated pages.
+
+The design must be mobile-first. A member detail view becomes a full-screen sheet on small screens, tables collapse into readable cards, and planning supports touch as well as drag-and-drop.
+
+Reuse the repository’s assets first. New Clash of Clans unit icons must come from the approved Supercell Fankit source and be copied into a local, documented asset mapping rather than hotlinked at render time.
+
+## Source of truth and document roles
+
+1. [`final-feature-list.md`](final-feature-list.md) is the definitive feature inventory.
+2. Documents `01` through `11` explain the finalized product, data, and UX decisions behind that inventory.
+3. [`12-Implemantation-plan-and-modularity.md`](12-Implemantation-plan-and-modularity.md) is the current implementation sequence and is intentionally maintained separately.
+4. [`13-live-api-reference.md`](13-live-api-reference.md) is evidence of the live API response, not a substitute for the product specification.
+5. [`design_proposal.html`](design_proposal.html) is the visual direction for the dashboard shell.
+
+## Non-negotiable constraints
+
+1. The CoC API provides current state, not a universal history.
+2. Player tags—not display names—are the permanent member identity.
+3. The API has no true last-login field; activity is inferred from observed changes.
+4. Donation counters reset weekly and must be calculated with reset-aware deltas.
+5. A private war log limits pre-tracker historical war backfill.
+6. The API provides completed Capital district levels, not live upgrade cost or progress.
+7. Rushed analysis requires maintained Town Hall cap reference data because the API does not provide caps by Town Hall.

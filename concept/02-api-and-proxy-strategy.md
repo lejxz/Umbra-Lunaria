@@ -1,67 +1,52 @@
-# 02 — Clash of Clans API & Proxy Strategy
+# 02 — Clash of Clans API, Proxy, and Data Availability
 
-## The core problem, restated precisely
+## Proxy strategy
 
-- A CoC API key is issued for a fixed list of IP addresses (up to a handful per key). Requests from any other IP get `403 Forbidden` with `reason: "accessDenied.invalidIp"`.
-- Vercel Serverless Functions on Hobby do not have a stable outbound IP. Every invocation can come from a different address in a large, rotating range.
-- Result: a naive `fetch("https://api.clashofclans.com/...")` from a Vercel function will work intermittently or not at all, because the key can only ever whitelist a handful of IPs and Vercel won't hold still.
+Supercell API keys are restricted to fixed outbound IP addresses. Vercel Hobby functions do not provide a fixed outbound IP, so Umbra Lunaria routes server-side requests through `https://cocproxy.royaleapi.dev/v1`.
 
-## The fix: RoyaleAPI's proxy
+1. Allowlist RoyaleAPI’s documented proxy IP on the Supercell developer key.
+2. Send the normal Supercell bearer token only from server-side code.
+3. Keep the standard API path and URL-encode every tag (`#` becomes `%23`).
+4. Treat proxy downtime as a failed poll: record the failure, retain prior data, and try again on the next scheduled cycle.
 
-RoyaleAPI (the team behind the popular Clash Royale stats site) runs a free public proxy that sits in front of Supercell's Clash of Clans, Clash Royale, and Brawl Stars APIs, specifically to solve this problem for developers on platforms without static IPs.
+The proxy solves IP allowlisting only. It does not increase Supercell rate limits or make unavailable data available.
 
-**How it works:**
-1. Create your API key as normal at `developer.clashofclans.com`.
-2. Instead of whitelisting your own (unstable) IP, whitelist RoyaleAPI's fixed proxy IP: **`45.79.218.79`**.
-3. Send your requests to `https://cocproxy.royaleapi.dev/...` instead of `https://api.clashofclans.com/...`, keeping the same path and the same `Authorization: Bearer <token>` header.
-4. RoyaleAPI forwards the request to Supercell from their whitelisted IP and returns the response unmodified.
+## Required endpoints
 
-Example:
+| Endpoint | Direct facts used by the product | Historical use |
+|---|---|---|
+| `GET /clans/{clanTag}` | Clan identity, description, badges, location, points, leagues, labels, requirements, war record, Capital hall, districts. | Daily clan cache and district snapshots. |
+| `GET /clans/{clanTag}/members` | Current roster, roles, donations, trophies, rank, selected league fields. | Ten-minute member snapshots and join/leave detection. |
+| `GET /players/{playerTag}` | Full player profile, war preference, career data, achievements, progression arrays, Capital contribution total. | Daily detail cache and on-demand stale-cache refresh. |
+| `GET /clans/{clanTag}/currentwar` | War state, timers, rosters, attacks, stars, destruction, opponent data. | Poll while preparation or battle is active. |
+| `GET /clans/{clanTag}/warlog` | Public regular-war outcomes. | Optional historical backfill only when war log is public. |
+| `GET /clans/{clanTag}/currentwar/leaguegroup` | CWL rounds and war tags. | CWL history and current-league view. |
+| `GET /clanwarleagues/wars/{warTag}` | Full CWL-war details. | CWL participant and attack history. |
+| `GET /clans/{clanTag}/capitalraidseasons` | Completed raid-weekend rewards, attacks, loot, and member contributions. | Raid history and Capital contribution trends. |
 
-```
-Direct (breaks on Vercel):
-GET https://api.clashofclans.com/v1/clans/%23YOURTAG/members
+## What the API does and does not provide
 
-Through the proxy (works on Vercel):
-GET https://cocproxy.royaleapi.dev/v1/clans/%23YOURTAG/members
-```
+| Need | Availability | Product behavior |
+|---|---|---|
+| Current clan/member/player state | Direct API fact | Cache it and show its capture time. |
+| Troop, hero, equipment, spell, and pet levels | Direct player-response fact | Show current level and API-reported global max. |
+| Current player name | Direct API fact | Refresh display name from the player tag. |
+| Previous player names | Not provided | Only names observed by Umbra Lunaria after tracking starts can be retained. |
+| True online or last-login time | Not provided | Show estimated activity only. |
+| Donation history | Not provided | Build from reset-aware snapshots. |
+| Historic war attacks | Partly available | Backfill public war log; otherwise build forward from tracking. |
+| Current Capital district level | Direct clan-response fact | Snapshot daily and diff upgrades. |
+| Live Capital upgrade cost/progress | Not provided | Do not invent a progress bar. |
+| Raid-weekend result | Direct endpoint fact | Ingest completed seasons before showing trend analytics. |
 
-Everything else about the request — headers, query params, response shape — is identical. This means `lib/coc-client` only needs a single configurable base URL, not a fork of its logic.
+## Rate-limit policy
 
-### Caveats to plan around
+1. A light poll makes one roster request and polls current war only when a war is active or in preparation.
+2. Full player responses run in the daily batch, not every ten minutes.
+3. A member-detail refresh may happen on demand only when the cached detail is stale and must use a short server cache.
+4. Browser refreshes never fan out directly to Supercell; `/api/war/refresh` applies a 30–60 second shared cache.
+5. The UI shows the most recent successful capture time rather than implying live, second-by-second data.
 
-- This is a **third-party dependency you don't control**. If RoyaleAPI's proxy has downtime, ingestion pauses. Build the poller to fail gracefully (log and retry next cycle, don't crash) rather than assuming 100% uptime.
-- This only solves outbound whitelisting. It does not increase your rate limit — Supercell's per-key rate limit still applies, the proxy doesn't grant a higher one.
-- Do not put your CoC API token in client-side code. All CoC/proxy calls happen from server-side Next.js API routes only, never from the browser.
+## Stable identity
 
-### Alternative considered: Vercel's own Static IPs feature
-
-Vercel now sells a native Static IPs add-on. It is real and it does work, but it's gated to Pro/Enterprise and billed on top of hosting — call it **not worth it** for a single hobby clan project when the RoyaleAPI proxy solves the exact same problem for free. Worth revisiting only if the project ever needs an inbound static IP too (the proxy only solves outbound), or if RoyaleAPI's proxy becomes unreliable.
-
-## Endpoints this project actually needs
-
-| Endpoint | Used for |
-|---|---|
-| `GET /clans/{clanTag}` | Clan-level stats: level, points, capital league, war league, member count, `warWins`/`warTies`/`warLosses`/`warWinStreak`, join requirements, location, labels, and the `clanCapital` object (`capitalHallLevel` + `districts[].districtHallLevel`). |
-| `GET /clans/{clanTag}/members` | Roster: tags, roles, donations, trophies — polled repeatedly for activity inference. |
-| `GET /players/{playerTag}` | Full member detail: troop/hero/spell/pet levels, Town Hall level, Builder Base stats, `warPreference`, career totals (`warStars`, `attackWins`, `defenseWins`, `bestTrophies`), `achievements[]`. |
-| `GET /clans/{clanTag}/currentwar` | Live current war state — `attacksPerMember`, both rosters, per-attack stars. Also the source for the war-prep scouting view during `preparation` state. |
-| `GET /clans/{clanTag}/warlog` | Regular war history — **only if the clan's `isWarLogPublic` flag is true.** If it's private, historical war outcomes before this tool existed are simply unavailable; only wars fought after ingestion starts can be recorded from `currentwar` snapshots. |
-| `GET /clans/{clanTag}/currentwar/leaguegroup` and `GET /clanwarleagues/wars/{warTag}` | CWL round data. |
-| `GET /clans/{clanTag}/capitalraidseasons` | Clan Capital raid weekend results and per-member contribution. |
-
-Tag encoding: player and clan tags start with `#`, which must be URL-encoded as `%23` in the request path (e.g. `#2Y8V8VGQ` → `%232Y8V8VGQ`). `lib/coc-client` should do this encoding internally so callers pass the human-readable tag.
-
-## Rate limits and polling budget
-
-Supercell does not publish an exact numeric rate limit for this API tier, but it is finite and shared across all keys tied to an account. The polling design in `04-activity-tracking-and-polling.md` is built around a conservative budget:
-
-- One `members` call per poll cycle (cheap — one clan-wide call).
-- Full `players/{tag}` detail calls are **not** fetched for all members every cycle — only on a slower cadence (see next doc) or on demand when a user opens a member's detail popup and the cached copy is stale.
-- `currentwar` is polled more frequently only while a war is actually active, not 24/7.
-
-This keeps steady-state usage low and leaves headroom for manual "refresh" actions triggered by users.
-
-## Player tags as the stable identity key
-
-The CoC API identifies people by **player tag**, not name (names can be changed in-game, tags cannot). Every table in the database keyed to a person should use player tag as the stable identifier/foreign key. Display names are cached but never used as a join key.
+`playerTag` is the permanent identity key for members, snapshots, progression, war participation, and roster slots. Display names are mutable and may be tracked as observations, but never used as a primary key or join condition.

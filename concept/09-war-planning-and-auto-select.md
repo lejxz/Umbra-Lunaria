@@ -1,41 +1,75 @@
-# 09 — Next Clan War Planning
+# 09 — Final War Planning & Auto-Select Concept
 
-## Drag-and-drop roster builder
+## Purpose
 
-- Two-panel layout: available roster (left) → war lineup slots (right), ordered by war-map position. Members with `warPreference = out` are shown but visually deprioritized (bottom of the list, muted), not hidden — leadership can still add them if needed.
-- `@dnd-kit` for interaction, with a tap-to-add fallback for touch (`10-mobile-support.md`).
-- Member detail popup (same component as `06-members.md`) reachable from within the planner.
-- War size selection: standard game sizes; warn before truncating a partially filled roster on a size change.
-- Save as draft (`war_rosters` table, `03-data-model-and-database.md`), finalize when ready.
+War Planning is an administrator-controlled workspace for assembling the next roster. It makes the underlying data visible and provides a recommendation, but leadership always decides the final lineup.
 
-## Auto-select scoring
+## Manual roster builder
 
-Ranks members using only data observed since the tool started polling — no retroactive history. Members with `warPreference = out` (`members.war_preference`, `03-data-model-and-database.md`) are excluded from the suggested roster automatically, not just deprioritized — the auto-select is meant to be a fast fill from people who've opted in.
+### Layout
 
-| Factor | Source | Normalized to |
-|---|---|---|
-| Recent activity | `member_snapshots.activity_flag`, trailing 14 days | % of trailing-14-day windows active |
-| War attack participation rate | `war_participants` since tracked | attacks used ÷ attacks allowed |
-| Average stars per attack | `war_attacks` since tracked | stars ÷ 3, capped at 1.0 |
-| 3-star rate | `war_attacks` since tracked | 3-star attacks ÷ total attacks |
-| Rushed % | `06-members.md` methodology | `1 − rushed_%/100` (less rushed scores higher) |
+1. **Available roster** — all retained members with Town Hall, war preference, recent activity, war summary, and limited-data state.
+2. **Selected lineup** — ordered map-position slots for the chosen war size.
+3. **Context panel** — selected member detail, available filters, and current preparation-day opponent data when a war is available.
 
-Town Hall level is used for opponent matching in the roster builder, not folded into the composite score — mixing "how strong is this account" with "what TH bracket do they belong in" the same way would blur two different questions.
+### Interactions
 
+1. Drag members between panels on desktop.
+2. Offer tap-to-add and tap-to-remove controls on touch devices.
+3. Allow map-position reordering.
+4. Support standard sizes: 10, 15, 20, 25, 30, 40, and 50.
+5. Warn before truncating a selected lineup when war size decreases.
+6. Open the same reusable member detail sheet without losing the draft state.
+7. Save a named draft and finalize it through an administrator-protected action.
+
+Members marked `warPreference = out` remain visible for manual leader choice but are visually deprioritized.
+
+## Auto-select recommendation
+
+Auto-select proposes an eligible roster; it never finalizes one.
+
+### Eligibility
+
+1. Retained current members are eligible by default.
+2. Members marked `warPreference = out` are excluded from the automatic suggestion but remain manually selectable.
+3. Members with incomplete history remain eligible but carry a limited-data label.
+
+### Composite score
+
+The default ranking uses only data observed since tracking began:
+
+| Factor | Default weight | Source |
+|---|---:|---|
+| Recent activity | 30% | Trailing 14-day activity evidence. |
+| War attack participation | 25% | Attacks used ÷ attacks allowed. |
+| Average stars per attack | 20% | Tracked war attacks. |
+| Three-star rate | 15% | Tracked war attacks. |
+| Account readiness | 10% | `1 − rushed_percent / 100`. |
+
+```text
+score = 0.30 × activity
+      + 0.25 × participation
+      + 0.20 × average_stars
+      + 0.15 × three_star_rate
+      + 0.10 × account_readiness
 ```
-score = 0.30 × activity + 0.25 × participation_rate
-      + 0.20 × avg_stars_normalized + 0.15 × three_star_rate
-      + 0.10 × (1 − rushed_% / 100)
-```
 
-Weights are a starting default, not fixed — they're exposed as runtime settings (`11-config-specification.md`) since which factor matters most is a judgment call for the clan, not something to hardcode permanently.
+1. Component values normalize to `0..1` before weighting.
+2. If a required component is unavailable, the suggestion shows incomplete data rather than silently assigning a false zero.
+3. Town Hall level is used for roster balance and matchup discussion, not folded into the quality score.
+4. Every suggested member exposes the factor breakdown.
 
-Composite score is the default sort in the available-roster panel, paired with the per-factor breakdown per member so leadership can see why someone ranked where they did. It's a sort/pre-fill suggestion, not an autonomous pick — final roster is still built manually.
+## Confidence and explanation
 
-## Confidence flagging
+1. Fewer than `minWarsForConfidentRanking` observed wars produces a `Limited data` label.
+2. The UI states the tracking window used for each recommendation.
+3. A leader can override any recommendation without warning or penalty.
+4. A finalized roster preserves the score snapshot and configuration version used at finalization for later review.
 
-Members with fewer than `minWarsForConfidentRanking` (default 3, `11-config-specification.md`) observed wars are marked "limited data" wherever their score appears.
+## Relationship to Member Activity Score
 
-## Phasing
+The dashboard’s Member Activity Score measures general observed clan support. Auto-select is a distinct war-readiness recommendation and uses the war-specific formula above. The two scores must never be presented as interchangeable.
 
-Depends entirely on accumulated data — realistically a Phase 2+ feature (`12-roadmap-and-modularity.md`).
+## Write protection
+
+Viewing planned rosters may be public if leadership chooses, but creating, editing, finalizing, or deleting a draft requires an administrator session.
