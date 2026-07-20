@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
 import { WarRecordCard } from "./war-record-card";
+import { CurrentWarCard } from "./current-war-card";
 import { CapitalSummaryCard } from "./capital-summary-card";
 import { DonationAnalytics } from "./donation-analytics";
 import { ActivityTimelinePanel } from "./activity-timeline";
@@ -108,21 +109,18 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         </p>
       </header>
 
-      {/* Identity card — full width */}
+      {/* Row 1: Identity card — full width */}
       <ClanIdentityCard clan={data.clan} />
 
-      {/* Stats row — war record + capital summary */}
+      {/* Row 2: War record | Current war | Capital overview — 3 even columns */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-1">
-          <WarRecordCard record={data.warRecord} />
-        </div>
-        <div className="lg:col-span-2">
-          <CapitalSummaryCard capital={data.capital} />
-        </div>
+        <WarRecordCard record={data.warRecord} />
+        <CurrentWarCard warSummary={data.warSummary} />
+        <CapitalSummaryCard capital={data.capital} />
       </div>
 
-      {/* Primary grid — donation analytics (large) + activity score leaderboard */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(285px,0.9fr)]">
+      {/* Row 3: Clan donations — full width (primary analytical panel) */}
+      <div className="mt-5">
         <DonationAnalytics
           dataByWindow={{
             "24h": {
@@ -142,14 +140,10 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             },
           }}
         />
-        <ActivityScoreLeaderboard
-          leaderboard={data.activityScore}
-          onMemberClick={setSelectedMember}
-        />
       </div>
 
-      {/* Secondary grid — activity timeline + needs attention */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(285px,0.9fr)]">
+      {/* Row 4: Activity timeline — full width */}
+      <div className="mt-5">
         <ActivityTimelinePanel
           dataByWindow={{
             "24h": data.activityTimeline,
@@ -157,14 +151,26 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             "30d": data.activityTimeline30d,
           }}
         />
+      </div>
+
+      {/* Row 5: Member Activity Score | Attention queue | Clan log — 3 columns */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <ActivityScoreLeaderboard
+          leaderboard={data.activityScore}
+          onMemberClick={setSelectedMember}
+        />
         <NeedsAttentionPanel
           attention={data.needsAttention}
           onMemberClick={setSelectedMember}
         />
+        <ClanLogPanel
+          log={data.clanLog}
+          onMemberClick={setSelectedMember}
+        />
       </div>
 
-      {/* Secondary grid — capital overview already above, clan log */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(285px,0.9fr)]">
+      {/* Row 6: Data freshness | Navigation summary — 2 columns */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <div className="glass rounded-2xl p-5 sm:p-6">
           <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
             Tracking status
@@ -191,14 +197,6 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             />
           </div>
         </div>
-        <ClanLogPanel
-          log={data.clanLog}
-          onMemberClick={setSelectedMember}
-        />
-      </div>
-
-      {/* Navigation summaries */}
-      <div className="mt-5">
         <NavSummaries
           warSummary={data.warSummary}
           capitalNav={data.capitalNav}

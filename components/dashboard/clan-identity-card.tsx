@@ -8,6 +8,10 @@ import Link from "next/link";
  * Clan identity card — the first, most prominent card on the dashboard.
  * Shows badge, name/tag, description, location, type, labels, leagues,
  * requirements, and freshness. See concept/05-dashboard.md §1.
+ *
+ * The badge is rendered without a circular container or shadow — the API
+ * badge image already has its own shape. The description follows the CoC
+ * in-game clan view style with limited characters per line.
  */
 export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
   return (
@@ -15,24 +19,27 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
       className="glass rounded-2xl p-5 sm:p-6"
       aria-labelledby="clan-identity-title"
     >
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:gap-6">
-        {/* Badge */}
-        {clan.badgeUrls?.large || clan.badgeUrls?.medium ? (
-          <Image
-            src={clan.badgeUrls.large ?? clan.badgeUrls.medium!}
-            alt={`${clan.name} badge`}
-            width={72}
-            height={72}
-            className="h-[72px] w-[72px] shrink-0 rounded-full object-cover shadow-glow"
-            unoptimized
-          />
-        ) : (
-          <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-full border border-umbra-line bg-umbra-elevated/50">
-            <span className="font-display text-2xl text-umbra-purple">
-              {clan.name.charAt(0)}
-            </span>
-          </div>
-        )}
+      <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:gap-6">
+        {/* Badge — no circular container, no forced shadow. The API badge
+            image already has its own shape and styling. */}
+        <div className="flex shrink-0 justify-center lg:justify-start">
+          {clan.badgeUrls?.large || clan.badgeUrls?.medium ? (
+            <Image
+              src={clan.badgeUrls.large ?? clan.badgeUrls.medium!}
+              alt={`${clan.name} badge`}
+              width={80}
+              height={80}
+              className="h-20 w-20 object-contain"
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-20 w-20 items-center justify-center rounded-xl border border-umbra-line bg-umbra-elevated/50">
+              <span className="font-display text-3xl text-umbra-purple">
+                {clan.name.charAt(0)}
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Identity copy */}
         <div className="min-w-0 flex-1">
@@ -45,20 +52,38 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
           >
             {clan.name}
           </h2>
+
+          {/* Description — CoC in-game style: limited chars per line, small text */}
           {clan.description && (
-            <p className="mt-1 line-clamp-2 text-sm text-umbra-muted">
+            <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-umbra-muted">
               {clan.description}
             </p>
           )}
-          <p className="mt-1 text-sm text-umbra-muted">
-            {[
-              clan.location?.name,
-              clan.type && `${clan.type} clan`,
-              clan.isFamilyFriendly === false && "Not family-friendly",
-            ]
-              .filter(Boolean)
-              .join(" · ")}
-          </p>
+
+          {/* Meta line — location, type, family-friendly as inline tags */}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+            {clan.location?.name && (
+              <span className="inline-flex items-center gap-1 text-umbra-muted">
+                <span className="text-umbra-purple">📍</span>
+                {clan.location.name}
+              </span>
+            )}
+            {clan.type && (
+              <span className="text-umbra-muted">
+                · {clan.type === "open" ? "Open" : clan.type === "inviteOnly" ? "Invite only" : clan.type === "closed" ? "Closed" : clan.type}
+              </span>
+            )}
+            {clan.isFamilyFriendly !== null && (
+              <span className="text-umbra-muted">
+                · {clan.isFamilyFriendly ? "Family-friendly" : "Not family-friendly"}
+              </span>
+            )}
+            {clan.chatLanguage?.name && (
+              <span className="text-umbra-muted">
+                · {clan.chatLanguage.name}
+              </span>
+            )}
+          </div>
 
           {/* Labels with icons */}
           {clan.labels && clan.labels.length > 0 && (
@@ -85,29 +110,42 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
           )}
         </div>
 
-        {/* Facts grid */}
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:text-right">
-          <Fact label="Clan tag" value={clan.tag} />
-          <Fact
-            label="War league"
-            value={clan.warLeague?.name ?? <UnavailableValue />}
-          />
-          <Fact
-            label="Capital league"
-            value={clan.capitalLeague?.name ?? <UnavailableValue />}
-          />
-          <Fact
-            label="War frequency"
-            value={clan.warFrequency ?? <UnavailableValue />}
-          />
-          <Fact
-            label="Members"
-            value={clan.memberCount?.toString() ?? <UnavailableValue />}
-          />
-          <Fact
-            label="Req. trophies"
-            value={clan.requiredTrophies?.toString() ?? <UnavailableValue />}
-          />
+        {/* Facts — in a contained sub-card */}
+        <div className="shrink-0 rounded-xl border border-umbra-line bg-umbra-ink/40 p-3">
+          <p className="mb-2 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+            Details
+          </p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+            <Fact label="Clan tag" value={clan.tag} mono />
+            <Fact
+              label="Level"
+              value={clan.clanLevel?.toString() ?? <UnavailableValue />}
+            />
+            <Fact
+              label="Members"
+              value={clan.memberCount?.toString() ?? <UnavailableValue />}
+            />
+            <Fact
+              label="War league"
+              value={clan.warLeague?.name ?? <UnavailableValue />}
+            />
+            <Fact
+              label="Capital league"
+              value={clan.capitalLeague?.name ?? <UnavailableValue />}
+            />
+            <Fact
+              label="War freq."
+              value={clan.warFrequency ?? <UnavailableValue />}
+            />
+            <Fact
+              label="Req. trophies"
+              value={clan.requiredTrophies?.toString() ?? <UnavailableValue />}
+            />
+            <Fact
+              label="Req. TH"
+              value={clan.requiredTownhallLevel?.toString() ?? <UnavailableValue />}
+            />
+          </div>
         </div>
       </div>
 
@@ -136,16 +174,20 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 function Fact({
   label,
   value,
+  mono,
 }: {
   label: string;
   value: React.ReactNode;
+  mono?: boolean;
 }) {
   return (
     <div>
       <span className="block font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="mt-1 block text-sm font-semibold text-white">
+      <span
+        className={`mt-0.5 block text-xs font-semibold text-white ${mono ? "font-mono" : ""}`}
+      >
         {value}
       </span>
     </div>

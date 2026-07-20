@@ -54,6 +54,7 @@ export function DonationChart({
               color: "#EEE5FF",
             }}
             labelStyle={{ color: "#9287AD" }}
+            itemStyle={{ color: "#EEE5FF" }}
           />
           <Bar dataKey="given" fill="#B678FF" radius={[4, 4, 0, 0]} name="Given" />
           <Bar

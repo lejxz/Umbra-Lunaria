@@ -62,7 +62,7 @@ export function generateBuckets(
   const buckets: Array<{ label: string; timestamp: Date }> = [];
 
   if (kind === "24h") {
-    // Hourly buckets
+    // Hourly buckets — labels like "14:00"
     for (let i = 0; i < 24; i++) {
       const ts = new Date(from);
       ts.setUTCHours(from.getUTCHours() + i);
@@ -71,14 +71,24 @@ export function generateBuckets(
         timestamp: ts,
       });
     }
-  } else {
-    // Daily buckets
-    const days = kind === "7d" ? 7 : 30;
-    for (let i = 0; i < days; i++) {
+  } else if (kind === "7d") {
+    // 7-day buckets — labels like "Mon", "Tue" (weekday is readable for 7 bars)
+    for (let i = 0; i < 7; i++) {
       const ts = new Date(from);
       ts.setUTCDate(from.getUTCDate() + i);
       buckets.push({
         label: formatInTimezone(ts, timezone, "EEE"),
+        timestamp: ts,
+      });
+    }
+  } else {
+    // 30-day buckets — labels like "Jul 1", "Jul 2" (dates, not weekdays,
+    // so the axis doesn't look like it's only showing 7 days)
+    for (let i = 0; i < 30; i++) {
+      const ts = new Date(from);
+      ts.setUTCDate(from.getUTCDate() + i);
+      buckets.push({
+        label: formatInTimezone(ts, timezone, "MMM d"),
         timestamp: ts,
       });
     }

@@ -108,11 +108,16 @@ describe("generateBuckets", () => {
     const buckets = generateBuckets(win, MANILA_TZ);
 
     expect(buckets).toHaveLength(30);
-    // Each label is still a 3-letter weekday abbreviation.
-    const validWeekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    // 30d labels are dates like "Jan 1", "Jan 2" — not weekday names, so
+    // the chart axis doesn't look like it's only showing 7 days.
     for (const b of buckets) {
-      expect(validWeekdays).toContain(b.label);
+      // Should match "MMM d" format: 3-letter month + space + day number
+      expect(b.label).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/);
     }
+    // First bucket should be around Jan 16 (16 days before Jan 15 is Dec 30,
+    // but 30 days before Jan 15 is Dec 16 — the label should contain a
+    // valid month abbreviation).
+    expect(buckets[0]?.label).toMatch(/^[A-Z][a-z]{2}/);
   });
 
   it("24h bucket timestamps are 1 hour apart and span the window", () => {

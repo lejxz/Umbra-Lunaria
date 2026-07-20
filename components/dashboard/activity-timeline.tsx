@@ -136,6 +136,7 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
               color: "#EEE5FF",
             }}
             labelStyle={{ color: "#9287AD" }}
+            itemStyle={{ color: "#EEE5FF" }}
             formatter={(value) => [`${value} active`, "Members"]}
           />
           <Bar dataKey="active" radius={[4, 4, 0, 0]} name="Active">

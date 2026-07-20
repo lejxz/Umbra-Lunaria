@@ -1,7 +1,56 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-:root { --font-display: "Cinzel", Georgia, serif; --font-sans: "Inter", system-ui, sans-serif; --font-mono: "JetBrains Mono", ui-monospace, monospace; }
-* { box-sizing: border-box; }
-body { background: radial-gradient(circle at 76% 0%, #211747 0, transparent 35%), #090811; color: #EEE5FF; font-family: var(--font-sans); }
-@layer components { .glass { @apply border border-umbra-line bg-umbra-surface/80 shadow-2xl backdrop-blur-xl; } .focus-ring { @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umbra-purple focus-visible:ring-offset-2 focus-visible:ring-offset-umbra-ink; } }
+
+:root {
+  --font-display: "Cinzel", Georgia, serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: radial-gradient(circle at 76% 0%, #211747 0, transparent 35%),
+    #090811;
+  color: #eee5ff;
+  font-family: var(--font-sans);
+}
+
+@layer components {
+  .glass {
+    @apply border border-umbra-line bg-umbra-surface/80 shadow-2xl backdrop-blur-xl;
+  }
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umbra-purple focus-visible:ring-offset-2 focus-visible:ring-offset-umbra-ink;
+  }
+}
+
+/* Custom scrollbar — thin, dark, purple-tinted to match the observatory theme.
+   Applied to all scrollable elements (cards with max-h-* overflow-y-auto). */
+@layer utilities {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(182, 120, 255, 0.25) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: rgba(182, 120, 255, 0.25);
+    border-radius: 3px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(182, 120, 255, 0.4);
+  }
+}
