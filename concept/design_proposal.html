@@ -1,224 +1,384 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umbra Lunaria - Design Proposal</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        umbra: {
-                            base: '#0B0914',      // Deepest background
-                            surface: '#151124',   // Card background
-                            border: '#32254A',    // Borders
-                            purple: '#A964FF',    // Vivid moon glow (Primary)
-                            lilac: '#E2D4F6',     // Logo text color (Headings)
-                            muted: '#8C81A8',     // Secondary text
-                            dark: '#08060E'       // Sidebar background
-                        }
-                    },
-                    fontFamily: {
-                        serif: ['Cinzel', 'serif'],
-                        sans: ['Inter', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { 
-            background: radial-gradient(circle at top right, #151124 0%, #0B0914 100%);
-            color: #E2D4F6; 
-        }
-        
-        .glass-card {
-            background: rgba(21, 17, 36, 0.7);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(169, 100, 255, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(226, 212, 246, 0.05);
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umbra Lunaria — Complete Design Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-        .glass-sidebar {
-            background: rgba(8, 6, 14, 0.85);
-            border-right: 1px solid rgba(169, 100, 255, 0.1);
-        }
+  :root {
+    --umbra-purple: #A964FF;
+    --umbra-purple-soft: rgba(169, 100, 255, 0.15);
+    --umbra-indigo: #7645D9;
+    --umbra-lilac: #E2D4F6;
+    
+    --bg-base: #0B0914;
+    --bg-surface: #151124;
+    --bg-surface-2: #1E1833;
+    --bg-glass: rgba(21, 17, 36, 0.7);
+    
+    --border-light: rgba(169, 100, 255, 0.15);
+    --border-strong: rgba(169, 100, 255, 0.3);
+    
+    --text-primary: #E2D4F6;
+    --text-secondary: #8C81A8;
+    --text-muted: #5B5277;
+    
+    --success: #10B981; --success-soft: rgba(16,185,129,0.15);
+    --warning: #F59E0B; --warning-soft: rgba(245,158,11,0.15);
+    --danger:  #EF4444; --danger-soft:  rgba(239,68,68,0.15);
+    --info:    #3B82F6; --info-soft:    rgba(59,130,246,0.15);
 
-        .glow-text {
-            text-shadow: 0 0 15px rgba(169, 100, 255, 0.4);
-        }
+    --gradient-brand: linear-gradient(135deg, #A964FF 0%, #7645D9 100%);
+    --gradient-mesh: radial-gradient(at 0% 0%, rgba(169, 100, 255, 0.2) 0px, transparent 50%),
+                     radial-gradient(at 100% 100%, rgba(118, 69, 217, 0.2) 0px, transparent 50%);
 
-        .glow-icon {
-            filter: drop-shadow(0 0 8px rgba(169, 100, 255, 0.6));
-        }
+    --font-display: 'Cinzel', serif;
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
 
-        .stat-value {
-            background: linear-gradient(180deg, #FFFFFF 0%, #E2D4F6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-    </style>
+    --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-5:20px; --s-6:24px;
+    --s-8:32px; --s-10:40px; --s-12:48px; --s-16:64px; --s-24:96px;
+
+    --r-sm:6px; --r-md:12px; --r-lg:16px; --r-xl:24px;
+
+    --shadow-glow: 0 0 15px rgba(169, 100, 255, 0.4);
+    --shadow-card: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(226, 212, 246, 0.05);
+
+    --dur: 0.25s; --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --max-w: 1200px; --nav-h: 64px;
+  }
+
+  html { scroll-behavior: smooth; background: var(--bg-base); }
+  body {
+    font-family: var(--font-sans); color: var(--text-primary);
+    line-height: 1.6; font-size: 15px;
+    background: radial-gradient(circle at top right, var(--bg-surface) 0%, var(--bg-base) 100%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--umbra-purple); color: white; }
+
+  /* NAV */
+  .nav { position: sticky; top: 0; z-index: 100; height: var(--nav-h);
+    backdrop-filter: blur(16px); background: rgba(11, 9, 20, 0.7); border-bottom: 1px solid var(--border-light); }
+  .nav-inner { max-width: var(--max-w); margin: 0 auto; height: 100%; padding: 0 var(--s-6);
+    display: flex; align-items: center; gap: var(--s-6); }
+  .nav-brand { display: flex; align-items: center; gap: var(--s-3); text-decoration: none; }
+  .nav-brand-mark { width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-brand);
+    display: grid; place-items: center; color: white; font-family: var(--font-display); font-weight: 700; font-size: 18px;
+    box-shadow: var(--shadow-glow); position: relative; overflow: hidden; }
+  .nav-brand-mark::after { content: ""; position: absolute; inset: 2px; background: var(--bg-base); border-radius: 50%; transform: translate(2px, -2px); }
+  .nav-brand-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.05em; color: var(--text-primary); text-shadow: var(--shadow-glow); }
+  .nav-links { display: flex; gap: var(--s-2); margin-left: auto; align-items: center; }
+  .nav-link { font-size: 13px; font-weight: 500; color: var(--text-secondary); padding: var(--s-2) var(--s-3);
+    border-radius: var(--r-sm); text-decoration: none; transition: all var(--dur) var(--ease-out); }
+  .nav-link:hover { color: var(--text-primary); background: var(--bg-surface-2); text-shadow: var(--shadow-glow); }
+
+  /* LAYOUT */
+  .container { max-width: var(--max-w); margin: 0 auto; padding: 0 var(--s-6); }
+  .section { padding: var(--s-24) 0; border-top: 1px solid var(--border-light); }
+  .section:first-of-type { border-top: none; }
+  
+  .eyebrow { display: inline-flex; align-items: center; font-family: var(--font-mono); font-size: 12px; font-weight: 500; color: var(--umbra-purple); letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: var(--umbra-purple-soft); border: 1px solid var(--border-strong); margin-bottom: var(--s-4); }
+  .section-title { font-family: var(--font-display); font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: 0.02em; line-height: 1.1; color: var(--umbra-lilac); margin-bottom: var(--s-3); text-shadow: var(--shadow-glow); }
+  .section-lead { font-size: 16px; color: var(--text-secondary); max-width: 640px; line-height: 1.6; margin-bottom: var(--s-10); }
+
+  /* HERO */
+  .hero { position: relative; overflow: hidden; padding: var(--s-24) 0 var(--s-20); border-bottom: 1px solid var(--border-light); text-align: center; }
+  .hero-mesh { position: absolute; inset: 0; background: var(--gradient-mesh); filter: blur(60px); opacity: 0.6; pointer-events: none; }
+  .hero-content { position: relative; max-width: 800px; margin: 0 auto; padding: 0 var(--s-6); display: flex; flex-direction: column; align-items: center; }
+  .hero-mark { width: 80px; height: 80px; border-radius: 50%; background: var(--gradient-brand);
+    display: grid; place-items: center; color: white; font-family: var(--font-display); font-weight: 700; font-size: 44px;
+    box-shadow: var(--shadow-glow); margin-bottom: var(--s-6); position: relative; overflow: hidden; }
+  .hero-mark::after { content: ""; position: absolute; inset: 4px; background: var(--bg-base); border-radius: 50%; transform: translate(4px, -4px); }
+  
+  .hero h1 { font-family: var(--font-display); font-size: clamp(40px, 7vw, 72px); font-weight: 700;
+    letter-spacing: 0.05em; line-height: 1.1; color: var(--umbra-lilac); margin-bottom: var(--s-6); text-shadow: var(--shadow-glow); text-transform: uppercase; }
+  .hero h1 .grad { background: var(--gradient-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { font-size: 18px; color: var(--text-secondary); max-width: 580px; line-height: 1.55; margin-bottom: var(--s-8); }
+  
+  .hero-meta { display: flex; gap: var(--s-8); margin-top: var(--s-12); padding-top: var(--s-8); border-top: 1px solid var(--border-light); flex-wrap: wrap; justify-content: center; width: 100%; max-width: 600px; }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 4px; }
+  .hero-meta-num { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--umbra-purple); text-shadow: var(--shadow-glow); }
+  .hero-meta-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+
+  /* BENTO / CARDS */
+  .bento { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--s-4); }
+  .card { background: var(--bg-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-light); border-radius: var(--r-xl); padding: var(--s-6); box-shadow: var(--shadow-card); transition: all var(--dur) var(--ease-out); }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(226, 212, 246, 0.1); }
+  .card-eyebrow { font-family: var(--font-mono); font-size: 11px; font-weight: 500; color: var(--text-secondary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: var(--s-3); }
+  
+  .col-4{grid-column:span 4} .col-6{grid-column:span 6} .col-8{grid-column:span 8} .col-12{grid-column:span 12}
+  @media (max-width:900px){ .col-4,.col-6,.col-8{grid-column:span 12} }
+
+  /* COLOR TOKENS */
+  .swatch { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border-light); background: var(--bg-surface); }
+  .swatch-color { height: 100px; }
+  .swatch-info { padding: var(--s-4); }
+  .swatch-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .swatch-hex { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+  
+  .token-row { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--border-light); }
+  .token-row:last-child { border-bottom: none; }
+  .token-swatch { width: 48px; height: 32px; border-radius: var(--r-sm); border: 1px solid var(--border-strong); flex-shrink: 0; }
+  .token-info { flex: 1; }
+  .token-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .token-role { font-size: 11px; color: var(--text-secondary); }
+  .token-hex { font-family: var(--font-mono); font-size: 12px; color: var(--umbra-purple); background: var(--umbra-purple-soft); padding: 2px 8px; border-radius: var(--r-sm); }
+
+  /* TYPOGRAPHY */
+  .type-row { display: flex; align-items: baseline; gap: var(--s-5); padding: var(--s-4) 0; border-bottom: 1px solid var(--border-light); }
+  .type-row:last-child { border-bottom: none; }
+  .type-meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary); width: 140px; flex-shrink: 0; }
+  .t-h1 { font-family: var(--font-display); font-size: 36px; font-weight: 700; letter-spacing: 0.02em; color: var(--umbra-lilac); text-shadow: var(--shadow-glow); }
+  .t-h2 { font-family: var(--font-display); font-size: 24px; font-weight: 700; letter-spacing: 0.02em; color: var(--umbra-lilac); }
+  .t-body { font-family: var(--font-sans); font-size: 15px; color: var(--text-primary); }
+  .t-mono { font-family: var(--font-mono); font-size: 13px; color: var(--umbra-purple); }
+
+  /* BUTTONS & BADGES */
+  .btn { font-family: var(--font-sans); font-size: 14px; font-weight: 600; padding: 10px 18px; border-radius: var(--r-md); border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: var(--s-2); transition: all var(--dur) var(--ease-out); }
+  .btn-primary { background: var(--gradient-brand); color: white; box-shadow: var(--shadow-glow); }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 0 25px rgba(169, 100, 255, 0.6); }
+  .btn-secondary { background: var(--bg-surface-2); color: var(--text-primary); border-color: var(--border-strong); }
+  .btn-secondary:hover { border-color: var(--umbra-purple); color: white; }
+  
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-brand { background: var(--umbra-purple-soft); color: var(--umbra-purple); border: 1px solid var(--border-strong); }
+  .badge-success { background: var(--success-soft); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+  .badge-warning { background: var(--warning-soft); color: var(--warning); border: 1px solid rgba(245,158,11,0.3); }
+
+  /* WEB APP MOCKUP */
+  .web-app { display: grid; grid-template-columns: 240px 1fr; min-height: 600px; border: 1px solid var(--border-strong); border-radius: var(--r-xl); overflow: hidden; box-shadow: var(--shadow-card); background: var(--bg-base); position: relative; }
+  .web-app::before { content: ""; position: absolute; top: 0; right: 25%; width: 400px; height: 400px; background: var(--umbra-purple-soft); filter: blur(100px); border-radius: 50%; pointer-events: none; }
+  
+  .web-side { background: rgba(8, 6, 14, 0.85); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; z-index: 10; backdrop-filter: blur(20px); }
+  .web-side-head { padding: var(--s-6); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: var(--s-3); }
+  .web-side-mark { width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-brand); display: grid; place-items: center; position: relative; overflow: hidden; box-shadow: var(--shadow-glow); }
+  .web-side-mark::after { content: ""; position: absolute; inset: 2px; background: var(--bg-base); border-radius: 50%; transform: translate(2px, -2px); }
+  .web-side-title { font-family: var(--font-display); font-weight: 700; color: var(--umbra-lilac); letter-spacing: 0.05em; text-shadow: var(--shadow-glow); }
+  
+  .web-nav { padding: var(--s-4); flex: 1; display: flex; flex-direction: column; gap: var(--s-2); }
+  .web-nav-item { padding: 12px 16px; border-radius: var(--r-md); font-size: 14px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: var(--s-3); transition: all 0.2s; }
+  .web-nav-item.active { background: var(--umbra-purple-soft); color: var(--umbra-purple); border: 1px solid var(--border-light); }
+  
+  .web-main { padding: var(--s-10); z-index: 5; }
+  .web-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--s-8); }
+  .web-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--umbra-lilac); letter-spacing: 0.02em; text-shadow: var(--shadow-glow); }
+  .web-subtitle { font-size: 14px; color: var(--text-secondary); margin-top: 4px; }
+  .web-tag { display: inline-flex; align-items: center; gap: var(--s-2); padding: 6px 16px; border-radius: 999px; background: var(--bg-surface-2); border: 1px solid var(--border-light); font-family: var(--font-mono); font-size: 12px; color: var(--umbra-lilac); }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-5); margin-bottom: var(--s-8); }
+  .stat-card { background: var(--bg-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: var(--s-5); box-shadow: var(--shadow-card); }
+  .stat-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--s-2); }
+  .stat-val { font-size: 32px; font-weight: 700; color: white; margin-bottom: 4px; }
+  .stat-val.grad { background: linear-gradient(180deg, #FFFFFF 0%, #E2D4F6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .stat-meta { font-size: 12px; color: var(--success); display: flex; align-items: center; gap: 4px; }
+
+  .panel-grid { display: grid; grid-template-columns: 2fr 1fr; gap: var(--s-5); }
+  .panel { background: var(--bg-glass); backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: var(--r-lg); padding: var(--s-6); min-height: 300px; box-shadow: var(--shadow-card); }
+  .panel-head { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--umbra-lilac); margin-bottom: var(--s-4); }
+
+  @media (max-width: 900px) { 
+    .web-app { grid-template-columns: 1fr; } 
+    .web-side { display: none; }
+    .stat-grid, .panel-grid { grid-template-columns: 1fr; }
+  }
+
+  /* UTILS */
+  .stack > * + * { margin-top: var(--s-4); }
+  .row { display: flex; gap: var(--s-3); align-items: center; flex-wrap: wrap; }
+</style>
 </head>
-<body class="font-sans antialiased min-h-screen flex selection:bg-umbra-purple selection:text-white">
+<body>
 
-    <!-- Sidebar -->
-    <aside class="w-64 glass-sidebar flex flex-col hidden md:flex h-screen sticky top-0">
-        <div class="p-6 border-b border-umbra-border/50 flex items-center gap-3">
-            <!-- Mock Logo Icon -->
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-umbra-purple to-[#ffc2f5] glow-icon relative overflow-hidden">
-                <div class="absolute inset-1 bg-umbra-dark rounded-full transform translate-x-1 -translate-y-1"></div>
-            </div>
-            <h1 class="font-serif text-xl tracking-wider text-umbra-lilac glow-text font-bold">UMBRA</h1>
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="nav-brand">
+      <div class="nav-brand-mark"></div>
+      <span class="nav-brand-name">Umbra Lunaria</span>
+    </a>
+    <div class="nav-links">
+      <a href="#brand" class="nav-link">Brand & Colors</a>
+      <a href="#typography" class="nav-link">Typography</a>
+      <a href="#components" class="nav-link">Components</a>
+      <a href="#mockup" class="nav-link">Web Mockup</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <div class="hero-mesh"></div>
+  <div class="hero-content">
+    <div class="hero-mark"></div>
+    <h1>Umbra <br><span class="grad">Lunaria</span></h1>
+    <p class="hero-sub">Data-driven clan management. A dark, glassmorphic aesthetic inspired by the mystic moon, designed specifically for Clash of Clans tracking.</p>
+    
+    <div class="hero-meta">
+      <div class="hero-meta-item"><span class="hero-meta-num">Dark</span><span class="hero-meta-label">Theme Only</span></div>
+      <div class="hero-meta-item"><span class="hero-meta-num">Glass</span><span class="hero-meta-label">Morphism UI</span></div>
+      <div class="hero-meta-item"><span class="hero-meta-num">Neon</span><span class="hero-meta-label">Data Stack</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- BRAND -->
+<section class="section" id="brand">
+  <div class="container">
+    <span class="eyebrow">01 — Colors</span>
+    <h2 class="section-title">Mystic Night.</h2>
+    <p class="section-lead">The color palette is built entirely on deep midnight blues and vibrant glowing purples, extracted directly from the reference logo art.</p>
+
+    <div class="bento" style="margin-bottom: var(--s-6);">
+      <div class="card col-12" style="padding: var(--s-8);">
+        <div class="card-eyebrow">Signature Glow · Purple → Deep Indigo</div>
+        <div style="height: 120px; border-radius: var(--r-md); background: var(--gradient-brand); box-shadow: var(--shadow-glow); position: relative; margin-top: var(--s-4);">
+          <div style="position: absolute; bottom: 16px; left: 20px; display: flex; gap: 24px; font-family: var(--font-mono); font-size: 12px; color: white; font-weight: 500;"><span>#A964FF</span><span>#7645D9</span></div>
         </div>
-        <nav class="flex-1 p-4 space-y-2">
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-umbra-purple/10 text-umbra-purple border border-umbra-purple/20 transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-                <span class="font-medium">Dashboard</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-umbra-muted hover:text-umbra-lilac hover:bg-umbra-surface transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                <span class="font-medium">Members</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-umbra-muted hover:text-umbra-lilac hover:bg-umbra-surface transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path></svg>
-                <span class="font-medium">Clan War</span>
-            </a>
-            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-umbra-muted hover:text-umbra-lilac hover:bg-umbra-surface transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                <span class="font-medium">Capital</span>
-            </a>
-        </nav>
-        <div class="p-6">
-            <div class="glass-card rounded-xl p-4 text-sm">
-                <p class="text-umbra-muted mb-1">Status</p>
-                <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 glow-icon"></span>
-                    <span class="text-emerald-400 font-medium tracking-wide text-xs uppercase">Live Sync Active</span>
-                </div>
-            </div>
+      </div>
+      <div class="swatch col-4"><div class="swatch-color" style="background: #A964FF;"></div><div class="swatch-info"><div class="swatch-name">Umbra Purple</div><div class="swatch-hex">#A964FF · Primary accent, glows</div></div></div>
+      <div class="swatch col-4"><div class="swatch-color" style="background: #7645D9;"></div><div class="swatch-info"><div class="swatch-name">Umbra Indigo</div><div class="swatch-hex">#7645D9 · Secondary gradients</div></div></div>
+      <div class="swatch col-4"><div class="swatch-color" style="background: #E2D4F6;"></div><div class="swatch-info"><div class="swatch-name">Umbra Lilac</div><div class="swatch-hex">#E2D4F6 · Primary headings</div></div></div>
+    </div>
+
+    <div class="bento">
+      <div class="card col-6" style="padding: 0; overflow: hidden;">
+        <div style="padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border-light);"><div class="card-eyebrow" style="margin:0;">Midnight Canvas</div></div>
+        <div class="token-row"><div class="token-swatch" style="background: #0B0914;"></div><div class="token-info"><div class="token-name">Base Background</div><div class="token-role">Deepest space</div></div><div class="token-hex">#0B0914</div></div>
+        <div class="token-row"><div class="token-swatch" style="background: #151124;"></div><div class="token-info"><div class="token-name">Surface</div><div class="token-role">Cards & panels</div></div><div class="token-hex">#151124</div></div>
+        <div class="token-row"><div class="token-swatch" style="border: 1px solid rgba(169,100,255,0.3); background: transparent;"></div><div class="token-info"><div class="token-name">Glass Border</div><div class="token-role">Subtle dividers</div></div><div class="token-hex">RGBA</div></div>
+      </div>
+      <div class="card col-6" style="padding: 0; overflow: hidden;">
+        <div style="padding: var(--s-4) var(--s-5); border-bottom: 1px solid var(--border-light);"><div class="card-eyebrow" style="margin:0;">Status Accents</div></div>
+        <div class="token-row"><div class="token-swatch" style="background: #10B981;"></div><div class="token-info"><div class="token-name">Success</div><div class="token-role">Active, 100% attacks</div></div><div class="token-hex">#10B981</div></div>
+        <div class="token-row"><div class="token-swatch" style="background: #F59E0B;"></div><div class="token-info"><div class="token-name">Warning</div><div class="token-role">Needs attention</div></div><div class="token-hex">#F59E0B</div></div>
+        <div class="token-row"><div class="token-swatch" style="background: #EF4444;"></div><div class="token-info"><div class="token-name">Danger</div><div class="token-role">Missed war</div></div><div class="token-hex">#EF4444</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TYPOGRAPHY -->
+<section class="section" id="typography">
+  <div class="container">
+    <span class="eyebrow">02 — Typography</span>
+    <h2 class="section-title">Elegance meets Utility.</h2>
+    <p class="section-lead">We use <strong>Cinzel</strong> to capture the elegant, high-fantasy feel of the brand, while falling back to <strong>Inter</strong> for clean, readable data tables and stats.</p>
+
+    <div class="card">
+      <div class="type-row"><span class="type-meta">Display (Cinzel)</span><span class="t-h1">The Clan Roster</span></div>
+      <div class="type-row"><span class="type-meta">Header (Cinzel)</span><span class="t-h2">Activity Overview</span></div>
+      <div class="type-row"><span class="type-meta">Body (Inter)</span><span class="t-body">We track member donations and war participation automatically over a 14-day rolling window.</span></div>
+      <div class="type-row"><span class="type-meta">Data (Mono)</span><span class="t-mono">#2Y8V8VGQ</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPONENTS -->
+<section class="section" id="components">
+  <div class="container">
+    <span class="eyebrow">03 — Components</span>
+    <h2 class="section-title">Glass & Glow.</h2>
+    <p class="section-lead">The UI elements rely on heavy backdrop blurs and subtle glowing borders to create depth on the dark canvas.</p>
+
+    <div class="bento">
+      <div class="card col-6">
+        <div class="card-eyebrow">Interactive</div>
+        <div class="row" style="margin-top: var(--s-4);">
+          <button class="btn btn-primary">Refresh Data</button>
+          <button class="btn btn-secondary">View Profile</button>
         </div>
-    </aside>
+      </div>
+      <div class="card col-6">
+        <div class="card-eyebrow">Status Badges</div>
+        <div class="row" style="margin-top: var(--s-4);">
+          <span class="badge badge-success">Active</span>
+          <span class="badge badge-brand">Leader</span>
+          <span class="badge badge-warning">Opted Out</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Main Content -->
-    <main class="flex-1 p-8 lg:p-12 overflow-y-auto relative">
-        <!-- Ambient background glow behind content -->
-        <div class="absolute top-0 right-1/4 w-96 h-96 bg-umbra-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
+<!-- MOCKUP -->
+<section class="section" id="mockup" style="padding-bottom: var(--s-24);">
+  <div class="container">
+    <span class="eyebrow">04 — Web Application</span>
+    <h2 class="section-title">The Dashboard Layout.</h2>
+    <p class="section-lead">Putting the tokens together into the core layout shell that will be built in Next.js.</p>
 
-        <header class="mb-10 flex justify-between items-end relative z-10">
-            <div>
-                <h2 class="font-serif text-3xl lg:text-4xl text-umbra-lilac tracking-wide mb-2 glow-text">Overview</h2>
-                <p class="text-umbra-muted">Welcome back to Umbra Lunaria. Here is the clan's latest pulse.</p>
-            </div>
-            <div class="flex items-center gap-3 bg-umbra-surface/50 border border-umbra-border rounded-full px-4 py-2">
-                <span class="text-umbra-muted text-sm">Tag</span>
-                <span class="text-umbra-lilac font-mono text-sm tracking-wider">#2Y8V8VGQ</span>
-            </div>
-        </header>
-
-        <!-- Stats Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 relative z-10">
-            
-            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-umbra-purple/20 rounded-lg text-umbra-purple">
-                        <svg class="w-6 h-6 glow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                    </div>
-                    <span class="flex items-center gap-1 text-emerald-400 text-sm font-medium">
-                        +2% <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
-                    </span>
-                </div>
-                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">Active Members</h3>
-                <div class="text-3xl font-bold stat-value">42 <span class="text-umbra-muted text-lg font-normal">/ 50</span></div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
-                        <svg class="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                </div>
-                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">Donations (24h)</h3>
-                <div class="text-3xl font-bold stat-value">12,450</div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-red-500/20 rounded-lg text-red-400">
-                        <svg class="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
-                    </div>
-                    <span class="flex items-center gap-1 text-umbra-muted text-sm font-medium">
-                        Win Streak: 4
-                    </span>
-                </div>
-                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">All-Time War Record</h3>
-                <div class="text-3xl font-bold stat-value flex items-baseline gap-2">
-                    128<span class="text-umbra-muted text-lg font-normal">W</span> 
-                    - 42<span class="text-umbra-muted text-lg font-normal">L</span>
-                </div>
-            </div>
-
-            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
-                <div class="flex justify-between items-start mb-4">
-                    <div class="p-2 bg-amber-500/20 rounded-lg text-amber-400">
-                        <svg class="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                </div>
-                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">Capital Hall</h3>
-                <div class="text-3xl font-bold stat-value flex items-baseline gap-2">
-                    Level 8
-                </div>
-            </div>
+    <div class="web-app">
+      <div class="web-side">
+        <div class="web-side-head">
+          <div class="web-side-mark"></div>
+          <span class="web-side-title">UMBRA</span>
+        </div>
+        <div class="web-nav">
+          <div class="web-nav-item active">Dashboard</div>
+          <div class="web-nav-item">Members</div>
+          <div class="web-nav-item">Clan War</div>
+          <div class="web-nav-item">Capital</div>
+        </div>
+      </div>
+      
+      <div class="web-main">
+        <div class="web-header">
+          <div>
+            <h2 class="web-title">Overview</h2>
+            <p class="web-subtitle">Clan pulse for the last 7 days.</p>
+          </div>
+          <div class="web-tag">TAG: #2Y8V8VGQ</div>
         </div>
 
-        <!-- Activity & Roster Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
-            <!-- Chart Placeholder -->
-            <div class="lg:col-span-2 glass-card rounded-2xl p-6 h-96 flex flex-col">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-medium text-umbra-lilac">Clan Activity (7 Days)</h3>
-                    <div class="flex bg-umbra-dark/50 rounded-lg p-1 border border-umbra-border/50">
-                        <button class="px-3 py-1 text-xs font-medium rounded bg-umbra-purple text-white shadow-[0_0_10px_rgba(169,100,255,0.4)]">Week</button>
-                        <button class="px-3 py-1 text-xs font-medium rounded text-umbra-muted hover:text-umbra-lilac">Month</button>
-                    </div>
-                </div>
-                <div class="flex-1 border border-dashed border-umbra-border/50 rounded-xl flex items-center justify-center bg-umbra-dark/30">
-                    <p class="text-umbra-muted/60 font-mono text-sm">Recharts AreaChart Placeholder</p>
-                </div>
-            </div>
-
-            <!-- Needs Attention -->
-            <div class="glass-card rounded-2xl p-6 flex flex-col">
-                <h3 class="text-lg font-medium text-umbra-lilac mb-6 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    Needs Attention
-                </h3>
-                
-                <div class="space-y-4">
-                    <div class="p-3 bg-umbra-dark/50 rounded-xl border border-umbra-border/50 flex items-center justify-between group hover:border-amber-500/30 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-umbra-surface border border-umbra-border flex items-center justify-center font-bold text-sm text-umbra-lilac">TH</div>
-                            <div>
-                                <p class="text-sm font-medium text-umbra-lilac">PlayerName</p>
-                                <p class="text-xs text-red-400">Inactive for 4 days</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="p-3 bg-umbra-dark/50 rounded-xl border border-umbra-border/50 flex items-center justify-between group hover:border-amber-500/30 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-umbra-surface border border-umbra-border flex items-center justify-center font-bold text-sm text-umbra-lilac">TH</div>
-                            <div>
-                                <p class="text-sm font-medium text-umbra-lilac">AnotherPlayer</p>
-                                <p class="text-xs text-amber-400">0 attacks used (War)</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-title">Active Members</div>
+            <div class="stat-val grad">42 <span style="font-size:16px; font-weight:500; color:var(--text-muted);">/ 50</span></div>
+            <div class="stat-meta">+2% this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Donations (24h)</div>
+            <div class="stat-val grad">12,450</div>
+            <div class="stat-meta">High activity</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">War Record</div>
+            <div class="stat-val grad">128<span style="font-size:16px; font-weight:500; color:var(--text-muted);">W</span> - 42<span style="font-size:16px; font-weight:500; color:var(--text-muted);">L</span></div>
+            <div class="stat-meta">Win streak: 4</div>
+          </div>
         </div>
-    </main>
+
+        <div class="panel-grid">
+          <div class="panel">
+            <h3 class="panel-head">Activity Graph</h3>
+            <div style="height: 200px; border: 1px dashed var(--border-strong); border-radius: var(--r-md); display:grid; place-items:center; color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">[ Recharts AreaChart ]</div>
+          </div>
+          <div class="panel">
+            <h3 class="panel-head">Needs Attention</h3>
+            <div class="stack">
+              <div style="padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light); border-radius: var(--r-md);">
+                <div style="font-weight: 600; font-size: 14px; color: var(--umbra-lilac);">PlayerOne</div>
+                <div style="font-size: 12px; color: var(--warning);">Inactive 4 days</div>
+              </div>
+              <div style="padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light); border-radius: var(--r-md);">
+                <div style="font-weight: 600; font-size: 14px; color: var(--umbra-lilac);">PlayerTwo</div>
+                <div style="font-size: 12px; color: var(--danger);">0 attacks used</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 </body>
 </html>
