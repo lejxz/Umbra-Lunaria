@@ -1,6 +1,6 @@
 import { desc, eq, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { clans, members, wars, capitalDistrictSnapshots, warParticipants } from "@/lib/db/schema";
+import { clans, members, wars, capitalDistrictSnapshots } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
 
 // UI reads stay behind this module so pages never depend on Drizzle's schema shape.
@@ -10,5 +10,3 @@ export const getMemberDetail = (playerTag: string) => db.select().from(members).
 export const getWarHistory = (limit = 20) => db.select().from(wars).where(eq(wars.state, "warEnded")).orderBy(desc(wars.endTime)).limit(limit);
 export const getCurrentWar = () => db.select().from(wars).where(ne(wars.state, "warEnded")).orderBy(desc(wars.id)).limit(1);
 export const getCapitalDistricts = () => db.select().from(capitalDistrictSnapshots).orderBy(desc(capitalDistrictSnapshots.capturedAt));
-
-export const getWarParticipation = (playerTag: string) => db.select().from(warParticipants).where(eq(warParticipants.playerTag, playerTag));
