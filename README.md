@@ -10,7 +10,7 @@ This is a single-clan tool. It is configured once, for one clan tag, and used by
 
 ## Planned features
 
-1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, an all-time war record card, a clan info panel, and a needs-attention panel.
+1. **Main Dashboard** — clan donations (24h/week/month), an hour-by-hour/day-by-day activity graph, an all-time war record card, a clan info panel, a needs-attention panel, and a clan log of recent joins/leaves (click through to a member's profile popup).
 2. **Clan Members List** — sortable/filterable roster (wars missed, war preference); per-member popup with activity history, login activity graph, war participation (missed attacks), career/lifetime stats, rushed/non-rushed analysis, full troop/hero/spell/pet levels shown as in-game cards, and a minimal Builder Base summary.
 3. **Clan War Details** — war history (regular + league), a live current-war view with a manual refresh button, and a preparation-day opponent scouting view.
 4. **Clan Capital Details** — raid-weekend activity dashboard, per-member contributions, and district-level upgrade tracking.

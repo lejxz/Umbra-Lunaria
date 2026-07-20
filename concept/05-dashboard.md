@@ -29,7 +29,17 @@ Small reference panel, cached from the clan object (`03-data-model-and-database.
 - Members with 0 war attacks used and little time left in an active war.
 - Members with `warPreference = out` (`06-members.md`) — informational, not a problem, but useful to see at a glance who's opted out before planning a roster.
 
-## 6. Navigation strips
+## 6. Clan log
+
+Chronological feed of recent roster changes — joins and leaves merged into one timeline, most recent first. Built entirely from `members.joined_at` and `members.left_at`, both already populated by the ingest route (`04-activity-tracking-and-polling.md`) — no new schema needed.
+
+- Each entry: name, tag, event type (joined / left), timestamp. A member who left and rejoined shows both events, not collapsed into one.
+- Click an entry → opens the member detail popup (`06-members.md`), same component used everywhere else. Two cases:
+  - **Still in the clan, or left less than 14 days ago:** full popup — the row still exists (retention policy, `03-data-model-and-database.md`).
+  - **Left 14+ days ago:** the member row has been purged. The popup can't show troop levels, activity history, etc., because that data no longer exists — show "left the clan on [date]; data removed per the 2-week retention policy" instead of a broken/empty profile. Don't silently fail or show empty charts.
+- Reasonable default window: last 30 days, or last 20 events, whichever is shorter — this is a recent-activity feed, not a full membership history browser.
+
+## 7. Navigation strips
 
 - Current war status strip (state, time remaining, stars/attacks used) — links to the full War page.
 - Capital raid weekend countdown/status strip — links to the full Capital page.
