@@ -4,6 +4,8 @@ A dedicated dashboard for a single Clash of Clans clan — member activity, war 
 
 This is a single-clan tool. It is configured once, for one clan tag, and used by that clan's leadership and members.
 
+https://umbra-lunaria.vercel.app/
+
 ## Status
 
 **Phase 0 complete. Phase 1 starting.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), GitHub Actions poller (every ~10 min + daily batch), Vercel Cron purge job, and all environment/repo secrets — data is flowing into the Neon database. Phase 1 (read-only core UI) is next: dashboard, members list, war center, and capital tracker. See [`concept/12-roadmap-and-modularity.md`](./concept/12-roadmap-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
