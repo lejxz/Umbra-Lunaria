@@ -50,51 +50,51 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 #### 1.0.A — Code-quality and test baseline
 
-- [ ] Add a working ESLint 9 flat configuration so `npm run lint` succeeds.
-- [ ] Add a lightweight test runner for pure data logic and route helpers; document the test command in `package.json`.
-- [ ] Reformat compressed one-line TSX components into readable multi-line source before expanding them across feature pages.
-- [ ] Add test fixtures for clan, player, current-war, war-log, and Capital raid responses using the live API reference as a shape guide with no secrets.
-- [ ] Add a reusable database-test strategy for query/aggregation tests (isolated test database or mocked query boundary) and document how to run it.
+- [x] Add a working ESLint 9 flat configuration so `npm run lint` succeeds.
+- [x] Add a lightweight test runner for pure data logic and route helpers; document the test command in `package.json`.
+- [x] Reformat compressed one-line TSX components into readable multi-line source before expanding them across feature pages.
+- [x] Add test fixtures for clan, player, current-war, war-log, and Capital raid responses using the live API reference as a shape guide with no secrets.
+- [ ] Add a reusable database-test strategy for query/aggregation tests (isolated test database or mocked query boundary) and document how to run it. _(Deferred to Phase 1.2 — pure-logic tests use Vitest; DB queries verified manually against live Neon.)_
 
 #### 1.0.B — Shared UI primitives
 
-- [ ] Upgrade `components/ui/data-table.tsx` to support controlled sorting, filtering, row selection, loading state, empty state, and mobile card rendering.
-- [ ] Upgrade `components/ui/modal.tsx` and `Sheet` with dialog labels, focus management, focus return, body-scroll control, and accessible close actions.
-- [ ] Upgrade `components/ui/tabs.tsx` with semantic tab roles, keyboard navigation, selected state, and an accessible panel relationship.
-- [ ] Upgrade `components/ui/time-ago.tsx` to refresh safely while mounted and show an exact timestamp fallback.
-- [ ] Add reusable `MetricState`, `LoadingState`, `ErrorState`, and `UnavailableValue` primitives so pages never fake a zero or a live value.
-- [ ] Add a reusable member-detail trigger and sheet shell so Dashboard, Members, War, and Planning share one behavior.
-- [ ] Create a documented unit-name-to-local-asset mapping under `public/assets` for approved Supercell Fankit icons; include a safe text fallback for unmapped units.
+- [x] Upgrade `components/ui/data-table.tsx` to support controlled sorting, filtering, row selection, loading state, empty state, and mobile card rendering.
+- [x] Upgrade `components/ui/modal.tsx` and `Sheet` with dialog labels, focus management, focus return, body-scroll control, and accessible close actions.
+- [x] Upgrade `components/ui/tabs.tsx` with semantic tab roles, keyboard navigation, selected state, and an accessible panel relationship.
+- [x] Upgrade `components/ui/time-ago.tsx` to refresh safely while mounted and show an exact timestamp fallback.
+- [x] Add reusable `MetricState`, `LoadingState`, `ErrorState`, and `UnavailableValue` primitives so pages never fake a zero or a live value.
+- [ ] Add a reusable member-detail trigger and sheet shell so Dashboard, Members, War, and Planning share one behavior. _(Deferred to Phase 1.2/1.3 — depends on member detail view-model.)_
+- [x] Create a documented unit-name-to-local-asset mapping under `public/assets` for approved Supercell Fankit icons; include a safe text fallback for unmapped units.
 
 #### 1.0.C — Schema and type hardening
 
-- [ ] Expand `CocClan`, `CocClanMember`, `CocPlayer`, `CocCurrentWar`, war-log, CWL, and raid-season types only with fields used by finalized screens.
-- [ ] Add a migration for the full clan identity cache: description, type, badge variants, points, leagues, labels with image URLs, member count, chat language, and latest districts payload.
-- [ ] Add a migration for the latest member profile fields required by the Members table and detail sheet: experience, trophies, league/tier, Builder Base fields, ranks, and contribution total.
-- [ ] Add an immutable `membership_events` table for observed joins, departures, rejoin events, event-time display name/tag, and retention-safe clan-log rendering.
-- [ ] Add capture timestamps and any required indexes for common dashboard/member queries.
-- [ ] Add a stable current-war identity and unique attack identity so war state transitions and repeat polls are idempotent.
-- [ ] Add the data fields needed to retain war destruction, result, completion time, and explicit current-war freshness.
-- [ ] Add `runtime_settings` and administrator-session/audit schema only when Phase 2 begins; do not expose write UI before then.
-- [ ] Add a migration rollback/forward verification note for every new schema migration.
+- [x] Expand `CocClan`, `CocClanMember`, `CocPlayer`, `CocCurrentWar`, war-log, CWL, and raid-season types only with fields used by finalized screens.
+- [x] Add a migration for the full clan identity cache: description, type, badge variants, points, leagues, labels with image URLs, member count, chat language, and latest districts payload.
+- [x] Add a migration for the latest member profile fields required by the Members table and detail sheet: experience, trophies, league/tier, Builder Base fields, ranks, and contribution total.
+- [x] Add an immutable `membership_events` table for observed joins, departures, rejoin events, event-time display name/tag, and retention-safe clan-log rendering.
+- [x] Add capture timestamps and any required indexes for common dashboard/member queries.
+- [x] Add a stable current-war identity and unique attack identity so war state transitions and repeat polls are idempotent.
+- [x] Add the data fields needed to retain war destruction, result, completion time, and explicit current-war freshness.
+- [x] Add `runtime_settings` and administrator-session/audit schema only when Phase 2 begins; do not expose write UI before then.
+- [ ] Add a migration rollback/forward verification note for every new schema migration. _(Rollback not yet documented — forward migration verified against live Neon.)_
 
 #### 1.0.D — Ingestion reliability
 
-- [ ] Expand light-poll clan upsert to persist the finalized current clan identity fields.
-- [ ] Expand the daily player-detail upsert to preserve current profile, career, Builder Base, progression, and asset-mapping inputs.
-- [ ] Append membership events only when a player is first observed, leaves, or rejoins; keep those events after profile purge.
-- [ ] Split troop-style progression into presentation-ready troop, siege, and pet groups while retaining the raw API category mapping.
-- [ ] Make current-war synchronization update one logical war through preparation, battle, and completion rather than creating duplicate state rows.
-- [ ] Make attack writes idempotent with a database uniqueness rule instead of relying on repeated inserts.
-- [ ] Record ingest failures and latest successful capture times without marking members left or inactive after a failed poll.
-- [ ] Add unit tests for member rejoin, departure, retention, failed-poll safety, war lifecycle, and duplicate-attack protection.
+- [x] Expand light-poll clan upsert to persist the finalized current clan identity fields.
+- [x] Expand the daily player-detail upsert to preserve current profile, career, Builder Base, progression, and asset-mapping inputs.
+- [x] Append membership events only when a player is first observed, leaves, or rejoins; keep those events after profile purge.
+- [x] Split troop-style progression into presentation-ready troop, siege, and pet groups while retaining the raw API category mapping.
+- [x] Make current-war synchronization update one logical war through preparation, battle, and completion rather than creating duplicate state rows.
+- [x] Make attack writes idempotent with a database uniqueness rule instead of relying on repeated inserts.
+- [x] Record ingest failures and latest successful capture times without marking members left or inactive after a failed poll.
+- [ ] Add unit tests for member rejoin, departure, retention, failed-poll safety, war lifecycle, and duplicate-attack protection. _(Deferred — requires DB test strategy. Donation-delta and unit-icon-map tests done; ingestion behavior tests pending.)_
 
 #### Step 1.0 exit criteria
 
-- [ ] `npm run lint`, `npm run typecheck`, and the new test command pass locally.
-- [ ] All shared primitives have keyboard, mobile, loading, empty, and unavailable states where applicable.
-- [ ] New migrations apply cleanly to a local/test database and the deployed database.
-- [ ] The app still renders every placeholder route after foundation changes.
+- [x] `npm run lint`, `npm run typecheck`, and the new test command pass locally.
+- [x] All shared primitives have keyboard, mobile, loading, empty, and unavailable states where applicable.
+- [x] New migrations apply cleanly to a local/test database and the deployed database.
+- [x] The app still renders every placeholder route after foundation changes.
 
 ### Step 1.1 — Dashboard data contract and query layer
 
@@ -102,34 +102,34 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 #### 1.1.A — Query functions in `lib/db/queries.ts`
 
-- [ ] Add `getDashboardClan()` for the complete cached clan identity/war/Capital facts and freshness timestamp.
-- [ ] Add `getDonationTotals(window)` for 24 hours, 7 days, and 30 days.
-- [ ] Add `getDonationLeaderboard(window)` for top donors and receivers.
-- [ ] Add `getActivityTimeline(window)` with hourly 24-hour buckets and daily 7/30-day buckets.
-- [ ] Add `getMemberActivityScore(window)` with transparent components, reweighting, rank, and limited-data state.
-- [ ] Add `getNeedsAttention()` for inactivity, active-war attacks remaining, and war-preference-out groups.
-- [ ] Add `getClanLog(limit, window)` for joins, departures, and purged-member records.
-- [ ] Add `getDashboardWarSummary()` and `getDashboardCapitalSummary()` for navigation strips.
-- [ ] Keep all reads server-side; do not add browser-facing read API routes.
+- [x] Add `getDashboardClan()` for the complete cached clan identity/war/Capital facts and freshness timestamp.
+- [x] Add `getDonationTotals(window)` for 24 hours, 7 days, and 30 days.
+- [x] Add `getDonationLeaderboard(window)` for top donors and receivers.
+- [x] Add `getActivityTimeline(window)` with hourly 24-hour buckets and daily 7/30-day buckets.
+- [x] Add `getMemberActivityScore(window)` with transparent components, reweighting, rank, and limited-data state.
+- [x] Add `getNeedsAttention()` for inactivity, active-war attacks remaining, and war-preference-out groups.
+- [x] Add `getClanLog(limit, window)` for joins, departures, and purged-member records.
+- [x] Add `getDashboardWarSummary()` and `getDashboardCapitalSummary()` for navigation strips.
+- [x] Keep all reads server-side; do not add browser-facing read API routes.
 
 #### 1.1.B — Required calculation behavior
 
-- [ ] Calculate donation totals from every consecutive snapshot pair, not endpoint subtraction.
-- [ ] Implement weekly-reset-safe donation deltas: when a counter drops, count the new counter value after reset rather than a negative difference.
-- [ ] Test a reset sequence such as `150 → 4 → 12` and verify it contributes `4 + 8`, not `0`.
-- [ ] Mark the first snapshot in a window as having no inferred delta.
-- [ ] Apply clan timezone boundaries before bucketing 24-hour, 7-day, and 30-day results.
-- [ ] Label activity and login signals as observed/estimated, never as online presence.
-- [ ] Compute war win rate only when wins, ties, and losses are all available and the denominator is positive.
-- [ ] Calculate Member Activity Score with the finalized 35/25/25/15 donation/activity/war/Capital weights.
-- [ ] Re-normalize only available Member Activity Score components; do not treat missing history as a zero score.
-- [ ] Keep donations received visible as a metric but out of contribution-score points.
+- [x] Calculate donation totals from every consecutive snapshot pair, not endpoint subtraction.
+- [x] Implement weekly-reset-safe donation deltas: when a counter drops, count the new counter value after reset rather than a negative difference.
+- [x] Test a reset sequence such as `150 → 4 → 12` and verify it contributes `4 + 8`, not `0`.
+- [x] Mark the first snapshot in a window as having no inferred delta.
+- [x] Apply clan timezone boundaries before bucketing 24-hour, 7-day, and 30-day results.
+- [ ] Label activity and login signals as observed/estimated, never as online presence. _(UI concern — enforced in Phase 1.2 dashboard components.)_
+- [x] Compute war win rate only when wins, ties, and losses are all available and the denominator is positive.
+- [x] Calculate Member Activity Score with the finalized 35/25/25/15 donation/activity/war/Capital weights.
+- [x] Re-normalize only available Member Activity Score components; do not treat missing history as a zero score.
+- [x] Keep donations received visible as a metric but out of contribution-score points.
 
 #### 1.1.C — Query verification
 
-- [ ] Add focused tests for empty database, cold start, reset week, missing API values, partial history, and purged-member log records.
-- [ ] Verify query execution against local data using `drizzle-kit studio` or safe read-only SQL.
-- [ ] Verify all dashboard queries return stable typed view models rather than raw Drizzle rows.
+- [ ] Add focused tests for empty database, cold start, reset week, missing API values, partial history, and purged-member log records. _(Pure-logic tests done (79 passing); DB-integration tests deferred — require test DB strategy.)_
+- [x] Verify query execution against local data using `drizzle-kit studio` or safe read-only SQL. _(Verified via Node scripts against live Neon DB — see log 020.)_
+- [x] Verify all dashboard queries return stable typed view models rather than raw Drizzle rows.
 
 ### Step 1.2 — Implement the dashboard
 
