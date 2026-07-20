@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umbra Lunaria - Design Proposal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        umbra: {
+                            base: '#0B0914',      // Deepest background
+                            surface: '#151124',   // Card background
+                            border: '#32254A',    // Borders
+                            purple: '#A964FF',    // Vivid moon glow (Primary)
+                            lilac: '#E2D4F6',     // Logo text color (Headings)
+                            muted: '#8C81A8',     // Secondary text
+                            dark: '#08060E'       // Sidebar background
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cinzel', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background: radial-gradient(circle at top right, #151124 0%, #0B0914 100%);
+            color: #E2D4F6; 
+        }
+        
+        .glass-card {
+            background: rgba(21, 17, 36, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(169, 100, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(226, 212, 246, 0.05);
+        }
+
+        .glass-sidebar {
+            background: rgba(8, 6, 14, 0.85);
+            border-right: 1px solid rgba(169, 100, 255, 0.1);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 15px rgba(169, 100, 255, 0.4);
+        }
+
+        .glow-icon {
+            filter: drop-shadow(0 0 8px rgba(169, 100, 255, 0.6));
+        }
+
+        .stat-value {
+            background: linear-gradient(180deg, #FFFFFF 0%, #E2D4F6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex selection:bg-umbra-purple selection:text-white">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-sidebar flex flex-col hidden md:flex h-screen sticky top-0">
+        <div class="p-6 border-b border-umbra-border/50 flex items-center gap-3">
+            <!-- Mock Logo Icon -->
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-umbra-purple to-[#ffc2f5] glow-icon relative overflow-hidden">
+                <div class="absolute inset-1 bg-umbra-dark rounded-full transform translate-x-1 -translate-y-1"></div>
+            </div>
+            <h1 class="font-serif text-xl tracking-wider text-umbra-lilac glow-text font-bold">UMBRA</h1>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-umbra-purple/10 text-umbra-purple border border-umbra-purple/20 transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-umbra-muted hover:text-umbra-lilac hover:bg-umbra-surface transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                <span class="font-medium">Members</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-umbra-muted hover:text-umbra-lilac hover:bg-umbra-surface transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"></path></svg>
+                <span class="font-medium">Clan War</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-lg text-umbra-muted hover:text-umbra-lilac hover:bg-umbra-surface transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                <span class="font-medium">Capital</span>
+            </a>
+        </nav>
+        <div class="p-6">
+            <div class="glass-card rounded-xl p-4 text-sm">
+                <p class="text-umbra-muted mb-1">Status</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 glow-icon"></span>
+                    <span class="text-emerald-400 font-medium tracking-wide text-xs uppercase">Live Sync Active</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8 lg:p-12 overflow-y-auto relative">
+        <!-- Ambient background glow behind content -->
+        <div class="absolute top-0 right-1/4 w-96 h-96 bg-umbra-purple/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <header class="mb-10 flex justify-between items-end relative z-10">
+            <div>
+                <h2 class="font-serif text-3xl lg:text-4xl text-umbra-lilac tracking-wide mb-2 glow-text">Overview</h2>
+                <p class="text-umbra-muted">Welcome back to Umbra Lunaria. Here is the clan's latest pulse.</p>
+            </div>
+            <div class="flex items-center gap-3 bg-umbra-surface/50 border border-umbra-border rounded-full px-4 py-2">
+                <span class="text-umbra-muted text-sm">Tag</span>
+                <span class="text-umbra-lilac font-mono text-sm tracking-wider">#2Y8V8VGQ</span>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8 relative z-10">
+            
+            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-umbra-purple/20 rounded-lg text-umbra-purple">
+                        <svg class="w-6 h-6 glow-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                    <span class="flex items-center gap-1 text-emerald-400 text-sm font-medium">
+                        +2% <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                    </span>
+                </div>
+                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">Active Members</h3>
+                <div class="text-3xl font-bold stat-value">42 <span class="text-umbra-muted text-lg font-normal">/ 50</span></div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-blue-500/20 rounded-lg text-blue-400">
+                        <svg class="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                </div>
+                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">Donations (24h)</h3>
+                <div class="text-3xl font-bold stat-value">12,450</div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-red-500/20 rounded-lg text-red-400">
+                        <svg class="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>
+                    </div>
+                    <span class="flex items-center gap-1 text-umbra-muted text-sm font-medium">
+                        Win Streak: 4
+                    </span>
+                </div>
+                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">All-Time War Record</h3>
+                <div class="text-3xl font-bold stat-value flex items-baseline gap-2">
+                    128<span class="text-umbra-muted text-lg font-normal">W</span> 
+                    - 42<span class="text-umbra-muted text-lg font-normal">L</span>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-6 transition-transform hover:-translate-y-1 duration-300">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-amber-500/20 rounded-lg text-amber-400">
+                        <svg class="w-6 h-6 filter drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <h3 class="text-umbra-muted text-sm font-medium mb-1 uppercase tracking-wider">Capital Hall</h3>
+                <div class="text-3xl font-bold stat-value flex items-baseline gap-2">
+                    Level 8
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity & Roster Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 relative z-10">
+            <!-- Chart Placeholder -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-6 h-96 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-medium text-umbra-lilac">Clan Activity (7 Days)</h3>
+                    <div class="flex bg-umbra-dark/50 rounded-lg p-1 border border-umbra-border/50">
+                        <button class="px-3 py-1 text-xs font-medium rounded bg-umbra-purple text-white shadow-[0_0_10px_rgba(169,100,255,0.4)]">Week</button>
+                        <button class="px-3 py-1 text-xs font-medium rounded text-umbra-muted hover:text-umbra-lilac">Month</button>
+                    </div>
+                </div>
+                <div class="flex-1 border border-dashed border-umbra-border/50 rounded-xl flex items-center justify-center bg-umbra-dark/30">
+                    <p class="text-umbra-muted/60 font-mono text-sm">Recharts AreaChart Placeholder</p>
+                </div>
+            </div>
+
+            <!-- Needs Attention -->
+            <div class="glass-card rounded-2xl p-6 flex flex-col">
+                <h3 class="text-lg font-medium text-umbra-lilac mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Needs Attention
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="p-3 bg-umbra-dark/50 rounded-xl border border-umbra-border/50 flex items-center justify-between group hover:border-amber-500/30 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-umbra-surface border border-umbra-border flex items-center justify-center font-bold text-sm text-umbra-lilac">TH</div>
+                            <div>
+                                <p class="text-sm font-medium text-umbra-lilac">PlayerName</p>
+                                <p class="text-xs text-red-400">Inactive for 4 days</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-umbra-dark/50 rounded-xl border border-umbra-border/50 flex items-center justify-between group hover:border-amber-500/30 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-umbra-surface border border-umbra-border flex items-center justify-center font-bold text-sm text-umbra-lilac">TH</div>
+                            <div>
+                                <p class="text-sm font-medium text-umbra-lilac">AnotherPlayer</p>
+                                <p class="text-xs text-amber-400">0 attacks used (War)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
