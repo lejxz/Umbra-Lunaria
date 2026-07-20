@@ -70,10 +70,8 @@
   .nav-inner { max-width: var(--max-w); margin: 0 auto; height: 100%; padding: 0 var(--s-6);
     display: flex; align-items: center; gap: var(--s-6); }
   .nav-brand { display: flex; align-items: center; gap: var(--s-3); text-decoration: none; }
-  .nav-brand-mark { width: 32px; height: 32px; border-radius: 50%; background: var(--gradient-brand);
-    filter: drop-shadow(0 0 8px rgba(169, 100, 255, 0.5));
-    -webkit-mask: radial-gradient(circle at 65% 35%, transparent 46%, black 47%);
-    mask: radial-gradient(circle at 65% 35%, transparent 46%, black 47%); }
+  .nav-brand-mark { width: 32px; height: 32px; border-radius: 50%; object-fit: cover;
+    filter: drop-shadow(0 0 8px rgba(169, 100, 255, 0.5)); }
   .nav-brand-name { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: 0.05em; color: var(--text-primary); text-shadow: var(--shadow-glow); }
   .nav-links { display: flex; gap: var(--s-2); margin-left: auto; align-items: center; }
   .nav-link { font-size: 13px; font-weight: 500; color: var(--text-secondary); padding: var(--s-2) var(--s-3);
@@ -93,10 +91,8 @@
   .hero { position: relative; overflow: hidden; padding: var(--s-24) 0; border-bottom: 1px solid var(--border-light); text-align: center; }
   .hero-mesh { position: absolute; inset: 0; background: var(--gradient-mesh); filter: blur(60px); opacity: 0.6; pointer-events: none; }
   .hero-content { position: relative; max-width: 800px; margin: 0 auto; padding: 0 var(--s-6); display: flex; flex-direction: column; align-items: center; }
-  .hero-mark { width: 80px; height: 80px; border-radius: 50%; background: var(--gradient-brand);
-    filter: drop-shadow(0 0 15px rgba(169, 100, 255, 0.5)); margin-bottom: var(--s-6);
-    -webkit-mask: radial-gradient(circle at 65% 35%, transparent 46%, black 47%);
-    mask: radial-gradient(circle at 65% 35%, transparent 46%, black 47%); }
+  .hero-mark { width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+    filter: drop-shadow(0 0 15px rgba(169, 100, 255, 0.5)); margin-bottom: var(--s-6); }
   
   .hero h1 { font-family: var(--font-display); font-size: clamp(40px, 7vw, 72px); font-weight: 700;
     letter-spacing: 0.05em; line-height: 1.1; color: var(--umbra-lilac); margin-bottom: var(--s-6); text-shadow: var(--shadow-glow); text-transform: uppercase; }
@@ -159,10 +155,8 @@
   
   .web-side { background: rgba(8, 6, 14, 0.85); border-right: 1px solid var(--border-light); display: flex; flex-direction: column; z-index: 10; backdrop-filter: blur(20px); }
   .web-side-head { padding: var(--s-6); border-bottom: 1px solid var(--border-light); display: flex; align-items: center; gap: var(--s-3); }
-  .web-side-mark { width: 28px; height: 28px; border-radius: 50%; background: var(--gradient-brand); 
-    filter: drop-shadow(0 0 6px rgba(169, 100, 255, 0.5));
-    -webkit-mask: radial-gradient(circle at 65% 35%, transparent 46%, black 47%);
-    mask: radial-gradient(circle at 65% 35%, transparent 46%, black 47%); }
+  .web-side-mark { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; 
+    filter: drop-shadow(0 0 6px rgba(169, 100, 255, 0.5)); }
   .web-side-title { font-family: var(--font-display); font-weight: 700; color: var(--umbra-lilac); letter-spacing: 0.05em; text-shadow: var(--shadow-glow); }
   
   .web-nav { padding: var(--s-4); flex: 1; display: flex; flex-direction: column; gap: var(--s-2); }
@@ -203,7 +197,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="#top" class="nav-brand">
-      <div class="nav-brand-mark"></div>
+      <img src="../public/assets/Logo.svg" alt="Umbra Lunaria Logo" class="nav-brand-mark" />
       <span class="nav-brand-name">Umbra Lunaria</span>
     </a>
     <div class="nav-links">
@@ -217,10 +211,9 @@
 <header class="hero" id="top">
   <div class="hero-mesh"></div>
   <div class="hero-content">
-    <div class="hero-mark"></div>
+    <img src="../public/assets/Logo.svg" alt="Umbra Lunaria Logo" class="hero-mark" />
     <h1>Umbra <br><span class="grad">Lunaria</span></h1>
     <p class="hero-sub">Data-driven clan management. A dark, glassmorphic aesthetic inspired by the mystic moon, designed specifically for Clash of Clans tracking.</p>
-    
     <div class="hero-meta">
       <div class="hero-meta-item"><span class="hero-meta-num">Dark</span><span class="hero-meta-label">Theme Only</span></div>
       <div class="hero-meta-item"><span class="hero-meta-num">Glass</span><span class="hero-meta-label">Morphism UI</span></div>
