@@ -24,6 +24,7 @@ import {
 import { clanConfig } from "@/config/clan.config";
 import type {
   DashboardClan,
+  ClanBadgeUrls,
   CapitalSummaryView,
   DonationTotals,
   DonationWindow,
@@ -568,6 +569,8 @@ export async function getMemberActivityScore(
       name: member.name,
       role: member.role,
       townHallLevel: member.townHallLevel,
+      league: (member.league as { name: string; iconUrls?: ClanBadgeUrls }) ?? null,
+      leagueTier: (member.leagueTier as { name: string; iconUrls?: ClanBadgeUrls }) ?? null,
       warPreference: (member.warPreference as "in" | "out") ?? null,
       donationsGiven,
       observedActivityRate,
@@ -924,6 +927,8 @@ async function getRetainedMembers() {
       role: members.role,
       townHallLevel: members.townHallLevel,
       warPreference: members.warPreference,
+      league: members.league,
+      leagueTier: members.leagueTier,
     })
     .from(members)
     .where(isNull(members.leftAt));

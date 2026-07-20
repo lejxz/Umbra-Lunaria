@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ActivityScoreLeaderboard } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -52,13 +53,26 @@ export function ActivityScoreLeaderboard({
                   <span className="font-mono text-xs text-umbra-purple">
                     {entry.rank.toString().padStart(2, "0")}
                   </span>
+                  {entry.league?.iconUrls?.small && (
+                    <Image
+                      src={entry.league.iconUrls.small}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="h-5 w-5 shrink-0"
+                      unoptimized
+                    />
+                  )}
                   <div className="min-w-0">
                     <p className="truncate text-sm text-umbra-lilac">
                       {entry.name}
                     </p>
+                    <p className="truncate font-mono text-[10px] text-umbra-muted">
+                      {entry.playerTag}
+                    </p>
                     <p className="truncate text-xs text-umbra-muted">
                       {entry.townHallLevel ? `TH${entry.townHallLevel}` : ""}
-                      {entry.role && ` · ${entry.role}`}
+                      {entry.league?.name && ` · ${entry.league.name}`}
                       {entry.limitedData && " · limited data"}
                     </p>
                   </div>

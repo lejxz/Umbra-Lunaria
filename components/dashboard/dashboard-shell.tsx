@@ -36,6 +36,8 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         name: string;
         role: string;
         townHallLevel: number | null;
+        league?: { name: string; iconUrls?: { small?: string; tiny?: string } } | null;
+        leagueTier?: { name: string; iconUrls?: { small?: string } } | null;
         warPreference?: string | null;
         score?: number;
         scoreComponents?: Array<{ name: string; available: boolean; points: number }>;
@@ -47,6 +49,8 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         name: entry.name,
         role: entry.role,
         townHallLevel: entry.townHallLevel,
+        league: entry.league,
+        leagueTier: entry.leagueTier,
         score: entry.totalScore,
         scoreComponents: entry.components.map((c) => ({
           name: c.name,

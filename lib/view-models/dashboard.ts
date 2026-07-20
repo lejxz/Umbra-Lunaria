@@ -18,6 +18,7 @@
 // ---------------------------------------------------------------------------
 
 export interface ClanBadgeUrls {
+  tiny?: string;
   small?: string;
   medium?: string;
   large?: string;
@@ -153,6 +154,8 @@ export interface MemberActivityScore {
   name: string;
   role: string;
   townHallLevel: number | null;
+  league: { name: string; iconUrls?: ClanBadgeUrls } | null;
+  leagueTier: { name: string; iconUrls?: ClanBadgeUrls } | null;
   totalScore: number; // 0..100
   rank: number;
   components: ActivityScoreComponent[];

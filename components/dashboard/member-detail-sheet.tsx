@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
 
@@ -26,6 +27,8 @@ export function MemberDetailSheet({
       name: string;
       role: string;
       townHallLevel: number | null;
+      league?: { name: string; iconUrls?: { small?: string; tiny?: string } } | null;
+      leagueTier?: { name: string; iconUrls?: { small?: string } } | null;
       warPreference?: string | null;
       score?: number;
       scoreComponents?: Array<{ name: string; available: boolean; points: number }>;
@@ -45,7 +48,7 @@ export function MemberDetailSheet({
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-start justify-between gap-4">
-            <div>
+            <div className="min-w-0">
               <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
                 Member summary
               </p>
@@ -57,7 +60,7 @@ export function MemberDetailSheet({
               </p>
             </div>
             {member.townHallLevel && (
-              <div className="rounded-xl bg-umbra-purple/15 px-4 py-2 text-center">
+              <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-4 py-2 text-center">
                 <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
                   Town Hall
                 </p>
@@ -67,6 +70,35 @@ export function MemberDetailSheet({
               </div>
             )}
           </div>
+
+          {/* League + league tier icons */}
+          {(member.league || member.leagueTier) && (
+            <div className="flex items-center gap-4 rounded-lg bg-white/[.035] p-3">
+              {member.league?.iconUrls?.small && (
+                <Image
+                  src={member.league.iconUrls.small}
+                  alt={member.league.name ?? "League"}
+                  width={36}
+                  height={36}
+                  className="h-9 w-9"
+                  unoptimized
+                />
+              )}
+              <div className="min-w-0">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+                  League
+                </p>
+                <p className="truncate text-sm font-semibold text-white">
+                  {member.league?.name ?? <UnavailableValue />}
+                </p>
+                {member.leagueTier?.name && (
+                  <p className="truncate text-xs text-umbra-muted">
+                    {member.leagueTier.name}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Quick facts */}
           <div className="grid grid-cols-2 gap-3">

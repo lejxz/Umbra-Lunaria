@@ -112,9 +112,14 @@ export function DonationAnalytics({
                   <span className="font-mono text-xs text-umbra-purple">
                     #{donor.rank}
                   </span>
-                  <span className="truncate text-sm text-umbra-lilac">
-                    {donor.name}
-                  </span>
+                  <div className="min-w-0">
+                    <span className="block truncate text-sm text-umbra-lilac">
+                      {donor.name}
+                    </span>
+                    <span className="block truncate font-mono text-[10px] text-umbra-muted">
+                      {donor.playerTag}
+                    </span>
+                  </div>
                 </div>
                 <span className="font-mono text-sm text-emerald-400">
                   {donor.total}

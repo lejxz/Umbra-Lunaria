@@ -33,6 +33,7 @@
  */
 import type {
   ActivityScoreComponent,
+  ClanBadgeUrls,
   DonationWindow,
   MemberActivityScore,
 } from "@/lib/view-models/dashboard";
@@ -42,6 +43,8 @@ export interface ScoreInput {
   name: string;
   role: string;
   townHallLevel: number | null;
+  league: { name: string; iconUrls?: ClanBadgeUrls } | null;
+  leagueTier: { name: string; iconUrls?: ClanBadgeUrls } | null;
   warPreference: "in" | "out" | null;
   // Per-member source values for the scoring window:
   donationsGiven: number; // reset-aware total for the window
@@ -189,6 +192,8 @@ export function computeActivityScore(
     name: input.name,
     role: input.role,
     townHallLevel: input.townHallLevel,
+    league: input.league,
+    leagueTier: input.leagueTier,
     totalScore,
     components,
     window,

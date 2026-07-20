@@ -112,6 +112,9 @@ function AttentionGroup({
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
+              <p className="truncate font-mono text-[10px] text-umbra-muted">
+                {m.playerTag}
+              </p>
               <p className="truncate text-xs text-umbra-muted">
                 {m.detail ?? m.reason}
               </p>

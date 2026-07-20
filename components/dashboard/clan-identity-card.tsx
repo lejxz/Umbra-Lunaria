@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { DashboardClan } from "@/lib/view-models/dashboard";
-import { Badge } from "@/components/ui/badge";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { UnavailableValue } from "@/components/ui/state-primitives";
 import Link from "next/link";
@@ -61,13 +60,26 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
               .join(" · ")}
           </p>
 
-          {/* Labels */}
+          {/* Labels with icons */}
           {clan.labels && clan.labels.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {clan.labels.map((label) => (
-                <Badge key={label.name} tone="muted">
+                <span
+                  key={label.name}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-umbra-muted"
+                >
+                  {label.iconUrls?.small && (
+                    <Image
+                      src={label.iconUrls.small}
+                      alt=""
+                      width={16}
+                      height={16}
+                      className="h-4 w-4"
+                      unoptimized
+                    />
+                  )}
                   {label.name}
-                </Badge>
+                </span>
               ))}
             </div>
           )}

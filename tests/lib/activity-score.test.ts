@@ -28,6 +28,8 @@ function baseInput(overrides: Partial<ScoreInput> = {}): ScoreInput {
     name: "TestMember",
     role: "member",
     townHallLevel: 14,
+    league: null,
+    leagueTier: null,
     warPreference: "in",
     donationsGiven: 1000,
     observedActivityRate: 1.0,
