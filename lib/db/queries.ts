@@ -21,8 +21,18 @@ export async function getDonationTotals(window: DonationWindow) {
   for (const snapshot of snapshots) byMember.set(snapshot.playerTag, [...(byMember.get(snapshot.playerTag) ?? []), snapshot]);
   const donors = [...byMember.entries()].map(([playerTag, rows]) => {
     const ordered = rows.sort((a, b) => a.capturedAt.getTime() - b.capturedAt.getTime());
-    const first = ordered[0]; const last = ordered.at(-1);
-    return { playerTag, given: Math.max(0, (last?.donations ?? 0) - (first?.donations ?? 0)), received: Math.max(0, (last?.donationsReceived ?? 0) - (first?.donationsReceived ?? 0)) };
+    let given = 0;
+    let received = 0;
+    for (let index = 1; index < ordered.length; index += 1) {
+      const previous = ordered[index - 1];
+      const current = ordered[index];
+      if (!previous || !current) continue;
+      // Weekly Supercell resets appear as negative deltas. Ignore the reset
+      // itself, but keep counting positive deltas on either side of it.
+      given += Math.max(0, current.donations - previous.donations);
+      received += Math.max(0, current.donationsReceived - previous.donationsReceived);
+    }
+    return { playerTag, given, received };
   }).sort((a, b) => b.given - a.given);
   return { given: donors.reduce((sum, item) => sum + item.given, 0), received: donors.reduce((sum, item) => sum + item.received, 0), donors: donors.slice(0, 5) };
 }
