@@ -25,9 +25,45 @@ jobs:
           fi
 
       - name: Call /api/ingest
+        id: ingest
         run: |
-          curl --fail-with-body -sS -X POST \
+          response=$(curl -sS -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${{ secrets.INGEST_SECRET }}" \
             -H "Content-Type: application/json" \
             -d "{\"batch\": ${{ steps.batch.outputs.is_batch }}}" \
-            "${{ secrets.VERCEL_APP_URL }}/api/ingest"
+            "${{ secrets.VERCEL_APP_URL }}/api/ingest")
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "http_code=$http_code" >> "$GITHUB_OUTPUT"
+          # Body goes through a delimiter block since it's JSON, not a single line.
+          {
+            echo "body<<INGEST_BODY_EOF"
+            echo "$body"
+            echo "INGEST_BODY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "$body"
+
+          if [ "$http_code" -lt 200 ] || [ "$http_code" -ge 300 ]; then
+            exit 1
+          fi
+
+      - name: Write run summary
+        if: always()
+        run: |
+          {
+            echo "### Poll result"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Trigger | \`${{ github.event_name }}\` |"
+            echo "| Batch run | \`${{ steps.batch.outputs.is_batch }}\` |"
+            echo "| HTTP status | \`${{ steps.ingest.outputs.http_code }}\` |"
+            echo ""
+            echo "**Response:**"
+            echo '```json'
+            echo '${{ steps.ingest.outputs.body }}'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
