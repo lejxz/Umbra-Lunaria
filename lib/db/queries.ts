@@ -836,13 +836,24 @@ export async function getDashboardWarSummary(): Promise<WarSummaryView> {
 // ---------------------------------------------------------------------------
 
 export async function getDashboard(): Promise<DashboardData> {
+  // Fetch all 3 windows of donation + activity data in parallel, plus the
+  // single-window data (clan, capital, activity score, needs attention, etc.).
+  // The 24h/7d/30d tabs switch client-side with no API calls.
   const [
     clan,
     capital,
-    donations,
-    donationTimeline,
-    donationLeaderboard,
-    activityTimeline,
+    donations24h,
+    donationTimeline24h,
+    donationLeaderboard24h,
+    donations7d,
+    donationTimeline7d,
+    donationLeaderboard7d,
+    donations30d,
+    donationTimeline30d,
+    donationLeaderboard30d,
+    activityTimeline24h,
+    activityTimeline7d,
+    activityTimeline30d,
     activityScore,
     needsAttention,
     clanLog,
@@ -855,7 +866,15 @@ export async function getDashboard(): Promise<DashboardData> {
     getDonationTotals("24h"),
     getDonationTimeline("24h"),
     getDonationLeaderboard("24h"),
+    getDonationTotals("7d"),
+    getDonationTimeline("7d"),
+    getDonationLeaderboard("7d"),
+    getDonationTotals("30d"),
+    getDonationTimeline("30d"),
+    getDonationLeaderboard("30d"),
     getActivityTimeline("24h"),
+    getActivityTimeline("7d"),
+    getActivityTimeline("30d"),
     getMemberActivityScore("30d"),
     getNeedsAttention(),
     getClanLog(),
@@ -868,10 +887,22 @@ export async function getDashboard(): Promise<DashboardData> {
     clan: clan ?? emptyClan(),
     warRecord: getWarRecord(clan),
     capital,
-    donations,
-    donationTimeline,
-    donationLeaderboard,
-    activityTimeline,
+    // 24h
+    donations: donations24h,
+    donationTimeline: donationTimeline24h,
+    donationLeaderboard: donationLeaderboard24h,
+    // 7d
+    donations7d,
+    donationTimeline7d,
+    donationLeaderboard7d,
+    // 30d
+    donations30d,
+    donationTimeline30d,
+    donationLeaderboard30d,
+    // Activity
+    activityTimeline: activityTimeline24h,
+    activityTimeline7d,
+    activityTimeline30d,
     activityScore,
     needsAttention,
     clanLog,

@@ -244,10 +244,23 @@ export interface DashboardData {
   clan: DashboardClan;
   warRecord: WarRecordView;
   capital: CapitalSummaryView;
+  // 24h (default)
   donations: DonationTotals;
   donationTimeline: DonationTimeline;
   donationLeaderboard: DonationLeaderboard;
+  // 7d
+  donations7d: DonationTotals;
+  donationTimeline7d: DonationTimeline;
+  donationLeaderboard7d: DonationLeaderboard;
+  // 30d
+  donations30d: DonationTotals;
+  donationTimeline30d: DonationTimeline;
+  donationLeaderboard30d: DonationLeaderboard;
+  // Activity timelines for all 3 windows
   activityTimeline: ActivityTimeline;
+  activityTimeline7d: ActivityTimeline;
+  activityTimeline30d: ActivityTimeline;
+  // 30-day activity score (the leaderboard uses 30d)
   activityScore: ActivityScoreLeaderboard;
   needsAttention: NeedsAttention;
   clanLog: ClanLog;
