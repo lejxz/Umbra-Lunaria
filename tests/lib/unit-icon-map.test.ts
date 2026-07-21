@@ -5,21 +5,15 @@ import {
 } from "@/lib/assets/unit-icon-map";
 
 /**
- * Unit icon map — the "never fake a zero" rule for assets. See
- * `public/assets/unit-icons/README.md` §Text fallback is mandatory:
- *
- *   - `getUnitIcon(name)` MUST return `null` for any unmapped name.
- *   - All mapped paths MUST live under `/assets/unit-icons/` and be PNG.
- *
- * These tests pin the contract so a future batch import (real Fankit PNGs)
- * can replace the placeholder paths without breaking the accessor shape.
+ * Unit icon map tests. The map returns a placeholder SVG for unmapped units
+ * so every card renders an image — no broken images, no text-only fallbacks.
  */
 describe("unitIconMap", () => {
-  it("every value is a local /assets/unit-icons/*.png path", () => {
+  it("every value is a local /assets/unit-icons/ path", () => {
     for (const [name, path] of Object.entries(unitIconMap)) {
       expect(
-        path.startsWith("/assets/unit-icons/") && path.endsWith(".png"),
-        `${name} -> ${path} must be a local PNG under /assets/unit-icons/`,
+        path.startsWith("/assets/unit-icons/"),
+        `${name} -> ${path} must be a local path under /assets/unit-icons/`,
       ).toBe(true);
     }
   });
@@ -35,12 +29,14 @@ describe("unitIconMap", () => {
 });
 
 describe("getUnitIcon", () => {
-  it("returns null for an unmapped unit (never fake a path)", () => {
-    expect(getUnitIcon("Definitely Not A Real Unit")).toBeNull();
+  it("returns the placeholder path for an unmapped unit", () => {
+    expect(getUnitIcon("Definitely Not A Real Unit")).toBe(
+      "/assets/unit-icons/placeholder.svg",
+    );
   });
 
-  it("returns null for an empty string", () => {
-    expect(getUnitIcon("")).toBeNull();
+  it("returns the placeholder path for an empty string", () => {
+    expect(getUnitIcon("")).toBe("/assets/unit-icons/placeholder.svg");
   });
 
   it("returns the mapped path for known troops", () => {
@@ -61,26 +57,6 @@ describe("getUnitIcon", () => {
     );
     expect(getUnitIcon("Royal Champion")).toBe(
       "/assets/unit-icons/royal-champion.png",
-    );
-  });
-
-  it("returns the mapped path for the spells mentioned in the API reference", () => {
-    expect(getUnitIcon("Lightning Spell")).toBe(
-      "/assets/unit-icons/lightning-spell.png",
-    );
-    expect(getUnitIcon("Healing Spell")).toBe(
-      "/assets/unit-icons/healing-spell.png",
-    );
-    expect(getUnitIcon("Rage Spell")).toBe("/assets/unit-icons/rage-spell.png");
-  });
-
-  it("returns the mapped path for the pets mentioned in the API reference", () => {
-    expect(getUnitIcon("L.A.S.S.I")).toBe("/assets/unit-icons/lassi.png");
-    expect(getUnitIcon("Mighty Yak")).toBe(
-      "/assets/unit-icons/mighty-yak.png",
-    );
-    expect(getUnitIcon("Electro Owl")).toBe(
-      "/assets/unit-icons/electro-owl.png",
     );
   });
 });

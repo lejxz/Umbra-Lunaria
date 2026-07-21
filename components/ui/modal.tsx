@@ -14,16 +14,10 @@ import { X } from "lucide-react";
 /**
  * Modal & Sheet — shared overlay primitives. See concept/10-mobile-support.md
  * §Accessibility (3): focus must be trapped inside an open dialog and restored
- * to the triggering control on close. The Sheet variant slides up from the
- * bottom on mobile and in from the right on desktop (concept/10 §6).
+ * to the triggering control on close.
  *
- * Behavior contract:
- *  - Close on Escape and on backdrop click (not on inside click).
- *  - Body scroll locked while open, restored on close.
- *  - Focus first focusable element on open; Tab cycles within the panel;
- *    Shift+Tab wraps to the last; focus returns to the trigger on close.
- *  - Visible close button with aria-label="Close".
- *  - aria-labelledby / aria-describedby threaded through to the dialog node.
+ * The modal has a FIXED header (title + close button) and a single scrollable
+ * content area below it — no double scrollbars.
  */
 
 const FOCUSABLE_SELECTOR =
@@ -57,7 +51,6 @@ function useFocusTrap(
     if (!active) return;
     previouslyFocused.current = document.activeElement as HTMLElement | null;
 
-    // Move focus into the panel on open.
     const panel = panelRef.current;
     if (panel) {
       const first = panel.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
@@ -139,8 +132,6 @@ export function Modal({
 
   useEffect(() => {
     if (!open || !mounted) return;
-    // Trigger the in-animation on the next frame so the browser actually
-    // paints the initial state first.
     const raf = requestAnimationFrame(() => setAnimateIn(true));
     return () => {
       cancelAnimationFrame(raf);
@@ -152,7 +143,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-[100] grid place-items-center bg-black/70 p-4 backdrop-blur-sm transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm transition-opacity duration-200 ${
         animateIn ? "opacity-100" : "opacity-0"
       }`}
       role="presentation"
@@ -161,7 +152,7 @@ export function Modal({
     >
       <div
         ref={panelRef}
-        className={`glass relative max-h-[90vh] w-full ${maxWidth} overflow-auto rounded-2xl p-6 transition-all duration-200 ${
+        className={`glass relative flex max-h-[90vh] w-full ${maxWidth} flex-col overflow-hidden rounded-2xl transition-all duration-200 ${
           animateIn ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
         role="dialog"
@@ -172,8 +163,17 @@ export function Modal({
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
-        <CloseButton onClose={onClose} />
-        {children}
+        {/* Close button — fixed at top-right */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="focus-ring absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-umbra-line bg-umbra-surface/80 text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+        >
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+        {/* Single scrollable content area — no nested overflow */}
+        <div className="overflow-y-auto p-6">{children}</div>
       </div>
     </div>,
     document.body,
@@ -187,6 +187,7 @@ export function Sheet({
   ariaLabelledBy,
   ariaDescribedBy,
   ariaLabel,
+  maxWidth = "max-w-lg",
 }: CommonProps) {
   const mounted = useMounted();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -206,8 +207,6 @@ export function Sheet({
 
   if (!open || !mounted) return null;
 
-  // Slide up from bottom on mobile (translate-y), slide in from right on
-  // desktop (sm:translate-x). See concept/10-mobile-support.md §6.
   const panelTransform = animateIn
     ? "translate-y-0 sm:translate-x-0"
     : "translate-y-full sm:translate-x-full";
@@ -223,7 +222,7 @@ export function Sheet({
     >
       <div
         ref={panelRef}
-        className={`glass absolute inset-x-0 bottom-0 max-h-[90vh] overflow-auto rounded-t-2xl p-6 transition-transform duration-300 ease-out sm:inset-y-0 sm:left-auto sm:w-full sm:max-w-lg sm:rounded-none sm:rounded-l-2xl ${panelTransform}`}
+        className={`glass absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col overflow-hidden rounded-t-2xl transition-transform duration-300 ease-out sm:inset-y-0 sm:left-auto sm:w-full ${maxWidth} sm:rounded-none sm:rounded-l-2xl ${panelTransform}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={ariaLabelledBy}
@@ -232,23 +231,17 @@ export function Sheet({
         tabIndex={-1}
         onClick={(event) => event.stopPropagation()}
       >
-        <CloseButton onClose={onClose} />
-        {children}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close"
+          className="focus-ring absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-umbra-line bg-umbra-surface/80 text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+        >
+          <X className="h-4 w-4" aria-hidden />
+        </button>
+        <div className="overflow-y-auto p-6">{children}</div>
       </div>
     </div>,
     document.body,
-  );
-}
-
-function CloseButton({ onClose }: { onClose: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClose}
-      aria-label="Close"
-      className="focus-ring absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-umbra-line bg-umbra-surface/70 text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
-    >
-      <X className="h-4 w-4" aria-hidden />
-    </button>
   );
 }

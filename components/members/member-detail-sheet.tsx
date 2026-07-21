@@ -9,9 +9,8 @@ import { useState } from "react";
 
 /**
  * Full member detail sheet with 7 sections per concept/06-members.md.
- * Uses a wider modal (max-w-3xl) with a clean two-column layout for
- * profile and stats. Progression cards match the in-game CoC style
- * with level boxes at the bottom-left.
+ * Uses a wider modal (max-w-3xl). The Modal handles scrolling — this
+ * component does NOT add its own overflow.
  */
 export function MemberDetailSheet({
   detail,
@@ -27,45 +26,43 @@ export function MemberDetailSheet({
       aria-labelledby="member-detail-title"
       maxWidth="max-w-3xl"
     >
-      <div className="max-h-[88vh] w-full max-w-3xl space-y-5 overflow-y-auto">
-        {/* 1. Profile summary */}
-        <ProfileSection detail={detail} />
-
-        {/* Departed notice */}
-        {detail.profile.isDeparted && (
-          <div className="rounded-lg bg-amber-400/10 px-4 py-2 text-sm text-amber-400">
-            ⚠ This member departed on{" "}
-            {detail.profile.leftAt
-              ? detail.profile.leftAt.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                  timeZone: "Asia/Manila",
-                })
-              : "an unknown date"}
-            . Data is retained temporarily.
-          </div>
-        )}
-
-        {/* 2. Activity */}
-        <ActivitySection detail={detail} />
-
-        {/* 3. Donations */}
-        <DonationsSection detail={detail} />
-
-        {/* 4. War participation */}
-        <WarSection detail={detail} />
-
-        {/* 5. Career */}
-        <CareerSection detail={detail} />
-
-        {/* 6. Progression */}
-        <ProgressionSection detail={detail} />
-
-        {/* 7. Rushed */}
-        <RushedSection detail={detail} />
-      </div>
+      <MemberDetailContent detail={detail} />
     </Modal>
+  );
+}
+
+/**
+ * The content of the member detail sheet (without the Modal wrapper).
+ * Exported so the dashboard can reuse the exact same layout in its own
+ * Modal — ensures UI consistency between dashboard and members popups.
+ */
+export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
+  return (
+    <div className="space-y-6">
+      <ProfileSection detail={detail} />
+
+      {detail.profile.isDeparted && (
+        <div className="rounded-lg bg-amber-400/10 px-4 py-2 text-sm text-amber-400">
+          ⚠ This member departed on{" "}
+          {detail.profile.leftAt
+            ? detail.profile.leftAt.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                timeZone: "Asia/Manila",
+              })
+            : "an unknown date"}
+          . Data is retained temporarily.
+        </div>
+      )}
+
+      <ActivitySection detail={detail} />
+      <DonationsSection detail={detail} />
+      <WarSection detail={detail} />
+      <CareerSection detail={detail} />
+      <ProgressionSection detail={detail} />
+      <RushedSection detail={detail} />
+    </div>
   );
 }
 
@@ -77,9 +74,9 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
   const p = detail.profile;
   return (
     <div>
-      <SectionLabel source="API fact">Profile summary</SectionLabel>
+      <SectionLabel source="API fact">Profile</SectionLabel>
 
-      {/* Header row: league icon + name/tag + TH badge */}
+      {/* Header: icon + name/tag + TH */}
       <div className="flex items-center gap-4">
         {p.leagueTier?.iconUrls?.small && (
           <Image
@@ -92,20 +89,27 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           />
         )}
         <div className="min-w-0 flex-1">
-          <h2 id="member-detail-title" className="font-display text-2xl text-umbra-lilac">
+          <h2
+            id="member-detail-title"
+            className="font-display text-2xl text-umbra-lilac"
+          >
             {p.name}
           </h2>
           <p className="font-mono text-xs text-umbra-muted">{p.playerTag}</p>
         </div>
         {p.townHallLevel && (
           <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-4 py-2 text-center">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">TH</p>
-            <p className="font-display text-xl font-bold text-umbra-purple">{p.townHallLevel}</p>
+            <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+              TH
+            </p>
+            <p className="font-display text-xl font-bold text-umbra-purple">
+              {p.townHallLevel}
+            </p>
           </div>
         )}
       </div>
 
-      {/* Stats grid — 4 columns */}
+      {/* Stats — uniform height cells */}
       <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <FactCell label="Role" value={<span className="capitalize">{p.role}</span>} />
         <FactCell label="Exp level" value={p.expLevel ?? <UnavailableValue />} />
@@ -116,7 +120,9 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           label="War pref"
           value={
             p.warPreference ? (
-              <Badge tone={p.warPreference === "in" ? "success" : "muted"}>{p.warPreference}</Badge>
+              <Badge tone={p.warPreference === "in" ? "success" : "muted"}>
+                {p.warPreference}
+              </Badge>
             ) : (
               <UnavailableValue />
             )
@@ -127,20 +133,15 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           label="Joined"
           value={
             p.joinedAt
-              ? p.joinedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+              ? p.joinedAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "Asia/Manila",
+                })
               : "—"
           }
         />
       </div>
-
-      {/* Builder Base row */}
-      {(p.builderHallLevel || p.builderBaseTrophies) && (
-        <div className="mt-2 grid grid-cols-3 gap-2">
-          <FactCell label="Builder Hall" value={p.builderHallLevel ?? <UnavailableValue />} />
-          <FactCell label="BB trophies" value={p.builderBaseTrophies ?? <UnavailableValue />} />
-          <FactCell label="Best BB" value={p.bestBuilderBaseTrophies ?? <UnavailableValue />} />
-        </div>
-      )}
     </div>
   );
 }
@@ -153,13 +154,17 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
   const a = detail.activity;
   return (
     <div>
-      <SectionLabel source="tracked history">Activity</SectionLabel>
+      <SectionLabel source="tracked">Activity</SectionLabel>
       <div className="grid grid-cols-2 gap-2">
         <FactCell
           label="Last active"
           value={
             a.lastActiveAt
-              ? a.lastActiveAt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+              ? a.lastActiveAt.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "Asia/Manila",
+                })
               : "—"
           }
         />
@@ -167,25 +172,29 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           label="Tracking started"
           value={
             a.trackingStart
-              ? a.trackingStart.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+              ? a.trackingStart.toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  timeZone: "Asia/Manila",
+                })
               : "—"
           }
         />
       </div>
       {a.hasPartialData && (
-        <p className="mt-2 text-xs text-amber-400">⚠ Partial data — tracking started partway through this window.</p>
+        <p className="mt-2 text-xs text-amber-400">⚠ Partial data</p>
       )}
       {a.buckets.length > 0 && (
         <div className="mt-3">
           <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
             30-day activity
           </p>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-0.5">
             {a.buckets.map((b, i) => (
               <div
                 key={i}
                 title={`${b.label}: ${b.active ? "active" : "inactive"}`}
-                className={`h-4 w-4 rounded-sm ${b.active ? "bg-umbra-purple" : "bg-white/10"}`}
+                className={`h-3.5 w-3.5 rounded-sm ${b.active ? "bg-umbra-purple" : "bg-white/10"}`}
               />
             ))}
           </div>
@@ -193,7 +202,8 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
       )}
       {a.loginDays.length > 0 && (
         <p className="mt-2 text-xs text-umbra-muted">
-          {a.loginDays.length} estimated login day{a.loginDays.length !== 1 ? "s" : ""} in the last 30 days.
+          {a.loginDays.length} estimated login day
+          {a.loginDays.length !== 1 ? "s" : ""} in the last 30 days.
         </p>
       )}
       <p className="mt-1 text-[11px] text-umbra-muted">
@@ -211,24 +221,35 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
   const d = detail.donations;
   return (
     <div>
-      <SectionLabel source="tracked / derived">Donations & contribution</SectionLabel>
+      <SectionLabel source="tracked / derived">Donations</SectionLabel>
       <div className="grid grid-cols-3 gap-2">
         <DonationCell label="24h" given={d.given24h} received={d.received24h} />
         <DonationCell label="7d" given={d.given7d} received={d.received7d} />
         <DonationCell label="30d" given={d.given30d} received={d.received30d} />
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <FactCell label="Ratio (30d)" value={d.ratio !== null ? d.ratio.toFixed(2) : <UnavailableValue />} />
-        <FactCell label="Activity score" value={d.activityScore !== null ? d.activityScore.toFixed(1) : <UnavailableValue />} />
+        <FactCell
+          label="Ratio (30d)"
+          value={d.ratio !== null ? d.ratio.toFixed(2) : <UnavailableValue />}
+        />
+        <FactCell
+          label="Activity score"
+          value={d.activityScore !== null ? d.activityScore.toFixed(1) : <UnavailableValue />}
+        />
       </div>
       {d.activityScoreComponents.length > 0 && (
-        <div className="mt-2 space-y-1">
+        <div className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-4">
           {d.activityScoreComponents.map((c) => (
-            <div key={c.name} className="flex items-center justify-between text-xs">
-              <span className="capitalize text-umbra-muted">{c.name}</span>
-              <span className="font-mono text-umbra-lilac">
+            <div
+              key={c.name}
+              className="rounded bg-white/[.035] px-2 py-1 text-center"
+            >
+              <p className="font-mono text-[8px] uppercase tracking-wider text-umbra-muted">
+                {c.name}
+              </p>
+              <p className="font-mono text-xs text-umbra-lilac">
                 {c.available ? c.points.toFixed(1) : "—"}
-              </span>
+              </p>
             </div>
           ))}
         </div>
@@ -245,9 +266,9 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
   const w = detail.warParticipation;
   return (
     <div>
-      <SectionLabel source="tracked history">War participation</SectionLabel>
+      <SectionLabel source="tracked">War participation</SectionLabel>
       {w.warsTracked === 0 ? (
-        <p className="text-xs text-umbra-muted">No wars tracked yet. Wars will appear here once the tracker observes them.</p>
+        <p className="text-xs text-umbra-muted">No wars tracked yet.</p>
       ) : (
         <>
           <div className="grid grid-cols-3 gap-2">
@@ -255,32 +276,59 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
             <FactCell label="Wars missed" value={w.warsMissed} />
             <FactCell
               label="Participation"
-              value={w.participationRate !== null ? `${(w.participationRate * 100).toFixed(0)}%` : <UnavailableValue />}
+              value={
+                w.participationRate !== null
+                  ? `${(w.participationRate * 100).toFixed(0)}%`
+                  : <UnavailableValue />
+              }
             />
           </div>
           <div className="mt-2 grid grid-cols-3 gap-2">
             <FactCell label="Stars earned" value={w.starsEarned} />
-            <FactCell label="Avg stars" value={w.averageStars !== null ? w.averageStars.toFixed(1) : <UnavailableValue />} />
+            <FactCell
+              label="Avg stars"
+              value={w.averageStars !== null ? w.averageStars.toFixed(1) : <UnavailableValue />}
+            />
             <FactCell
               label="3-star rate"
-              value={w.threeStarRate !== null ? `${(w.threeStarRate * 100).toFixed(0)}%` : <UnavailableValue />}
+              value={
+                w.threeStarRate !== null
+                  ? `${(w.threeStarRate * 100).toFixed(0)}%`
+                  : <UnavailableValue />
+              }
             />
           </div>
           {w.recentWars.length > 0 && (
             <div className="mt-3">
-              <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Recent wars</p>
+              <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+                Recent wars
+              </p>
               <div className="space-y-1">
                 {w.recentWars.map((war) => (
-                  <div key={war.warId} className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-1.5 text-xs">
+                  <div
+                    key={war.warId}
+                    className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-1.5 text-xs"
+                  >
                     <div className="min-w-0">
-                      <p className="truncate text-umbra-lilac">vs {war.opponentName ?? "Unknown"}</p>
+                      <p className="truncate text-umbra-lilac">
+                        vs {war.opponentName ?? "Unknown"}
+                      </p>
                       <p className="font-mono text-[10px] text-umbra-muted">
-                        {war.attacksUsed}/{war.attacksAllowed} attacks · {war.starsEarned} stars
+                        {war.attacksUsed}/{war.attacksAllowed} attacks ·{" "}
+                        {war.starsEarned} stars
                         {war.missed && " · missed"}
                       </p>
                     </div>
                     {war.result && (
-                      <Badge tone={war.result === "win" ? "success" : war.result === "loss" ? "danger" : "muted"}>
+                      <Badge
+                        tone={
+                          war.result === "win"
+                            ? "success"
+                            : war.result === "loss"
+                              ? "danger"
+                              : "muted"
+                        }
+                      >
                         {war.result}
                       </Badge>
                     )}
@@ -309,15 +357,21 @@ function CareerSection({ detail }: { detail: MemberDetailView }) {
   const [showAll, setShowAll] = useState(false);
   return (
     <div>
-      <SectionLabel source="API fact">Career statistics</SectionLabel>
+      <SectionLabel source="API fact">Career</SectionLabel>
       <div className="grid grid-cols-3 gap-2">
         <FactCell label="War stars" value={c.warStars ?? <UnavailableValue />} />
         <FactCell label="Attack wins" value={c.attackWins ?? <UnavailableValue />} />
         <FactCell label="Defense wins" value={c.defenseWins ?? <UnavailableValue />} />
       </div>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <FactCell label="Capital contrib" value={c.clanCapitalContributions ?? <UnavailableValue />} />
-        <FactCell label="Best BB trophies" value={c.bestBuilderBaseTrophies ?? <UnavailableValue />} />
+        <FactCell
+          label="Capital contrib"
+          value={c.clanCapitalContributions ?? <UnavailableValue />}
+        />
+        <FactCell
+          label="Best BB trophies"
+          value={c.bestBuilderBaseTrophies ?? <UnavailableValue />}
+        />
       </div>
       {c.achievements.length > 0 && (
         <div className="mt-3">
@@ -328,14 +382,16 @@ function CareerSection({ detail }: { detail: MemberDetailView }) {
             {showAll ? "Hide" : "Show"} {c.achievements.length} achievements
           </button>
           {showAll && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
               {c.achievements.map((a) => (
-                <div key={a.name} className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-1.5 text-xs">
+                <div
+                  key={a.name}
+                  className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-1.5 text-xs"
+                >
                   <span className="truncate text-umbra-lilac">{a.name}</span>
-                  <span className="font-mono text-umbra-muted">
+                  <span className="shrink-0 font-mono text-umbra-muted">
                     {a.value.toLocaleString()}
                     {a.target && ` / ${a.target.toLocaleString()}`}
-                    {a.stars && ` ★${a.stars}`}
                   </span>
                 </div>
               ))}
@@ -351,7 +407,7 @@ function CareerSection({ detail }: { detail: MemberDetailView }) {
 }
 
 // ---------------------------------------------------------------------------
-// Section 6: Progression — in-game CoC style cards
+// Section 6: Progression — in-game CoC style, compact
 // ---------------------------------------------------------------------------
 
 function ProgressionSection({ detail }: { detail: MemberDetailView }) {
@@ -375,7 +431,9 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
     return (
       <div>
         <SectionLabel source="API fact">Progression</SectionLabel>
-        <p className="text-xs text-umbra-muted">Progression data pending first daily batch.</p>
+        <p className="text-xs text-umbra-muted">
+          Progression data pending first daily batch.
+        </p>
       </div>
     );
   }
@@ -383,15 +441,15 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       <SectionLabel source="API fact">Progression</SectionLabel>
-      <div className="space-y-4">
+      <div className="space-y-3">
         {categories
           .filter((c) => c.items.length > 0)
           .map((cat) => (
             <div key={cat.label}>
-              <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
-                {cat.label}
+              <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+                {cat.label} ({cat.items.length})
               </p>
-              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
+              <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8">
                 {cat.items.map((item) => (
                   <ProgressionCard
                     key={item.name}
@@ -409,11 +467,8 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
 }
 
 /**
- * In-game CoC style progression card:
- * - Square tile with the unit icon centered
- * - Level number in a small box at the bottom-left
- * - When maxed: the level box turns gold and shows "MAX"
- * - Unit name below the tile
+ * Compact in-game CoC style progression card.
+ * Small square tile with icon + level box at bottom-left.
  */
 function ProgressionCard({
   name,
@@ -428,35 +483,28 @@ function ProgressionCard({
   const isMaxed = maxLevel !== null && level >= maxLevel;
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      {/* The tile — square, with icon + level box */}
+    <div
+      className="group relative"
+      title={`${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`}
+    >
+      {/* Tile */}
       <div
-        className={`relative aspect-square w-full overflow-hidden rounded-lg border-2 ${
+        className={`relative aspect-square w-full overflow-hidden rounded-md border ${
           isMaxed
-            ? "border-amber-400/60 bg-amber-400/5"
+            ? "border-amber-400/50 bg-amber-400/5"
             : "border-umbra-line bg-umbra-ink/60"
         }`}
       >
-        {/* Unit icon (or text fallback) — centered, fills the tile */}
-        {icon ? (
-          <Image
-            src={icon}
-            alt={name}
-            fill
-            className="object-contain p-1"
-            unoptimized
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <span className="font-display text-2xl font-bold text-umbra-purple/60">
-              {name.charAt(0)}
-            </span>
-          </div>
-        )}
-
-        {/* Level box — bottom-left corner, in-game style */}
+        <Image
+          src={icon}
+          alt={name}
+          fill
+          className="object-contain p-1"
+          unoptimized
+        />
+        {/* Level box — bottom-left, in-game style */}
         <div
-          className={`absolute bottom-0.5 left-0.5 flex items-center justify-center rounded px-1.5 py-0.5 font-mono text-[10px] font-bold ${
+          className={`absolute bottom-0.5 left-0.5 rounded px-1 font-mono text-[9px] font-bold leading-tight ${
             isMaxed
               ? "bg-amber-400 text-umbra-ink"
               : "bg-umbra-ink/90 text-umbra-lilac"
@@ -464,19 +512,7 @@ function ProgressionCard({
         >
           {isMaxed ? "MAX" : level}
         </div>
-
-        {/* Max level indicator — small number top-right when not maxed */}
-        {maxLevel !== null && !isMaxed && (
-          <div className="absolute right-0.5 top-0.5 rounded bg-umbra-ink/80 px-1 font-mono text-[8px] text-umbra-muted">
-            {maxLevel}
-          </div>
-        )}
       </div>
-
-      {/* Unit name below the tile */}
-      <p className="w-full truncate text-center text-[10px] text-umbra-muted" title={name}>
-        {name}
-      </p>
     </div>
   );
 }
@@ -489,7 +525,7 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
   const r = detail.rushed;
   return (
     <div>
-      <SectionLabel source="derived analysis">Rushed analysis</SectionLabel>
+      <SectionLabel source="derived">Rushed analysis</SectionLabel>
       {r.overallPercent === null ? (
         <p className="text-xs text-umbra-muted">
           Not available yet — requires Town Hall cap reference data (Phase 3.0).
@@ -497,7 +533,9 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
       ) : (
         <>
           <div className="rounded-xl bg-white/[.035] p-3 text-center">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Overall rushed</p>
+            <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+              Overall rushed
+            </p>
             <p className="mt-1 font-display text-3xl font-bold text-amber-400">
               {r.overallPercent.toFixed(1)}%
             </p>
@@ -508,7 +546,9 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
                 <FactCell
                   key={c.category}
                   label={c.category}
-                  value={c.percent !== null ? `${c.percent.toFixed(0)}%` : <UnavailableValue />}
+                  value={
+                    c.percent !== null ? `${c.percent.toFixed(0)}%` : <UnavailableValue />
+                  }
                 />
               ))}
             </div>
@@ -532,8 +572,12 @@ function SectionLabel({
 }) {
   return (
     <div className="mb-2 flex items-center gap-2 border-b border-umbra-line/50 pb-1">
-      <h3 className="font-display text-sm font-semibold text-umbra-lilac">{children}</h3>
-      <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-purple">{source}</span>
+      <h3 className="font-display text-sm font-semibold text-umbra-lilac">
+        {children}
+      </h3>
+      <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-purple">
+        {source}
+      </span>
     </div>
   );
 }
@@ -546,8 +590,10 @@ function FactCell({
   value: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg bg-white/[.035] p-2">
-      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{label}</p>
+    <div className="flex h-full flex-col justify-center rounded-lg bg-white/[.035] p-2">
+      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+        {label}
+      </p>
       <p className="mt-0.5 text-xs font-semibold text-white">{value}</p>
     </div>
   );
@@ -564,7 +610,9 @@ function DonationCell({
 }) {
   return (
     <div className="rounded-lg bg-white/[.035] p-2 text-center">
-      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{label}</p>
+      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+        {label}
+      </p>
       <p className="mt-0.5 text-sm font-bold text-emerald-400">{given}</p>
       <p className="font-mono text-[10px] text-umbra-muted">/ {received}</p>
     </div>

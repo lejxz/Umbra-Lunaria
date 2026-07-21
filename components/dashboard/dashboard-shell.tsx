@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
 import { WarRecordCard } from "./war-record-card";
@@ -25,74 +25,6 @@ import { MemberDetailSheet } from "./member-detail-sheet";
  */
 export function DashboardShell({ data }: { data: DashboardData }) {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
-
-  // Build a member lookup map for the MemberDetailSheet. We only have
-  // activity-score data (which includes all retained members), so we use
-  // that as the source. Members not in the leaderboard won't have detail
-  // data here — the full member detail comes in Phase 1.3.
-  const memberMap = useMemo(() => {
-    const map = new Map<
-      string,
-      {
-        name: string;
-        role: string;
-        townHallLevel: number | null;
-        league?: { name: string; iconUrls?: { small?: string; tiny?: string } } | null;
-        leagueTier?: { name: string; iconUrls?: { small?: string } } | null;
-        warPreference?: string | null;
-        score?: number;
-        scoreComponents?: Array<{ name: string; available: boolean; points: number }>;
-      }
-    >();
-
-    for (const entry of data.activityScore.entries) {
-      map.set(entry.playerTag, {
-        name: entry.name,
-        role: entry.role,
-        townHallLevel: entry.townHallLevel,
-        league: entry.league,
-        leagueTier: entry.leagueTier,
-        score: entry.totalScore,
-        scoreComponents: entry.components.map((c) => ({
-          name: c.name,
-          available: c.available,
-          points: c.points,
-        })),
-      });
-    }
-
-    // Also add members from needs-attention and clan log that might not be
-    // in the leaderboard (e.g. departed/purged members in the log).
-    for (const m of data.needsAttention.inactive) {
-      if (!map.has(m.playerTag)) {
-        map.set(m.playerTag, {
-          name: m.name,
-          role: m.role,
-          townHallLevel: m.townHallLevel,
-        });
-      }
-    }
-    for (const m of data.needsAttention.attacksRemaining) {
-      if (!map.has(m.playerTag)) {
-        map.set(m.playerTag, {
-          name: m.name,
-          role: m.role,
-          townHallLevel: m.townHallLevel,
-        });
-      }
-    }
-    for (const m of data.needsAttention.warPreferenceOut) {
-      if (!map.has(m.playerTag)) {
-        map.set(m.playerTag, {
-          name: m.name,
-          role: m.role,
-          townHallLevel: m.townHallLevel,
-        });
-      }
-    }
-
-    return map;
-  }, [data]);
 
   return (
     <div className="mx-auto max-w-[1380px] p-5 sm:p-8 lg:p-10">
@@ -210,11 +142,10 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         </p>
       </footer>
 
-      {/* Member detail sheet */}
+      {/* Member detail sheet — fetches full detail on click */}
       <MemberDetailSheet
         playerTag={selectedMember}
         onClose={() => setSelectedMember(null)}
-        members={memberMap}
       />
     </div>
   );

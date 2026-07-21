@@ -142,10 +142,10 @@ export const unitIconMap: Record<string, string> = {
 /**
  * Resolve a CoC API unit name to a local icon path.
  *
- * @returns the local asset path when the unit is mapped, otherwise `null`.
- *          Callers MUST render a text fallback when this returns `null` —
- *          never render a broken image or invent a placeholder path.
+ * @returns the local asset path when the unit is mapped, otherwise the
+ *          placeholder path. This ensures every card renders an image —
+ *          no broken images, no text-only fallbacks.
  */
-export function getUnitIcon(name: string): string | null {
-  return unitIconMap[name] ?? null;
+export function getUnitIcon(name: string): string {
+  return unitIconMap[name] ?? "/assets/unit-icons/placeholder.svg";
 }
