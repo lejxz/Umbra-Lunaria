@@ -30,7 +30,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
       <div className="absolute inset-0 bg-gradient-to-r from-umbra-ink/95 via-umbra-ink/80 to-umbra-ink/90" />
 
       {/* Content */}
-      <div className="relative flex flex-col gap-8 p-5 sm:p-8 md:flex-row md:items-start md:justify-between">
+      <div className="relative flex flex-col gap-8 p-5 sm:p-8 md:flex-row md:items-center md:justify-between">
         
         {/* ===== LEFT COLUMN: Identity ===== */}
         <div className="flex flex-1 flex-col items-center text-center">
