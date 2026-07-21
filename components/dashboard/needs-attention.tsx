@@ -1,5 +1,6 @@
 import type { NeedsAttention as NeedsAttentionData } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 
 /**
  * Needs-attention panel. Shows three separate lists:
@@ -21,7 +22,12 @@ export function NeedsAttentionPanel({
     attention.warPreferenceOut.length;
 
   return (
-    <section className="glass rounded-2xl p-5" aria-labelledby="attention-title">
+    <section
+      className="glass flex flex-col rounded-2xl p-5"
+      aria-labelledby="attention-title"
+      style={{ minHeight: "380px" }}
+    >
+      {/* Header */}
       <div className="flex items-center justify-between">
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           Attention queue
@@ -30,20 +36,26 @@ export function NeedsAttentionPanel({
           {totalSignals} {totalSignals === 1 ? "signal" : "signals"}
         </Badge>
       </div>
-      <h3 id="attention-title" className="mt-1 font-display text-lg text-umbra-lilac">
+      <h3
+        id="attention-title"
+        className="mt-1 font-display text-lg text-umbra-lilac"
+      >
         Needs attention
       </h3>
 
       {totalSignals === 0 ? (
-        <p className="mt-4 text-sm text-umbra-muted">
-          No attention items. All members are active and up to date.
-        </p>
+        <div className="mt-4 flex flex-1 items-center justify-center">
+          <EmptyState
+            title="No attention items"
+            description="All members are active and up to date."
+          />
+        </div>
       ) : (
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 flex-1 space-y-4 overflow-y-auto">
           {/* Attacks remaining */}
           {attention.attacksRemaining.length > 0 && (
             <AttentionGroup
-              label="Attacks remaining in active war"
+              label="Attacks remaining"
               tone="warning"
               members={attention.attacksRemaining}
               onMemberClick={onMemberClick}
@@ -53,7 +65,7 @@ export function NeedsAttentionPanel({
           {/* Inactive */}
           {attention.inactive.length > 0 && (
             <AttentionGroup
-              label={`Inactive (${attention.inactivityThresholdDays}d+ threshold)`}
+              label={`Inactive (${attention.inactivityThresholdDays}d+)`}
               tone="danger"
               members={attention.inactive}
               onMemberClick={onMemberClick}
@@ -102,20 +114,17 @@ function AttentionGroup({
 
   return (
     <div>
-      <p className={`mb-2 text-xs font-semibold ${color}`}>{label}</p>
+      <p className={`mb-1.5 text-xs font-semibold ${color}`}>{label}</p>
       <div className="space-y-1.5">
         {members.map((m) => (
           <button
             key={m.playerTag}
             onClick={() => onMemberClick?.(m.playerTag)}
-            className="flex w-full items-center justify-between gap-3 rounded-lg bg-white/[.035] px-3 py-2 text-left transition hover:bg-white/[.06] focus-ring"
+            className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition hover:bg-white/[.06] focus-ring"
           >
             <div className="min-w-0">
               <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
-              <p className="truncate font-mono text-[10px] text-umbra-muted">
-                {m.playerTag}
-              </p>
-              <p className="truncate text-xs text-umbra-muted">
+              <p className="truncate text-[11px] text-umbra-muted">
                 {m.detail ?? m.reason}
               </p>
             </div>

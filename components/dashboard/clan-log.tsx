@@ -15,26 +15,34 @@ export function ClanLogPanel({
   onMemberClick?: (playerTag: string) => void;
 }) {
   return (
-    <section className="glass rounded-2xl p-5" aria-labelledby="clan-log-title">
+    <section
+      className="glass flex flex-col rounded-2xl p-5"
+      aria-labelledby="clan-log-title"
+      style={{ minHeight: "380px" }}
+    >
+      {/* Header */}
       <div className="flex items-center justify-between">
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           Roster history
         </p>
         <Badge tone="muted">{log.entries.length} recent</Badge>
       </div>
-      <h3 id="clan-log-title" className="mt-1 font-display text-lg text-umbra-lilac">
+      <h3
+        id="clan-log-title"
+        className="mt-1 font-display text-lg text-umbra-lilac"
+      >
         Clan log
       </h3>
 
       {log.entries.length === 0 ? (
-        <div className="mt-4">
+        <div className="mt-4 flex flex-1 items-center justify-center">
           <EmptyState
             title="No membership events yet"
             description="Joins, departures, and rejoins will appear here once the tracker observes them."
           />
         </div>
       ) : (
-        <div className="mt-4 max-h-80 space-y-1.5 overflow-y-auto">
+        <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto">
           {log.entries.map((entry) => {
             const tone =
               entry.eventType === "join"
@@ -46,9 +54,11 @@ export function ClanLogPanel({
             return (
               <button
                 key={entry.id}
-                onClick={() => !entry.isPurged && onMemberClick?.(entry.playerTag)}
+                onClick={() =>
+                  !entry.isPurged && onMemberClick?.(entry.playerTag)
+                }
                 disabled={entry.isPurged}
-                className={`flex w-full items-center justify-between gap-3 rounded-lg bg-white/[.035] px-3 py-2.5 text-left transition ${
+                className={`flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition ${
                   entry.isPurged
                     ? "cursor-default opacity-60"
                     : "hover:bg-white/[.06] focus-ring"
