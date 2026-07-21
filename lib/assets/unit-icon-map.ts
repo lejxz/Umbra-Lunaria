@@ -142,10 +142,16 @@ export const unitIconMap: Record<string, string> = {
 /**
  * Resolve a CoC API unit name to a local icon path.
  *
- * @returns the local asset path when the unit is mapped, otherwise the
- *          placeholder path. This ensures every card renders an image —
- *          no broken images, no text-only fallbacks.
+ * Currently returns the placeholder for ALL units because the real Fankit
+ * PNG assets haven't been downloaded yet. When real icons are added, replace
+ * the return with `unitIconMap[name] ?? "/assets/unit-icons/placeholder.svg"`.
+ *
+ * The progression cards are auto-populated from the API response — if a new
+ * troop is added by Supercell, it will appear automatically (with the
+ * placeholder icon) without any code changes.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function getUnitIcon(name: string): string {
-  return unitIconMap[name] ?? "/assets/unit-icons/placeholder.svg";
+  // TODO: When real Fankit PNGs are added, use: return unitIconMap[name] ?? "/assets/unit-icons/placeholder.svg";
+  return "/assets/unit-icons/placeholder.svg";
 }

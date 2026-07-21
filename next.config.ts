@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+    // Allow local SVG placeholders for unit icons.
+    dangerouslyAllowSVG: true,
   },
 };
 

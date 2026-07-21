@@ -5,7 +5,23 @@ import type { MemberDetailView } from "@/lib/view-models/members";
 import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
+import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
+
+/**
+ * Convert a Date or ISO string to a Date object.
+ * When data comes from the API (JSON), dates are serialized as strings.
+ */
+function toDate(d: Date | string | null): Date | null {
+  if (!d) return null;
+  return d instanceof Date ? d : new Date(d);
+}
+
+function formatDate(d: Date | string | null, opts?: Intl.DateTimeFormatOptions): string {
+  const date = toDate(d);
+  if (!date) return "—";
+  return date.toLocaleDateString("en-US", opts ?? { month: "short", day: "numeric", timeZone: "Asia/Manila" });
+}
 
 /**
  * Full member detail sheet with 7 sections per concept/06-members.md.
@@ -45,7 +61,7 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
         <div className="rounded-lg bg-amber-400/10 px-4 py-2 text-sm text-amber-400">
           ⚠ This member departed on{" "}
           {detail.profile.leftAt
-            ? detail.profile.leftAt.toLocaleDateString("en-US", {
+            ? formatDate(detail.profile.leftAt, {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
@@ -61,6 +77,7 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
       <WarSection detail={detail} />
       <CareerSection detail={detail} />
       <ProgressionSection detail={detail} />
+      <AchievementsSection detail={detail} />
       <RushedSection detail={detail} />
     </div>
   );
@@ -133,7 +150,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           label="Joined"
           value={
             p.joinedAt
-              ? p.joinedAt.toLocaleDateString("en-US", {
+              ? formatDate(p.joinedAt, {
                   month: "short",
                   day: "numeric",
                   timeZone: "Asia/Manila",
@@ -160,7 +177,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           label="Last active"
           value={
             a.lastActiveAt
-              ? a.lastActiveAt.toLocaleDateString("en-US", {
+              ? formatDate(a.lastActiveAt, {
                   month: "short",
                   day: "numeric",
                   timeZone: "Asia/Manila",
@@ -172,7 +189,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           label="Tracking started"
           value={
             a.trackingStart
-              ? a.trackingStart.toLocaleDateString("en-US", {
+              ? formatDate(a.trackingStart, {
                   month: "short",
                   day: "numeric",
                   timeZone: "Asia/Manila",
@@ -237,6 +254,19 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
           value={d.activityScore !== null ? d.activityScore.toFixed(1) : <UnavailableValue />}
         />
       </div>
+
+      {/* 30-day donation chart — reuses the dashboard DonationChart */}
+      {d.buckets.length > 0 && (
+        <div className="mt-3">
+          <p className="mb-1 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+            30-day trend
+          </p>
+          <div className="h-[140px]">
+            <DonationChart buckets={d.buckets} />
+          </div>
+        </div>
+      )}
+
       {d.activityScoreComponents.length > 0 && (
         <div className="mt-2 grid grid-cols-2 gap-1 sm:grid-cols-4">
           {d.activityScoreComponents.map((c) => (
@@ -354,7 +384,6 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
 
 function CareerSection({ detail }: { detail: MemberDetailView }) {
   const c = detail.career;
-  const [showAll, setShowAll] = useState(false);
   return (
     <div>
       <SectionLabel source="API fact">Career</SectionLabel>
@@ -373,35 +402,49 @@ function CareerSection({ detail }: { detail: MemberDetailView }) {
           value={c.bestBuilderBaseTrophies ?? <UnavailableValue />}
         />
       </div>
-      {c.achievements.length > 0 && (
-        <div className="mt-3">
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className="font-mono text-[10px] uppercase tracking-wider text-umbra-purple transition hover:text-umbra-lilac"
-          >
-            {showAll ? "Hide" : "Show"} {c.achievements.length} achievements
-          </button>
-          {showAll && (
-            <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
-              {c.achievements.map((a) => (
-                <div
-                  key={a.name}
-                  className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-1.5 text-xs"
-                >
-                  <span className="truncate text-umbra-lilac">{a.name}</span>
-                  <span className="shrink-0 font-mono text-umbra-muted">
-                    {a.value.toLocaleString()}
-                    {a.target && ` / ${a.target.toLocaleString()}`}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
       <p className="mt-2 text-[11px] text-umbra-muted">
         Lifetime Supercell totals — not tracked since Umbra Lunaria began.
       </p>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Section 5b: Achievements (after progression)
+// ---------------------------------------------------------------------------
+
+function AchievementsSection({ detail }: { detail: MemberDetailView }) {
+  const c = detail.career;
+  const [showAll, setShowAll] = useState(false);
+
+  if (c.achievements.length === 0) return null;
+
+  return (
+    <div>
+      <SectionLabel source="API fact">Achievements</SectionLabel>
+      <button
+        onClick={() => setShowAll(!showAll)}
+        className="font-mono text-[10px] uppercase tracking-wider text-umbra-purple transition hover:text-umbra-lilac"
+      >
+        {showAll ? "Hide" : "Show"} {c.achievements.length} achievements
+      </button>
+      {showAll && (
+        <div className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-2">
+          {c.achievements.map((a) => (
+            <div
+              key={a.name}
+              className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-1.5 text-xs"
+            >
+              <span className="truncate text-umbra-lilac">{a.name}</span>
+              <span className="shrink-0 font-mono text-umbra-muted">
+                {a.value.toLocaleString()}
+                {a.target && ` / ${a.target.toLocaleString()}`}
+                {a.stars && ` ★${a.stars}`}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -449,7 +492,7 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
               <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
                 {cat.label} ({cat.items.length})
               </p>
-              <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 md:grid-cols-8">
+              <div className="grid grid-cols-8 gap-1 sm:grid-cols-10 md:grid-cols-12">
                 {cat.items.map((item) => (
                   <ProgressionCard
                     key={item.name}
@@ -502,12 +545,12 @@ function ProgressionCard({
           className="object-contain p-1"
           unoptimized
         />
-        {/* Level box — bottom-left, in-game style */}
+        {/* Level box — bottom-left, in-game style, bigger for readability */}
         <div
-          className={`absolute bottom-0.5 left-0.5 rounded px-1 font-mono text-[9px] font-bold leading-tight ${
+          className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-[11px] font-bold leading-none ${
             isMaxed
               ? "bg-amber-400 text-umbra-ink"
-              : "bg-umbra-ink/90 text-umbra-lilac"
+              : "bg-umbra-ink/95 text-umbra-lilac"
           }`}
         >
           {isMaxed ? "MAX" : level}
