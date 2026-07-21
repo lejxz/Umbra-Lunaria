@@ -158,11 +158,11 @@ function TotalChip({
   value: number | string | null;
 }) {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-2">
+    <div className="flex h-8 items-center gap-1.5 px-3">
       <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-display text-sm font-bold text-white">
+      <span className="font-display text-sm font-bold leading-none text-white">
         {value ?? <UnavailableValue />}
       </span>
     </div>

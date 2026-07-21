@@ -55,11 +55,11 @@ export function ActivityTimelinePanel({
         <div className="flex flex-wrap items-center gap-4">
           {/* Compact stats card */}
           <div className="hidden md:flex items-center rounded-xl bg-white/5 p-1">
-            <div className="flex items-center gap-1.5 px-3 py-2">
+            <div className="flex h-8 items-center gap-1.5 px-3">
               <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
                 Active · {window}
               </span>
-              <span className="font-display text-sm font-bold text-white">
+              <span className="font-display text-sm font-bold leading-none text-white">
                 {current.totalActiveMembers}
                 <span className="ml-1 text-[11px] text-umbra-muted">
                   / {current.totalMembers}
@@ -67,11 +67,11 @@ export function ActivityTimelinePanel({
               </span>
             </div>
             <div className="h-4 w-px bg-white/10 mx-1" />
-            <div className="flex items-center gap-1.5 px-3 py-2">
+            <div className="flex h-8 items-center gap-1.5 px-3">
               <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
                 Rate
               </span>
-              <span className="font-display text-sm font-bold text-white">
+              <span className="font-display text-sm font-bold leading-none text-white">
                 {current.totalMembers > 0
                   ? `${((current.totalActiveMembers / current.totalMembers) * 100).toFixed(0)}%`
                   : "—"}
