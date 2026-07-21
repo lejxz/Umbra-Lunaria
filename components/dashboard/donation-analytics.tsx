@@ -37,8 +37,8 @@ export function DonationAnalytics({
       aria-labelledby="donation-title"
       style={{ minHeight: "380px" }}
     >
-      {/* Header + tabs */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* Header + Stats + Tabs */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
             Contribution pulse
@@ -50,37 +50,34 @@ export function DonationAnalytics({
             Clan donations
           </h3>
         </div>
-        <Tabs
-          items={["24h", "7d", "30d"]}
-          active={window}
-          onChange={(v) => setWindow(v as DonationWindow)}
-          label="Donation window"
-        />
-      </div>
-
-      {/* Compact totals — inline, not big cards */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <TotalChip
-          label="Given"
-          value={current.totals.given}
-        />
-        <TotalChip
-          label="Received"
-          value={current.totals.received}
-        />
-        <TotalChip
-          label="Ratio"
-          value={
-            current.totals.ratio !== null
-              ? current.totals.ratio.toFixed(2)
-              : null
-          }
-        />
-        {current.totals.hasPartialData && (
-          <span className="text-[11px] text-amber-400">
-            ⚠ Partial data
-          </span>
-        )}
+        
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Compact totals card */}
+          <div className="hidden md:flex items-center gap-4 rounded-lg bg-white/[.03] border border-white/5 px-4 py-1.5 backdrop-blur-sm">
+            <TotalChip label="Given" value={current.totals.given} />
+            <div className="h-4 w-px bg-white/10" />
+            <TotalChip label="Received" value={current.totals.received} />
+            <div className="h-4 w-px bg-white/10" />
+            <TotalChip
+              label="Ratio"
+              value={
+                current.totals.ratio !== null
+                  ? current.totals.ratio.toFixed(2)
+                  : null
+              }
+            />
+            {current.totals.hasPartialData && (
+              <span className="ml-2 text-[10px] text-amber-400">⚠ Partial</span>
+            )}
+          </div>
+          
+          <Tabs
+            items={["24h", "7d", "30d"]}
+            active={window}
+            onChange={(v) => setWindow(v as DonationWindow)}
+            label="Donation window"
+          />
+        </div>
       </div>
 
       {/* Chart + Top donors — chart fills remaining height */}

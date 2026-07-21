@@ -38,8 +38,8 @@ export function ActivityTimelinePanel({
       className="glass rounded-2xl p-5 sm:p-6"
       aria-labelledby="activity-title"
     >
-      {/* Header + tabs */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      {/* Header + Stats + Tabs */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
             Roster signal
@@ -51,40 +51,44 @@ export function ActivityTimelinePanel({
             Activity timeline
           </h3>
         </div>
-        <Tabs
-          items={["24h", "7d", "30d"]}
-          active={window}
-          onChange={(v) => setWindow(v as DonationWindow)}
-          label="Activity window"
-        />
-      </div>
-
-      {/* Compact stats — inline, matching donation card style */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
-            Active · {window}
-          </span>
-          <span className="font-display text-lg font-bold text-white">
-            {current.totalActiveMembers}
-            <span className="ml-1 text-sm text-umbra-muted">
-              / {current.totalMembers}
-            </span>
-          </span>
+        
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Compact stats card */}
+          <div className="hidden md:flex items-center gap-4 rounded-lg bg-white/[.03] border border-white/5 px-4 py-1.5 backdrop-blur-sm">
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+                Active · {window}
+              </span>
+              <span className="font-display text-lg font-bold text-white">
+                {current.totalActiveMembers}
+                <span className="ml-1 text-sm text-umbra-muted">
+                  / {current.totalMembers}
+                </span>
+              </span>
+            </div>
+            <div className="h-4 w-px bg-white/10" />
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+                Rate
+              </span>
+              <span className="font-display text-lg font-bold text-white">
+                {current.totalMembers > 0
+                  ? `${((current.totalActiveMembers / current.totalMembers) * 100).toFixed(0)}%`
+                  : "—"}
+              </span>
+            </div>
+            {current.hasPartialData && (
+              <span className="ml-2 text-[10px] text-amber-400">⚠ Partial</span>
+            )}
+          </div>
+          
+          <Tabs
+            items={["24h", "7d", "30d"]}
+            active={window}
+            onChange={(v) => setWindow(v as DonationWindow)}
+            label="Activity window"
+          />
         </div>
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
-            Rate
-          </span>
-          <span className="font-display text-lg font-bold text-white">
-            {current.totalMembers > 0
-              ? `${((current.totalActiveMembers / current.totalMembers) * 100).toFixed(0)}%`
-              : "—"}
-          </span>
-        </div>
-        {current.hasPartialData && (
-          <span className="text-[11px] text-amber-400">⚠ Partial data</span>
-        )}
       </div>
 
       {/* Chart — explicit height so ResponsiveContainer can render */}
@@ -102,9 +106,6 @@ export function ActivityTimelinePanel({
         )}
       </div>
 
-      <p className="mt-3 text-xs text-umbra-muted">
-        Estimated from observed changes — not online presence.
-      </p>
     </section>
   );
 }
