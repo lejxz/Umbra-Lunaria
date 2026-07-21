@@ -30,7 +30,7 @@ body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(9, 8, 17, 0.95);
+  background: rgba(9, 8, 17, 0.9);
   pointer-events: none;
   z-index: 0;
 }
@@ -43,7 +43,7 @@ body > * {
 
 @layer components {
   .glass {
-    @apply border border-umbra-line bg-umbra-surface/80 shadow-2xl backdrop-blur-xl;
+    @apply border border-umbra-line bg-umbra-surface/40 shadow-2xl backdrop-blur-md;
   }
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umbra-purple focus-visible:ring-offset-2 focus-visible:ring-offset-umbra-ink;
