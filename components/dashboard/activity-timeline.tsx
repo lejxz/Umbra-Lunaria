@@ -35,9 +35,8 @@ export function ActivityTimelinePanel({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5 sm:p-6"
+      className="glass rounded-2xl p-5 sm:p-6"
       aria-labelledby="activity-title"
-      style={{ minHeight: "380px" }}
     >
       {/* Header + tabs */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -88,12 +87,12 @@ export function ActivityTimelinePanel({
         )}
       </div>
 
-      {/* Chart — fills remaining height */}
-      <div className="mt-4 min-h-[180px] flex-1">
+      {/* Chart — explicit height so ResponsiveContainer can render */}
+      <div className="mt-4 h-[220px]">
         {current.buckets.length > 0 ? (
           <ActivityChart buckets={current.buckets} />
         ) : (
-          <div className="flex h-full min-h-[180px] items-center justify-center">
+          <div className="flex h-full items-center justify-center">
             <EmptyState
               title="No activity yet"
               description="Observed activity will appear once members change donations or trophies between polls."
