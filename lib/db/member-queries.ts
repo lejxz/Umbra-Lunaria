@@ -24,6 +24,7 @@ import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { computeWindow } from "@/lib/time/windows";
 import { calculateDonationWindow } from "@/lib/scoring/donations";
 import { computeWarMetrics } from "@/lib/scoring/war-metrics";
+import { computeRushed } from "@/lib/scoring/rushed";
 
 // ---------------------------------------------------------------------------
 // Roster
@@ -157,10 +158,7 @@ export async function getMemberDetail(
         })),
     },
     progression: progressionData,
-    rushed: {
-      overallPercent: null, // Phase 3.0
-      categoryBreakdown: [],
-    },
+    rushed: computeRushedFromProgression(progressionData),
   };
 }
 
@@ -530,5 +528,35 @@ async function getProgressionDetail(playerTag: string) {
     pets: pets.map((p) => ({ name: p.name, level: p.level, maxLevel: p.maxLevel ?? null })),
     builderBaseTroops: (builderBase.troops ?? []).map((t) => ({ name: t.name, level: t.level, maxLevel: t.maxLevel ?? null })),
     builderBaseHeroes: (builderBase.heroes ?? []).map((h) => ({ name: h.name, level: h.level, maxLevel: h.maxLevel ?? null })),
+  };
+}
+
+/**
+ * Compute rushed analysis from progression data using the API's maxLevel.
+ * See concept/06-members.md §7 and lib/scoring/rushed.ts.
+ */
+function computeRushedFromProgression(p: {
+  troops: Array<{ name: string; level: number; maxLevel: number | null }>;
+  heroes: Array<{ name: string; level: number; maxLevel: number | null }>;
+  heroEquipment: Array<{ name: string; level: number; maxLevel: number | null }>;
+  spells: Array<{ name: string; level: number; maxLevel: number | null }>;
+  pets: Array<{ name: string; level: number; maxLevel: number | null }>;
+  builderBaseTroops: Array<{ name: string; level: number; maxLevel: number | null }>;
+  builderBaseHeroes: Array<{ name: string; level: number; maxLevel: number | null }>;
+}) {
+  const result = computeRushed([
+    { category: "Troops", items: p.troops },
+    { category: "Heroes", items: p.heroes },
+    { category: "Equipment", items: p.heroEquipment },
+    { category: "Spells", items: p.spells },
+    { category: "Pets", items: p.pets },
+  ]);
+
+  return {
+    overallPercent: result.overallPercent,
+    categoryBreakdown: result.categoryBreakdown.map((c) => ({
+      category: c.category,
+      percent: c.percent,
+    })),
   };
 }

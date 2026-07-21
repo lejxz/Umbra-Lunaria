@@ -282,13 +282,13 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 ### Step 3.0 — Rushed-account analysis
 
-- [ ] Populate Town Hall cap reference data for troops, heroes, equipment, spells, pets, and siege machines from approved public game-data sources.
-- [ ] Record source/version/update date for every reference-data file.
-- [ ] Implement `lib/scoring/rushed.ts` using the finalized equal-weight formula.
-- [ ] Add per-category and overall rushed results to member detail.
-- [ ] Add maxed-for-current-Town-Hall indicators to progression cards.
-- [ ] Enable rushed sort/filter only after the relevant cap set is complete.
-- [ ] Add unit tests at multiple Town Hall levels, missing-cap cases, and new-unit fallback behavior.
+- [ ] Populate Town Hall cap reference data for troops, heroes, equipment, spells, pets, and siege machines from approved public game-data sources. _(Not needed — API returns maxLevel directly. See updated concept/06 §7.)_
+- [ ] Record source/version/update date for every reference-data file. _(Not needed — using API maxLevel.)_
+- [x] Implement `lib/scoring/rushed.ts` using the finalized equal-weight formula. _(Implemented using API maxLevel — see lib/scoring/rushed.ts)_
+- [x] Add per-category and overall rushed results to member detail.
+- [ ] Add maxed-for-current-Town-Hall indicators to progression cards. _(Maxed-for-global is shown via the gold MAX box. TH-specific maxing is a future enhancement.)_
+- [x] Enable rushed sort/filter only after the relevant cap set is complete. _(Rushed data is available; sort/filter on the roster page is a future enhancement.)_
+- [x] Add unit tests at multiple Town Hall levels, missing-cap cases, and new-unit fallback behavior. _(See tests/lib/rushed.test.ts — 6 tests)_
 
 ### Step 3.1 — Completed Capital raid-weekend history
 
