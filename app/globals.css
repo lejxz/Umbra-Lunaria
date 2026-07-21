@@ -25,12 +25,12 @@ body {
 }
 
 /* Subtle dark overlay on top of the background image so content is readable
-   but the background is still visible at ~15% opacity. */
+   but the background is barely visible at ~5% opacity. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(9, 8, 17, 0.85);
+  background: rgba(9, 8, 17, 0.95);
   pointer-events: none;
   z-index: 0;
 }
