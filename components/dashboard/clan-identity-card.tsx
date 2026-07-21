@@ -103,19 +103,19 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
           {/* Labels */}
           {clan.labels && clan.labels.length > 0 && (
-            <div className="mt-2 flex flex-wrap justify-start gap-2 pt-2">
+            <div className="mt-2 flex flex-wrap justify-start gap-1.5 pt-2">
               {clan.labels.map((label) => (
                 <span
                   key={label.name}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-umbra-ink/50 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-umbra-muted backdrop-blur-sm shadow-md"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-umbra-ink/50 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-umbra-muted backdrop-blur-sm shadow-md"
                 >
                   {label.iconUrls?.small && (
                     <Image
                       src={label.iconUrls.small}
                       alt=""
-                      width={14}
-                      height={14}
-                      className="h-3.5 w-3.5"
+                      width={12}
+                      height={12}
+                      className="h-3 w-3"
                       unoptimized
                     />
                   )}
