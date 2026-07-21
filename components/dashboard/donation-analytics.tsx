@@ -53,11 +53,11 @@ export function DonationAnalytics({
         
         <div className="flex flex-wrap items-center gap-4">
           {/* Compact totals card */}
-          <div className="hidden md:flex items-center gap-4 rounded-lg bg-white/[.03] border border-white/5 px-4 py-1.5 backdrop-blur-sm">
+          <div className="hidden md:flex items-center rounded-xl bg-white/5 p-1">
             <TotalChip label="Given" value={current.totals.given} />
-            <div className="h-4 w-px bg-white/10" />
+            <div className="h-4 w-px bg-white/10 mx-1" />
             <TotalChip label="Received" value={current.totals.received} />
-            <div className="h-4 w-px bg-white/10" />
+            <div className="h-4 w-px bg-white/10 mx-1" />
             <TotalChip
               label="Ratio"
               value={
@@ -67,7 +67,7 @@ export function DonationAnalytics({
               }
             />
             {current.totals.hasPartialData && (
-              <span className="ml-2 text-[10px] text-amber-400">⚠ Partial</span>
+              <span className="ml-2 pr-3 text-[10px] text-amber-400">⚠ Partial</span>
             )}
           </div>
           
@@ -158,11 +158,11 @@ function TotalChip({
   value: number | string | null;
 }) {
   return (
-    <div className="flex items-baseline gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+    <div className="flex items-center gap-1.5 px-3 py-2">
+      <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-display text-lg font-bold text-white">
+      <span className="font-display text-sm font-bold text-white">
         {value ?? <UnavailableValue />}
       </span>
     </div>
