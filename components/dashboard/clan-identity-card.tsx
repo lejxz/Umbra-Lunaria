@@ -33,8 +33,8 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
       <div className="relative flex flex-col gap-8 p-5 sm:p-8 md:flex-row md:items-start md:justify-between">
         
         {/* ===== LEFT COLUMN: Identity ===== */}
-        <div className="flex flex-1 flex-col items-center text-center md:items-start md:text-left">
-          <div className="flex flex-col items-center gap-4 md:flex-row md:items-center">
+        <div className="flex flex-1 flex-col items-center text-center">
+          <div className="flex flex-col items-center gap-4">
             {/* Badge */}
             <div className="shrink-0">
               {clan.badgeUrls?.large || clan.badgeUrls?.medium ? (
@@ -70,7 +70,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
           {/* Description */}
           {clan.description && (
             <div className="mt-4 w-full max-w-[420px]">
-              <p className="whitespace-pre-line break-words text-left text-sm leading-relaxed text-umbra-muted">
+              <p className="whitespace-pre-line break-words text-center text-sm leading-relaxed text-umbra-muted">
                 {clan.description}
               </p>
             </div>
@@ -78,7 +78,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
           {/* Labels */}
           {clan.labels && clan.labels.length > 0 && (
-            <div className="mt-5 flex flex-wrap justify-center gap-2 md:justify-start">
+            <div className="mt-5 flex flex-wrap justify-center gap-2">
               {clan.labels.map((label) => (
                 <span
                   key={label.name}
@@ -103,9 +103,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
         {/* ===== RIGHT COLUMN: Stats List ===== */}
         <div className="flex w-full shrink-0 flex-col md:max-w-[340px] lg:max-w-[400px]">
-          <StatRow label="Clan Level" value={clan.clanLevel} />
           <StatRow label="Members" value={clan.memberCount ? `${clan.memberCount}/50` : <UnavailableValue />} />
-          <div className="my-2" />
           <StatRow label="Clan War League" value={clan.warLeague?.name ?? <UnavailableValue />} />
           <StatRow label="Clan Location" value={clan.location?.name ?? <UnavailableValue />} />
           <StatRow label="Chat Language" value={clan.chatLanguage?.name ?? <UnavailableValue />} />
@@ -126,8 +124,6 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
             }
           />
           <StatRow label="Required League" value={clan.requiredTrophies} />
-          <div className="my-2" />
-          <StatRow label="Capital League" value={clan.capitalLeague?.name ?? <UnavailableValue />} />
         </div>
       </div>
     </section>
