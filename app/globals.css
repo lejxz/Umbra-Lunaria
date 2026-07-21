@@ -13,10 +13,32 @@
 }
 
 body {
-  background: radial-gradient(circle at 76% 0%, #211747 0, transparent 35%),
-    #090811;
+  background-color: #090811;
+  background-image: url("/assets/Clan-Card-Background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: #eee5ff;
   font-family: var(--font-sans);
+  position: relative;
+}
+
+/* Subtle dark overlay on top of the background image so content is readable
+   but the background is still visible at ~15% opacity. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(9, 8, 17, 0.85);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure all content sits above the overlay */
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 @layer components {

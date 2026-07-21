@@ -25,7 +25,7 @@ export function NeedsAttentionPanel({
     <section
       className="glass flex flex-col rounded-2xl p-5"
       aria-labelledby="attention-title"
-      style={{ minHeight: "380px" }}
+      style={{ height: "380px" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
