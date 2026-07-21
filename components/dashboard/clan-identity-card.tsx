@@ -78,7 +78,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
         </div>
 
         {/* ===== RIGHT COLUMN: Stats List ===== */}
-        <div className="flex w-full shrink-0 flex-col md:max-w-[340px] lg:max-w-[400px]">
+        <div className="flex w-full shrink-0 flex-col rounded-xl border border-white/5 bg-umbra-ink/40 p-5 backdrop-blur-md md:max-w-[340px] lg:max-w-[400px]">
           <StatRow label="Members" value={clan.memberCount ? `${clan.memberCount}/50` : <UnavailableValue />} />
           <StatRow label="Clan War League" value={clan.warLeague?.name ?? <UnavailableValue />} />
           <StatRow label="Clan Location" value={clan.location?.name ?? <UnavailableValue />} />
@@ -103,7 +103,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
           {/* Labels */}
           {clan.labels && clan.labels.length > 0 && (
-            <div className="mt-4 flex flex-wrap justify-start gap-2 pt-2">
+            <div className="mt-2 flex flex-wrap justify-start gap-2 pt-2">
               {clan.labels.map((label) => (
                 <span
                   key={label.name}
@@ -142,11 +142,11 @@ function StatRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-white/10 py-1.5 last:border-0 last:pb-0">
-      <span className="font-mono text-[11px] font-semibold text-white shadow-black drop-shadow-md">
+    <div className="flex items-center justify-between border-b border-white/5 py-2.5 last:border-0 last:pb-0">
+      <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="text-right text-[13px] font-medium text-white shadow-black drop-shadow-md">
+      <span className="text-right text-[13px] font-semibold text-white">
         {value ?? <UnavailableValue />}
       </span>
     </div>
