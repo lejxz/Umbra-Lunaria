@@ -41,6 +41,9 @@ export function CurrentWarCard({
 
       {warSummary.state === null || warSummary.state === "notInWar" ? (
         <div className="mt-4 flex flex-1 flex-col items-center justify-center py-6">
+          <div className="mb-3 flex justify-center text-umbra-purple/40">
+            <WarEmptyIcon />
+          </div>
           <p className="text-sm text-umbra-muted">
             {warSummary.state === null ? "No war data yet" : "Clan is at peace"}
           </p>
@@ -185,6 +188,38 @@ function VsIcon() {
         <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#EEE5FF" />
         <polygon points="-1,4 1,4 0,7" fill="#EEE5FF" />
       </g>
+    </svg>
+  );
+}
+
+/**
+ * Empty state icon for War
+ */
+function WarEmptyIcon() {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M24 4C14 4 10 10 10 10V22C10 32 22 42 24 44C26 42 38 32 38 22V10C38 10 34 4 24 4Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray="2 4"
+      />
+      <path
+        d="M17 17L31 31M31 17L17 31"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

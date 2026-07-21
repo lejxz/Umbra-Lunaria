@@ -94,6 +94,7 @@ export function ActivityTimelinePanel({
         ) : (
           <div className="flex h-full items-center justify-center">
             <EmptyState
+              icon={<ActivityEmptyIcon />}
               title="No activity yet"
               description="Observed activity will appear once members change donations or trophies between polls."
             />
@@ -129,7 +130,7 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
           axisLine={false}
           interval="preserveStartEnd"
           minTickGap={30}
-          angle={-30}
+          angle={-45}
           textAnchor="end"
           height={40}
         />
@@ -160,5 +161,27 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
+  );
+}
+
+function ActivityEmptyIcon() {
+  return (
+    <svg
+      width="48"
+      height="48"
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M8 24H16L20 12L28 36L32 24H40"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray="2 4"
+      />
+    </svg>
   );
 }

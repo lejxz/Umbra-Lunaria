@@ -37,7 +37,7 @@ export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
           axisLine={false}
           interval="preserveStartEnd"
           minTickGap={30}
-          angle={-30}
+          angle={-45}
           textAnchor="end"
           height={40}
         />
