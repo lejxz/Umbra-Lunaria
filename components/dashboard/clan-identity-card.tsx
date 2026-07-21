@@ -51,34 +51,13 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
             </div>
           </div>
 
-          {/* Meta chips — below the clan tag */}
-          <div className="flex flex-wrap gap-1.5">
-            {clan.location?.name && <Chip>{clan.location.name}</Chip>}
-            {clan.type && (
-              <Chip>
-                {clan.type === "open"
-                  ? "Open"
-                  : clan.type === "inviteOnly"
-                    ? "Invite only"
-                    : clan.type === "closed"
-                      ? "Closed"
-                      : clan.type}
-              </Chip>
-            )}
-            {clan.isFamilyFriendly !== null && (
-              <Chip tone={clan.isFamilyFriendly ? "success" : "muted"}>
-                {clan.isFamilyFriendly
-                  ? "Family-friendly"
-                  : "Not family-friendly"}
-              </Chip>
-            )}
-            {clan.chatLanguage?.name && <Chip>{clan.chatLanguage.name}</Chip>}
-          </div>
-
-          {/* Description — in a container matching the stat card background */}
+          {/* Description — in a container matching the stat card background.
+              Width constrained to match CoC's in-game description box
+              (~40 chars per line), with break-words for long unbroken lines. */}
           {clan.description && (
             <div className="rounded-xl border border-umbra-line bg-umbra-ink/40 p-3">
-              <p className="whitespace-pre-line text-xs leading-relaxed text-umbra-muted">
+              <p className="whitespace-pre-line break-words text-xs leading-relaxed text-umbra-muted"
+                 style={{ maxWidth: "320px" }}>
                 {clan.description}
               </p>
             </div>
@@ -121,9 +100,28 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
             label="Capital league"
             value={clan.capitalLeague?.name ?? <UnavailableValue />}
           />
-          <StatCard label="War wins" value={clan.warWins} tone="success" />
-          <StatCard label="War losses" value={clan.warLosses} tone="danger" />
-          <StatCard label="Win streak" value={clan.warWinStreak} tone="brand" />
+          <StatCard
+            label="Location"
+            value={clan.location?.name ?? <UnavailableValue />}
+          />
+          <StatCard
+            label="Type"
+            value={
+              clan.type
+                ? clan.type === "open"
+                  ? "Open"
+                  : clan.type === "inviteOnly"
+                    ? "Invite only"
+                    : clan.type === "closed"
+                      ? "Closed"
+                      : clan.type
+                : <UnavailableValue />
+            }
+          />
+          <StatCard
+            label="Language"
+            value={clan.chatLanguage?.name ?? <UnavailableValue />}
+          />
           <StatCard label="Req. trophies" value={clan.requiredTrophies} />
         </div>
       </div>
@@ -162,26 +160,3 @@ function StatCard({
   );
 }
 
-/** Pill chip for meta info (location, type, etc.) */
-function Chip({
-  children,
-  tone = "default",
-}: {
-  children: React.ReactNode;
-  tone?: "default" | "success" | "muted";
-}) {
-  const classes =
-    tone === "success"
-      ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-400"
-      : tone === "muted"
-        ? "border-white/10 bg-white/5 text-umbra-muted"
-        : "border-umbra-purple/20 bg-umbra-purple/10 text-umbra-lilac";
-
-  return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-medium ${classes}`}
-    >
-      {children}
-    </span>
-  );
-}
