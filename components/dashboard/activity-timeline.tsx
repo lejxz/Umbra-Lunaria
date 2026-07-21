@@ -21,6 +21,9 @@ import {
  * Activity timeline panel. Shows active-member count and percent of the
  * retained roster for 24-hour, 7-day, and 30-day windows. Labeled as
  * observed activity, never "online now." See concept/05-dashboard.md §6.
+ *
+ * Styled consistently with the donation analytics card: compact inline
+ * stats, chart fills remaining height, same axis treatment.
  */
 export function ActivityTimelinePanel({
   dataByWindow,
@@ -31,13 +34,21 @@ export function ActivityTimelinePanel({
   const current = dataByWindow[window];
 
   return (
-    <section className="glass rounded-2xl p-5" aria-labelledby="activity-title">
+    <section
+      className="glass flex flex-col rounded-2xl p-5 sm:p-6"
+      aria-labelledby="activity-title"
+      style={{ minHeight: "380px" }}
+    >
+      {/* Header + tabs */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
             Roster signal
           </p>
-          <h3 id="activity-title" className="mt-1 font-display text-lg text-umbra-lilac">
+          <h3
+            id="activity-title"
+            className="mt-1 font-display text-lg text-umbra-lilac"
+          >
             Activity timeline
           </h3>
         </div>
@@ -49,43 +60,40 @@ export function ActivityTimelinePanel({
         />
       </div>
 
-      {/* Summary stats */}
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-white/[.035] p-3">
-          <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-            Active members · {window}
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-white">
+      {/* Compact stats — inline, matching donation card style */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+            Active · {window}
+          </span>
+          <span className="font-display text-lg font-bold text-white">
             {current.totalActiveMembers}
             <span className="ml-1 text-sm text-umbra-muted">
               / {current.totalMembers}
             </span>
-          </p>
+          </span>
         </div>
-        <div className="rounded-xl bg-white/[.035] p-3">
-          <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-            Participation rate
-          </p>
-          <p className="mt-1 font-display text-2xl font-bold text-white">
+        <div className="flex items-baseline gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+            Rate
+          </span>
+          <span className="font-display text-lg font-bold text-white">
             {current.totalMembers > 0
               ? `${((current.totalActiveMembers / current.totalMembers) * 100).toFixed(0)}%`
               : "—"}
-          </p>
+          </span>
         </div>
+        {current.hasPartialData && (
+          <span className="text-[11px] text-amber-400">⚠ Partial data</span>
+        )}
       </div>
 
-      {current.hasPartialData && (
-        <p className="mt-3 rounded-lg bg-amber-400/10 px-3 py-2 text-xs text-amber-400">
-          ⚠ Partial data — tracking started partway through this window.
-        </p>
-      )}
-
-      {/* Chart */}
-      <div className="mt-4">
+      {/* Chart — fills remaining height */}
+      <div className="mt-4 min-h-[180px] flex-1">
         {current.buckets.length > 0 ? (
           <ActivityChart buckets={current.buckets} />
         ) : (
-          <div className="flex h-[122px] items-center justify-center">
+          <div className="flex h-full min-h-[180px] items-center justify-center">
             <EmptyState
               title="No activity yet"
               description="Observed activity will appear once members change donations or trophies between polls."
@@ -109,43 +117,49 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
   }));
 
   return (
-    <div className="h-[122px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: -20 }}>
-          <XAxis
-            dataKey="label"
-            tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
-            tickLine={false}
-            axisLine={false}
-            interval="preserveStartEnd"
-            minTickGap={20}
-          />
-          <YAxis
-            tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
-            tickLine={false}
-            axisLine={false}
-            width={30}
-          />
-          <Tooltip
-            cursor={{ fill: "rgba(182, 120, 255, 0.08)" }}
-            contentStyle={{
-              background: "#12101C",
-              border: "1px solid rgba(190, 151, 255, 0.15)",
-              borderRadius: "8px",
-              fontSize: "12px",
-              color: "#EEE5FF",
-            }}
-            labelStyle={{ color: "#9287AD" }}
-            itemStyle={{ color: "#EEE5FF" }}
-            formatter={(value) => [`${value} active`, "Members"]}
-          />
-          <Bar dataKey="active" radius={[4, 4, 0, 0]} name="Active">
-            {data.map((_, i) => (
-              <Cell key={i} fill="#7552DF" />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart
+        data={data}
+        margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+        barCategoryGap="20%"
+      >
+        <XAxis
+          dataKey="label"
+          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tickLine={false}
+          axisLine={false}
+          interval="preserveStartEnd"
+          minTickGap={30}
+          angle={-30}
+          textAnchor="end"
+          height={40}
+        />
+        <YAxis
+          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tickLine={false}
+          axisLine={false}
+          width={32}
+          allowDecimals={false}
+        />
+        <Tooltip
+          cursor={{ fill: "rgba(182, 120, 255, 0.08)" }}
+          contentStyle={{
+            background: "#12101C",
+            border: "1px solid rgba(190, 151, 255, 0.15)",
+            borderRadius: "8px",
+            fontSize: "12px",
+            color: "#EEE5FF",
+          }}
+          labelStyle={{ color: "#9287AD" }}
+          itemStyle={{ color: "#EEE5FF" }}
+          formatter={(value) => [`${value} active`, "Members"]}
+        />
+        <Bar dataKey="active" radius={[3, 3, 0, 0]} name="Active">
+          {data.map((_, i) => (
+            <Cell key={i} fill="#7552DF" />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
   );
 }
