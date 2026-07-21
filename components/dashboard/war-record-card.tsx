@@ -20,12 +20,6 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           All-time record
         </p>
-        <Link
-          href="/war"
-          className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted transition hover:text-umbra-lilac"
-        >
-          War center →
-        </Link>
       </div>
       <h3
         id="war-record-title"

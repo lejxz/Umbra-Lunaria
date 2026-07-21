@@ -25,12 +25,6 @@ export function CurrentWarCard({
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           Live status
         </p>
-        <Link
-          href="/war"
-          className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted transition hover:text-umbra-lilac"
-        >
-          War center →
-        </Link>
       </div>
       <h3
         id="current-war-title"

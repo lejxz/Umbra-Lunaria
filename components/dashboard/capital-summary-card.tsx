@@ -21,12 +21,6 @@ export function CapitalSummaryCard({
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           Clan capital
         </p>
-        <Link
-          href="/capital"
-          className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted transition hover:text-umbra-lilac"
-        >
-          Capital →
-        </Link>
       </div>
       <h3
         id="capital-title"
