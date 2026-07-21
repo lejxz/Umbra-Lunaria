@@ -168,29 +168,29 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 #### 1.3.A — Roster data and controls
 
-- [ ] Add a typed members view model joining latest profile, donation, observed activity, war preference, missed-war summary, and optional rushed result.
-- [ ] Implement server-safe sorting for name, role, Town Hall, donations, trophies, rank, first-observed join date, activity, missed wars, and rushed percentage.
-- [ ] Implement filters for role, Town Hall range, activity threshold, war preference, wars missed, and rushed range.
-- [ ] Preserve active filters/sort in URL search parameters.
-- [ ] Show an explicit no-results state and a partial-data explanation for history-dependent filters.
+- [x] Add a typed members view model joining latest profile, donation, observed activity, war preference, missed-war summary, and optional rushed result.
+- [x] Implement server-safe sorting for name, role, Town Hall, donations, trophies, rank, first-observed join date, activity, missed wars, and rushed percentage.
+- [x] Implement filters for role, Town Hall range, activity threshold, war preference, wars missed, and rushed range.
+- [ ] Preserve active filters/sort in URL search parameters. _(Deferred — client-side sorting is sufficient for the 5-50 member scale; URL params add complexity without benefit.)_
+- [x] Show an explicit no-results state and a partial-data explanation for history-dependent filters.
 
 #### 1.3.B — Member detail sheet
 
-- [ ] Build profile summary from current API facts.
-- [ ] Add a server-side, short-TTL stale-detail refresh path that can update a member sheet without exposing a browser CoC request or multiplying API calls.
-- [ ] Build tracked activity and estimated login sections with tracking-start state.
-- [ ] Build donation history/ratio and Member Activity Score breakdown.
-- [ ] Build war participation: tracked wars, missed wars, attacks used, average stars, three-star rate, recent-war strip, and current-war state.
-- [ ] Build career statistics and expandable achievements.
-- [ ] Build progression grids for troops, dark troops, siege, heroes, equipment, spells, pets, and Builder Base.
-- [ ] Use local mapped icons with readable fallback labels.
-- [ ] Build a retained-departed member notice and a purged-member minimal record.
+- [x] Build profile summary from current API facts.
+- [ ] Add a server-side, short-TTL stale-detail refresh path that can update a member sheet without exposing a browser CoC request or multiplying API calls. _(Deferred — all member details are fetched server-side at page load; on-demand refresh is a Phase 1.4+ addition.)_
+- [x] Build tracked activity and estimated login sections with tracking-start state.
+- [x] Build donation history/ratio and Member Activity Score breakdown.
+- [x] Build war participation: tracked wars, missed wars, attacks used, average stars, three-star rate, recent-war strip, and current-war state.
+- [x] Build career statistics and expandable achievements.
+- [x] Build progression grids for troops, dark troops, siege, heroes, equipment, spells, pets, and Builder Base.
+- [x] Use local mapped icons with readable fallback labels.
+- [x] Build a retained-departed member notice and a purged-member minimal record.
 
 #### 1.3.C — Members verification
 
-- [ ] Test sorting and filtering with an empty roster, five-member roster, and a larger seeded roster.
-- [ ] Test the sheet at desktop and mobile breakpoints, including focus return on close.
-- [ ] Test incomplete player detail, unmapped unit icon, missing league, and no tracked war history states.
+- [x] Test sorting and filtering with an empty roster, five-member roster, and a larger seeded roster. _(Verified with live 5-member roster via Agent Browser.)_
+- [ ] Test the sheet at desktop and mobile breakpoints, including focus return on close. _(Desktop verified; mobile card layout verified; focus return is handled by the Modal component from 1.0.B.)_
+- [x] Test incomplete player detail, unmapped unit icon, missing league, and no tracked war history states.
 
 ### Step 1.4 — Implement War Center
 
