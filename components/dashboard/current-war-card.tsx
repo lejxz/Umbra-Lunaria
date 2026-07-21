@@ -1,11 +1,12 @@
 import Link from "next/link";
 import type { WarSummaryView } from "@/lib/view-models/dashboard";
-import { Badge, UnavailableValue } from "@/components/ui";
+import { UnavailableValue } from "@/components/ui/state-primitives";
 
 /**
- * Current war card — a compact overview for the 3-column stats row.
- * Shows war state, opponent, score, and a countdown timer. Links to /war.
- * See concept/05-dashboard.md §9 (navigation summary) and concept/07.
+ * Current war card — compact Our-clan vs Enemy-clan layout.
+ * Shows stars and destruction percentage side by side with a VS icon
+ * in the middle. Links to /war.
+ * See concept/05-dashboard.md §9 and concept/07.
  */
 export function CurrentWarCard({
   warSummary,
@@ -16,7 +17,10 @@ export function CurrentWarCard({
     warSummary.state === "preparation" || warSummary.state === "inWar";
 
   return (
-    <section className="glass rounded-2xl p-5" aria-labelledby="current-war-title">
+    <section
+      className="glass flex flex-col rounded-2xl p-5"
+      aria-labelledby="current-war-title"
+    >
       <div className="flex items-center justify-between">
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           Live status
@@ -28,16 +32,17 @@ export function CurrentWarCard({
           War center →
         </Link>
       </div>
-      <h3 id="current-war-title" className="mt-1 font-display text-lg text-umbra-lilac">
+      <h3
+        id="current-war-title"
+        className="mt-1 font-display text-lg text-umbra-lilac"
+      >
         Current war
       </h3>
 
       {warSummary.state === null || warSummary.state === "notInWar" ? (
-        <div className="mt-4 flex flex-col items-center justify-center py-6">
+        <div className="mt-4 flex flex-1 flex-col items-center justify-center py-6">
           <p className="text-sm text-umbra-muted">
-            {warSummary.state === null
-              ? "No war data yet"
-              : "Clan is at peace"}
+            {warSummary.state === null ? "No war data yet" : "Clan is at peace"}
           </p>
           <p className="mt-1 text-xs text-umbra-muted">
             Wars appear here when they start
@@ -45,69 +50,64 @@ export function CurrentWarCard({
         </div>
       ) : (
         <>
-          {/* State badge */}
-          <div className="mt-3 flex items-center gap-2">
-            <Badge
-              tone={
+          {/* State badge + team size */}
+          <div className="mt-3 flex items-center justify-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                 warSummary.state === "inWar"
-                  ? "warning"
+                  ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
                   : warSummary.state === "preparation"
-                    ? "brand"
-                    : "muted"
-              }
+                    ? "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple"
+                    : "border-white/10 bg-white/5 text-umbra-muted"
+              }`}
             >
               {warSummary.state === "inWar"
                 ? "● Battle day"
                 : warSummary.state === "preparation"
                   ? "○ Preparation"
                   : "War ended"}
-            </Badge>
+            </span>
             {warSummary.teamSize && (
-              <span className="font-mono text-xs text-umbra-muted">
+              <span className="font-mono text-[10px] text-umbra-muted">
                 {warSummary.teamSize}v{warSummary.teamSize}
               </span>
             )}
           </div>
 
-          {/* Opponent */}
-          {warSummary.opponentName && (
-            <p className="mt-2 truncate text-sm text-umbra-lilac">
-              vs {warSummary.opponentName}
-            </p>
-          )}
-
-          {/* Score */}
-          {warSummary.ownStars !== null && warSummary.opponentStars !== null && (
-            <div className="mt-3 rounded-xl bg-white/[.035] p-3 text-center">
+          {/* VS layout: Our clan | VS icon | Enemy clan */}
+          <div className="mt-3 flex flex-1 items-center justify-center gap-3">
+            {/* Our clan */}
+            <div className="flex-1 text-center">
               <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-                Stars
+                Our clan
               </p>
-              <p className="mt-1 font-display text-2xl font-bold text-white">
-                <span className="text-umbra-purple">{warSummary.ownStars}</span>
-                <span className="mx-2 text-umbra-muted">—</span>
-                <span className="text-red-400">{warSummary.opponentStars}</span>
+              <p className="mt-1 font-display text-2xl font-bold text-umbra-purple">
+                {warSummary.ownStars ?? <UnavailableValue />}
+              </p>
+              <p className="mt-0.5 font-mono text-[10px] text-umbra-muted">
+                {warSummary.ownDestructionPercentage !== null
+                  ? `${warSummary.ownDestructionPercentage}%`
+                  : "—"}
               </p>
             </div>
-          )}
 
-          {/* Destruction + attacks */}
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <MiniStat
-              label="Destruction"
-              value={
-                warSummary.ownDestructionPercentage !== null
-                  ? `${warSummary.ownDestructionPercentage}%`
-                  : <UnavailableValue />
-              }
-            />
-            <MiniStat
-              label="Attacks"
-              value={
-                warSummary.ownAttacks !== null
-                  ? `${warSummary.ownAttacks}/${warSummary.opponentAttacks ?? "—"}`
-                  : <UnavailableValue />
-              }
-            />
+            {/* VS icon */}
+            <VsIcon />
+
+            {/* Enemy clan */}
+            <div className="flex-1 text-center">
+              <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+                {warSummary.opponentName ?? "Enemy"}
+              </p>
+              <p className="mt-1 font-display text-2xl font-bold text-red-400">
+                {warSummary.opponentStars ?? <UnavailableValue />}
+              </p>
+              <p className="mt-0.5 font-mono text-[10px] text-umbra-muted">
+                {warSummary.opponentDestructionPercentage !== null
+                  ? `${warSummary.opponentDestructionPercentage}%`
+                  : "—"}
+              </p>
+            </div>
           </div>
 
           {/* Timer */}
@@ -135,19 +135,56 @@ export function CurrentWarCard({
   );
 }
 
-function MiniStat({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) {
+/**
+ * Custom VS icon — crossed swords in a circular badge.
+ * Pure SVG, themed with the purple/lilac observatory palette.
+ */
+function VsIcon() {
   return (
-    <div className="rounded-lg bg-white/[.035] p-2.5 text-center">
-      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-        {label}
-      </p>
-      <p className="mt-1 font-display text-base font-bold text-white">{value}</p>
-    </div>
+    <svg
+      width="40"
+      height="40"
+      viewBox="0 0 40 40"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="shrink-0"
+      aria-hidden="true"
+    >
+      {/* Circle background */}
+      <circle
+        cx="20"
+        cy="20"
+        r="18"
+        stroke="rgba(182, 120, 255, 0.3)"
+        strokeWidth="1.5"
+        fill="rgba(182, 120, 255, 0.08)"
+      />
+      {/* Crossed swords — left sword (purple) */}
+      <g transform="translate(20 20) rotate(-45)">
+        <rect
+          x="-0.8"
+          y="-10"
+          width="1.6"
+          height="14"
+          rx="0.5"
+          fill="#B678FF"
+        />
+        <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#B678FF" />
+        <polygon points="-1,4 1,4 0,7" fill="#B678FF" />
+      </g>
+      {/* Crossed swords — right sword (lilac) */}
+      <g transform="translate(20 20) rotate(45)">
+        <rect
+          x="-0.8"
+          y="-10"
+          width="1.6"
+          height="14"
+          rx="0.5"
+          fill="#EEE5FF"
+        />
+        <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#EEE5FF" />
+        <polygon points="-1,4 1,4 0,7" fill="#EEE5FF" />
+      </g>
+    </svg>
   );
 }
