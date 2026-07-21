@@ -12,7 +12,8 @@ import { DonationChart } from "./donation-chart";
 
 /**
  * Donation analytics — the largest primary panel on the dashboard.
- * Shows 24h/7d/30d tabs with totals, ratio, a chart, and a mini leaderboard.
+ * Layout: totals row at top, then a 2-column grid with the chart on the left
+ * (taller) and the top donors leaderboard on the right.
  * See concept/05-dashboard.md §4.
  */
 export function DonationAnalytics({
@@ -31,13 +32,19 @@ export function DonationAnalytics({
   const current = dataByWindow[window];
 
   return (
-    <section className="glass rounded-2xl p-5 sm:p-6" aria-labelledby="donation-title">
+    <section
+      className="glass rounded-2xl p-5 sm:p-6"
+      aria-labelledby="donation-title"
+    >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
             Contribution pulse
           </p>
-          <h3 id="donation-title" className="mt-1 font-display text-lg text-umbra-lilac">
+          <h3
+            id="donation-title"
+            className="mt-1 font-display text-lg text-umbra-lilac"
+          >
             Clan donations
           </h3>
         </div>
@@ -79,56 +86,61 @@ export function DonationAnalytics({
         </p>
       )}
 
-      {/* Chart */}
-      <div className="mt-5">
-        {current.timeline.buckets.length > 0 ? (
-          <DonationChart
-            buckets={current.timeline.buckets}
-            window={window}
-          />
-        ) : (
-          <div className="flex h-[124px] items-center justify-center">
-            <EmptyState
-              title="No donation activity yet"
-              description="Donations will appear here once members start donating between polls."
+      {/* Chart + Top donors side by side */}
+      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_240px]">
+        {/* Chart — taller now */}
+        <div>
+          {current.timeline.buckets.length > 0 ? (
+            <DonationChart
+              buckets={current.timeline.buckets}
+              window={window}
             />
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="flex h-[200px] items-center justify-center">
+              <EmptyState
+                title="No donation activity yet"
+                description="Donations will appear here once members start donating between polls."
+              />
+            </div>
+          )}
+        </div>
 
-      {/* Mini leaderboard */}
-      {current.leaderboard.topDonors.length > 0 && (
-        <div className="mt-5 border-t border-umbra-line pt-4">
+        {/* Top donors — right side */}
+        <div className="lg:border-l lg:border-umbra-line lg:pl-4">
           <p className="mb-2 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
             Top donors · {window}
           </p>
-          <div className="space-y-1.5">
-            {current.leaderboard.topDonors.slice(0, 3).map((donor) => (
-              <div
-                key={donor.playerTag}
-                className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-2"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="font-mono text-xs text-umbra-purple">
-                    #{donor.rank}
-                  </span>
-                  <div className="min-w-0">
-                    <span className="block truncate text-sm text-umbra-lilac">
-                      {donor.name}
+          {current.leaderboard.topDonors.length > 0 ? (
+            <div className="space-y-1.5">
+              {current.leaderboard.topDonors.slice(0, 8).map((donor) => (
+                <div
+                  key={donor.playerTag}
+                  className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-2"
+                >
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span className="font-mono text-xs text-umbra-purple">
+                      #{donor.rank}
                     </span>
-                    <span className="block truncate font-mono text-[10px] text-umbra-muted">
-                      {donor.playerTag}
-                    </span>
+                    <div className="min-w-0">
+                      <span className="block truncate text-sm text-umbra-lilac">
+                        {donor.name}
+                      </span>
+                      <span className="block truncate font-mono text-[10px] text-umbra-muted">
+                        {donor.playerTag}
+                      </span>
+                    </div>
                   </div>
+                  <span className="shrink-0 font-mono text-sm text-emerald-400">
+                    {donor.total}
+                  </span>
                 </div>
-                <span className="font-mono text-sm text-emerald-400">
-                  {donor.total}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-umbra-muted">No donations tracked yet</p>
+          )}
         </div>
-      )}
+      </div>
     </section>
   );
 }

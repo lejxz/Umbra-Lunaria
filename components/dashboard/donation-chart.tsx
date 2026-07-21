@@ -27,7 +27,7 @@ export function DonationChart({
   }));
 
   return (
-    <div className="h-[140px] w-full">
+    <div className="h-[200px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: -20 }}>
           <XAxis

@@ -327,8 +327,12 @@ export async function getDonationTimeline(
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
+
+  // Fetch ALL snapshots in the window PLUS the last snapshot before the window
+  // started (as a baseline for the first bucket's delta).
   const snapshots = await db
     .select({
+      playerTag: memberSnapshots.playerTag,
       capturedAt: memberSnapshots.capturedAt,
       donations: memberSnapshots.donations,
       donationsReceived: memberSnapshots.donationsReceived,
@@ -337,23 +341,79 @@ export async function getDonationTimeline(
     .where(
       and(
         inArray(memberSnapshots.playerTag, tags),
-        gte(memberSnapshots.capturedAt, win.from),
         lte(memberSnapshots.capturedAt, win.to),
       ),
     )
     .orderBy(memberSnapshots.capturedAt);
 
-  // Bucket the snapshots
+  // For each bucket, compute the reset-aware donation DELTA (not the raw
+  // cumulative counter). The delta is the sum of per-pair differences for
+  // snapshots that fall within that bucket, using the last pre-bucket
+  // snapshot as the baseline. See concept/04-activity-tracking-and-polling.md
+  // "Reset-aware donation accounting".
   const donationBuckets: DonationBucket[] = buckets.map((b, i) => {
     const bucketStart = b.timestamp;
-    const bucketEnd = i < buckets.length - 1 ? buckets[i + 1]!.timestamp : win.to;
-    const inBucket = snapshots.filter(
-      (s) => s.capturedAt >= bucketStart && s.capturedAt < bucketEnd,
-    );
+    const bucketEnd =
+      i < buckets.length - 1 ? buckets[i + 1]!.timestamp : win.to;
+
+    let given = 0;
+    let received = 0;
+
+    for (const tag of tags) {
+      const memberSnaps = snapshots
+        .filter(
+          (s) =>
+            s.playerTag === tag && s.capturedAt <= bucketEnd,
+        )
+        .sort((a, b2) => a.capturedAt.getTime() - b2.capturedAt.getTime());
+
+      if (memberSnaps.length === 0) continue;
+
+      // Find the baseline: last snapshot at or before bucketStart
+      let baselineGiven: number | null = null;
+      let baselineReceived: number | null = null;
+      const inBucket: typeof memberSnaps = [];
+
+      for (const s of memberSnaps) {
+        if (s.capturedAt <= bucketStart) {
+          baselineGiven = s.donations;
+          baselineReceived = s.donationsReceived;
+        } else if (s.capturedAt > bucketStart && s.capturedAt <= bucketEnd) {
+          inBucket.push(s);
+        }
+      }
+
+      if (inBucket.length === 0) continue;
+
+      // Compute deltas using the reset-aware rule
+      let prevGiven = baselineGiven;
+      let prevReceived = baselineReceived;
+
+      for (const s of inBucket) {
+        if (prevGiven !== null) {
+          if (s.donations >= prevGiven) {
+            given += s.donations - prevGiven;
+          } else {
+            // Weekly reset — new counter value is the contribution
+            given += s.donations;
+          }
+        }
+        if (prevReceived !== null) {
+          if (s.donationsReceived >= prevReceived) {
+            received += s.donationsReceived - prevReceived;
+          } else {
+            received += s.donationsReceived;
+          }
+        }
+        prevGiven = s.donations;
+        prevReceived = s.donationsReceived;
+      }
+    }
+
     return {
       label: b.label,
-      given: inBucket.reduce((sum, s) => sum + s.donations, 0),
-      received: inBucket.reduce((sum, s) => sum + s.donationsReceived, 0),
+      given,
+      received,
       timestamp: b.timestamp,
     };
   });
