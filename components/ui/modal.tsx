@@ -117,6 +117,8 @@ type CommonProps = {
   ariaDescribedBy?: string;
   /** Accessible role label rendered when no ariaLabelledBy is provided. */
   ariaLabel?: string;
+  /** Max width class for the dialog panel. Default: max-w-lg */
+  maxWidth?: string;
 };
 
 export function Modal({
@@ -126,6 +128,7 @@ export function Modal({
   ariaLabelledBy,
   ariaDescribedBy,
   ariaLabel,
+  maxWidth = "max-w-lg",
 }: CommonProps) {
   const mounted = useMounted();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -158,7 +161,7 @@ export function Modal({
     >
       <div
         ref={panelRef}
-        className={`glass relative max-h-[90vh] w-full max-w-lg overflow-auto rounded-2xl p-6 transition-all duration-200 ${
+        className={`glass relative max-h-[90vh] w-full ${maxWidth} overflow-auto rounded-2xl p-6 transition-all duration-200 ${
           animateIn ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
         }`}
         role="dialog"

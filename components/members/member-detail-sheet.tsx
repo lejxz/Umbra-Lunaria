@@ -8,14 +8,10 @@ import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import { useState } from "react";
 
 /**
- * Full member detail sheet with 7 sections per concept/06-members.md:
- * 1. Profile summary (API fact)
- * 2. Activity (tracked history)
- * 3. Donations (tracked/derived)
- * 4. War participation (tracked)
- * 5. Career statistics (API fact)
- * 6. Progression cards (API fact)
- * 7. Rushed analysis (derived)
+ * Full member detail sheet with 7 sections per concept/06-members.md.
+ * Uses a wider modal (max-w-3xl) with a clean two-column layout for
+ * profile and stats. Progression cards match the in-game CoC style
+ * with level boxes at the bottom-left.
  */
 export function MemberDetailSheet({
   detail,
@@ -29,8 +25,9 @@ export function MemberDetailSheet({
       open
       onClose={onClose}
       aria-labelledby="member-detail-title"
+      maxWidth="max-w-3xl"
     >
-      <div className="max-h-[85vh] space-y-5 overflow-y-auto">
+      <div className="max-h-[88vh] w-full max-w-3xl space-y-5 overflow-y-auto">
         {/* 1. Profile summary */}
         <ProfileSection detail={detail} />
 
@@ -81,7 +78,9 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       <SectionLabel source="API fact">Profile summary</SectionLabel>
-      <div className="flex items-start gap-4">
+
+      {/* Header row: league icon + name/tag + TH badge */}
+      <div className="flex items-center gap-4">
         {p.leagueTier?.iconUrls?.small && (
           <Image
             src={p.leagueTier.iconUrls.small}
@@ -99,33 +98,47 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           <p className="font-mono text-xs text-umbra-muted">{p.playerTag}</p>
         </div>
         {p.townHallLevel && (
-          <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-3 py-1.5 text-center">
+          <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-4 py-2 text-center">
             <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">TH</p>
             <p className="font-display text-xl font-bold text-umbra-purple">{p.townHallLevel}</p>
           </div>
         )}
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+
+      {/* Stats grid — 4 columns */}
+      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <FactCell label="Role" value={<span className="capitalize">{p.role}</span>} />
         <FactCell label="Exp level" value={p.expLevel ?? <UnavailableValue />} />
         <FactCell label="Trophies" value={p.trophies ?? <UnavailableValue />} />
         <FactCell label="Best trophies" value={p.bestTrophies ?? <UnavailableValue />} />
         <FactCell label="League tier" value={p.leagueTier?.name ?? <UnavailableValue />} />
-        <FactCell label="War pref" value={
-          p.warPreference ? (
-            <Badge tone={p.warPreference === "in" ? "success" : "muted"}>{p.warPreference}</Badge>
-          ) : <UnavailableValue />
-        } />
+        <FactCell
+          label="War pref"
+          value={
+            p.warPreference ? (
+              <Badge tone={p.warPreference === "in" ? "success" : "muted"}>{p.warPreference}</Badge>
+            ) : (
+              <UnavailableValue />
+            )
+          }
+        />
         <FactCell label="Clan rank" value={p.clanRank ?? <UnavailableValue />} />
-        <FactCell label="Joined" value={
-          p.joinedAt ? p.joinedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" }) : "—"
-        } />
+        <FactCell
+          label="Joined"
+          value={
+            p.joinedAt
+              ? p.joinedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+              : "—"
+          }
+        />
       </div>
+
+      {/* Builder Base row */}
       {(p.builderHallLevel || p.builderBaseTrophies) && (
-        <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div className="mt-2 grid grid-cols-3 gap-2">
           <FactCell label="Builder Hall" value={p.builderHallLevel ?? <UnavailableValue />} />
           <FactCell label="BB trophies" value={p.builderBaseTrophies ?? <UnavailableValue />} />
-          <FactCell label="Best BB trophies" value={p.bestBuilderBaseTrophies ?? <UnavailableValue />} />
+          <FactCell label="Best BB" value={p.bestBuilderBaseTrophies ?? <UnavailableValue />} />
         </div>
       )}
     </div>
@@ -142,25 +155,40 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
     <div>
       <SectionLabel source="tracked history">Activity</SectionLabel>
       <div className="grid grid-cols-2 gap-2">
-        <FactCell label="Last active" value={
-          a.lastActiveAt ? a.lastActiveAt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" }) : "—"
-        } />
-        <FactCell label="Tracking started" value={
-          a.trackingStart ? a.trackingStart.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" }) : "—"
-        } />
+        <FactCell
+          label="Last active"
+          value={
+            a.lastActiveAt
+              ? a.lastActiveAt.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+              : "—"
+          }
+        />
+        <FactCell
+          label="Tracking started"
+          value={
+            a.trackingStart
+              ? a.trackingStart.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+              : "—"
+          }
+        />
       </div>
       {a.hasPartialData && (
         <p className="mt-2 text-xs text-amber-400">⚠ Partial data — tracking started partway through this window.</p>
       )}
       {a.buckets.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1">
-          {a.buckets.map((b, i) => (
-            <div
-              key={i}
-              title={`${b.label}: ${b.active ? "active" : "inactive"}`}
-              className={`h-4 w-4 rounded-sm ${b.active ? "bg-umbra-purple" : "bg-white/10"}`}
-            />
-          ))}
+        <div className="mt-3">
+          <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+            30-day activity
+          </p>
+          <div className="flex flex-wrap gap-1">
+            {a.buckets.map((b, i) => (
+              <div
+                key={i}
+                title={`${b.label}: ${b.active ? "active" : "inactive"}`}
+                className={`h-4 w-4 rounded-sm ${b.active ? "bg-umbra-purple" : "bg-white/10"}`}
+              />
+            ))}
+          </div>
         </div>
       )}
       {a.loginDays.length > 0 && (
@@ -225,12 +253,18 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
           <div className="grid grid-cols-3 gap-2">
             <FactCell label="Wars tracked" value={w.warsTracked} />
             <FactCell label="Wars missed" value={w.warsMissed} />
-            <FactCell label="Participation" value={w.participationRate !== null ? `${(w.participationRate * 100).toFixed(0)}%` : <UnavailableValue />} />
+            <FactCell
+              label="Participation"
+              value={w.participationRate !== null ? `${(w.participationRate * 100).toFixed(0)}%` : <UnavailableValue />}
+            />
           </div>
           <div className="mt-2 grid grid-cols-3 gap-2">
             <FactCell label="Stars earned" value={w.starsEarned} />
             <FactCell label="Avg stars" value={w.averageStars !== null ? w.averageStars.toFixed(1) : <UnavailableValue />} />
-            <FactCell label="3-star rate" value={w.threeStarRate !== null ? `${(w.threeStarRate * 100).toFixed(0)}%` : <UnavailableValue />} />
+            <FactCell
+              label="3-star rate"
+              value={w.threeStarRate !== null ? `${(w.threeStarRate * 100).toFixed(0)}%` : <UnavailableValue />}
+            />
           </div>
           {w.recentWars.length > 0 && (
             <div className="mt-3">
@@ -317,12 +351,15 @@ function CareerSection({ detail }: { detail: MemberDetailView }) {
 }
 
 // ---------------------------------------------------------------------------
-// Section 6: Progression
+// Section 6: Progression — in-game CoC style cards
 // ---------------------------------------------------------------------------
 
 function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   const p = detail.progression;
-  const categories: Array<{ label: string; items: Array<{ name: string; level: number; maxLevel: number | null }> }> = [
+  const categories: Array<{
+    label: string;
+    items: Array<{ name: string; level: number; maxLevel: number | null }>;
+  }> = [
     { label: "Troops", items: p.troops },
     { label: "Heroes", items: p.heroes },
     { label: "Equipment", items: p.heroEquipment },
@@ -346,24 +383,38 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       <SectionLabel source="API fact">Progression</SectionLabel>
-      <div className="space-y-3">
-        {categories.filter((c) => c.items.length > 0).map((cat) => (
-          <div key={cat.label}>
-            <p className="mb-1.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-              {cat.label}
-            </p>
-            <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-4">
-              {cat.items.map((item) => (
-                <ProgressionCard key={item.name} name={item.name} level={item.level} maxLevel={item.maxLevel} />
-              ))}
+      <div className="space-y-4">
+        {categories
+          .filter((c) => c.items.length > 0)
+          .map((cat) => (
+            <div key={cat.label}>
+              <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+                {cat.label}
+              </p>
+              <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 md:grid-cols-6">
+                {cat.items.map((item) => (
+                  <ProgressionCard
+                    key={item.name}
+                    name={item.name}
+                    level={item.level}
+                    maxLevel={item.maxLevel}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
       </div>
     </div>
   );
 }
 
+/**
+ * In-game CoC style progression card:
+ * - Square tile with the unit icon centered
+ * - Level number in a small box at the bottom-left
+ * - When maxed: the level box turns gold and shows "MAX"
+ * - Unit name below the tile
+ */
 function ProgressionCard({
   name,
   level,
@@ -375,18 +426,56 @@ function ProgressionCard({
 }) {
   const icon = getUnitIcon(name);
   const isMaxed = maxLevel !== null && level >= maxLevel;
+
   return (
-    <div className={`rounded-lg border p-2 text-center ${isMaxed ? "border-emerald-400/30 bg-emerald-400/5" : "border-umbra-line bg-white/[.035]"}`}>
-      {icon ? (
-        <Image src={icon} alt={name} width={28} height={28} className="mx-auto h-7 w-7 object-contain" unoptimized />
-      ) : (
-        <div className="mx-auto flex h-7 w-7 items-center justify-center rounded bg-umbra-elevated/50">
-          <span className="text-[10px] text-umbra-muted">{name.charAt(0)}</span>
+    <div className="flex flex-col items-center gap-1">
+      {/* The tile — square, with icon + level box */}
+      <div
+        className={`relative aspect-square w-full overflow-hidden rounded-lg border-2 ${
+          isMaxed
+            ? "border-amber-400/60 bg-amber-400/5"
+            : "border-umbra-line bg-umbra-ink/60"
+        }`}
+      >
+        {/* Unit icon (or text fallback) — centered, fills the tile */}
+        {icon ? (
+          <Image
+            src={icon}
+            alt={name}
+            fill
+            className="object-contain p-1"
+            unoptimized
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="font-display text-2xl font-bold text-umbra-purple/60">
+              {name.charAt(0)}
+            </span>
+          </div>
+        )}
+
+        {/* Level box — bottom-left corner, in-game style */}
+        <div
+          className={`absolute bottom-0.5 left-0.5 flex items-center justify-center rounded px-1.5 py-0.5 font-mono text-[10px] font-bold ${
+            isMaxed
+              ? "bg-amber-400 text-umbra-ink"
+              : "bg-umbra-ink/90 text-umbra-lilac"
+          }`}
+        >
+          {isMaxed ? "MAX" : level}
         </div>
-      )}
-      <p className="mt-1 truncate text-[10px] text-umbra-lilac">{name}</p>
-      <p className={`font-mono text-[10px] ${isMaxed ? "text-emerald-400" : "text-umbra-muted"}`}>
-        {level}{maxLevel ? `/${maxLevel}` : ""}
+
+        {/* Max level indicator — small number top-right when not maxed */}
+        {maxLevel !== null && !isMaxed && (
+          <div className="absolute right-0.5 top-0.5 rounded bg-umbra-ink/80 px-1 font-mono text-[8px] text-umbra-muted">
+            {maxLevel}
+          </div>
+        )}
+      </div>
+
+      {/* Unit name below the tile */}
+      <p className="w-full truncate text-center text-[10px] text-umbra-muted" title={name}>
+        {name}
       </p>
     </div>
   );
@@ -416,9 +505,11 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
           {r.categoryBreakdown.length > 0 && (
             <div className="mt-2 grid grid-cols-3 gap-2">
               {r.categoryBreakdown.map((c) => (
-                <FactCell key={c.category} label={c.category} value={
-                  c.percent !== null ? `${c.percent.toFixed(0)}%` : <UnavailableValue />
-                } />
+                <FactCell
+                  key={c.category}
+                  label={c.category}
+                  value={c.percent !== null ? `${c.percent.toFixed(0)}%` : <UnavailableValue />}
+                />
               ))}
             </div>
           )}
@@ -440,7 +531,7 @@ function SectionLabel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-2 flex items-center gap-2">
+    <div className="mb-2 flex items-center gap-2 border-b border-umbra-line/50 pb-1">
       <h3 className="font-display text-sm font-semibold text-umbra-lilac">{children}</h3>
       <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-purple">{source}</span>
     </div>

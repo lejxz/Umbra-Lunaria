@@ -43,6 +43,7 @@ export function MemberDetailSheet({
       open={open}
       onClose={onClose}
       aria-labelledby="member-detail-title"
+      maxWidth="max-w-xl"
     >
       {member && (
         <div className="space-y-4">

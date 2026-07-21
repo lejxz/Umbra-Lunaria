@@ -14,6 +14,9 @@ import type { MemberDetailView } from "@/lib/view-models/members";
 /**
  * Members roster — client component with sorting, filtering, and member
  * detail sheet. See concept/06-members.md.
+ *
+ * Design: clean card-based layout with a filter bar, desktop table, and
+ * mobile cards. Readable spacing, clear visual hierarchy.
  */
 export function MembersRoster({
   roster,
@@ -32,7 +35,6 @@ export function MembersRoster({
   const sorted = useMemo(() => {
     let result = [...roster.entries];
 
-    // Filters
     if (filterRole) {
       result = result.filter((m) => m.role === filterRole);
     }
@@ -43,7 +45,6 @@ export function MembersRoster({
       result = result.filter((m) => m.isActive);
     }
 
-    // Sort
     result.sort((a, b) => {
       let cmp = 0;
       switch (sortField) {
@@ -51,7 +52,7 @@ export function MembersRoster({
           cmp = a.name.localeCompare(b.name);
           break;
         case "role":
-          cmp = a.role.localeCompare(b.role);
+          cmp = roleOrder(a.role) - roleOrder(b.role);
           break;
         case "townHallLevel":
           cmp = (a.townHallLevel ?? 0) - (b.townHallLevel ?? 0);
@@ -70,8 +71,7 @@ export function MembersRoster({
           break;
         case "activity":
           cmp =
-            (a.lastActiveAt?.getTime() ?? 0) -
-            (b.lastActiveAt?.getTime() ?? 0);
+            (a.lastActiveAt?.getTime() ?? 0) - (b.lastActiveAt?.getTime() ?? 0);
           break;
         case "warsMissed":
           cmp = a.warsMissed - b.warsMissed;
@@ -101,12 +101,14 @@ export function MembersRoster({
     <div>
       {/* Filter bar */}
       <div className="glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Filter</span>
+        </div>
         <FilterSelect
-          label="Role"
           value={filterRole}
           onChange={setFilterRole}
           options={[
-            { value: "", label: "All" },
+            { value: "", label: "All roles" },
             { value: "leader", label: "Leader" },
             { value: "coLeader", label: "Co-leader" },
             { value: "admin", label: "Admin" },
@@ -114,16 +116,15 @@ export function MembersRoster({
           ]}
         />
         <FilterSelect
-          label="War pref"
           value={filterWarPref}
           onChange={setFilterWarPref}
           options={[
-            { value: "", label: "All" },
+            { value: "", label: "All war pref" },
             { value: "in", label: "In" },
             { value: "out", label: "Out" },
           ]}
         />
-        <label className="flex items-center gap-2 text-xs text-umbra-muted">
+        <label className="flex cursor-pointer items-center gap-2 text-xs text-umbra-lilac">
           <input
             type="checkbox"
             checked={filterActiveOnly}
@@ -132,12 +133,14 @@ export function MembersRoster({
           />
           Active only
         </label>
-        <span className="ml-auto font-mono text-[10px] text-umbra-muted">
-          {sorted.length} / {roster.totalMembers} members
-        </span>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="font-mono text-[10px] text-umbra-muted">
+            {sorted.length} of {roster.totalMembers}
+          </span>
+        </div>
       </div>
 
-      {/* Roster table (desktop) / cards (mobile) */}
+      {/* Roster */}
       {sorted.length === 0 ? (
         <EmptyState
           title="No members found"
@@ -151,14 +154,12 @@ export function MembersRoster({
               <thead className="border-b border-umbra-line bg-white/[.02]">
                 <tr>
                   <Th label="#" field="clanRank" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Name" field="name" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Role" field="role" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+                  <Th label="Member" field="name" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
                   <Th label="TH" field="townHallLevel" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">League</th>
                   <Th label="Trophies" field="trophies" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
                   <Th label="Donations" field="donations" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
                   <Th label="Activity" field="activity" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Wars missed" field="warsMissed" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+                  <Th label="Wars" field="warsMissed" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
                   <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">War</th>
                 </tr>
               </thead>
@@ -169,52 +170,71 @@ export function MembersRoster({
                     onClick={() => setSelectedTag(m.playerTag)}
                     className="cursor-pointer transition hover:bg-white/[.04] focus-ring"
                   >
+                    {/* Rank */}
                     <td className="px-4 py-3 font-mono text-xs text-umbra-muted">
                       {m.clanRank ?? "—"}
                     </td>
+                    {/* Member — icon + name + tag + role */}
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-3">
                         {m.leagueTier?.iconUrls?.small && (
                           <Image
                             src={m.leagueTier.iconUrls.small}
                             alt=""
-                            width={20}
-                            height={20}
-                            className="h-5 w-5 shrink-0"
+                            width={28}
+                            height={28}
+                            className="h-7 w-7 shrink-0"
                             unoptimized
                           />
                         )}
-                        <div>
-                          <p className="text-sm text-umbra-lilac">{m.name}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-umbra-lilac">{m.name}</p>
                           <p className="font-mono text-[10px] text-umbra-muted">
-                            {m.playerTag}
+                            {m.playerTag} · <span className="capitalize">{m.role}</span>
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs text-umbra-muted capitalize">
-                      {m.role}
+                    {/* TH */}
+                    <td className="px-4 py-3">
+                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-md bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
+                        {m.townHallLevel ?? "—"}
+                      </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-sm text-umbra-purple">
-                      {m.townHallLevel ?? "—"}
-                    </td>
-                    <td className="px-4 py-3 text-xs text-umbra-muted">
-                      {m.leagueTier?.name ?? m.league?.name ?? "—"}
-                    </td>
+                    {/* Trophies */}
                     <td className="px-4 py-3 font-mono text-sm text-white">
                       {m.trophies ?? "—"}
+                      {m.leagueTier?.name && (
+                        <span className="ml-1 text-[10px] text-umbra-muted">
+                          {m.leagueTier.name}
+                        </span>
+                      )}
                     </td>
-                    <td className="px-4 py-3 font-mono text-xs text-white">
-                      <span className="text-emerald-400">{m.currentDonations ?? 0}</span>
-                      <span className="text-umbra-muted"> / </span>
-                      <span className="text-umbra-muted">{m.currentDonationsReceived ?? 0}</span>
-                    </td>
+                    {/* Donations */}
                     <td className="px-4 py-3">
-                      <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
+                      <div className="flex items-center gap-2 font-mono text-xs">
+                        <span className="text-emerald-400">↑{m.currentDonations ?? 0}</span>
+                        <span className="text-umbra-muted">↓{m.currentDonationsReceived ?? 0}</span>
+                      </div>
                     </td>
+                    {/* Activity */}
+                    <td className="px-4 py-3">
+                      <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
+                    </td>
+                    {/* Wars */}
                     <td className="px-4 py-3 font-mono text-xs text-white">
-                      {m.warsTracked > 0 ? `${m.warsMissed}/${m.warsTracked}` : "—"}
+                      {m.warsTracked > 0 ? (
+                        <span>
+                          <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
+                            {m.warsMissed}
+                          </span>
+                          <span className="text-umbra-muted">/{m.warsTracked}</span>
+                        </span>
+                      ) : (
+                        <span className="text-umbra-muted">—</span>
+                      )}
                     </td>
+                    {/* War pref */}
                     <td className="px-4 py-3">
                       {m.warPreference && (
                         <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
@@ -240,19 +260,23 @@ export function MembersRoster({
                   <Image
                     src={m.leagueTier.iconUrls.small}
                     alt=""
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 shrink-0"
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 shrink-0"
                     unoptimized
                   />
                 )}
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
-                    <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} compact />
+                    <p className="truncate text-sm font-medium text-umbra-lilac">{m.name}</p>
+                    <ActivityDot isActive={m.isActive} />
                   </div>
                   <p className="font-mono text-[10px] text-umbra-muted">
-                    TH{m.townHallLevel} · {m.role} · {m.currentDonations ?? 0} given
+                    TH{m.townHallLevel} · <span className="capitalize">{m.role}</span>
+                  </p>
+                  <p className="font-mono text-[10px] text-umbra-muted">
+                    ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
+                    {m.warsTracked > 0 && ` · ${m.warsMissed}/${m.warsTracked} missed`}
                   </p>
                 </div>
                 {m.warPreference && (
@@ -275,6 +299,20 @@ export function MembersRoster({
       )}
     </div>
   );
+}
+
+/** Role sort order — leader > coLeader > admin > member */
+function roleOrder(role: string): number {
+  switch (role) {
+    case "leader":
+      return 0;
+    case "coLeader":
+      return 1;
+    case "admin":
+      return 2;
+    default:
+      return 3;
+  }
 }
 
 function Th({
@@ -305,61 +343,66 @@ function Th({
 }
 
 function FilterSelect({
-  label,
   value,
   onChange,
   options,
 }: {
-  label: string;
   value: string;
   onChange: (v: string) => void;
   options: Array<{ value: string; label: string }>;
 }) {
   return (
-    <label className="flex items-center gap-1.5 text-xs text-umbra-muted">
-      <span className="font-mono uppercase tracking-wider">{label}</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-umbra-line bg-umbra-ink/60 px-2 py-1 text-xs text-umbra-lilac focus-ring"
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="rounded-lg border border-umbra-line bg-umbra-ink/60 px-3 py-1.5 text-xs text-umbra-lilac transition focus:border-umbra-purple/50 focus:outline-none"
+    >
+      {options.map((o) => (
+        <option key={o.value} value={o.value}>
+          {o.label}
+        </option>
+      ))}
+    </select>
   );
 }
 
-function ActivityDot({
+function ActivityIndicator({
   isActive,
   lastActive,
-  compact,
 }: {
   isActive: boolean;
   lastActive: Date | null;
-  compact?: boolean;
 }) {
-  if (compact) {
-    return (
-      <span
-        className={`h-2 w-2 shrink-0 rounded-full ${isActive ? "bg-emerald-400" : "bg-umbra-muted/40"}`}
-        title={lastActive ? `Last active ${lastActive.toLocaleDateString()}` : "No activity"}
-      />
-    );
-  }
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-2">
       <span
-        className={`h-2 w-2 rounded-full ${isActive ? "bg-emerald-400" : "bg-umbra-muted/40"}`}
+        className={`h-2 w-2 rounded-full ${
+          isActive
+            ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
+            : "bg-umbra-muted/40"
+        }`}
       />
       <span className="font-mono text-[10px] text-umbra-muted">
         {lastActive
-          ? lastActive.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })
+          ? lastActive.toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              timeZone: "Asia/Manila",
+            })
           : "—"}
       </span>
     </div>
+  );
+}
+
+function ActivityDot({ isActive }: { isActive: boolean }) {
+  return (
+    <span
+      className={`h-2 w-2 shrink-0 rounded-full ${
+        isActive
+          ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
+          : "bg-umbra-muted/40"
+      }`}
+    />
   );
 }
