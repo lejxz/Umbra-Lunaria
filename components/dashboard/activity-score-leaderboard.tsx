@@ -100,10 +100,11 @@ export function ActivityScoreLeaderboard({
             ))}
           </div>
 
-          <p className="mt-3 shrink-0 text-xs text-umbra-muted">
-            Transparent components reweight when history is unavailable.
-            {totalMembers > 15 && ` Top 15 of ${totalMembers}.`}
-          </p>
+          {totalMembers > 15 && (
+            <p className="mt-3 shrink-0 text-xs text-umbra-muted">
+              Top 15 of {totalMembers}.
+            </p>
+          )}
         </>
       )}
     </section>
