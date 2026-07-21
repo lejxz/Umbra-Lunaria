@@ -33,46 +33,48 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
       <div className="relative flex flex-col gap-8 p-5 sm:p-8 md:flex-row md:items-start md:justify-between">
         
         {/* ===== LEFT COLUMN: Identity ===== */}
-        <div className="flex flex-1 flex-col items-center md:flex-row md:items-start gap-6 text-center md:text-left">
-          {/* Badge */}
-          <div className="shrink-0">
-            {clan.badgeUrls?.large || clan.badgeUrls?.medium ? (
-              <Image
-                src={clan.badgeUrls.large ?? clan.badgeUrls.medium!}
-                alt={`${clan.name} badge`}
-                width={104}
-                height={104}
-                className="h-26 w-26 object-contain drop-shadow-lg"
-                unoptimized
-              />
-            ) : (
-              <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-umbra-line bg-umbra-elevated/50">
-                <span className="font-display text-4xl text-umbra-purple">
-                  {clan.name.charAt(0)}
-                </span>
-              </div>
-            )}
+        <div className="flex flex-1 flex-col items-center text-center">
+          <div className="flex flex-col items-center gap-4">
+            {/* Badge */}
+            <div className="shrink-0">
+              {clan.badgeUrls?.large || clan.badgeUrls?.medium ? (
+                <Image
+                  src={clan.badgeUrls.large ?? clan.badgeUrls.medium!}
+                  alt={`${clan.name} badge`}
+                  width={104}
+                  height={104}
+                  className="h-26 w-26 object-contain drop-shadow-lg"
+                  unoptimized
+                />
+              ) : (
+                <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-umbra-line bg-umbra-elevated/50">
+                  <span className="font-display text-4xl text-umbra-purple">
+                    {clan.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {/* Title & Tag */}
+            <div>
+              <h2
+                id="clan-identity-title"
+                className="font-display text-3xl font-semibold text-umbra-lilac drop-shadow-md"
+              >
+                {clan.name}
+              </h2>
+              <p className="mt-1 font-mono text-[13px] text-umbra-muted">{clan.tag}</p>
+            </div>
           </div>
-          
-          {/* Title, Tag, Description */}
-          <div className="flex flex-col items-center md:items-start max-w-[420px]">
-            <h2
-              id="clan-identity-title"
-              className="font-display text-3xl font-semibold text-umbra-lilac drop-shadow-md"
-            >
-              {clan.name}
-            </h2>
-            <p className="mt-1 font-mono text-[13px] text-umbra-muted">{clan.tag}</p>
 
-            {/* Description */}
-            {clan.description && (
-              <div className="mt-4 w-full rounded-xl border border-umbra-line/50 bg-umbra-ink/50 p-4 backdrop-blur-sm">
-                <p className="whitespace-pre-line break-words text-center md:text-left text-sm leading-relaxed text-umbra-muted">
-                  {clan.description}
-                </p>
-              </div>
-            )}
-          </div>
+          {/* Description */}
+          {clan.description && (
+            <div className="mt-5 w-full max-w-[420px] rounded-xl border border-umbra-line/50 bg-umbra-ink/50 p-4 backdrop-blur-sm">
+              <p className="whitespace-pre-line break-words text-center text-sm leading-relaxed text-umbra-muted">
+                {clan.description}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* ===== RIGHT COLUMN: Stats List ===== */}
