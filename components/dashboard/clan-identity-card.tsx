@@ -103,7 +103,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
           {/* Labels */}
           {clan.labels && clan.labels.length > 0 && (
-            <div className="mt-2 flex flex-wrap justify-start gap-1.5 pt-2">
+            <div className="mt-2 flex flex-wrap justify-center gap-1.5 pt-2">
               {clan.labels.map((label) => (
                 <span
                   key={label.name}
