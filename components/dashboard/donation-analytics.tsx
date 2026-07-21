@@ -84,7 +84,7 @@ export function DonationAnalytics({
       </div>
 
       {/* Chart + Top donors — chart fills remaining height */}
-      <div className="mt-4 grid flex-1 gap-4 lg:grid-cols-[1fr_220px]">
+      <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">
         {/* Chart — fills remaining height of the card */}
         <div className="min-h-[180px]">
           {current.timeline.buckets.length > 0 ? (
@@ -101,33 +101,50 @@ export function DonationAnalytics({
         </div>
 
         {/* Top donors — right side */}
-        <div className="lg:border-l lg:border-umbra-line lg:pl-4">
-          <p className="mb-2 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-            Top donors · {window}
+        <div className="flex flex-col lg:border-l lg:border-white/5 lg:pl-6">
+          <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+            Top 5 Donors · {window}
           </p>
           {current.leaderboard.topDonors.length > 0 ? (
-            <div className="space-y-1">
-              {current.leaderboard.topDonors.slice(0, 8).map((donor) => (
-                <div
-                  key={donor.playerTag}
-                  className="flex items-center justify-between rounded-md bg-white/[.035] px-2.5 py-1.5"
-                >
-                  <div className="flex min-w-0 items-center gap-2">
-                    <span className="font-mono text-[10px] text-umbra-purple">
-                      #{donor.rank}
-                    </span>
-                    <span className="truncate text-xs text-umbra-lilac">
-                      {donor.name}
+            <div className="flex flex-col gap-2">
+              {current.leaderboard.topDonors.slice(0, 5).map((donor) => {
+                // Determine rank styling
+                let rankColor = "text-umbra-purple";
+                let badgeStyle = "bg-white/[.02] border border-white/5";
+                
+                if (donor.rank === 1) {
+                  rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
+                  badgeStyle = "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
+                } else if (donor.rank === 2) {
+                  rankColor = "text-slate-300";
+                  badgeStyle = "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
+                } else if (donor.rank === 3) {
+                  rankColor = "text-orange-400";
+                  badgeStyle = "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
+                }
+
+                return (
+                  <div
+                    key={donor.playerTag}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] ${badgeStyle}`}
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className={`font-mono text-[13px] font-bold ${rankColor}`}>
+                        #{donor.rank}
+                      </span>
+                      <span className="truncate text-[13px] font-medium text-umbra-lilac">
+                        {donor.name}
+                      </span>
+                    </div>
+                    <span className="shrink-0 font-mono text-[13px] font-semibold text-emerald-400">
+                      {donor.total}
                     </span>
                   </div>
-                  <span className="shrink-0 font-mono text-xs text-emerald-400">
-                    {donor.total}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
-            <p className="text-xs text-umbra-muted">No donations tracked yet</p>
+            <p className="text-[13px] text-umbra-muted">No donations tracked yet</p>
           )}
         </div>
       </div>
