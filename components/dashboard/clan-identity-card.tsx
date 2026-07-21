@@ -69,7 +69,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
           {/* Description */}
           {clan.description && (
-            <div className="mt-5 w-full max-w-[420px] rounded-xl border border-umbra-line/50 bg-umbra-ink/50 p-4 backdrop-blur-sm">
+            <div className="mt-4 w-full max-w-[420px]">
               <p className="whitespace-pre-line break-words text-left text-sm leading-relaxed text-umbra-muted">
                 {clan.description}
               </p>
@@ -102,12 +102,13 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
         </div>
 
         {/* ===== RIGHT COLUMN: Stats List ===== */}
-        <div className="flex w-full shrink-0 flex-col space-y-3 rounded-xl border border-white/5 bg-umbra-ink/40 p-5 backdrop-blur-md md:max-w-[340px] lg:max-w-[400px]">
+        <div className="flex w-full shrink-0 flex-col md:max-w-[340px] lg:max-w-[400px]">
           <StatRow label="Clan Level" value={clan.clanLevel} />
           <StatRow label="Members" value={clan.memberCount ? `${clan.memberCount}/50` : <UnavailableValue />} />
-          <StatRow label="War League" value={clan.warLeague?.name ?? <UnavailableValue />} />
-          <StatRow label="Capital League" value={clan.capitalLeague?.name ?? <UnavailableValue />} />
-          <StatRow label="Location" value={clan.location?.name ?? <UnavailableValue />} />
+          <div className="my-2" />
+          <StatRow label="Clan War League" value={clan.warLeague?.name ?? <UnavailableValue />} />
+          <StatRow label="Clan Location" value={clan.location?.name ?? <UnavailableValue />} />
+          <StatRow label="Chat Language" value={clan.chatLanguage?.name ?? <UnavailableValue />} />
           <StatRow
             label="Type"
             value={
@@ -124,8 +125,9 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
               )
             }
           />
-          <StatRow label="Language" value={clan.chatLanguage?.name ?? <UnavailableValue />} />
-          <StatRow label="Req. Trophies" value={clan.requiredTrophies} />
+          <StatRow label="Required League" value={clan.requiredTrophies} />
+          <div className="my-2" />
+          <StatRow label="Capital League" value={clan.capitalLeague?.name ?? <UnavailableValue />} />
         </div>
       </div>
     </section>
@@ -144,11 +146,11 @@ function StatRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-umbra-line/30 pb-2.5 pt-1 last:border-0 last:pb-0">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+    <div className="flex items-center justify-between border-b border-white/10 py-1.5 last:border-0 last:pb-0">
+      <span className="font-mono text-[11px] font-semibold text-white shadow-black drop-shadow-md">
         {label}
       </span>
-      <span className="text-right text-sm font-semibold text-white">
+      <span className="text-right text-[13px] font-medium text-white shadow-black drop-shadow-md">
         {value ?? <UnavailableValue />}
       </span>
     </div>
