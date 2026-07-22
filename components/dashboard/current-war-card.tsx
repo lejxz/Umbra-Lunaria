@@ -108,7 +108,7 @@ export function CurrentWarCard({
               </p>
               
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-black/20 px-3 py-1.5 border border-white/5 shadow-inner">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-white/[.035] px-4 py-2">
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.ownStars ?? <UnavailableValue />}
                   </span>
@@ -152,7 +152,7 @@ export function CurrentWarCard({
               </p>
               
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-black/20 px-3 py-1.5 border border-white/5 shadow-inner">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-white/[.035] px-4 py-2">
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.opponentStars ?? <UnavailableValue />}
                   </span>
