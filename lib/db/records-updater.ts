@@ -47,7 +47,8 @@ interface RecordCandidate {
 
 export async function checkHallOfFameRecords(): Promise<string[]> {
   const errors: string[] = [];
-  const LIMIT = 10;
+  // Set a high limit so we store ranks for the whole clan (for member detail views)
+  const LIMIT = 1000;
 
   const allMembersRaw = await db
     .select({ playerTag: members.playerTag, name: members.name })

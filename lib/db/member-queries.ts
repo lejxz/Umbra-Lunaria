@@ -13,6 +13,7 @@ import {
   wars,
   warParticipants,
   unitLevels,
+  hallOfFameRecords,
 } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
 import type {
@@ -103,13 +104,22 @@ export async function getMemberDetail(
   if (!member) return null;
 
   // Fetch all the data in parallel
-  const [activityData, donationData, warData, progressionData] =
+  const [activityData, donationData, warData, progressionData, hofRecords] =
     await Promise.all([
       getActivityDetail(member.playerTag),
       getDonationDetail(member.playerTag),
       getWarDetail(member.playerTag),
       getProgressionDetail(member.playerTag),
+      db.select().from(hallOfFameRecords).where(eq(hallOfFameRecords.holderTag, member.playerTag))
     ]);
+
+  const hofMap = hofRecords.reduce((acc, r) => {
+    acc[r.awardKey as keyof MemberDetailView["hallOfFame"]] = {
+      rank: r.rank,
+      valueLabel: r.valueLabel,
+    };
+    return acc;
+  }, {} as Partial<MemberDetailView["hallOfFame"]>);
 
   return {
     profile: {
@@ -160,6 +170,13 @@ export async function getMemberDetail(
     },
     progression: progressionData,
     rushed: computeRushedFromProgression(progressionData),
+    hallOfFame: {
+      philanthropist: hofMap.philanthropist ?? null,
+      vanguard: hofMap.vanguard ?? null,
+      dedicated: hofMap.dedicated ?? null,
+      capitalist: hofMap.capitalist ?? null,
+      unsleeping: hofMap.unsleeping ?? null,
+    },
   };
 }
 

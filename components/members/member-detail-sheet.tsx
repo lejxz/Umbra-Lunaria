@@ -52,6 +52,7 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
       
       <DonationsSection detail={detail} />
       <ActivityScoreSection detail={detail} />
+      <HallOfFameSection detail={detail} />
       <RushedSection detail={detail} />
       <ProgressionSection detail={detail} />
       <AchievementsSection detail={detail} />
@@ -555,6 +556,50 @@ function SectionLabel({ children, noMargin }: { children: React.ReactNode, noMar
   return (
     <div className={`flex items-center gap-2 border-b border-umbra-line/50 pb-1 ${noMargin ? '' : 'mb-3'}`}>
       <h3 className="font-display text-sm font-semibold text-umbra-lilac">{children}</h3>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Section 8: Hall of Fame Records
+// ---------------------------------------------------------------------------
+
+function HallOfFameSection({ detail }: { detail: MemberDetailView }) {
+  if (!detail.hallOfFame) return null;
+  const hof = detail.hallOfFame;
+
+  if (!hof.philanthropist && !hof.vanguard && !hof.dedicated && !hof.capitalist && !hof.unsleeping) {
+    return null;
+  }
+
+  const awards = [
+    { key: "unsleeping", name: "Unsleeping", data: hof.unsleeping },
+    { key: "dedicated", name: "Dedicated", data: hof.dedicated },
+    { key: "philanthropist", name: "Philanthropist", data: hof.philanthropist },
+    { key: "vanguard", name: "Vanguard", data: hof.vanguard },
+    { key: "capitalist", name: "Capitalist", data: hof.capitalist },
+  ];
+
+  return (
+    <div className="rounded-xl border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
+      <SectionLabel noMargin>All-Time Records</SectionLabel>
+      <div className="mt-4 flex flex-1">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 w-full">
+          {awards.map((c) => (
+            <div key={c.key} className="relative overflow-hidden rounded-lg bg-white/[.03] px-2 py-2 text-center">
+              <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{c.name}</p>
+              <p className={`mt-0.5 font-mono text-sm font-bold ${c.data ? "text-white" : "text-umbra-muted/40"}`}>
+                {c.data ? c.data.valueLabel : "—"}
+              </p>
+              {c.data && (
+                <span className={`absolute top-1.5 right-1.5 font-mono text-[9px] ${c.data.rank === 1 ? "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]" : c.data.rank === 2 ? "text-slate-300" : c.data.rank === 3 ? "text-orange-400" : "text-umbra-purple/70"}`}>
+                  {c.data.rank === 1 ? "👑" : `#${c.data.rank}`}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
