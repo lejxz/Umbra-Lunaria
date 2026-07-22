@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { HallOfFame, HallOfFameAwardKey, HallOfFameLeaderboard } from "@/lib/view-models/dashboard";
 
 const AWARD_META: Record<
@@ -55,75 +54,52 @@ const AWARD_ORDER: HallOfFameAwardKey[] = [
 const RANK_COLORS = ["text-yellow-400", "text-slate-300", "text-amber-600"];
 
 export function HallOfFameCard({ data }: { data: HallOfFame }) {
-  const [activeKey, setActiveKey] = useState<HallOfFameAwardKey>("philanthropist");
-
-  const activeBoard = data.leaderboards.find((lb) => lb.awardKey === activeKey);
-  const meta = AWARD_META[activeKey];
-
   return (
-    <div className="rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden">
+    <div className="space-y-4">
       {/* Header */}
-      <div className="px-5 pt-5 pb-4 border-b border-umbra-line/50">
+      <div className="px-1">
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           All-time clan records
         </p>
-        <h2 className="mt-0.5 font-display text-xl font-semibold text-umbra-lilac">
+        <h2 className="mt-0.5 font-display text-2xl font-semibold text-umbra-lilac">
           Hall of Fame
         </h2>
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex overflow-x-auto border-b border-umbra-line/50 scrollbar-none">
+      {/* Grid Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         {AWARD_ORDER.map((key) => {
-          const m = AWARD_META[key];
-          const isActive = key === activeKey;
+          const meta = AWARD_META[key];
           const board = data.leaderboards.find((lb) => lb.awardKey === key);
           return (
-            <button
+            <div
               key={key}
-              id={`hof-tab-${key}`}
-              onClick={() => setActiveKey(key)}
-              className={`flex flex-col items-center gap-1 px-5 py-3 text-left shrink-0 border-b-2 transition-all duration-200 ${
-                isActive
-                  ? `border-current ${m.color} bg-white/[.03]`
-                  : "border-transparent text-umbra-muted hover:text-umbra-lilac/70 hover:bg-white/[.02]"
-              }`}
+              className="flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden"
             >
-              <span className="text-lg leading-none">{m.icon}</span>
-              <span className="font-display text-[11px] font-semibold leading-tight whitespace-nowrap">
-                {m.title}
-              </span>
-              {board && board.entries.length > 0 && (
-                <span className="font-mono text-[9px] opacity-50">
-                  {board.entries.length} ranked
-                </span>
-              )}
-            </button>
+              {/* Category header */}
+              <div className={`flex flex-col items-center gap-1.5 border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20`}>
+                <span className="text-3xl">{meta.icon}</span>
+                <div>
+                  <p className={`font-display text-sm font-bold ${meta.color}`}>{meta.title}</p>
+                  <p className="font-mono text-[9px] text-umbra-muted opacity-80 mt-0.5">{meta.subtitle}</p>
+                </div>
+              </div>
+
+              {/* Ranked rows */}
+              <div className="p-3 flex-1">
+                {!board || board.entries.length === 0 ? (
+                  <EmptyLeaderboard />
+                ) : (
+                  <div className="space-y-1">
+                    {board.entries.map((entry) => (
+                      <RankRow key={entry.playerTag} entry={entry} meta={meta} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
           );
         })}
-      </div>
-
-      {/* Active leaderboard */}
-      <div className="p-5">
-        {/* Category header */}
-        <div className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 ${meta.accent}`}>
-          <span className="text-2xl">{meta.icon}</span>
-          <div>
-            <p className={`font-display text-base font-bold ${meta.color}`}>{meta.title}</p>
-            <p className="font-mono text-[10px] text-umbra-muted">{meta.subtitle}</p>
-          </div>
-        </div>
-
-        {/* Ranked rows */}
-        {!activeBoard || activeBoard.entries.length === 0 ? (
-          <EmptyLeaderboard />
-        ) : (
-          <div className="space-y-1.5">
-            {activeBoard.entries.map((entry) => (
-              <RankRow key={entry.playerTag} entry={entry} meta={meta} />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -141,42 +117,43 @@ function RankRow({
 
   return (
     <div
-      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.03] ${
+      className={`flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-white/[.04] ${
         isTop3 ? "bg-white/[.02]" : ""
       }`}
     >
       {/* Rank */}
       <span
-        className={`w-6 shrink-0 text-center font-mono text-sm font-bold ${rankColor}`}
+        className={`w-5 shrink-0 text-center font-mono text-xs font-bold ${rankColor}`}
       >
         {entry.rank === 1 ? "👑" : `#${entry.rank}`}
       </span>
 
-      {/* Name */}
-      <span className="flex-1 truncate font-semibold text-sm text-white/90">
-        {entry.name}
-      </span>
-
-      {/* Meta label (secondary stat) */}
-      {entry.metaLabel && (
-        <span className="font-mono text-[10px] text-umbra-muted shrink-0">
-          {entry.metaLabel}
-        </span>
-      )}
-
-      {/* Value */}
-      <span className={`shrink-0 font-mono text-sm font-bold ${isTop3 ? meta.color : "text-umbra-lilac/70"}`}>
-        {entry.valueLabel}
-      </span>
+      {/* Name and Value Stack */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center justify-between gap-1">
+          <span className="truncate font-semibold text-[13px] text-white/90">
+            {entry.name}
+          </span>
+          <span className={`shrink-0 font-mono text-[11px] font-bold ${isTop3 ? meta.color : "text-umbra-lilac/70"}`}>
+            {entry.valueLabel}
+          </span>
+        </div>
+        {/* Meta label (secondary stat) */}
+        {entry.metaLabel && (
+          <span className="font-mono text-[9px] text-umbra-muted truncate">
+            {entry.metaLabel}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
 function EmptyLeaderboard() {
   return (
-    <div className="py-10 text-center">
-      <p className="font-mono text-xs text-umbra-muted">
-        No data yet — records populate after the first daily batch.
+    <div className="py-8 text-center flex items-center justify-center h-full">
+      <p className="font-mono text-[10px] text-umbra-muted/50">
+        No records yet.
       </p>
     </div>
   );
