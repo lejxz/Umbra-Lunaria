@@ -25,6 +25,8 @@ body {
   background-attachment: fixed;
   color: #eee5ff;
   font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
   position: relative;
 }
 

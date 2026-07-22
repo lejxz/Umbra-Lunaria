@@ -126,37 +126,74 @@ function CompactStat({ label, value, accent }: { label: string; value: React.Rea
 }
 
 // ---------------------------------------------------------------------------
-// Section 2: Activity
+// Section 2: Activity — heatmap style
 // ---------------------------------------------------------------------------
 
 function ActivitySection({ detail }: { detail: MemberDetailView }) {
   const a = detail.activity;
+  const activeDays = a.buckets.filter((b) => b.active).length;
+  const totalDays = a.buckets.length;
+
   return (
     <div>
       <SectionLabel>Activity</SectionLabel>
-      <div className="grid grid-cols-2 gap-2">
-        <CompactStat label="Last active" value={fmtDate(a.lastActiveAt)} />
-        <CompactStat label="Login days (30d)" value={a.loginDays.length} accent="purple" />
+
+      {/* Summary line */}
+      <div className="flex items-baseline gap-3">
+        <div>
+          <span className="font-display text-2xl font-bold text-umbra-purple">{activeDays}</span>
+          <span className="text-sm text-umbra-muted"> / {totalDays} active days</span>
+        </div>
+        {a.loginDays.length > 0 && (
+          <span className="font-mono text-[10px] text-umbra-muted">
+            · {a.loginDays.length} login day{a.loginDays.length !== 1 ? "s" : ""}
+          </span>
+        )}
       </div>
+
+      {/* Heatmap strip — one cell per day, intensity based on activity */}
       {a.buckets.length > 0 && (
         <div className="mt-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">30-day activity</p>
-            <div className="flex items-center gap-2 text-[10px] text-umbra-muted">
-              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-umbra-purple" /> Active</span>
-              <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-sm bg-white/10" /> Inactive</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-0.5">
+          <div className="flex gap-[2px]">
             {a.buckets.map((b, i) => (
-              <div key={i} title={`${b.label}: ${b.active ? "active" : "inactive"}`} className={`h-4 w-4 rounded-sm transition-colors ${b.active ? "bg-umbra-purple" : "bg-white/10"}`} />
+              <div
+                key={i}
+                title={`${b.label}: ${b.active ? "active" : "inactive"}`}
+                className={`h-7 flex-1 min-w-[6px] rounded-sm transition-all hover:scale-y-110 ${
+                  b.active
+                    ? "bg-gradient-to-t from-umbra-indigo to-umbra-purple"
+                    : "bg-white/[.06]"
+                }`}
+              />
             ))}
+          </div>
+          {/* Date labels */}
+          <div className="mt-1 flex justify-between font-mono text-[8px] text-umbra-muted/60">
+            <span>{a.buckets[0]?.label ?? ""}</span>
+            <span>{a.buckets[a.buckets.length - 1]?.label ?? ""}</span>
           </div>
         </div>
       )}
+
+      {/* Last active + tracking info */}
+      <div className="mt-3 flex items-center gap-4 text-xs">
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Last active</span>
+          <span className="font-semibold text-white">{fmtDate(a.lastActiveAt)}</span>
+        </div>
+        <div className="h-3 w-px bg-umbra-line/30" />
+        <div className="flex items-center gap-1.5">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Tracking</span>
+          <span className="text-umbra-muted">{fmtDate(a.trackingStart)}</span>
+        </div>
+      </div>
+
       {a.hasPartialData && (
         <p className="mt-2 text-[10px] text-amber-400">⚠ Partial tracking data</p>
       )}
+      <p className="mt-1 text-[10px] text-umbra-muted/60">
+        Estimated from observed changes — not online presence.
+      </p>
     </div>
   );
 }
@@ -167,25 +204,69 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
 
 function WarSection({ detail }: { detail: MemberDetailView }) {
   const w = detail.warParticipation;
+
+  if (w.warsTracked === 0) {
+    return (
+      <div>
+        <SectionLabel>War Record</SectionLabel>
+        <div className="flex flex-col items-center justify-center py-6 text-center">
+          {/* Crossed swords icon (dimmed) */}
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="opacity-30">
+            <g transform="translate(20 20) rotate(-45)">
+              <rect x="-0.8" y="-10" width="1.6" height="14" rx="0.5" fill="#9287AD" />
+              <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#9287AD" />
+            </g>
+            <g transform="translate(20 20) rotate(45)">
+              <rect x="-0.8" y="-10" width="1.6" height="14" rx="0.5" fill="#9287AD" />
+              <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#9287AD" />
+            </g>
+          </svg>
+          <p className="mt-2 text-sm text-umbra-muted">No wars tracked yet</p>
+          <p className="mt-0.5 text-[11px] text-umbra-muted/60">
+            War history will appear here once the tracker observes a war.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const participationPct = w.participationRate !== null ? Math.round(w.participationRate * 100) : null;
+
   return (
     <div>
       <SectionLabel>War Record</SectionLabel>
-      {w.warsTracked === 0 ? (
-        <p className="text-xs text-umbra-muted">No wars tracked yet.</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-2">
-            <CompactStat label="Wars Tracked" value={w.warsTracked} />
-            <CompactStat label="Wars Missed" value={w.warsMissed} accent={w.warsMissed > 0 ? "amber" : "emerald"} />
-            <CompactStat label="3-Star Rate" value={w.threeStarRate !== null ? `${(w.threeStarRate * 100).toFixed(0)}%` : <UnavailableValue />} accent="emerald" />
-            <CompactStat label="Avg Stars" value={w.averageStars !== null ? w.averageStars.toFixed(1) : <UnavailableValue />} />
-          </div>
-          {w.currentWarStatus && (
-            <div className="mt-3 rounded-lg bg-umbra-purple/10 border border-umbra-purple/20 px-3 py-1.5 text-center text-xs text-umbra-lilac">
-              Current war: <span className="font-semibold">{w.currentWarStatus}</span>
-            </div>
-          )}
-        </>
+      {/* Big participation number */}
+      <div className="flex items-baseline gap-3">
+        <span className="font-display text-2xl font-bold text-umbra-purple">{w.warsTracked}</span>
+        <span className="text-sm text-umbra-muted">wars tracked</span>
+        {participationPct !== null && (
+          <span className="ml-auto font-mono text-xs text-emerald-400">{participationPct}% participation</span>
+        )}
+      </div>
+
+      {/* Stat row */}
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <CompactStat
+          label="Missed"
+          value={w.warsMissed}
+          accent={w.warsMissed > 0 ? "amber" : "emerald"}
+        />
+        <CompactStat
+          label="3-star rate"
+          value={w.threeStarRate !== null ? `${(w.threeStarRate * 100).toFixed(0)}%` : <UnavailableValue />}
+          accent="emerald"
+        />
+        <CompactStat
+          label="Avg stars"
+          value={w.averageStars !== null ? w.averageStars.toFixed(1) : <UnavailableValue />}
+        />
+        <CompactStat label="Stars earned" value={w.starsEarned} accent="amber" />
+      </div>
+
+      {w.currentWarStatus && (
+        <div className="mt-3 rounded-lg bg-umbra-purple/10 border border-umbra-purple/20 px-3 py-1.5 text-center text-xs text-umbra-lilac">
+          Current war: <span className="font-semibold">{w.currentWarStatus}</span>
+        </div>
       )}
     </div>
   );
