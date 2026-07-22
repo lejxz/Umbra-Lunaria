@@ -1,3 +1,7 @@
+# Manual fallback only — the primary light-poll + daily-batch schedule now
+# runs on a third-party cron-job web service for schedule consistency.
+# See concept/04-activity-tracking-and-polling.md. Use this workflow via the
+# Actions tab ("Run workflow") for ad-hoc ingest runs.
 name: Poll Clash of Clans data
 
 on:

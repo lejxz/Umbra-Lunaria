@@ -111,14 +111,19 @@ export interface WarHistoryEntry {
 // ---------------------------------------------------------------------------
 
 export interface WarCenterData {
-  // The active war (preparation/inWar) if one exists, else the most recent
-  // ended war so the page always answers "what's the war situation?". null
-  // only when no wars exist at all (cold start).
+  // The active war (preparation/inWar) if one exists. null when the clan is at
+  // peace — the hero then renders the no-active-war state. Ended wars are NOT
+  // promoted to this field (they live in `history`); a backfill row without a
+  // snapshot can't render the roster/attack detail.
   currentWar: CurrentWarDetail | null;
   // Attack log for currentWar (empty during preparation, before any attacks).
   attackLog: WarAttackLogEntry[];
   // History list, most-recent first.
   history: WarHistoryEntry[];
+  // Most recent ended war, surfaced as a one-line "last result" in the hero
+  // when there is no active war (concept/07 §landing state). null on cold
+  // start (no wars at all) or when an active war is already shown.
+  lastResult: WarHistoryEntry | null;
   // Clan war-log visibility — drives the private-war-log notice.
   warLogPublic: boolean | null;
   // Earliest tracked war/snapshot time — for the "history before tracking may

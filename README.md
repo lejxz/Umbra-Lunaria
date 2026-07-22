@@ -8,7 +8,7 @@ https://umbra-lunaria.vercel.app/
 
 ## Status
 
-**Phase 0 complete. Phase 1 starting.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), GitHub Actions poller (every ~10 min + daily batch), Vercel Cron purge job, and all environment/repo secrets — data is flowing into the Neon database. Phase 1 (read-only core UI) is next: dashboard, members list, war center, and capital tracker. See [`concept/12-roadmap-and-modularity.md`](./concept/12-roadmap-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
+**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~10 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the Neon database. Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`concept/12-Implemantation-plan-and-modularity.md`](./concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
 
 ## Planned features
 
@@ -42,7 +42,7 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 
 - A Clash of Clans account, with a clan to track (leadership access isn't required to *read* public clan data via the API, but is required if the clan's war log is private and you want it public — see below).
 - A Supercell ID / Clash of Clans developer account to create an API key.
-- A GitHub account (for the repo, and for the scheduled polling workflow — see [`concept/01-tech-stack.md`](./concept/01-tech-stack.md)).
+- A GitHub account (for the repo). The scheduled polling now runs on a **third-party cron-job web service** (e.g. cron-job.org) — see [`concept/04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md).
 - A Vercel account, for hosting.
 - A Neon account (or just use Vercel's Marketplace integration, which provisions one for you — see [`concept/03-data-model-and-database.md`](./concept/03-data-model-and-database.md)).
 
@@ -54,9 +54,9 @@ Do these in order — later steps need values from earlier ones.
 2. **Set `config/clan.config.ts`** — ✅ already configured with the clan tag `#2Y8V8VGQ`.
 3. **Create the Vercel project and Neon database** — see "Vercel & database" below. You'll come out of this with a deployment URL and a `DATABASE_URL`.
 4. **Set Vercel environment variables** — `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET` **and `CRON_SECRET`** (see "Configuration"). Not optional — the app throws immediately at runtime without these, by design (`lib/db/index.ts`, `lib/coc-client/client.ts`), and only you can set them since they live in your Vercel project. `CRON_SECRET` specifically: Vercel does **not** generate this for you — generate one yourself (`openssl rand -hex 32`) and set it like any other variable, then Vercel automatically forwards it as the Authorization header when it calls `/api/cron/purge`.
-5. **Set GitHub repo secrets** — see "GitHub Actions & repo secrets" below. `INGEST_SECRET` here must be the **same value** as in Vercel. `CRON_SECRET` is Vercel-only — GitHub never calls the purge route, so it doesn't need this one.
+5. **Configure the third-party cron-job service** — see "Polling cron jobs" below. Create two jobs (light poll every 10 min, daily batch once daily) pointing at `https://<your-vercel-app>/api/ingest` with `Authorization: Bearer <INGEST_SECRET>` and the `batch` body flag. The `.github/workflows/poll.yml` workflow remains as a manual (`workflow_dispatch`) fallback.
 6. **Deploy.** The build itself runs the database migration (`"build": "drizzle-kit migrate && next build"` in `package.json`), so there's no separate manual migration step — it happens automatically against whatever `DATABASE_URL` is set in Vercel at build time, every deploy. Safe to run repeatedly: already-applied migrations are skipped.
-7. **Verify it's working** — Actions tab → "Poll Clash of Clans data" → Run workflow (manual trigger via `workflow_dispatch`, don't need to wait for the schedule). Check the run succeeded, then check the `members` and `member_snapshots` tables in Neon for rows.
+7. **Verify it's working** — trigger the light-poll cron job in the cron service's dashboard (or Actions tab → "Poll Clash of Clans data" → Run workflow as a fallback). Check the run succeeded, then check the `members` and `member_snapshots` tables in Neon for rows.
 
 ## Getting a Clash of Clans API key — step by step
 
@@ -70,7 +70,7 @@ The Clash of Clans API is free, but every key is locked to specific IP addresses
    - **Description:** optional, e.g. `Clan dashboard hosted on Vercel`.
    - **Allowed IP Addresses:** this is the field that matters. **Do not try to guess or enter a Vercel IP** — it changes constantly and this will not work. Enter RoyaleAPI's fixed proxy IP instead: `45.79.218.79`. (Full reasoning in [`concept/02-api-and-proxy-strategy.md`](./concept/02-api-and-proxy-strategy.md).)
 5. Click **Create Key**. Copy the generated token immediately — the full token is only shown once. If you lose it, you'll need to revoke and recreate the key.
-6. **Do not commit this token to the repo.** It goes into Vercel's environment variables (`COC_API_TOKEN`) and into the GitHub Actions workflow's repo secrets, both described in [`concept/11-config-specification.md`](./concept/11-config-specification.md) — never in a checked-in file.
+6. **Do not commit this token to the repo.** It goes into Vercel's environment variables (`COC_API_TOKEN`) and into the third-party cron-job service's request headers, both described in [`concept/11-config-specification.md`](./concept/11-config-specification.md) — never in a checked-in file.
 7. **Find your clan's tag:** in-game, open your clan's info screen — the tag is shown under the clan name, starting with `#`. You'll need it for `config/clan.config.ts` (see [`concept/11-config-specification.md`](./concept/11-config-specification.md)).
 8. **Check whether your clan's war log is public:** Clan Settings (in-game, leader/co-leader only) → War Log visibility. If it's private, historical war results before this tool starts running won't be recoverable through the API — see the note in [`concept/07-clan-war.md`](./concept/07-clan-war.md). Setting it to public is optional but recommended if you want a head start on war history.
 9. Once your Vercel project is set up with the env vars from [`concept/11-config-specification.md`](./concept/11-config-specification.md), all Clash of Clans API calls in this project are routed through `https://cocproxy.royaleapi.dev` automatically — you should never need to touch the raw `api.clashofclans.com` URL directly in application code.
@@ -83,16 +83,29 @@ The Clash of Clans API is free, but every key is locked to specific IP addresses
 2. **Storage** tab → Marketplace Database Providers → **Neon** → Create. This provisions a free-tier Postgres database and auto-populates `DATABASE_URL` in the project's environment variables — no separate Neon signup needed.
 3. **Environment Variables** (Project Settings): add `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET`, and `CRON_SECRET` — see "Configuration" below for exact values. `CRON_SECRET` is not auto-generated by Vercel despite what an earlier version of this README said — generate it yourself, same as `INGEST_SECRET`.
 4. **Deploy.** Vercel picks up `vercel.json`'s cron entry automatically and will forward your `CRON_SECRET` value as the request's Authorization header when it calls `/api/cron/purge` — but only if you've actually set that variable in step 3.
-5. Copy the resulting deployment URL (e.g. `https://umbra-lunaria.vercel.app`) — you need it for the GitHub Actions secret below.
+5. Copy the resulting deployment URL (e.g. `https://umbra-lunaria.vercel.app`) — you need it for the cron-job configuration below.
 
-## GitHub Actions & repo secrets
+## Polling cron jobs (third-party cron service)
 
-The polling workflow (`.github/workflows/poll.yml`) runs on GitHub's infrastructure and calls your deployed Vercel app — it needs its own secrets, separate from Vercel's environment variables:
+The light poll and daily batch are triggered by an **external cron-job web service** (e.g. cron-job.org / EasyCron / UptimeRobot Cron) rather than GitHub Actions, because the third-party service delivers more consistent scheduling. The `.github/workflows/poll.yml` workflow is retained as a manual (`workflow_dispatch`) fallback for ad-hoc runs.
 
-1. Repo → **Settings → Secrets and variables → Actions → New repository secret**.
-2. Add `INGEST_SECRET` — generate one with `openssl rand -hex 32`, and use the **exact same value** you set in Vercel's `INGEST_SECRET`. If these two don't match, `/api/ingest` returns 401 and every poll fails silently until someone checks the Actions log.
-3. Add `VERCEL_APP_URL` — the deployment URL from the Vercel step above, no trailing slash.
-4. Test it: Actions tab → "Poll Clash of Clans data" → **Run workflow** (this uses the `workflow_dispatch` trigger, so you don't have to wait for the cron schedule to fire).
+Configure two jobs in the cron service, both POSTing to your deployed Vercel app:
+
+| Job | Schedule | URL | Headers | Body |
+|---|---|---|---|---|
+| Light poll | every 10 min | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": false}` |
+| Daily batch | once daily (e.g. 04:00 Asia/Manila) | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": true}` |
+
+The `INGEST_SECRET` used here must be the **exact same value** as in Vercel's environment variables — if they don't match, `/api/ingest` returns 401 and every poll fails. Set the daily-batch job's request timeout to ≥ 30s (full player-detail fetches take longer than the light poll).
+
+### GitHub Actions (manual fallback)
+
+`.github/workflows/poll.yml` is kept as a `workflow_dispatch`-only manual fallback. If you want to use it, set these repo secrets (Repo → Settings → Secrets and variables → Actions):
+
+1. `INGEST_SECRET` — the **same value** as in Vercel.
+2. `VERCEL_APP_URL` — the deployment URL, no trailing slash.
+
+Then: Actions tab → "Poll Clash of Clans data" → **Run workflow**.
 
 **A gotcha worth knowing about if you're pushing to this repo with a personal access token** (including if an AI coding tool is pushing on your behalf): GitHub rejects any push that touches `.github/workflows/*` unless the token has the **`workflow`** scope. A token without it will push everything else in a commit but fail specifically on the workflow file, with no ambiguity in the error message — it says so directly. Fine-grained PATs can have this permission added after creation without regenerating the token value; classic PATs need the `workflow` scope checked at creation.
 

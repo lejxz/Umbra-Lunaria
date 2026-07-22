@@ -19,7 +19,7 @@
  * Server-only: imports @/lib/db. Never call from a client component.
  */
 
-import { and, desc, eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { wars, warParticipants, warAttacks, clans } from "@/lib/db/schema";
 import {
@@ -328,11 +328,18 @@ export async function backfillWarLog(
  * Only fetches war tags that look real (the league group uses "#0" placeholders
  * for rounds that haven't opened yet). Per-war fetch errors are caught so one
  * inaccessible round doesn't abort the rest.
+ *
+ * CWL side normalization: the `/clanwarleagues/wars/{warTag}` response lists
+ * the two clans as `clan` and `opponent`, but does NOT guarantee our clan is
+ * `clan`. We swap the two sides when our clan is the `opponent` so that
+ * `syncCurrentWar` always sees our clan as `clan` — otherwise `ownStars`,
+ * `war_participants` (FK to `members`), and the stored snapshot would all be
+ * recorded from the opponent's perspective.
  */
 export async function syncCwlWars(
   clanTag: string,
   capturedAt: Date,
-): Promise<{ synced: number; reason: string | null }> {
+): Promise<{ synced: number; reason: string | null; lastState: string | null }> {
   let group;
   try {
     group = await cocClient.getCwlLeagueGroup(clanTag);
@@ -340,10 +347,11 @@ export async function syncCwlWars(
     const reason =
       err instanceof Error ? `cwl league group: ${err.message}` : "cwl league group failed";
     // 404 = not in CWL this season — normal, not an error worth surfacing.
-    return { synced: 0, reason };
+    return { synced: 0, reason, lastState: null };
   }
 
   let synced = 0;
+  let lastState: string | null = null;
   for (const round of group.rounds ?? []) {
     for (const warTag of round.warTags ?? []) {
       // "#0" placeholders mark rounds that haven't opened yet.
@@ -352,19 +360,24 @@ export async function syncCwlWars(
         const cwlWar = await cocClient.getCwlWar(warTag);
         if (!cwlWar.clan || !cwlWar.opponent) continue;
         // Only sync wars that involve our clan.
-        if (
-          cwlWar.clan.tag !== clanTag &&
-          cwlWar.opponent.tag !== clanTag
-        )
-          continue;
-        await syncCurrentWar(cwlWar, capturedAt, warTag);
+        const weAreClan = cwlWar.clan.tag === clanTag;
+        const weAreOpponent = cwlWar.opponent.tag === clanTag;
+        if (!weAreClan && !weAreOpponent) continue;
+
+        // Normalize so `clan` is always OUR clan before syncing.
+        const normalized = weAreClan
+          ? cwlWar
+          : { ...cwlWar, clan: cwlWar.opponent, opponent: cwlWar.clan };
+
+        await syncCurrentWar(normalized, capturedAt, warTag);
         synced++;
+        lastState = cwlWar.state;
       } catch {
         // A single round being inaccessible (404) is expected mid-season.
       }
     }
   }
-  return { synced, reason: null };
+  return { synced, reason: null, lastState };
 }
 
 // ---------------------------------------------------------------------------
@@ -419,7 +432,7 @@ export async function refreshCurrentWar(
     if (cwl.synced > 0) {
       return {
         ok: true,
-        state: "inWar",
+        state: cwl.lastState ?? "inWar",
         warType: "cwl",
         capturedAt,
         error: null,
@@ -439,7 +452,7 @@ export async function refreshCurrentWar(
   if (cwl.synced > 0) {
     return {
       ok: true,
-      state: "inWar",
+      state: cwl.lastState ?? "inWar",
       warType: "cwl",
       capturedAt,
       error: null,
@@ -454,18 +467,4 @@ export async function refreshCurrentWar(
     capturedAt,
     error: cwl.reason && !/404|not found/i.test(cwl.reason) ? cwl.reason : null,
   };
-}
-
-/**
- * Convenience: read the most-recently-synced war row (any type), used by the
- * War Center to pick the "current" war to display. Returns null when no wars
- * exist at all.
- */
-export async function getLatestWarRow() {
-  const [row] = await db
-    .select()
-    .from(wars)
-    .orderBy(desc(wars.id))
-    .limit(1);
-  return row ?? null;
 }

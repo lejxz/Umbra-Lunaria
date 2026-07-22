@@ -9,7 +9,16 @@ Umbra Lunaria uses two capture modes:
 | Light poll | Every 10 minutes | Roster, member snapshots, join/leave detection, and current war while preparation/battle is active. |
 | Daily batch | Once daily | Clan cache, full player details, Capital districts, completed raid seasons, and stale reference refreshes. |
 
-GitHub Actions schedules the light poll because Vercel Hobby Cron is daily only. Vercel Cron runs the daily retention purge. Scheduled delivery is best effort: the UI must tolerate delayed or missed samples and show the latest successful capture time.
+Both capture modes are triggered by an **external third-party cron-job web service** (e.g. cron-job.org / EasyCron / UptimeRobot Cron) that POSTs `/api/ingest` on a fixed schedule with the `INGEST_SECRET` bearer token. This replaced the earlier GitHub Actions trigger because the third-party service delivers more consistent, sub-minute-jitter scheduling than GitHub Actions cron (which drifts under load) and keeps both the light poll and the daily batch behind one configurable scheduler. The repository's `.github/workflows/poll.yml` is retained as a manual (`workflow_dispatch`) fallback for ad-hoc runs, not as the primary scheduler.
+
+The daily retention purge is still run by **Vercel Cron** (`/api/cron/purge`), because it only needs once-daily execution and Vercel Cron can call the route with the `CRON_SECRET` natively.
+
+Two cron jobs are configured in the third-party service:
+
+1. **Light poll** — every 10 minutes, `POST /api/ingest` with body `{"batch": false}` and `Authorization: Bearer <INGEST_SECRET>`.
+2. **Daily batch** — once daily (e.g. 04:00 clan time), `POST /api/ingest` with body `{"batch": true}` and the same bearer token.
+
+Scheduled delivery is best effort: the UI must tolerate delayed or missed samples and show the latest successful capture time.
 
 ## Light-poll sequence
 

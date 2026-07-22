@@ -10,7 +10,7 @@ Configuration has three deliberately separate layers:
 
 ## Environment variables
 
-Set these in Vercel; copy only the non-secret references to GitHub Actions where needed.
+Set these in Vercel. The `INGEST_SECRET` is also configured in the third-party cron-job service that triggers `/api/ingest` (see concept/04). The `CRON_SECRET` is sent automatically by Vercel Cron when it invokes `/api/cron/purge`.
 
 ```text
 # Clash of Clans API
@@ -31,14 +31,25 @@ ADMIN_PASSWORD_HASH=
 
 `COC_API_TOKEN`, `DATABASE_URL`, `INGEST_SECRET`, `CRON_SECRET`, `ADMIN_SESSION_SECRET`, and `ADMIN_PASSWORD_HASH` are secrets. They must not be checked into source control, exposed in browser code, or copied into session logs.
 
-## GitHub Actions secrets
+## Third-party cron-job service configuration
+
+The external cron-job service (e.g. cron-job.org / EasyCron / UptimeRobot Cron) owns the light-poll and daily-batch schedule. Configure two jobs pointing at the deployed Vercel URL:
+
+| Job | Schedule | Method | URL | Headers | Body |
+|---|---|---|---|---|---|
+| Light poll | every 10 min | POST | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": false}` |
+| Daily batch | once daily (e.g. 04:00 Asia/Manila) | POST | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": true}` |
+
+The `INGEST_SECRET` configured in the cron service must exactly match the Vercel environment value. Use the service's "request timeout" ≥ 30s for the daily batch (full player-detail fetches take longer than the light poll).
+
+## GitHub Actions (manual fallback only)
 
 ```text
 VERCEL_APP_URL=
 INGEST_SECRET=
 ```
 
-The workflow calls `/api/ingest` with `Authorization: Bearer ${{ secrets.INGEST_SECRET }}`. Its secret must exactly match the Vercel environment value.
+`.github/workflows/poll.yml` is retained as a `workflow_dispatch`-only (manual) fallback for ad-hoc ingest runs from the Actions tab. It is no longer the primary scheduler — the third-party cron service is, for schedule consistency (see concept/04). The `INGEST_SECRET` repository secret must still match the Vercel environment value when the fallback is used.
 
 ## Static clan configuration
 
@@ -49,7 +60,7 @@ The workflow calls `/api/ingest` with `Authorization: Bearer ${{ secrets.INGEST_
 | `clanTag` | `#2JPCYP98L` | The one clan tracked by this deployment. |
 | `timezone` | `Asia/Manila` | Day boundaries and rendered timestamps. |
 | `memberRetentionDays` | `14` | Retained departed-member data duration. |
-| `pollIntervalMinutes` | `10` | Target light-poll cadence; workflow cron must match it. |
+| `pollIntervalMinutes` | `10` | Target light-poll cadence; the third-party cron-job service schedule must match it. |
 | `minWarsForConfidentRanking` | `3` | Threshold for a full-confidence auto-select score. |
 | `features` | per feature | Enable/disable incomplete or optional surfaces. |
 

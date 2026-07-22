@@ -9,7 +9,7 @@
  * from a client component.
  */
 
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { wars, clans } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
@@ -54,27 +54,18 @@ export async function getWarClanIdentity(): Promise<{
 // ---------------------------------------------------------------------------
 
 export async function getWarCenter(): Promise<WarCenterData> {
-  // Active war first (preparation or inWar — at most one per clan), else the
-  // most recent ended war so the page always answers "what's the situation?".
-  let warRow: typeof wars.$inferSelect | null = null;
-
+  // ---- Active war (preparation or inWar — at most one per clan). Only an
+  // active war becomes the hero "current war" detail. Ended wars are shown in
+  // the history list, NOT picked as the hero, because a backfill row without a
+  // snapshot can't render the roster/attack detail (picking it would also
+  // exclude it from history — the vanishing-war bug). ----
   const [active] = await db
     .select()
     .from(wars)
     .where(inArray(wars.state, ["preparation", "inWar"]))
     .orderBy(desc(wars.startTime))
     .limit(1);
-  if (active) {
-    warRow = active;
-  } else {
-    const [ended] = await db
-      .select()
-      .from(wars)
-      .where(eq(wars.state, "warEnded"))
-      .orderBy(desc(wars.endTime))
-      .limit(1);
-    warRow = ended ?? null;
-  }
+  const warRow = active ?? null;
 
   // ---- Clan war-log visibility (drives the private-war-log notice) ----
   const [clanRow] = await db
@@ -83,12 +74,41 @@ export async function getWarCenter(): Promise<WarCenterData> {
     .where(eq(clans.clanTag, clanConfig.clanTag))
     .limit(1);
 
-  // ---- History list (most-recent first, excluding the displayed current war) ----
-  const historyRows = await db
-    .select()
-    .from(wars)
-    .orderBy(desc(wars.endTime), desc(wars.id))
-    .limit(50);
+  // ---- History list (most-recent first). Project only the columns the list
+  // needs + a `has_snapshot` boolean — do NOT pull the full JSONB snapshot for
+  // 50 rows (it can be tens of KB each for live-tracked wars). Exclude the
+  // active hero war from the list (it's shown above) when one exists. ----
+  const historyProjection = {
+    id: wars.id,
+    warType: wars.warType,
+    opponentName: wars.opponentName,
+    opponentTag: wars.opponentTag,
+    opponentBadgeUrls: wars.opponentBadgeUrls,
+    opponentClanLevel: wars.opponentClanLevel,
+    result: wars.result,
+    teamSize: wars.teamSize,
+    ownStars: wars.ownStars,
+    opponentStars: wars.opponentStars,
+    ownDestructionPercentage: wars.ownDestructionPercentage,
+    opponentDestructionPercentage: wars.opponentDestructionPercentage,
+    endTime: wars.endTime,
+    startTime: wars.startTime,
+    attacksPerMember: wars.attacksPerMember,
+    lastSyncedAt: wars.lastSyncedAt,
+    hasSnapshot: sql<boolean>`${wars.warSnapshot} IS NOT NULL`,
+  };
+  const historyRows = warRow
+    ? await db
+        .select(historyProjection)
+        .from(wars)
+        .where(ne(wars.id, warRow.id))
+        .orderBy(desc(wars.endTime), desc(wars.id))
+        .limit(50)
+    : await db
+        .select(historyProjection)
+        .from(wars)
+        .orderBy(desc(wars.endTime), desc(wars.id))
+        .limit(50);
 
   // ---- Tracking start (earliest observed war) for the "history may be
   // incomplete before tracking" caveat. ----
@@ -107,14 +127,21 @@ export async function getWarCenter(): Promise<WarCenterData> {
     }
   }
 
-  const history: WarHistoryEntry[] = historyRows
-    .filter((r) => !warRow || r.id !== warRow.id)
-    .map(toHistoryEntry);
+  // ---- Last result: when there's no active war, surface the most recent
+  // ended war as a one-line "last result" in the hero so the page still
+  // answers "what was the last war?" (concept/07 §landing state). ----
+  let lastResult: WarHistoryEntry | null = null;
+  if (!currentWar && historyRows.length > 0 && historyRows[0]) {
+    lastResult = toHistoryEntry(historyRows[0]);
+  }
+
+  const history: WarHistoryEntry[] = historyRows.map(toHistoryEntry);
 
   return {
     currentWar,
     attackLog,
     history,
+    lastResult,
     warLogPublic: clanRow?.isWarLogPublic ?? null,
     trackingStart: trackingRow?.earliest ?? null,
     refreshTtlSeconds: REFRESH_TTL_SECONDS,
@@ -319,7 +346,33 @@ function buildRosterMember(
   };
 }
 
-function toHistoryEntry(row: typeof wars.$inferSelect): WarHistoryEntry {
+/**
+ * Map a projected war row to the history view model. Accepts the column-select
+ * shape used by `getWarCenter` (which includes a `hasSnapshot` boolean rather
+ * than the full JSONB payload) so the history query never transfers the large
+ * snapshot for 50 rows.
+ */
+type HistoryProjection = {
+  id: number;
+  warType: string;
+  opponentName: string | null;
+  opponentTag: string | null;
+  opponentBadgeUrls: unknown;
+  opponentClanLevel: number | null;
+  result: string | null;
+  teamSize: number | null;
+  ownStars: number | null;
+  opponentStars: number | null;
+  ownDestructionPercentage: number | null;
+  opponentDestructionPercentage: number | null;
+  endTime: Date | null;
+  startTime: Date | null;
+  attacksPerMember: number | null;
+  lastSyncedAt: Date | null;
+  hasSnapshot: boolean;
+};
+
+function toHistoryEntry(row: HistoryProjection): WarHistoryEntry {
   return {
     warId: row.id,
     warType: row.warType as "regular" | "cwl",
@@ -336,7 +389,7 @@ function toHistoryEntry(row: typeof wars.$inferSelect): WarHistoryEntry {
     endTime: row.endTime,
     startTime: row.startTime,
     attacksPerMember: row.attacksPerMember,
-    hasDetail: !!row.warSnapshot,
+    hasDetail: row.hasSnapshot,
     lastSyncedAt: row.lastSyncedAt,
   };
 }

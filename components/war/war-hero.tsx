@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { CurrentWarDetail } from "@/lib/view-models/war";
+import type { CurrentWarDetail, WarHistoryEntry } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { LiveCountdown } from "@/components/ui/live-countdown";
 import { TimeAgo } from "@/components/ui/time-ago";
@@ -14,17 +14,21 @@ import { WarRefreshButton } from "./war-refresh-button";
  *
  * Shows a clear no-active-war state when there is no current war, and surfaces
  * the shared-TTL refresh control. The "stale capture" caveat is shown when an
- * active war hasn't been synced recently.
+ * active war hasn't been synced recently. When at peace, a one-line "last
+ * result" surfaces the most recent ended war so the page still answers "what
+ * was the last war?".
  */
 export function WarHero({
   currentWar,
   clanBadgeUrls,
   clanName,
+  lastResult,
   refreshTtlSeconds,
 }: {
   currentWar: CurrentWarDetail | null;
   clanBadgeUrls?: ClanBadgeUrls | null;
   clanName?: string | null;
+  lastResult?: WarHistoryEntry | null;
   refreshTtlSeconds: number;
 }) {
   if (!currentWar) {
@@ -50,6 +54,27 @@ export function WarHero({
             The clan isn&apos;t in a war right now. The most recent result appears in the
             history below once tracking begins.
           </p>
+          {lastResult && (
+            <div className="mt-5 w-full max-w-md rounded-xl border border-umbra-line bg-white/[.03] px-4 py-3">
+              <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+                Last result
+              </p>
+              <div className="mt-1.5 flex items-center justify-between gap-3">
+                <span className="truncate text-sm text-umbra-lilac">
+                  vs {lastResult.opponentName ?? "Unknown"}
+                </span>
+                <ResultBadge result={lastResult.result} />
+              </div>
+              <p className="mt-1 font-mono text-2xs text-umbra-muted">
+                ★{lastResult.ownStars ?? "—"}–{lastResult.opponentStars ?? "—"}
+                {lastResult.ownDestructionPercentage != null &&
+                  ` · ${lastResult.ownDestructionPercentage}%`}
+                {lastResult.endTime && (
+                  <> · <TimeAgo date={lastResult.endTime} /></>
+                )}
+              </p>
+            </div>
+          )}
         </div>
       </section>
     );
@@ -231,5 +256,31 @@ function WarClanColumn({
         </p>
       </div>
     </div>
+  );
+}
+
+function ResultBadge({ result }: { result: "win" | "loss" | "tie" | null }) {
+  if (result === "win")
+    return (
+      <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-2xs font-semibold uppercase text-emerald-400">
+        Win
+      </span>
+    );
+  if (result === "loss")
+    return (
+      <span className="rounded-full border border-red-400/30 bg-red-400/10 px-2 py-0.5 text-2xs font-semibold uppercase text-red-400">
+        Loss
+      </span>
+    );
+  if (result === "tie")
+    return (
+      <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-2xs font-semibold uppercase text-amber-400">
+        Tie
+      </span>
+    );
+  return (
+    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-2xs font-semibold uppercase text-umbra-muted">
+      —
+    </span>
   );
 }

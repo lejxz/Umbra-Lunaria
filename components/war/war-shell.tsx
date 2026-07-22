@@ -36,6 +36,7 @@ export function WarShell({
         currentWar={data.currentWar}
         clanBadgeUrls={clanBadgeUrls}
         clanName={clanName}
+        lastResult={data.lastResult}
         refreshTtlSeconds={data.refreshTtlSeconds}
       />
 
