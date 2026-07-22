@@ -90,9 +90,9 @@ export function CurrentWarCard({
           </div>
 
           {/* VS layout: Our clan | VS icon | Enemy clan */}
-          <div className="mt-3 flex flex-1 items-center justify-center gap-3">
+          <div className="mt-3 flex flex-1 items-stretch justify-center gap-2">
             {/* Our clan */}
-            <div className="flex-1 flex flex-col items-center text-center">
+            <div className="flex-1 flex flex-col items-center text-center rounded-xl bg-white/[.035] border border-white/5 p-3 shadow-sm">
               {clanBadgeUrls?.small && (
                 <div className="relative h-10 w-10 mb-1">
                   <Image
@@ -103,25 +103,28 @@ export function CurrentWarCard({
                   />
                 </div>
               )}
-              <p className="font-display text-[15px] font-medium text-umbra-lilac leading-tight line-clamp-2">
+              <p className="font-display text-[14px] font-medium text-umbra-lilac leading-tight line-clamp-2">
                 {clanName ?? "Our Clan"}
               </p>
-              <div className="mt-2 flex flex-col items-center">
-                <p className="font-display text-2xl font-bold text-umbra-purple">
-                  {warSummary.ownStars ?? <UnavailableValue />}
-                </p>
-                <p className="mt-0.5 font-mono text-[10px] text-umbra-muted">
-                  {warSummary.ownDestructionPercentage !== null
-                    ? `${warSummary.ownDestructionPercentage}%`
-                    : "—"}
-                </p>
+              
+              <div className="mt-auto pt-3 flex w-full flex-col items-center">
+                <div className="w-full rounded-lg bg-black/20 p-2 border border-white/5 shadow-inner">
+                  <p className="font-display text-2xl font-bold text-umbra-purple">
+                    {warSummary.ownStars ?? <UnavailableValue />}
+                  </p>
+                  <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+                    {warSummary.ownDestructionPercentage !== null
+                      ? `${warSummary.ownDestructionPercentage}%`
+                      : "—"}
+                  </p>
+                </div>
               </div>
             </div>
 
             {/* VS icon & team size */}
-            <div className="flex flex-col items-center justify-center shrink-0">
+            <div className="flex flex-col items-center justify-center px-1 shrink-0">
               {warSummary.teamSize && (
-                <span className="mb-2 font-mono text-[10px] font-semibold tracking-wider text-umbra-muted">
+                <span className="mb-2 rounded border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[10px] font-bold tracking-wider text-umbra-muted shadow-sm">
                   {warSummary.teamSize}v{warSummary.teamSize}
                 </span>
               )}
@@ -131,7 +134,7 @@ export function CurrentWarCard({
             </div>
 
             {/* Enemy clan */}
-            <div className="flex-1 flex flex-col items-center text-center">
+            <div className="flex-1 flex flex-col items-center text-center rounded-xl bg-white/[.035] border border-white/5 p-3 shadow-sm">
               {warSummary.opponentBadgeUrls?.small && (
                 <div className="relative h-10 w-10 mb-1">
                   <Image
@@ -142,18 +145,21 @@ export function CurrentWarCard({
                   />
                 </div>
               )}
-              <p className="font-display text-[15px] font-medium text-red-300 leading-tight line-clamp-2">
+              <p className="font-display text-[14px] font-medium text-red-300/80 leading-tight line-clamp-2">
                 {warSummary.opponentName ?? "Enemy"}
               </p>
-              <div className="mt-2 flex flex-col items-center">
-                <p className="font-display text-2xl font-bold text-red-400">
-                  {warSummary.opponentStars ?? <UnavailableValue />}
-                </p>
-                <p className="mt-0.5 font-mono text-[10px] text-umbra-muted">
-                  {warSummary.opponentDestructionPercentage !== null
-                    ? `${warSummary.opponentDestructionPercentage}%`
-                    : "—"}
-                </p>
+              
+              <div className="mt-auto pt-3 flex w-full flex-col items-center">
+                <div className="w-full rounded-lg bg-black/20 p-2 border border-white/5 shadow-inner">
+                  <p className="font-display text-2xl font-bold text-red-400/80">
+                    {warSummary.opponentStars ?? <UnavailableValue />}
+                  </p>
+                  <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+                    {warSummary.opponentDestructionPercentage !== null
+                      ? `${warSummary.opponentDestructionPercentage}%`
+                      : "—"}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
