@@ -84,22 +84,11 @@ export function MembersRoster({
     });
 
     return result;
-  }, [roster.entries, sortField, sortDir, filterRole, filterWarPref, filterActiveOnly]);
-
-  function toggleSort(field: MemberSortField) {
-    if (sortField === field) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortDir("asc");
-    }
-  }
-
   const selectedDetail = selectedTag ? memberDetails[selectedTag] : null;
 
   return (
     <div>
-      {/* Filter bar */}
+      {/* Filter and Sort bar */}
       <div className="glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Filter</span>
@@ -133,6 +122,34 @@ export function MembersRoster({
           />
           Active only
         </label>
+        
+        {/* Separator */}
+        <div className="mx-2 hidden h-4 w-px bg-umbra-line/50 sm:block"></div>
+        
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Sort</span>
+        </div>
+        <FilterSelect
+          value={sortField}
+          onChange={(v) => setSortField(v as MemberSortField)}
+          options={[
+            { value: "clanRank", label: "Clan Rank" },
+            { value: "name", label: "Name" },
+            { value: "townHallLevel", label: "Town Hall" },
+            { value: "trophies", label: "Trophies" },
+            { value: "donations", label: "Donations" },
+            { value: "activity", label: "Activity" },
+            { value: "warsMissed", label: "Wars Missed" },
+          ]}
+        />
+        <button
+          onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
+          className="flex h-7 w-7 items-center justify-center rounded-lg border border-umbra-line bg-umbra-ink/60 text-xs text-umbra-lilac transition hover:border-umbra-purple/50 focus-ring"
+          title={`Toggle to ${sortDir === "asc" ? "descending" : "ascending"}`}
+        >
+          {sortDir === "asc" ? "↑" : "↓"}
+        </button>
+
         <div className="ml-auto flex items-center gap-2">
           <span className="font-mono text-[10px] text-umbra-muted">
             {sorted.length} of {roster.totalMembers}
@@ -153,13 +170,13 @@ export function MembersRoster({
             <table className="w-full text-left">
               <thead className="border-b border-umbra-line bg-white/[.02]">
                 <tr>
-                  <Th label="#" field="clanRank" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Member" field="name" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="TH" field="townHallLevel" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Trophies" field="trophies" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Donations" field="donations" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Activity" field="activity" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
-                  <Th label="Wars" field="warsMissed" sortField={sortField} sortDir={sortDir} onSort={toggleSort} />
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">#</th>
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Member</th>
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">TH</th>
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Trophies</th>
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Donations</th>
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Activity</th>
+                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Wars</th>
                   <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">War</th>
                 </tr>
               </thead>
@@ -313,33 +330,6 @@ function roleOrder(role: string): number {
     default:
       return 3;
   }
-}
-
-function Th({
-  label,
-  field,
-  sortField,
-  sortDir,
-  onSort,
-}: {
-  label: string;
-  field: MemberSortField;
-  sortField: MemberSortField;
-  sortDir: SortDirection;
-  onSort: (field: MemberSortField) => void;
-}) {
-  const active = sortField === field;
-  return (
-    <th
-      className="cursor-pointer px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted transition hover:text-umbra-lilac"
-      onClick={() => onSort(field)}
-    >
-      <span className={active ? "text-umbra-purple" : ""}>
-        {label}
-        {active && (sortDir === "asc" ? " ↑" : " ↓")}
-      </span>
-    </th>
-  );
 }
 
 function FilterSelect({
