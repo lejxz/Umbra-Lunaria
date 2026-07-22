@@ -200,28 +200,28 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       <SectionLabel>Donations</SectionLabel>
-      <div className="grid grid-cols-3 gap-2">
-        <DonationCell label="24h" given={d.given24h} received={d.received24h} />
-        <DonationCell label="7d" given={d.given7d} received={d.received7d} />
-        <DonationCell label="30d" given={d.given30d} received={d.received30d} />
+      <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-lg bg-white/[.02] border border-white/[.02] px-4 py-2">
+        <DonationInline label="24h" given={d.given24h} received={d.received24h} />
+        <DonationInline label="7d" given={d.given7d} received={d.received7d} />
+        <DonationInline label="30d" given={d.given30d} received={d.received30d} />
       </div>
       
       {d.buckets.length > 0 && (
         <div className="mt-4">
           <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">30-day trend</p>
-          <div className="h-[80px]"><DonationChart buckets={d.buckets} /></div>
+          <div className="h-[140px]"><DonationChart buckets={d.buckets} /></div>
         </div>
       )}
     </div>
   );
 }
 
-function DonationCell({ label, given, received }: { label: string; given: number; received: number }) {
+function DonationInline({ label, given, received }: { label: string; given: number; received: number }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg bg-white/[.03] border border-white/[.02] py-3">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">{label}</p>
-      <div className="mt-1 flex items-baseline gap-1 font-mono">
-        <span className="text-base font-bold text-emerald-400">↑{given}</span>
+    <div className="flex items-center gap-2 font-mono">
+      <span className="text-[10px] uppercase tracking-wider text-umbra-muted">{label}:</span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-sm font-bold text-emerald-400">↑{given}</span>
         <span className="text-xs text-umbra-muted">↓{received}</span>
       </div>
     </div>
