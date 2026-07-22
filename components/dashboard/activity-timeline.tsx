@@ -35,7 +35,7 @@ export function ActivityTimelinePanel({
 
   return (
     <section
-      className="glass rounded-2xl p-5 sm:p-6"
+      className="glass flex h-full flex-col rounded-2xl p-5 sm:p-6"
       aria-labelledby="activity-title"
     >
       {/* Header + Stats + Tabs */}
@@ -91,8 +91,8 @@ export function ActivityTimelinePanel({
         </div>
       </div>
 
-      {/* Chart — explicit height so ResponsiveContainer can render */}
-      <div className="mt-4 h-[220px]">
+      {/* Chart — flex-1 to fill the remaining height (stretches to match leaderboard) */}
+      <div className="mt-4 flex-1 min-h-[220px]">
         {current.buckets.length > 0 ? (
           <ActivityChart buckets={current.buckets} />
         ) : (

@@ -74,19 +74,23 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 4: Activity Score Leaderboard | Activity Timeline — 2 cols */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <ActivityScoreLeaderboard
-          leaderboard={data.activityScore}
-          onMemberClick={setSelectedMember}
-        />
-        <ActivityTimelinePanel
-          dataByWindow={{
-            "24h": data.activityTimeline,
-            "7d": data.activityTimeline7d,
-            "30d": data.activityTimeline30d,
-          }}
-        />
+      {/* Row 4: Activity Timeline (wide) | Activity Score Leaderboard — 3 cols */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <ActivityTimelinePanel
+            dataByWindow={{
+              "24h": data.activityTimeline,
+              "7d": data.activityTimeline7d,
+              "30d": data.activityTimeline30d,
+            }}
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <ActivityScoreLeaderboard
+            leaderboard={data.activityScore}
+            onMemberClick={setSelectedMember}
+          />
+        </div>
       </div>
 
       {/* Row 5: Needs Attention | Clan Log — 2 cols */}
