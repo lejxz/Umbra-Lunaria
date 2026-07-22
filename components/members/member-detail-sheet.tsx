@@ -154,11 +154,6 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           <span className="font-display text-2xl font-bold text-umbra-purple">{activeDays}</span>
           <span className="text-sm text-umbra-muted"> / {totalDays} active days</span>
         </div>
-        {a.loginDays.length > 0 && (
-          <span className="font-mono text-[10px] text-umbra-muted">
-            · {a.loginDays.length} login day{a.loginDays.length !== 1 ? "s" : ""}
-          </span>
-        )}
       </div>
 
       {/* Heatmap strip — full width barcode style */}
