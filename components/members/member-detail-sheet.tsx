@@ -200,7 +200,7 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       <SectionLabel>Donations</SectionLabel>
-      <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-lg bg-white/[.02] border border-white/[.02] px-4 py-2">
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 rounded-lg bg-white/[.02] border border-white/[.02] px-4 py-2">
         <DonationInline label="24h" given={d.given24h} received={d.received24h} />
         <DonationInline label="7d" given={d.given7d} received={d.received7d} />
         <DonationInline label="30d" given={d.given30d} received={d.received30d} />
