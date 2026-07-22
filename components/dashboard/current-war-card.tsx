@@ -127,9 +127,9 @@ export function CurrentWarCard({
 
               {/* Team size */}
               {warSummary.teamSize && (
-                <div className="mt-2.5 rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
-                  <span className="font-mono text-[10px] font-bold tracking-[0.2em] text-umbra-purple/90 ml-[0.2em]">
-                    {warSummary.teamSize}V{warSummary.teamSize}
+                <div className="mt-2.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-umbra-purple/90">
+                    {warSummary.teamSize}v{warSummary.teamSize}
                   </span>
                 </div>
               )}
