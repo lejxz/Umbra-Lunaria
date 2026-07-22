@@ -27,6 +27,7 @@ export function MembersRoster({
 }) {
   const [sortField, setSortField] = useState<MemberSortField>("clanRank");
   const [sortDir, setSortDir] = useState<SortDirection>("asc");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState<string>("");
   const [filterWarPref, setFilterWarPref] = useState<string>("");
   const [filterActiveOnly, setFilterActiveOnly] = useState(false);
@@ -43,6 +44,14 @@ export function MembersRoster({
     }
     if (filterActiveOnly) {
       result = result.filter((m) => m.isActive);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          m.playerTag.toLowerCase().includes(q)
+      );
     }
 
     result.sort((a, b) => {
@@ -84,7 +93,7 @@ export function MembersRoster({
     });
 
     return result;
-  }, [roster.entries, sortField, sortDir, filterRole, filterWarPref, filterActiveOnly]);
+  }, [roster.entries, sortField, sortDir, filterRole, filterWarPref, filterActiveOnly, searchQuery]);
 
   const selectedDetail = selectedTag ? memberDetails[selectedTag] : null;
 
@@ -95,6 +104,13 @@ export function MembersRoster({
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Filter</span>
         </div>
+        <input
+          type="text"
+          placeholder="Search by name or #tag..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-8 w-48 rounded-lg border border-umbra-line bg-umbra-ink/60 px-3 text-xs text-umbra-lilac placeholder-umbra-muted/50 focus:border-umbra-purple/50 focus:outline-none focus:ring-1 focus:ring-umbra-purple/50 transition"
+        />
         <Select
           value={filterRole}
           onChange={setFilterRole}
