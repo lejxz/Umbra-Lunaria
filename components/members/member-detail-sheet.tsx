@@ -151,24 +151,24 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
         )}
       </div>
 
-      {/* Heatmap strip — one cell per day, intensity based on activity */}
+      {/* Heatmap strip — GitHub style 7x7 grid */}
       {a.buckets.length > 0 && (
-        <div className="mt-3">
-          <div className="flex gap-[2px]">
+        <div className="mt-4 flex flex-col items-center">
+          <div className="grid grid-flow-col grid-rows-7 gap-[3px]">
             {a.buckets.map((b, i) => (
               <div
                 key={i}
                 title={`${b.label}: ${b.active ? "active" : "inactive"}`}
-                className={`h-7 flex-1 min-w-[6px] rounded-sm transition-all hover:scale-y-110 ${
+                className={`h-3 w-3 rounded-sm transition-all hover:scale-125 ${
                   b.active
-                    ? "bg-gradient-to-t from-umbra-indigo to-umbra-purple"
-                    : "bg-white/[.06]"
+                    ? "bg-umbra-purple shadow-[0_0_8px_rgba(182,120,255,0.4)]"
+                    : "bg-white/[.04] border border-white/5"
                 }`}
               />
             ))}
           </div>
           {/* Date labels */}
-          <div className="mt-1 flex justify-between font-mono text-[8px] text-umbra-muted/60">
+          <div className="mt-2 flex w-full max-w-[120px] justify-between font-mono text-[9px] uppercase tracking-widest text-umbra-muted/60">
             <span>{a.buckets[0]?.label ?? ""}</span>
             <span>{a.buckets[a.buckets.length - 1]?.label ?? ""}</span>
           </div>
