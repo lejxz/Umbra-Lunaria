@@ -1,9 +1,10 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { CurrentWarDetail, WarHistoryEntry } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { LiveCountdown } from "@/components/ui/live-countdown";
 import { TimeAgo } from "@/components/ui/time-ago";
-import { IconSwords, IconWarEmpty } from "@/components/ui/icons";
+import { IconSwords, IconWarEmpty, IconChevronRight } from "@/components/ui/icons";
 import { WarRefreshButton } from "./war-refresh-button";
 
 /**
@@ -150,7 +151,7 @@ export function WarHero({
         <WarClanColumn
           badgeUrls={clanBadgeUrls ?? null}
           name={clanName ?? "Our Clan"}
-          clanLevel={null}
+          clanLevel={currentWar.clan.clanLevel}
           stars={currentWar.clan.stars}
           destruction={currentWar.clan.destructionPercentage}
           attacks={currentWar.clan.attacks}
@@ -181,6 +182,7 @@ export function WarHero({
             <div className="mt-3.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5">
               <span className="text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
                 {currentWar.teamSize}v{currentWar.teamSize}
+                {currentWar.attacksPerMember != null && ` · ${currentWar.attacksPerMember} atk`}
               </span>
             </div>
           )}
@@ -197,6 +199,21 @@ export function WarHero({
           tone="opponent"
         />
       </div>
+
+      {/* Plan lineup link (concept/07 prep scouting §5: link to the Planning
+          page for manual lineup construction). Shown during preparation so
+          leaders can jump straight to building a roster from the scout view. */}
+      {currentWar.state === "preparation" && (
+        <div className="mt-4 flex justify-center">
+          <Link
+            href="/planning"
+            className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/60 hover:bg-umbra-purple/20"
+          >
+            Plan lineup
+            <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }

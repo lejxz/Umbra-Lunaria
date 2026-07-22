@@ -68,7 +68,7 @@ export function WarAttackLog({
               <th className="px-2 py-2 font-semibold">Defender</th>
               <th className="px-2 py-2 text-center font-semibold">★</th>
               <th className="px-2 py-2 text-right font-semibold">Destr.</th>
-              <th className="hidden px-2 py-2 text-right font-semibold sm:table-cell">Time</th>
+              <th className="hidden px-2 py-2 text-right font-semibold sm:table-cell">Dur.</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-umbra-line/60">
