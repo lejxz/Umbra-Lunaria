@@ -19,6 +19,7 @@ import { DonationChart } from "./donation-chart";
  */
 export function DonationAnalytics({
   dataByWindow,
+  onMemberClick,
 }: {
   dataByWindow: Record<
     DonationWindow,
@@ -28,6 +29,7 @@ export function DonationAnalytics({
       leaderboard: DonationLeaderboard;
     }
   >;
+  onMemberClick?: (playerTag: string) => void;
 }) {
   const [window, setWindow] = useState<DonationWindow>("24h");
   const current = dataByWindow[window];
@@ -122,9 +124,10 @@ export function DonationAnalytics({
                 }
 
                 return (
-                  <div
+                  <button
                     key={donor.playerTag}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] ${badgeStyle}`}
+                    onClick={() => onMemberClick?.(donor.playerTag)}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-[13px] font-bold ${rankColor}`}>
@@ -147,7 +150,7 @@ export function DonationAnalytics({
                     <span className="shrink-0 font-mono text-[13px] font-semibold text-emerald-400">
                       {donor.total}
                     </span>
-                  </div>
+                  </button>
                 );
               })}
             </div>

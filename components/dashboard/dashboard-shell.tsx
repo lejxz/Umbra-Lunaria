@@ -70,6 +70,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
               leaderboard: data.donationLeaderboard30d,
             },
           }}
+          onMemberClick={setSelectedMember}
         />
       </div>
 
