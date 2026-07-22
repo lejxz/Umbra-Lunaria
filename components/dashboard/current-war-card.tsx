@@ -43,15 +43,13 @@ export function CurrentWarCard({
           </h3>
         </div>
         {countdownTarget && isWarActive && (
-          <div className="flex flex-col items-end">
-            <div className="flex flex-col items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 shadow-sm backdrop-blur-sm">
-              <span className="mb-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-umbra-muted">
-                {warSummary.state === "preparation" ? "Starts in" : "Ends in"}
-              </span>
-              <span className="font-mono text-xs font-bold tracking-widest text-umbra-lilac">
-                <LiveCountdown targetDate={countdownTarget} />
-              </span>
-            </div>
+          <div className="flex flex-col items-end text-right">
+            <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+              {warSummary.state === "preparation" ? "Starts in" : "Ends in"}
+            </p>
+            <p className="mt-1 font-mono text-lg text-umbra-lilac font-medium tracking-wider">
+              <LiveCountdown targetDate={countdownTarget} />
+            </p>
           </div>
         )}
       </div>
