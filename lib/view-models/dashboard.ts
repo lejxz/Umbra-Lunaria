@@ -253,18 +253,32 @@ export type HallOfFameAwardKey =
   | "capitalist"
   | "unsleeping";
 
-export interface HallOfFameEntry {
+export interface HallOfFameRankedEntry {
+  rank: number;
+  playerTag: string;
+  name: string;
+  value: number;         // raw number for sorting
+  valueLabel: string;    // human-readable, e.g. "9,616 troops"
+  metaLabel?: string;    // optional secondary stat, e.g. "80% rate"
+}
+
+export interface HallOfFameLeaderboard {
   awardKey: HallOfFameAwardKey;
-  holderName: string;
-  holderTag: string;
-  recordValue: number;
-  valueLabel: string;
-  periodLabel: string | null;
-  achievedAt: Date;
+  entries: HallOfFameRankedEntry[];
 }
 
 export interface HallOfFame {
-  entries: HallOfFameEntry[];
+  leaderboards: HallOfFameLeaderboard[];
+  // The single all-time record holder per category (from the DB cache)
+  records: Array<{
+    awardKey: HallOfFameAwardKey;
+    holderName: string;
+    holderTag: string;
+    recordValue: number;
+    valueLabel: string;
+    periodLabel: string | null;
+    achievedAt: Date;
+  }>;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,162 +1,182 @@
 "use client";
 
-import type { HallOfFame, HallOfFameAwardKey, HallOfFameEntry } from "@/lib/view-models/dashboard";
+import { useState } from "react";
+import type { HallOfFame, HallOfFameAwardKey, HallOfFameLeaderboard } from "@/lib/view-models/dashboard";
 
 const AWARD_META: Record<
   HallOfFameAwardKey,
-  { title: string; subtitle: string; icon: string; color: string; glow: string }
+  { title: string; subtitle: string; icon: string; color: string; accent: string }
 > = {
   philanthropist: {
     title: "The Philanthropist",
-    subtitle: "Highest donations given",
+    subtitle: "Highest all-time donations",
     icon: "🎁",
     color: "text-emerald-400",
-    glow: "shadow-[0_0_24px_rgba(52,211,153,0.15)]",
+    accent: "border-emerald-400/40 bg-emerald-400/5",
   },
   vanguard: {
     title: "The Vanguard",
     subtitle: "Most 3-star war attacks",
     icon: "⚔️",
     color: "text-amber-400",
-    glow: "shadow-[0_0_24px_rgba(251,191,36,0.15)]",
+    accent: "border-amber-400/40 bg-amber-400/5",
   },
   dedicated: {
     title: "The Dedicated",
     subtitle: "Longest login streak",
     icon: "🔥",
     color: "text-orange-400",
-    glow: "shadow-[0_0_24px_rgba(251,146,60,0.15)]",
+    accent: "border-orange-400/40 bg-orange-400/5",
   },
   capitalist: {
     title: "The Capitalist",
-    subtitle: "Highest Capital loot (single raid)",
+    subtitle: "Best single raid weekend",
     icon: "💰",
     color: "text-yellow-400",
-    glow: "shadow-[0_0_24px_rgba(250,204,21,0.15)]",
+    accent: "border-yellow-400/40 bg-yellow-400/5",
   },
   unsleeping: {
     title: "The Unsleeping",
     subtitle: "Highest all-time raw activity",
     icon: "👁️",
     color: "text-umbra-purple",
-    glow: "shadow-[0_0_24px_rgba(182,120,255,0.2)]",
+    accent: "border-umbra-purple/40 bg-umbra-purple/5",
   },
 };
 
+const AWARD_ORDER: HallOfFameAwardKey[] = [
+  "philanthropist",
+  "vanguard",
+  "dedicated",
+  "capitalist",
+  "unsleeping",
+];
+
+const RANK_COLORS = ["text-yellow-400", "text-slate-300", "text-amber-600"];
+
 export function HallOfFameCard({ data }: { data: HallOfFame }) {
-  const { entries } = data;
+  const [activeKey, setActiveKey] = useState<HallOfFameAwardKey>("philanthropist");
+
+  const activeBoard = data.leaderboards.find((lb) => lb.awardKey === activeKey);
+  const meta = AWARD_META[activeKey];
 
   return (
-    <div className="rounded-2xl border border-umbra-line bg-umbra-surface/40 p-5 shadow-lg backdrop-blur-md">
+    <div className="rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden">
       {/* Header */}
-      <div className="mb-5 flex items-center gap-3">
-        <div>
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
-            Clan records
-          </p>
-          <h2 className="mt-0.5 font-display text-xl font-semibold text-umbra-lilac">
-            Hall of Fame
-          </h2>
-        </div>
+      <div className="px-5 pt-5 pb-4 border-b border-umbra-line/50">
+        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          All-time clan records
+        </p>
+        <h2 className="mt-0.5 font-display text-xl font-semibold text-umbra-lilac">
+          Hall of Fame
+        </h2>
       </div>
 
-      {entries.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {(["philanthropist", "vanguard", "dedicated", "capitalist", "unsleeping"] as HallOfFameAwardKey[]).map(
-            (key) => {
-              const entry = entries.find((e) => e.awardKey === key);
-              const meta = AWARD_META[key];
-              return entry ? (
-                <AwardTile key={key} entry={entry} meta={meta} />
-              ) : (
-                <PendingTile key={key} meta={meta} />
-              );
-            }
-          )}
+      {/* Category Tabs */}
+      <div className="flex overflow-x-auto border-b border-umbra-line/50 scrollbar-none">
+        {AWARD_ORDER.map((key) => {
+          const m = AWARD_META[key];
+          const isActive = key === activeKey;
+          const board = data.leaderboards.find((lb) => lb.awardKey === key);
+          return (
+            <button
+              key={key}
+              id={`hof-tab-${key}`}
+              onClick={() => setActiveKey(key)}
+              className={`flex flex-col items-center gap-1 px-5 py-3 text-left shrink-0 border-b-2 transition-all duration-200 ${
+                isActive
+                  ? `border-current ${m.color} bg-white/[.03]`
+                  : "border-transparent text-umbra-muted hover:text-umbra-lilac/70 hover:bg-white/[.02]"
+              }`}
+            >
+              <span className="text-lg leading-none">{m.icon}</span>
+              <span className="font-display text-[11px] font-semibold leading-tight whitespace-nowrap">
+                {m.title}
+              </span>
+              {board && board.entries.length > 0 && (
+                <span className="font-mono text-[9px] opacity-50">
+                  {board.entries.length} ranked
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Active leaderboard */}
+      <div className="p-5">
+        {/* Category header */}
+        <div className={`mb-4 flex items-center gap-3 rounded-xl border px-4 py-3 ${meta.accent}`}>
+          <span className="text-2xl">{meta.icon}</span>
+          <div>
+            <p className={`font-display text-base font-bold ${meta.color}`}>{meta.title}</p>
+            <p className="font-mono text-[10px] text-umbra-muted">{meta.subtitle}</p>
+          </div>
         </div>
-      )}
+
+        {/* Ranked rows */}
+        {!activeBoard || activeBoard.entries.length === 0 ? (
+          <EmptyLeaderboard />
+        ) : (
+          <div className="space-y-1.5">
+            {activeBoard.entries.map((entry) => (
+              <RankRow key={entry.playerTag} entry={entry} meta={meta} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function AwardTile({
+function RankRow({
   entry,
   meta,
 }: {
-  entry: HallOfFameEntry;
+  entry: HallOfFameLeaderboard["entries"][number];
   meta: (typeof AWARD_META)[HallOfFameAwardKey];
 }) {
+  const isTop3 = entry.rank <= 3;
+  const rankColor = RANK_COLORS[entry.rank - 1] ?? "text-umbra-muted";
+
   return (
     <div
-      className={`group relative flex flex-col rounded-xl border border-white/[.06] bg-white/[.03] p-4 transition-all duration-300 hover:bg-white/[.05] hover:border-white/[.12] ${meta.glow}`}
+      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.03] ${
+        isTop3 ? "bg-white/[.02]" : ""
+      }`}
     >
-      {/* Icon */}
-      <span className="text-2xl" role="img" aria-label={meta.title}>
-        {meta.icon}
+      {/* Rank */}
+      <span
+        className={`w-6 shrink-0 text-center font-mono text-sm font-bold ${rankColor}`}
+      >
+        {entry.rank === 1 ? "👑" : `#${entry.rank}`}
       </span>
 
-      {/* Award title */}
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-        {meta.subtitle}
-      </p>
-      <p className="font-display text-[11px] font-semibold text-umbra-lilac/80 leading-tight">
-        {meta.title}
-      </p>
+      {/* Name */}
+      <span className="flex-1 truncate font-semibold text-sm text-white/90">
+        {entry.name}
+      </span>
 
-      {/* Record value — the big number */}
-      <p className={`mt-3 font-display text-2xl font-bold leading-none ${meta.color}`}>
-        {entry.recordValue.toLocaleString()}
-      </p>
-      <p className="mt-0.5 font-mono text-[10px] text-umbra-muted">
+      {/* Meta label (secondary stat) */}
+      {entry.metaLabel && (
+        <span className="font-mono text-[10px] text-umbra-muted shrink-0">
+          {entry.metaLabel}
+        </span>
+      )}
+
+      {/* Value */}
+      <span className={`shrink-0 font-mono text-sm font-bold ${isTop3 ? meta.color : "text-umbra-lilac/70"}`}>
         {entry.valueLabel}
-      </p>
-
-      {/* Holder */}
-      <div className="mt-3 border-t border-white/[.05] pt-3">
-        <p className="font-semibold text-sm text-white truncate">{entry.holderName}</p>
-        {entry.periodLabel && (
-          <p className="font-mono text-[9px] text-umbra-muted/70 mt-0.5">{entry.periodLabel}</p>
-        )}
-      </div>
-
-      {/* Crown badge */}
-      <span className="absolute right-3 top-3 text-[10px] opacity-30 group-hover:opacity-60 transition-opacity">
-        👑
       </span>
     </div>
   );
 }
 
-function PendingTile({
-  meta,
-}: {
-  meta: (typeof AWARD_META)[HallOfFameAwardKey];
-}) {
+function EmptyLeaderboard() {
   return (
-    <div className="flex flex-col rounded-xl border border-dashed border-white/[.06] bg-white/[.01] p-4">
-      <span className="text-2xl opacity-30" role="img" aria-label={meta.title}>
-        {meta.icon}
-      </span>
-      <p className="mt-2 font-mono text-[9px] uppercase tracking-wider text-umbra-muted/50">
-        {meta.subtitle}
-      </p>
-      <p className="font-display text-[11px] font-semibold text-umbra-lilac/30 leading-tight">
-        {meta.title}
-      </p>
-      <p className="mt-3 font-mono text-xs text-umbra-muted/40">
-        Pending first daily batch
-      </p>
-    </div>
-  );
-}
-
-function EmptyState() {
-  return (
-    <div className="py-8 text-center">
+    <div className="py-10 text-center">
       <p className="font-mono text-xs text-umbra-muted">
-        Records will appear after the first daily batch completes.
+        No data yet — records populate after the first daily batch.
       </p>
     </div>
   );
