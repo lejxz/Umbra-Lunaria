@@ -74,8 +74,12 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 4: Activity timeline — full width */}
-      <div className="mt-5">
+      {/* Row 4: Activity Score Leaderboard | Activity Timeline — 2 cols */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <ActivityScoreLeaderboard
+          leaderboard={data.activityScore}
+          onMemberClick={setSelectedMember}
+        />
         <ActivityTimelinePanel
           dataByWindow={{
             "24h": data.activityTimeline,
@@ -85,12 +89,8 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 5: Member Activity Score | Attention queue | Clan log — 3 columns */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <ActivityScoreLeaderboard
-          leaderboard={data.activityScore}
-          onMemberClick={setSelectedMember}
-        />
+      {/* Row 5: Needs Attention | Clan Log — 2 cols */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <NeedsAttentionPanel
           attention={data.needsAttention}
           onMemberClick={setSelectedMember}
@@ -101,42 +101,24 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 6: Data freshness | Navigation summary — 2 columns */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <div className="glass rounded-2xl p-5 sm:p-6">
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
-            Tracking status
-          </p>
-          <h3 className="mt-1 font-display text-lg text-umbra-lilac">
-            Data freshness
-          </h3>
-          <div className="mt-4 space-y-3">
-            <FreshnessRow
-              label="Last poll"
-              date={data.clan.lastPolledAt}
-            />
-            <FreshnessRow
-              label="Last daily batch"
-              date={data.clan.lastDailyBatchAt}
-            />
-            <FreshnessRow
-              label="Tracking started"
-              date={data.trackingStart}
-            />
-            <FreshnessRow
-              label="War last synced"
-              date={data.warSummary.lastSyncedAt}
-            />
-          </div>
-        </div>
+      {/* Row 6: Navigation summary — full width strip */}
+      <div className="mt-5">
         <NavSummaries
           warSummary={data.warSummary}
           capitalNav={data.capitalNav}
         />
       </div>
 
+      {/* Compact data freshness footer */}
+      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 rounded-lg border border-umbra-line/30 bg-umbra-ink/30 px-4 py-2.5">
+        <FreshnessChip label="Last poll" date={data.clan.lastPolledAt} />
+        <FreshnessChip label="Daily batch" date={data.clan.lastDailyBatchAt} />
+        <FreshnessChip label="Tracking started" date={data.trackingStart} />
+        <FreshnessChip label="War synced" date={data.warSummary.lastSyncedAt} />
+      </div>
+
       {/* Footer */}
-      <footer className="mt-8 border-t border-umbra-line pt-5 text-center">
+      <footer className="mt-6 border-t border-umbra-line pt-4 text-center">
         <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
           Umbra Lunaria · Clan Observatory · Single-clan deployment
         </p>
@@ -151,27 +133,28 @@ export function DashboardShell({ data }: { data: DashboardData }) {
   );
 }
 
-function FreshnessRow({
+function FreshnessChip({
   label,
   date,
 }: {
   label: string;
-  date: Date | null;
+  date: Date | string | null;
 }) {
+  const formatted = date
+    ? new Date(date).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Asia/Manila",
+      })
+    : "—";
   return (
-    <div className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-2">
-      <span className="text-xs text-umbra-muted">{label}</span>
-      <span className="font-mono text-xs text-umbra-lilac">
-        {date
-          ? new Date(date).toLocaleString("en-US", {
-              month: "short",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-              timeZone: "Asia/Manila",
-            })
-          : "—"}
+    <div className="flex items-center gap-1.5">
+      <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+        {label}
       </span>
+      <span className="font-mono text-[10px] text-umbra-lilac">{formatted}</span>
     </div>
   );
 }

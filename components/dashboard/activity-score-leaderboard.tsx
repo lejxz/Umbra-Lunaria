@@ -16,7 +16,7 @@ export function ActivityScoreLeaderboard({
   leaderboard: ActivityScoreLeaderboard;
   onMemberClick?: (playerTag: string) => void;
 }) {
-  const { entries, window, totalMembers } = leaderboard;
+  const { entries, window } = leaderboard;
 
   return (
     <section
