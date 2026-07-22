@@ -27,7 +27,7 @@ export function Select({ value, onChange, options, className = "" }: SelectProps
   const selectedLabel = options.find((o) => o.value === value)?.label ?? value;
 
   return (
-    <div ref={ref} className={`relative ${className}`}>
+    <div ref={ref} className={`relative ${open ? "z-50" : "z-10"} ${className}`}>
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -38,7 +38,7 @@ export function Select({ value, onChange, options, className = "" }: SelectProps
       </button>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full min-w-[130px] right-0 origin-top rounded-lg border border-umbra-line bg-[#0f0c20] p-1 shadow-2xl backdrop-blur-md">
+        <div className="absolute z-50 mt-1 min-w-full left-0 origin-top-left rounded-lg border border-umbra-line bg-[#0f0c20] p-1.5 shadow-2xl backdrop-blur-md whitespace-nowrap">
           {options.map((o) => (
             <button
               key={o.value}
@@ -49,8 +49,8 @@ export function Select({ value, onChange, options, className = "" }: SelectProps
               }}
               className={`flex w-full text-left items-center rounded-md px-2 py-1.5 text-xs transition-colors ${
                 value === o.value
-                  ? "bg-umbra-purple/20 text-white font-medium"
-                  : "text-umbra-lilac hover:bg-white/[.05]"
+                  ? "text-white font-medium bg-umbra-purple/10"
+                  : "text-umbra-lilac hover:bg-white/[.05] hover:text-white"
               }`}
             >
               {o.label}
