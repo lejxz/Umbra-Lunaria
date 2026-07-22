@@ -91,7 +91,7 @@ export function MembersRoster({
   return (
     <div>
       {/* Filter and Sort bar */}
-      <div className="glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
+      <div className="relative z-20 glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Filter</span>
         </div>
