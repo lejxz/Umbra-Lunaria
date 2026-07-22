@@ -20,6 +20,7 @@ import {
   warParticipants,
   capitalRaidSeasons,
   capitalContributions,
+  hallOfFameRecords,
 } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
 import type {
@@ -44,6 +45,9 @@ import type {
   CapitalNavSummary,
   DashboardData,
   ScoreWindow,
+  HallOfFame,
+  HallOfFameEntry,
+  HallOfFameAwardKey,
 } from "@/lib/view-models/dashboard";
 import {
   calculateDonationWindow,
@@ -906,6 +910,35 @@ export async function getDashboardWarSummary(): Promise<WarSummaryView> {
 // Aggregate dashboard
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Hall of Fame
+// ---------------------------------------------------------------------------
+
+export async function getHallOfFame(): Promise<HallOfFame> {
+  const rows = await db.select().from(hallOfFameRecords);
+  const ORDER: HallOfFameAwardKey[] = [
+    "philanthropist",
+    "vanguard",
+    "dedicated",
+    "capitalist",
+    "unsleeping",
+  ];
+  const entries: HallOfFameEntry[] = ORDER.flatMap((key) => {
+    const row = rows.find((r) => r.awardKey === key);
+    if (!row) return [];
+    return [{
+      awardKey: key,
+      holderName: row.holderName,
+      holderTag: row.holderTag,
+      recordValue: row.recordValue,
+      valueLabel: row.valueLabel,
+      periodLabel: row.periodLabel,
+      achievedAt: row.achievedAt,
+    }];
+  });
+  return { entries };
+}
+
 export async function getDashboard(): Promise<DashboardData> {
   // Fetch all 3 windows of donation + activity data in parallel, plus the
   // single-window data (clan, capital, activity score, needs attention, etc.).
@@ -933,6 +966,7 @@ export async function getDashboard(): Promise<DashboardData> {
     warSummary,
     capitalNav,
     trackingStart,
+    hallOfFame,
   ] = await Promise.all([
     getDashboardClan(),
     getCapitalSummary(),
@@ -956,6 +990,7 @@ export async function getDashboard(): Promise<DashboardData> {
     getDashboardWarSummary(),
     getCapitalNavSummary(),
     getTrackingStart(),
+    getHallOfFame(),
   ]);
 
   return {
@@ -985,6 +1020,7 @@ export async function getDashboard(): Promise<DashboardData> {
     clanLog,
     warSummary,
     capitalNav,
+    hallOfFame,
     trackingStart,
   };
 }

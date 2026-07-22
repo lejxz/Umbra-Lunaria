@@ -243,6 +243,31 @@ export interface CapitalNavSummary {
 }
 
 // ---------------------------------------------------------------------------
+// Hall of Fame (all-time clan records)
+// ---------------------------------------------------------------------------
+
+export type HallOfFameAwardKey =
+  | "philanthropist"
+  | "vanguard"
+  | "dedicated"
+  | "capitalist"
+  | "unsleeping";
+
+export interface HallOfFameEntry {
+  awardKey: HallOfFameAwardKey;
+  holderName: string;
+  holderTag: string;
+  recordValue: number;
+  valueLabel: string;
+  periodLabel: string | null;
+  achievedAt: Date;
+}
+
+export interface HallOfFame {
+  entries: HallOfFameEntry[];
+}
+
+// ---------------------------------------------------------------------------
 // Full dashboard aggregate (returned by getDashboard())
 // ---------------------------------------------------------------------------
 
@@ -274,5 +299,7 @@ export interface DashboardData {
   clanLog: ClanLog;
   warSummary: WarSummaryView;
   capitalNav: CapitalNavSummary;
+  hallOfFame: HallOfFame;
   trackingStart: Date | null; // earliest member_snapshots.captured_at across the clan
 }
+

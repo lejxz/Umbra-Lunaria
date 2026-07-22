@@ -379,6 +379,26 @@ export const warRosterSlots = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// hall_of_fame_records — one row per award category. A new all-time high
+// overwrites the existing row; no historical entries are kept here (the raw
+// data in member_snapshots / war_attacks / capital_contributions is the
+// source of truth). Populated by the daily batch via records-updater.ts.
+// ---------------------------------------------------------------------------
+
+export const hallOfFameRecords = pgTable("hall_of_fame_records", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  // "philanthropist" | "vanguard" | "dedicated" | "capitalist" | "unsleeping"
+  awardKey: text("award_key").notNull().unique(),
+  holderTag: text("holder_tag").notNull(),
+  holderName: text("holder_name").notNull(), // preserved even after member purge
+  recordValue: integer("record_value").notNull(), // raw int (donations, stars, days, gold, raw score)
+  valueLabel: text("value_label").notNull(), // e.g. "9,616 troops", "15 three-stars"
+  periodLabel: text("period_label"), // e.g. "Jul 2026", "Raid Jul 20"
+  achievedAt: timestamp("achieved_at", { withTimezone: true }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
 // runtime_settings — administrator-editable DB values. Phase 2 writes; the
 // schema is ready now per concept/12 Step 1.0.C.
 // ---------------------------------------------------------------------------

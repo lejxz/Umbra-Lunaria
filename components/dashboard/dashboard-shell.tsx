@@ -12,6 +12,7 @@ import { AttentionPanel } from "./needs-attention";
 import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
 import { MemberDetailSheet } from "./member-detail-sheet";
+import { HallOfFameCard } from "./hall-of-fame-card";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -91,7 +92,12 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 5: Needs Attention | Clan Log — 3 cols */}
+      {/* Row 5: Hall of Fame — full width */}
+      <div className="mt-5">
+        <HallOfFameCard data={data.hallOfFame} />
+      </div>
+
+      {/* Row 6: Needs Attention | Clan Log — 3 cols */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <AttentionPanel
           title="Attention Queue"

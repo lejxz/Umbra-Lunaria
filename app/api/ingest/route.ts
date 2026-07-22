@@ -23,6 +23,7 @@ import {
 } from "@/lib/coc-client/client";
 import { clanConfig } from "@/config/clan.config";
 import type { IngestResult } from "@/lib/ingest/types";
+import { checkHallOfFameRecords } from "@/lib/db/records-updater";
 
 /**
  * Parse a Clash of Clans API timestamp.
@@ -343,6 +344,15 @@ async function runDailyBatch(): Promise<string[]> {
           builderBase: builderBasePayload,
         },
       });
+  }
+
+  // ---- Hall of Fame records (checked once per daily batch) ----
+  try {
+    const hofErrors = await checkHallOfFameRecords();
+    errors.push(...hofErrors);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`hall-of-fame records update failed: ${msg}`);
   }
 
   return errors;
