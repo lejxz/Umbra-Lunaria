@@ -107,6 +107,41 @@ export interface WarHistoryEntry {
 }
 
 // ---------------------------------------------------------------------------
+// War detail (opened from the history "View details" button). Same shape as
+// CurrentWarDetail but reusable for any live-tracked war by id. Includes the
+// attack log so the sheet can render a full analysis.
+// ---------------------------------------------------------------------------
+
+export interface WarDetailView {
+  detail: CurrentWarDetail;
+  attackLog: WarAttackLogEntry[];
+  // Derived analysis totals shown at the top of the detail sheet.
+  analysis: WarAnalysis;
+}
+
+export interface WarAnalysis {
+  // Attack efficiency
+  ownAttacksUsed: number;
+  ownAttacksTotal: number; // teamSize * attacksPerMember
+  opponentAttacksUsed: number;
+  opponentAttacksTotal: number;
+  // Three-star rate (own attacks that scored 3 stars / own attacks used)
+  ownThreeStarRate: number | null; // null when ownAttacksUsed = 0
+  opponentThreeStarRate: number | null;
+  // Average stars per attack
+  ownAverageStars: number | null;
+  opponentAverageStars: number | null;
+  // Members who used 0 attacks (battle day only — null during prep)
+  ownNoAttackMembers: number | null;
+  opponentNoAttackMembers: number | null;
+  // Best attacks (highest destruction at 3 stars)
+  ownBestAttack: { attackerName: string; stars: number; destruction: number } | null;
+  // TH-level summary for the matchup-quality note
+  ownAverageTh: number | null;
+  opponentAverageTh: number | null;
+}
+
+// ---------------------------------------------------------------------------
 // Aggregate returned by getWarCenter()
 // ---------------------------------------------------------------------------
 

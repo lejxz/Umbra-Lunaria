@@ -20,6 +20,8 @@ import type {
   WarRosterMember,
   WarAttackLogEntry,
   WarHistoryEntry,
+  WarDetailView,
+  WarAnalysis,
 } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 
@@ -391,5 +393,105 @@ function toHistoryEntry(row: HistoryProjection): WarHistoryEntry {
     attacksPerMember: row.attacksPerMember,
     hasDetail: row.hasSnapshot,
     lastSyncedAt: row.lastSyncedAt,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// getWarDetail — fetch a single live-tracked war by id for the detail sheet.
+// Returns null when the war doesn't exist or has no snapshot (backfill row).
+// ---------------------------------------------------------------------------
+
+export async function getWarDetail(warId: number): Promise<WarDetailView | null> {
+  const [row] = await db
+    .select()
+    .from(wars)
+    .where(eq(wars.id, warId))
+    .limit(1);
+  if (!row) return null;
+
+  const parsed = parseWarSnapshot(row);
+  if (!parsed) return null; // no snapshot — not detail-able
+
+  const analysis = buildAnalysis(parsed.detail, parsed.attackLog);
+  return {
+    detail: parsed.detail,
+    attackLog: parsed.attackLog,
+    analysis,
+  };
+}
+
+/**
+ * Derive the analysis totals shown at the top of the war detail sheet. Pure
+ * function over the parsed view model — no DB access — so it can be reused for
+ * both the current war and any historical live-tracked war. Rates whose
+ * denominator is 0 are reported as `null` (never fake a zero — concept/00).
+ */
+function buildAnalysis(
+  detail: CurrentWarDetail,
+  attackLog: WarAttackLogEntry[],
+): WarAnalysis {
+  const ownAttacks = attackLog.filter((a) => a.attackerIsOwnClan);
+  const oppAttacks = attackLog.filter((a) => !a.attackerIsOwnClan);
+  const ownAttacksUsed = ownAttacks.length;
+  const oppAttacksUsed = oppAttacks.length;
+  const total =
+    detail.teamSize != null && detail.attacksPerMember != null
+      ? detail.teamSize * detail.attacksPerMember
+      : null;
+  const ownAttacksTotal = total ?? 0;
+  const opponentAttacksTotal = total ?? 0;
+
+  const ownThree = ownAttacks.filter((a) => a.stars >= 3).length;
+  const oppThree = oppAttacks.filter((a) => a.stars >= 3).length;
+  const ownStarsSum = ownAttacks.reduce((s, a) => s + a.stars, 0);
+  const oppStarsSum = oppAttacks.reduce((s, a) => s + a.stars, 0);
+
+  const isBattle = detail.state !== "preparation";
+  const ownNoAttack = isBattle
+    ? detail.clan.members.filter((m) => m.attacksUsed === 0).length
+    : null;
+  const oppNoAttack = isBattle
+    ? detail.opponent.members.filter((m) => m.attacksUsed === 0).length
+    : null;
+
+  // Best own attack = highest destruction among 3-star attacks; fall back to
+  // highest destruction among any own attack.
+  let ownBestAttack: WarAnalysis["ownBestAttack"] = null;
+  if (ownAttacks.length > 0) {
+    const sorted = [...ownAttacks].sort(
+      (a, b) =>
+        b.destructionPercentage - a.destructionPercentage || b.stars - a.stars,
+    );
+    const top = sorted[0];
+    if (top) {
+      ownBestAttack = {
+        attackerName: top.attackerName,
+        stars: top.stars,
+        destruction: top.destructionPercentage,
+      };
+    }
+  }
+
+  const ownThs = detail.clan.members.map((m) => m.townhallLevel).filter((t) => t > 0);
+  const oppThs = detail.opponent.members
+    .map((m) => m.townhallLevel)
+    .filter((t) => t > 0);
+  const avg = (arr: number[]) =>
+    arr.length ? arr.reduce((s, n) => s + n, 0) / arr.length : null;
+
+  return {
+    ownAttacksUsed,
+    ownAttacksTotal,
+    opponentAttacksUsed,
+    opponentAttacksTotal,
+    ownThreeStarRate: ownAttacksUsed > 0 ? ownThree / ownAttacksUsed : null,
+    opponentThreeStarRate: oppAttacksUsed > 0 ? oppThree / oppAttacksUsed : null,
+    ownAverageStars: ownAttacksUsed > 0 ? ownStarsSum / ownAttacksUsed : null,
+    opponentAverageStars: oppAttacksUsed > 0 ? oppStarsSum / oppAttacksUsed : null,
+    ownNoAttackMembers: ownNoAttack,
+    opponentNoAttackMembers: oppNoAttack,
+    ownBestAttack,
+    ownAverageTh: avg(ownThs),
+    opponentAverageTh: avg(oppThs),
   };
 }
