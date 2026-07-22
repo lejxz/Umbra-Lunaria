@@ -45,6 +45,8 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
         </div>
       )}
       
+      <HallOfFameSection detail={detail} />
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <ActivitySection detail={detail} />
         <WarSection detail={detail} />
@@ -52,7 +54,6 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
       
       <DonationsSection detail={detail} />
       <ActivityScoreSection detail={detail} />
-      <HallOfFameSection detail={detail} />
       <RushedSection detail={detail} />
       <ProgressionSection detail={detail} />
       <AchievementsSection detail={detail} />
