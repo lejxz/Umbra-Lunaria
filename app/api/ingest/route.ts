@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
@@ -79,9 +80,11 @@ export async function POST(req: NextRequest) {
       errors: [...lightResult.errors, ...batchErrors],
       events: lightResult.events,
     };
+    revalidatePath("/", "layout");
     return NextResponse.json(result);
   }
 
+  revalidatePath("/", "layout");
   return NextResponse.json({
     ...lightResult,
     batch: isBatch,
