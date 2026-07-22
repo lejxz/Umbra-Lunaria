@@ -156,7 +156,7 @@ function RankRow({
           <span className="truncate font-semibold text-[13px] text-white/90">
             {entry.name}
           </span>
-          <span className={`shrink-0 font-mono text-2xs font-bold ${entry.rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>
+          <span className={`shrink-0 font-mono text-xs font-bold ${entry.rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>
             {entry.valueLabel}
           </span>
         </div>
