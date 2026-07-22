@@ -158,9 +158,9 @@ export function WarHero({
           tone="own"
         />
 
-        <div className="flex flex-col items-center justify-center px-2 shrink-0">
+        <div className="flex flex-col items-center justify-center px-3 shrink-0">
           <span
-            className={`mb-2.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider whitespace-nowrap ${
+            className={`mb-3.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider whitespace-nowrap ${
               currentWar.state === "inWar"
                 ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
                 : currentWar.state === "preparation"
@@ -178,7 +178,7 @@ export function WarHero({
             <IconSwords className="h-6 w-6" />
           </div>
           {currentWar.teamSize != null && (
-            <div className="mt-2.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5">
+            <div className="mt-3.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5">
               <span className="text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
                 {currentWar.teamSize}v{currentWar.teamSize}
               </span>
