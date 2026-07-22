@@ -7,6 +7,7 @@ import { Badge, UnavailableValue } from "@/components/ui";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
+import { Star } from "lucide-react";
 
 const TZ = "Asia/Manila";
 
@@ -411,9 +412,18 @@ function AchievementsSection({ detail }: { detail: MemberDetailView }) {
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
           {c.achievements.map((a) => (
             <div key={a.name} className="flex items-center justify-between rounded-lg bg-white/[.03] border border-white/[.02] px-3 py-2 text-xs">
-              <span className="truncate text-umbra-lilac">{a.name}</span>
-              <span className="shrink-0 font-mono text-umbra-muted text-[11px]">
-                {a.value.toLocaleString()}{a.target && ` / ${a.target.toLocaleString()}`}{a.stars && ` ★${a.stars}`}
+              <div className="flex items-center gap-2 overflow-hidden">
+                <span className="truncate font-medium text-umbra-lilac/90">{a.name}</span>
+                {a.stars !== undefined && (
+                  <div className="flex items-center text-amber-400 shrink-0">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Star key={i} className={`w-3 h-3 ${(a.stars ?? 0) > i ? "fill-current" : "fill-transparent opacity-20"}`} />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <span className="shrink-0 font-mono text-umbra-muted/80 text-[11px] ml-4">
+                {a.value.toLocaleString()}{a.target && ` / ${a.target.toLocaleString()}`}
               </span>
             </div>
           ))}
