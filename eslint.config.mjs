@@ -27,6 +27,13 @@ const eslintConfig = [
       "postcss.config.js",
       "next-env.d.ts",
       "vitest.config.ts",
+      // Sandbox / dev-tooling — not part of the Umbra Lunaria project.
+      "examples/**",
+      "skills/**",
+      "mini-services/**",
+      "upload/**",
+      "download/**",
+      ".zscripts/**",
     ],
   },
   // Extend Next.js core-web-vitals + TypeScript rules.

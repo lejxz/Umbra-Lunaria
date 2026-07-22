@@ -245,21 +245,28 @@ export interface CocWarLogEntry {
   endTime: string;
   teamSize: number;
   attacksPerMember?: number;
+  battleModifier?: string; // "none" | etc. — API field
   clan: {
     tag: string;
     name: string;
+    badgeUrls?: CocIconUrls;
     clanLevel?: number;
-    attacks: number;
+    // Present on our clan; the API sometimes omits `attacks` on the opponent
+    // object in war-log entries. Treat as optional everywhere for safety.
+    attacks?: number;
     stars: number;
     destructionPercentage: number;
+    expEarned?: number;
   };
   opponent: {
     tag: string;
     name: string;
+    badgeUrls?: CocIconUrls;
     clanLevel?: number;
-    attacks: number;
+    attacks?: number;
     stars: number;
     destructionPercentage: number;
+    expEarned?: number;
   };
 }
 

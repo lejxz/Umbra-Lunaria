@@ -1,0 +1,130 @@
+/**
+ * Typed view models for the War Center (concept/07-clan-war.md).
+ *
+ * Page components receive these shapes — never raw Drizzle rows or raw CoC API
+ * payloads. Every value is explicitly typed so the UI can render loading,
+ * empty, unavailable, private-war-log, stale-capture, and refresh-error
+ * states without guessing. See concept/00 "Product contract".
+ */
+
+import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
+
+// ---------------------------------------------------------------------------
+// Current war detail (parsed from the stored CocCurrentWar snapshot)
+// ---------------------------------------------------------------------------
+
+export interface WarRosterMember {
+  tag: string;
+  name: string;
+  mapPosition: number;
+  townhallLevel: number;
+  attacksUsed: number;
+  attacksAllowed: number;
+  attacksRemaining: number;
+  // Best single attack this member made (stars + destruction). null when the
+  // member has not attacked yet — the UI shows a prominent no-attack state.
+  bestStars: number | null;
+  bestDestruction: number | null;
+  // Attacks defended against (from opponentAttacks on this member).
+  defendedAgainst: number;
+  bestDefenseStars: number | null; // lowest stars conceded in one defense, null if never defended
+  // True for our clan, false for the opponent — drives whether the row links
+  // into the shared member detail sheet (opponent tags are not in `members`).
+  isOwnClan: boolean;
+}
+
+export interface WarClanSide {
+  tag: string;
+  name: string;
+  clanLevel: number | null;
+  badgeUrls: ClanBadgeUrls | null;
+  stars: number;
+  destructionPercentage: number;
+  attacks: number;
+  attacksRemaining: number; // teamSize * attacksPerMember - attacks, null-derived to 0
+  members: WarRosterMember[];
+}
+
+export interface CurrentWarDetail {
+  warId: number;
+  warType: "regular" | "cwl";
+  state: "preparation" | "inWar" | "warEnded";
+  teamSize: number | null;
+  attacksPerMember: number | null;
+  startTime: Date | null;
+  endTime: Date | null;
+  preparationStartTime: Date | null;
+  lastSyncedAt: Date | null;
+  clan: WarClanSide;
+  opponent: WarClanSide;
+}
+
+// ---------------------------------------------------------------------------
+// Attack log (merged from both clans' attacks in the snapshot, by order)
+// ---------------------------------------------------------------------------
+
+export interface WarAttackLogEntry {
+  order: number;
+  attackerTag: string;
+  attackerName: string;
+  attackerMapPosition: number | null;
+  attackerTownhallLevel: number | null;
+  attackerIsOwnClan: boolean;
+  defenderTag: string;
+  defenderName: string;
+  defenderMapPosition: number | null;
+  defenderTownhallLevel: number | null;
+  defenderIsOwnClan: boolean;
+  stars: number;
+  destructionPercentage: number;
+  duration: number | null;
+}
+
+// ---------------------------------------------------------------------------
+// History list (one row per stored war, regular or CWL)
+// ---------------------------------------------------------------------------
+
+export interface WarHistoryEntry {
+  warId: number;
+  warType: "regular" | "cwl";
+  opponentName: string | null;
+  opponentTag: string | null;
+  opponentBadgeUrls: ClanBadgeUrls | null;
+  opponentClanLevel: number | null;
+  result: "win" | "loss" | "tie" | null; // null while ongoing or backfill-unavailable
+  teamSize: number | null;
+  ownStars: number | null;
+  opponentStars: number | null;
+  ownDestructionPercentage: number | null;
+  opponentDestructionPercentage: number | null;
+  endTime: Date | null;
+  startTime: Date | null;
+  attacksPerMember: number | null;
+  // True when a full snapshot exists (live-tracked) — the history row can open
+  // a detail view. False for war-log backfill rows (no roster/attack detail).
+  hasDetail: boolean;
+  lastSyncedAt: Date | null;
+}
+
+// ---------------------------------------------------------------------------
+// Aggregate returned by getWarCenter()
+// ---------------------------------------------------------------------------
+
+export interface WarCenterData {
+  // The active war (preparation/inWar) if one exists, else the most recent
+  // ended war so the page always answers "what's the war situation?". null
+  // only when no wars exist at all (cold start).
+  currentWar: CurrentWarDetail | null;
+  // Attack log for currentWar (empty during preparation, before any attacks).
+  attackLog: WarAttackLogEntry[];
+  // History list, most-recent first.
+  history: WarHistoryEntry[];
+  // Clan war-log visibility — drives the private-war-log notice.
+  warLogPublic: boolean | null;
+  // Earliest tracked war/snapshot time — for the "history before tracking may
+  // be incomplete" caveat on the history list.
+  trackingStart: Date | null;
+  // Shared TTL the refresh route enforces, surfaced so the UI can show
+  // "try again in Ns" while rate-limited.
+  refreshTtlSeconds: number;
+}

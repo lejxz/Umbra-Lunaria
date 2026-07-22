@@ -214,6 +214,13 @@ export const wars = pgTable(
       withTimezone: true,
     }),
     lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+    // Full CocCurrentWar snapshot (both clans, rosters, attacks). Stored so the
+    // War Center can render the opponent roster and a names-attached attack log
+    // — opponent members are NOT in `members` (war_participants has a FK to it),
+    // so the snapshot is the only place their identity is preserved for the UI.
+    // Null for war-log backfill rows that predate tracking (no roster detail).
+    // See concept/07-clan-war.md + concept/12 Step 1.4.A.
+    warSnapshot: jsonb("war_snapshot"),
   },
   (table) => [
     // Unique identity prevents duplicate war rows on repeat polls.

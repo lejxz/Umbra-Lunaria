@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   clans,
@@ -8,38 +8,23 @@ import {
   memberSnapshots,
   membershipEvents,
   unitLevels,
-  wars,
-  warParticipants,
-  warAttacks,
   capitalDistrictSnapshots,
 } from "@/lib/db/schema";
 import {
   cocClient,
   type CocClan,
   type CocClanMember,
-  type CocCurrentWar,
   type CocPlayer,
   type CocUnitLevel,
 } from "@/lib/coc-client/client";
 import { clanConfig } from "@/config/clan.config";
 import type { IngestResult } from "@/lib/ingest/types";
 import { checkHallOfFameRecords } from "@/lib/db/records-updater";
-
-/**
- * Parse a Clash of Clans API timestamp.
- * The API returns times in the format "YYYYMMDDTHHMMSS.000Z" (no dashes/colons),
- * which JavaScript's `new Date()` cannot parse. This converts it to ISO 8601.
- */
-function parseCoCTime(time: string | undefined | null): Date | null {
-  if (!time) return null;
-  // Format: "20260722T051024.000Z" → "2026-07-22T05:10:24.000Z"
-  const iso = time.replace(
-    /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
-    "$1-$2-$3T$4:$5:$6",
-  );
-  const date = new Date(iso);
-  return isNaN(date.getTime()) ? null : date;
-}
+import {
+  syncCurrentWar,
+  syncCwlWars,
+  backfillWarLog,
+} from "@/lib/ingest/war-sync";
 
 /**
  * POST /api/ingest
@@ -213,14 +198,17 @@ async function runLightPoll(): Promise<IngestResult> {
     const currentWar = await cocClient.getCurrentWar(clanTag);
     if (
       currentWar &&
-      (currentWar.state === "preparation" ||
-        currentWar.state === "inWar" ||
-        currentWar.state === "warEnded") &&
+      currentWar.state !== "notInWar" &&
       currentWar.clan &&
       currentWar.opponent
     ) {
       await syncCurrentWar(currentWar, capturedAt);
       warSynced = true;
+    } else {
+      // Regular endpoint says notInWar — the clan may be in Clan War League,
+      // which uses the league-group + war-tag endpoints instead.
+      const cwl = await syncCwlWars(clanTag, capturedAt);
+      if (cwl.synced > 0) warSynced = true;
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -238,7 +226,7 @@ async function runLightPoll(): Promise<IngestResult> {
 }
 
 // ===========================================================================
-// Daily batch — full clan refresh + complete player detail per retained member.
+// Daily batch — full clan refresh + war-log backfill + complete player detail.
 // ===========================================================================
 
 async function runDailyBatch(): Promise<string[]> {
@@ -265,6 +253,16 @@ async function runDailyBatch(): Promise<string[]> {
       districtHallLevel: district.districtHallLevel,
       capturedAt,
     });
+  }
+
+  // ---- War-log backfill (only while isWarLogPublic) ----
+  // Populates the War Center history list with past wars the tracker didn't
+  // observe live. Idempotent — safe to run every daily batch. See concept/07.
+  try {
+    await backfillWarLog(clanTag);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`war log backfill failed: ${msg}`);
   }
 
   // ---- Full player profile per retained member ----
@@ -359,153 +357,6 @@ async function runDailyBatch(): Promise<string[]> {
 }
 
 // ===========================================================================
-// syncCurrentWar — idempotent war sync with stable identity per war type.
-// ===========================================================================
-
-/**
- * Sync a regular or CWL war idempotently.
- *
- * Identity:
- *   - CWL (`warTag` provided)        → match on `wars.war_tag`
- *   - Regular (`warTag` undefined)   → match on (opponent_tag + start_time)
- *
- * On a hit: update state / stars / destruction / attacks / result /
- * `lastSyncedAt` (transitioning through preparation → inWar → warEnded).
- * On a miss: insert a new war row with the full field set.
- *
- * `war_attacks` use `.onConflictDoNothing()` against the
- * (war_id, attacker_tag, attack_order) unique index. `attackedAt` is only
- * written on the first insert for a given attack — subsequent polls leave it
- * untouched, so it always reflects the first time we observed the attack.
- *
- * Opponent clan members are NOT persisted to `war_participants` because that
- * table has a FK to `members.player_tag` and opponent tags are not present
- * in our `members` table. Defender identity is preserved via
- * `war_attacks.defender_tag`, and the opponent clan's aggregate stats live
- * on the `wars` row itself.
- */
-async function syncCurrentWar(
-  currentWar: CocCurrentWar,
-  capturedAt: Date,
-  warTag?: string,
-): Promise<void> {
-  if (!currentWar.clan || !currentWar.opponent) return;
-
-  const warType: "regular" | "cwl" = warTag ? "cwl" : "regular";
-  const startTime = parseCoCTime(currentWar.startTime);
-
-  // ---- Find existing war by stable identity ----
-  let existingWar: typeof wars.$inferSelect | undefined;
-  if (warType === "cwl" && warTag) {
-    [existingWar] = await db
-      .select()
-      .from(wars)
-      .where(eq(wars.warTag, warTag))
-      .limit(1);
-  } else if (currentWar.opponent.tag && startTime) {
-    [existingWar] = await db
-      .select()
-      .from(wars)
-      .where(
-        and(
-          eq(wars.opponentTag, currentWar.opponent.tag),
-          eq(wars.startTime, startTime),
-        ),
-      )
-      .limit(1);
-  }
-
-  const result = computeWarResult(currentWar);
-  const warFieldSet = {
-    state: currentWar.state,
-    opponentTag: currentWar.opponent.tag,
-    opponentName: currentWar.opponent.name,
-    opponentBadgeUrls: currentWar.opponent.badgeUrls ?? null,
-    opponentClanLevel: currentWar.opponent.clanLevel ?? null,
-    teamSize: currentWar.teamSize ?? null,
-    attacksPerMember: currentWar.attacksPerMember ?? null,
-    ownStars: currentWar.clan.stars,
-    opponentStars: currentWar.opponent.stars,
-    ownDestructionPercentage: Math.round(currentWar.clan.destructionPercentage),
-    opponentDestructionPercentage: Math.round(
-      currentWar.opponent.destructionPercentage,
-    ),
-    ownAttacks: currentWar.clan.attacks,
-    opponentAttacks: currentWar.opponent.attacks,
-    result,
-    startTime,
-    endTime: parseCoCTime(currentWar.endTime),
-    preparationStartTime: parseCoCTime(currentWar.preparationStartTime),
-    lastSyncedAt: capturedAt,
-  };
-
-  let warId: number;
-  if (existingWar) {
-    warId = existingWar.id;
-    await db.update(wars).set(warFieldSet).where(eq(wars.id, warId));
-  } else {
-    const [inserted] = await db
-      .insert(wars)
-      .values({
-        warTag: warType === "cwl" ? warTag : null,
-        warType,
-        ...warFieldSet,
-      })
-      .returning({ id: wars.id });
-    if (!inserted) throw new Error("failed to insert war row");
-    warId = inserted.id;
-  }
-
-  // ---- Sync own-clan participants + attacks ----
-  const attacksAllowed = currentWar.attacksPerMember ?? 2;
-  for (const m of currentWar.clan.members ?? []) {
-    const attacksUsed = m.attacks?.length ?? 0;
-    const starsEarned = m.attacks?.reduce((sum, a) => sum + a.stars, 0) ?? 0;
-
-    await db
-      .insert(warParticipants)
-      .values({
-        warId,
-        playerTag: m.tag,
-        mapPosition: m.mapPosition,
-        attacksAllowed,
-        attacksUsed,
-        starsEarned,
-        missed: attacksUsed === 0,
-      })
-      .onConflictDoUpdate({
-        target: [warParticipants.warId, warParticipants.playerTag],
-        set: {
-          mapPosition: m.mapPosition,
-          attacksAllowed,
-          attacksUsed,
-          starsEarned,
-          missed: attacksUsed === 0,
-        },
-      });
-
-    for (const attack of m.attacks ?? []) {
-      await db
-        .insert(warAttacks)
-        .values({
-          warId,
-          attackerTag: attack.attackerTag,
-          defenderTag: attack.defenderTag,
-          stars: attack.stars,
-          destructionPercentage: attack.destructionPercentage,
-          attackOrder: attack.order,
-          duration: attack.duration ?? null,
-          // attackedAt is only written on the first insert — the unique
-          // index on (war_id, attacker_tag, attack_order) makes subsequent
-          // attempts no-ops via onConflictDoNothing.
-          attackedAt: capturedAt,
-        })
-        .onConflictDoNothing();
-    }
-  }
-}
-
-// ===========================================================================
 // Helpers
 // ===========================================================================
 
@@ -553,9 +404,7 @@ async function insertMemberSnapshot(m: CocClanMember, capturedAt: Date) {
   const receivedIncreased = lastSnap
     ? m.donationsReceived > lastSnap.donationsReceived
     : false;
-  const trophiesChanged = lastSnap
-    ? m.trophies !== lastSnap.trophies
-    : false;
+  const trophiesChanged = lastSnap ? m.trophies !== lastSnap.trophies : false;
   const bbTrophiesChanged =
     lastSnap &&
     m.builderBaseTrophies != null &&
@@ -634,30 +483,6 @@ async function upsertClan(
       target: clans.clanTag,
       set: setValues,
     });
-}
-
-/**
- * Compute the war result from the live API state. Returns `null` for wars
- * that haven't ended yet. Star ties are broken by destruction percentage
- * (CoC's standard tiebreaker).
- */
-function computeWarResult(
-  currentWar: CocCurrentWar,
-): "win" | "loss" | "tie" | null {
-  if (currentWar.state !== "warEnded") return null;
-  if (!currentWar.clan || !currentWar.opponent) return null;
-
-  const own = currentWar.clan.stars;
-  const opp = currentWar.opponent.stars;
-  if (own > opp) return "win";
-  if (own < opp) return "loss";
-
-  // Stars tied → fall back to destruction percentage.
-  const ownDestr = currentWar.clan.destructionPercentage;
-  const oppDestr = currentWar.opponent.destructionPercentage;
-  if (ownDestr > oppDestr) return "win";
-  if (ownDestr < oppDestr) return "loss";
-  return "tie";
 }
 
 /**

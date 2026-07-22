@@ -1,5 +1,50 @@
-import { ComingSoon, PageScaffold } from "@/components/page-scaffold";
+import { PageScaffold } from "@/components/page-scaffold";
+import { ErrorState } from "@/components/ui/state-primitives";
+import { WarShell } from "@/components/war/war-shell";
+import { getWarCenter, getWarClanIdentity } from "@/lib/db/war-queries";
 
-export default function WarPage() {
-  return <PageScaffold section="War center" title="Clan war" description="See the current battle clearly, without unnecessary noise." eyebrow="live readiness"><ComingSoon label="War signal" description="War history, current-war progress, attack status, and preparation scouting will appear here with a deliberate mobile-first layout." /></PageScaffold>;
+/**
+ * War Center — current-war hero, roster + attack status, preparation scouting,
+ * and war history. See concept/07-clan-war.md.
+ *
+ * Server component: all reads happen here (concept/01 "No browser route calls
+ * Supercell directly"). The client shell owns the member-detail-sheet state and
+ * the refresh control. Stale-capture, private-war-log, no-active-war, and
+ * refresh-error states are rendered inline by the section components.
+ */
+export default async function WarPage() {
+  let data;
+  try {
+    data = await getWarCenter();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return (
+      <PageScaffold
+        section="War center"
+        title="Clan war"
+        description="See the current battle clearly, without unnecessary noise."
+        eyebrow="live readiness"
+      >
+        <ErrorState message="The war center couldn&apos;t load." />
+        <p className="mt-4 text-sm text-umbra-muted">{message}</p>
+      </PageScaffold>
+    );
+  }
+
+  const clanIdentity = await getWarClanIdentity().catch(() => null);
+
+  return (
+    <PageScaffold
+      section="War center"
+      title="Clan war"
+      description="See the current battle clearly, without unnecessary noise."
+      eyebrow="live readiness"
+    >
+      <WarShell
+        data={data}
+        clanBadgeUrls={clanIdentity?.badgeUrls ?? null}
+        clanName={clanIdentity?.name ?? null}
+      />
+    </PageScaffold>
+  );
 }

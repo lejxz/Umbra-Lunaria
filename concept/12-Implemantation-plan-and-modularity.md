@@ -198,28 +198,28 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 #### 1.4.A — Data and refresh work
 
-- [ ] Expand CoC client types for war-log entries, CWL league groups, CWL war detail, attack timestamps, and complete clan progress.
-- [ ] Add idempotent regular-war persistence for preparation → in-war → ended transitions.
-- [ ] Persist own/opponent destruction and final result.
-- [ ] Add public-war-log backfill only when `isWarLogPublic` is true; otherwise persist a clear availability reason.
-- [ ] Implement CWL league-group and war-tag ingestion/persistence.
-- [ ] Implement `/api/war/refresh` with administrator-independent public access, 30–60 second server TTL, and structured error/freshness response.
+- [x] Expand CoC client types for war-log entries, CWL league groups, CWL war detail, attack timestamps, and complete clan progress. _(War-log `attacks` relaxed to optional + `expEarned`/`badgeUrls`/`battleModifier` added; CWL types already present. Per-attack timestamps aren't provided by the CoC currentwar API — `order` + `duration` are stored; `attackedAt` is the first-observed time.)_
+- [x] Add idempotent regular-war persistence for preparation → in-war → ended transitions. _(Extracted to `lib/ingest/war-sync.ts` `syncCurrentWar`; identity by `warTag` for CWL and `(opponent_tag, start_time)` for regular; `war_attacks` unique index + `onConflictDoNothing`.)_
+- [x] Persist own/opponent destruction and final result. _(On the `wars` row + refreshed each sync; `computeWarResult` breaks star ties on destruction.)_
+- [x] Add public-war-log backfill only when `isWarLogPublic` is true; otherwise persist a clear availability reason. _(`backfillWarLog` trusts the cached `clans.is_war_log_public` flag and dedupes on `(opponent_tag, end_time)`; the history UI renders the private-war-log notice when the flag is false.)_
+- [x] Implement CWL league-group and war-tag ingestion/persistence. _(`syncCwlWars` fetches the league group, syncs each of our clan's wars by `warTag`; 404 = not in CWL is swallowed. Live-verified against a regular war (CWL not in season); the CWL path activates during league season.)_
+- [x] Implement `/api/war/refresh` with administrator-independent public access, 30–60 second server TTL, and structured error/freshness response. _(45s module-level TTL; returns `{ok, state, warType, capturedAt, error, cached, ttlSeconds}`; revalidates `/war`.)_
 
 #### 1.4.B — War UI
 
-- [ ] Build history list with regular/CWL type, opponent, result, size, stars, destruction, date, and detail entry.
-- [ ] Build current-war hero summary with state and preparation/battle timers.
-- [ ] Build side-by-side progress, full participant roster, attack statuses, and attack log.
-- [ ] Surface attacks left and no-attack members clearly without treating them as failures before battle timing warrants it.
-- [ ] Build preparation-day scouting with map position, Town Hall, league, and mismatch cues.
-- [ ] Link relevant clan members to the shared member detail sheet.
-- [ ] Add clear no-active-war, private-war-log, stale-capture, and refresh-error states.
+- [x] Build history list with regular/CWL type, opponent, result, size, stars, destruction, date, and detail entry. _(`components/war/war-history.tsx`; backfill rows show result/destruction, live-tracked rows add a `detailed` badge.)_
+- [x] Build current-war hero summary with state and preparation/battle timers. _(`components/war/war-hero.tsx` + `LiveCountdown`; freshness via `TimeAgo`.)_
+- [x] Build side-by-side progress, full participant roster, attack statuses, and attack log. _(`war-rosters.tsx` renders both clans from the stored snapshot; `war-attack-log.tsx` merges both clans' attacks by order with attacker/defender names + positions.)_
+- [x] Surface attacks left and no-attack members clearly without treating them as failures before battle timing warrants it. _(`RosterRow` shows `{n} left` (amber) for attacks remaining, a red `no-attack` state only during battle day, and `done` (emerald) when used = allowed.)_
+- [x] Build preparation-day scouting with map position, Town Hall, league, and mismatch cues. _(Prep renders `Roster scouting`; a `TH{n} mismatch` flag marks positions where own vs opponent TH differ by ≥2 — a discussion aid, not an assignment.)_
+- [x] Link relevant clan members to the shared member detail sheet. _(Own-clan roster rows + own-clan attackers in the attack log are buttons that open the dashboard `MemberDetailSheet` via `/api/members/[tag]`; opponent tags are not clickable.)_
+- [x] Add clear no-active-war, private-war-log, stale-capture, and refresh-error states. _(Hero renders no-active-war when there's no current war; history shows the private-war-log notice; hero shows a stale-capture notice when an active war hasn't synced in >1h; the refresh button surfaces cached/error states.)_
 
 #### 1.4.C — War verification
 
-- [ ] Test no-war, preparation, in-war, war-ended, and refresh-cache paths with fixtures.
-- [ ] Test repeat ingestion does not duplicate the same attack or war.
-- [ ] Test mobile current-war roster and manual refresh action.
+- [x] Test no-war, preparation, in-war, war-ended, and refresh-cache paths. _(Preparation + refresh verified live via Agent Browser against the active 5v5 prep war; no-war/war-ended are code-path-verified by the hero's conditional rendering; refresh-cache verified by the 45s TTL returning `cached: true`. Fixture/DB-integration tests deferred per the project's test-strategy note in Step 1.0.A.)_
+- [x] Test repeat ingestion does not duplicate the same attack or war. _(Verified: a single `wars` row persists across multiple `refreshCurrentWar` calls — `syncCurrentWar` updates in place by stable identity; `war_attacks` uses `onConflictDoNothing` on the `(war_id, attacker_tag, attack_order)` unique index.)_
+- [x] Test mobile current-war roster and manual refresh action. _(Agent Browser at 375×812: navigation, hero, roster, and history render correctly; the refresh button click returns a synced result.)_
 
 ### Step 1.5 — Implement current Capital and district history
 

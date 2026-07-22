@@ -23,3 +23,22 @@ next-env.d.ts
 
 # drizzle — meta/ is NOT ignored; drizzle-kit needs it committed to
 # correctly diff future schema changes against the last migration.
+
+# --- sandbox / dev-tooling (not part of the Umbra Lunaria project) ---
+bun.lock
+bun.lockb
+Caddyfile
+.zscripts/
+examples/
+mini-services/
+skills/
+upload/
+download/
+dev.log
+dev.out.log
+*.log
+.z-ai-config
+.claude
+# Agent coordination worklog (not part of the project)
+worklog.md
+tool-results/
