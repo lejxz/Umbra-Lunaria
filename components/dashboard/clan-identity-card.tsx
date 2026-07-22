@@ -18,7 +18,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
     >
       {/* Background image */}
       <Image
-        src="/assets/Clan-Card-Background.png"
+        src="/assets/Clan-Card-Background.jpg"
         alt=""
         fill
         className="object-cover"
