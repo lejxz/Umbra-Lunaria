@@ -58,7 +58,8 @@ export function ScoreLeaderboard({
       </div>
 
       {/* True Podium (Top 3) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 items-end">
+      <div className="mx-auto max-w-3xl">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 items-end">
         {/* Rank 2 - Silver (Left) */}
         <div className="order-2 md:order-1">
           {rank2 && (
@@ -91,6 +92,7 @@ export function ScoreLeaderboard({
             />
           )}
         </div>
+        </div>
       </div>
 
       {/* Ranks 4+ (Hidden behind button) */}
@@ -116,13 +118,10 @@ export function ScoreLeaderboard({
           <h2 className="font-display text-xl text-umbra-lilac">
             Full Activity Score Leaderboard
           </h2>
-          <p className="mt-1 text-sm text-umbra-muted">
-            Ranks 4 through {entries.length} based on {window === "all" ? "lifetime" : window} data.
-          </p>
         </div>
 
         <div className="flex flex-col gap-2">
-          {rest.map((entry) => (
+          {entries.map((entry) => (
             <PodiumCard
               key={entry.playerTag}
               entry={entry}
