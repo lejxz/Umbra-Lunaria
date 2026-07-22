@@ -52,8 +52,9 @@ export function NeedsAttentionPanel({
           />
         </div>
       ) : (
-        <div className="mt-4 flex-1 space-y-4 overflow-y-auto pr-2">
-          {/* Attacks remaining */}
+        <div className="mt-4 flex flex-1 flex-col overflow-hidden rounded-xl border border-white/5 bg-black/20 shadow-inner">
+          <div className="flex-1 space-y-4 overflow-y-auto p-2 custom-scrollbar">
+            {/* Attacks remaining */}
           {attention.attacksRemaining.length > 0 && (
             <AttentionGroup
               label="Attacks remaining"
@@ -85,6 +86,7 @@ export function NeedsAttentionPanel({
               onMemberClick={onMemberClick}
             />
           )}
+          </div>
         </div>
       )}
     </section>
@@ -119,9 +121,11 @@ function AttentionGroup({
         : "text-umbra-muted";
 
   return (
-    <div>
-      <div className="sticky top-0 z-10 mb-2 border-b border-umbra-line/50 bg-[#0c0a1a]/80 pb-1 backdrop-blur-md">
-        <p className={`text-xs font-semibold ${color}`}>{label}</p>
+    <div className="relative">
+      <div className="sticky top-0 z-10 mb-2 border-b border-white/10 bg-black/40 rounded-md px-2 py-1.5 backdrop-blur-md">
+        <h4 className={`text-sm font-semibold ${color}`}>
+          {label}
+        </h4>
       </div>
       <div className="space-y-1.5">
         {members.map((m) => (

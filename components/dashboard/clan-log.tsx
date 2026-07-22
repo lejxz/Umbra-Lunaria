@@ -43,8 +43,9 @@ export function ClanLogPanel({
           />
         </div>
       ) : (
-        <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto pr-2">
-          {log.entries.map((entry) => {
+        <div className="mt-4 flex flex-1 flex-col overflow-hidden rounded-xl border border-white/5 bg-black/20 shadow-inner">
+          <div className="flex-1 space-y-1.5 overflow-y-auto p-2">
+            {log.entries.map((entry) => {
             const tone =
               entry.eventType === "join"
                 ? "success"
@@ -106,6 +107,7 @@ export function ClanLogPanel({
               </button>
             );
           })}
+          </div>
         </div>
       )}
     </section>
