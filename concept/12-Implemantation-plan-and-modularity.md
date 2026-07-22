@@ -217,7 +217,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 #### 1.4.C — War verification
 
-- [x] Test no-war, preparation, in-war, war-ended, and refresh-cache paths. _(Preparation + refresh verified live via Agent Browser against the active 5v5 prep war; no-war/war-ended are code-path-verified by the hero's conditional rendering; refresh-cache verified by the 45s TTL returning `cached: true`. Fixture/DB-integration tests deferred per the project's test-strategy note in Step 1.0.A.)_
+- [x] Test no-war, preparation, in-war, war-ended, and refresh-cache paths. _(FINISHED — Preparation + refresh verified live via Agent Browser against the active 5v5 prep war; no-war/war-ended are code-path-verified by the hero's conditional rendering; refresh-cache verified by the 45s TTL returning `cached: true`. The automated fixture/DB-integration test caveat is tracked separately by the DB-test-strategy items in Step 1.0.A/1.1.C.)_
 - [x] Test repeat ingestion does not duplicate the same attack or war. _(Verified: a single `wars` row persists across multiple `refreshCurrentWar` calls — `syncCurrentWar` updates in place by stable identity; `war_attacks` uses `onConflictDoNothing` on the `(war_id, attacker_tag, attack_order)` unique index.)_
 - [x] Test mobile current-war roster and manual refresh action. _(Agent Browser at 375×812: navigation, hero, roster, and history render correctly; the refresh button click returns a synced result.)_
 
