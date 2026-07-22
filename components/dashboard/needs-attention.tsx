@@ -1,6 +1,7 @@
 import type { NeedsAttention as NeedsAttentionData } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Clock, Swords, ShieldOff } from "lucide-react";
 
 /**
  * Needs-attention panel. Shows three separate lists:
@@ -40,7 +41,7 @@ export function NeedsAttentionPanel({
         id="attention-title"
         className="mt-1 font-display text-lg text-umbra-lilac"
       >
-        Needs attention
+        Attention Queue
       </h3>
 
       {totalSignals === 0 ? (
@@ -51,12 +52,13 @@ export function NeedsAttentionPanel({
           />
         </div>
       ) : (
-        <div className="mt-4 flex-1 space-y-4 overflow-y-auto">
+        <div className="mt-4 flex-1 space-y-4 overflow-y-auto pr-2">
           {/* Attacks remaining */}
           {attention.attacksRemaining.length > 0 && (
             <AttentionGroup
               label="Attacks remaining"
               tone="warning"
+              icon={Swords}
               members={attention.attacksRemaining}
               onMemberClick={onMemberClick}
             />
@@ -67,6 +69,7 @@ export function NeedsAttentionPanel({
             <AttentionGroup
               label={`Inactive (${attention.inactivityThresholdDays}d+)`}
               tone="danger"
+              icon={Clock}
               members={attention.inactive}
               onMemberClick={onMemberClick}
             />
@@ -77,6 +80,7 @@ export function NeedsAttentionPanel({
             <AttentionGroup
               label="Opted out of wars"
               tone="muted"
+              icon={ShieldOff}
               members={attention.warPreferenceOut}
               onMemberClick={onMemberClick}
             />
@@ -90,11 +94,13 @@ export function NeedsAttentionPanel({
 function AttentionGroup({
   label,
   tone,
+  icon: Icon,
   members,
   onMemberClick,
 }: {
   label: string;
   tone: "warning" | "danger" | "muted";
+  icon: React.ElementType;
   members: Array<{
     playerTag: string;
     name: string;
@@ -114,7 +120,9 @@ function AttentionGroup({
 
   return (
     <div>
-      <p className={`mb-1.5 text-xs font-semibold ${color}`}>{label}</p>
+      <div className="sticky top-0 z-10 mb-2 border-b border-umbra-line/50 bg-[#0c0a1a]/80 pb-1 backdrop-blur-md">
+        <p className={`text-xs font-semibold ${color}`}>{label}</p>
+      </div>
       <div className="space-y-1.5">
         {members.map((m) => (
           <button
@@ -122,16 +130,19 @@ function AttentionGroup({
             onClick={() => onMemberClick?.(m.playerTag)}
             className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition hover:bg-white/[.06] focus-ring"
           >
-            <div className="min-w-0">
-              <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
-              <p className="truncate text-[11px] text-umbra-muted">
-                {m.detail ?? m.reason}
-              </p>
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20">
+                <Icon className={`h-3.5 w-3.5 ${color}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
+                <p className="truncate text-[11px] text-umbra-muted">
+                  {m.detail ?? m.reason}
+                </p>
+              </div>
             </div>
             {m.townHallLevel && (
-              <span className="shrink-0 font-mono text-[10px] text-umbra-purple">
-                TH{m.townHallLevel}
-              </span>
+              <Badge tone="brand">TH{m.townHallLevel}</Badge>
             )}
           </button>
         ))}

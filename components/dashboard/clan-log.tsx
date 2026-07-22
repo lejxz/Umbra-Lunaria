@@ -1,6 +1,7 @@
 import type { ClanLog as ClanLogData } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { UserPlus, UserMinus, UserCheck } from "lucide-react";
 
 /**
  * Clan activity log. Renders a most-recent-first feed of joins, departures,
@@ -31,7 +32,7 @@ export function ClanLogPanel({
         id="clan-log-title"
         className="mt-1 font-display text-lg text-umbra-lilac"
       >
-        Clan log
+        Clan Log
       </h3>
 
       {log.entries.length === 0 ? (
@@ -42,7 +43,7 @@ export function ClanLogPanel({
           />
         </div>
       ) : (
-        <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto">
+        <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto pr-2">
           {log.entries.map((entry) => {
             const tone =
               entry.eventType === "join"
@@ -50,6 +51,20 @@ export function ClanLogPanel({
                 : entry.eventType === "leave"
                   ? "danger"
                   : "brand";
+                  
+            const Icon = 
+              entry.eventType === "join"
+                ? UserPlus
+                : entry.eventType === "leave"
+                  ? UserMinus
+                  : UserCheck;
+
+            const iconColor = 
+              entry.eventType === "join"
+                ? "text-emerald-400"
+                : entry.eventType === "leave"
+                  ? "text-red-400"
+                  : "text-umbra-purple";
 
             return (
               <button
@@ -64,23 +79,28 @@ export function ClanLogPanel({
                     : "hover:bg-white/[.06] focus-ring"
                 }`}
               >
-                <div className="min-w-0">
-                  <p className="truncate text-sm text-umbra-lilac">
-                    {entry.name}
-                    {entry.isPurged && (
-                      <span className="ml-2 text-xs text-umbra-muted">
-                        · data removed
-                      </span>
-                    )}
-                  </p>
-                  <p className="truncate font-mono text-[10px] text-umbra-muted">
-                    {entry.playerTag} ·{" "}
-                    {new Date(entry.eventTime).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      timeZone: "Asia/Manila",
-                    })}
-                  </p>
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20">
+                    <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm text-umbra-lilac">
+                      {entry.name}
+                      {entry.isPurged && (
+                        <span className="ml-2 text-xs text-umbra-muted">
+                          · data removed
+                        </span>
+                      )}
+                    </p>
+                    <p className="truncate text-[11px] text-umbra-muted">
+                      <span className="font-mono">{entry.playerTag}</span> ·{" "}
+                      {new Date(entry.eventTime).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        timeZone: "Asia/Manila",
+                      })}
+                    </p>
+                  </div>
                 </div>
                 <Badge tone={tone}>{entry.eventType}</Badge>
               </button>

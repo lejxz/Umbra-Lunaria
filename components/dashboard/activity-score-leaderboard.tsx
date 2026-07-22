@@ -48,7 +48,7 @@ export function ActivityScoreLeaderboard({
       ) : (
         <>
           {/* Leaderboard — fills remaining height */}
-          <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto">
+          <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto pr-2">
             {entries.slice(0, 15).map((entry) => (
               <button
                 key={entry.playerTag}
