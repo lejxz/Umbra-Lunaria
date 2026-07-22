@@ -12,7 +12,7 @@
 
 import { clanConfig } from "@/config/clan.config";
 
-export type WindowKind = "24h" | "7d" | "30d";
+export type WindowKind = "24h" | "7d" | "30d" | "all";
 
 export interface TimeWindow {
   from: Date;
@@ -39,6 +39,9 @@ export function computeWindow(kind: WindowKind, now: Date = new Date()): TimeWin
       break;
     case "30d":
       from.setUTCDate(from.getUTCDate() - 30);
+      break;
+    case "all":
+      from.setTime(0); // Epoch start
       break;
   }
 

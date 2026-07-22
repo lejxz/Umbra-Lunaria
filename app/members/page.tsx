@@ -38,7 +38,7 @@ export default async function MembersPage() {
         return [m.playerTag, detail] as const;
       }),
     ),
-    getMemberActivityScore("30d"),
+    getMemberActivityScore("all"),
   ]);
 
   const memberDetails: Record<string, MemberDetailView> = {};

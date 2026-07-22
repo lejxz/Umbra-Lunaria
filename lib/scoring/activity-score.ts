@@ -34,8 +34,8 @@
 import type {
   ActivityScoreComponent,
   ClanBadgeUrls,
-  DonationWindow,
   MemberActivityScore,
+  ScoreWindow,
 } from "@/lib/view-models/dashboard";
 
 export interface ScoreInput {
@@ -94,7 +94,7 @@ const RAW_WEIGHTS = {
 export function computeActivityScore(
   input: ScoreInput,
   clanMaxValues: ClanMaxValues,
-  window: DonationWindow,
+  window: ScoreWindow,
   trackingStart: Date | null,
   limitedData: boolean,
 ): Omit<MemberActivityScore, "rank"> {

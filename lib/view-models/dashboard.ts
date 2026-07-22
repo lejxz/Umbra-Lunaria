@@ -78,6 +78,7 @@ export interface CapitalSummaryView {
 // ---------------------------------------------------------------------------
 
 export type DonationWindow = "24h" | "7d" | "30d";
+export type ScoreWindow = DonationWindow | "all";
 
 export interface DonationTotals {
   window: DonationWindow;
@@ -160,13 +161,13 @@ export interface MemberActivityScore {
   totalScore: number; // 0..100
   rank: number;
   components: ActivityScoreComponent[];
-  window: DonationWindow;
+  window: ScoreWindow;
   limitedData: boolean; // true when insufficient tracking history
   trackingStart: Date | null;
 }
 
 export interface ActivityScoreLeaderboard {
-  window: DonationWindow;
+  window: ScoreWindow;
   entries: MemberActivityScore[];
   totalMembers: number;
 }

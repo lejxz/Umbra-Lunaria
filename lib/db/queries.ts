@@ -43,6 +43,7 @@ import type {
   WarSummaryView,
   CapitalNavSummary,
   DashboardData,
+  ScoreWindow,
 } from "@/lib/view-models/dashboard";
 import {
   calculateDonationWindow,
@@ -505,7 +506,7 @@ export async function getActivityTimeline(
 // ---------------------------------------------------------------------------
 
 export async function getMemberActivityScore(
-  windowKind: DonationWindow = "30d",
+  windowKind: ScoreWindow = "30d",
 ): Promise<ActivityScoreLeaderboard> {
   const win = computeWindow(windowKind);
   const trackingStart = await getTrackingStart();
