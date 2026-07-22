@@ -51,6 +51,7 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
       </div>
       
       <DonationsSection detail={detail} />
+      <ActivityScoreSection detail={detail} />
       <RushedSection detail={detail} />
       <ProgressionSection detail={detail} />
       <AchievementsSection detail={detail} />
@@ -145,7 +146,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
 
   return (
     <div className="flex h-full flex-col">
-      <SectionLabel>Activity</SectionLabel>
+      <SectionLabel>Log In Activity</SectionLabel>
 
       {/* Summary line */}
       <div className="flex items-baseline gap-3">
@@ -159,26 +160,6 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           </span>
         )}
       </div>
-
-      {/* Activity Score Breakdown */}
-      {detail.donations.activityScore !== null && (
-        <div className="mt-2 flex flex-col gap-1.5 rounded-lg bg-white/[.02] p-3 border border-white/[.05]">
-          <div className="flex items-center justify-between">
-            <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Activity Score</span>
-            <span className="font-semibold text-umbra-purple">{Math.round(detail.donations.activityScore)} / 100</span>
-          </div>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {detail.donations.activityScoreComponents.map((c, i) => (
-              <div key={i} className="flex flex-col rounded bg-white/[.03] px-2 py-1.5">
-                <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted/70">{c.name}</span>
-                <span className={`text-xs font-medium ${c.available ? "text-white" : "text-umbra-muted/40"}`}>
-                  {c.available ? `+${Math.round(c.points)} pts` : "N/A"}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Heatmap strip — full width barcode style */}
       {a.buckets.length > 0 && (
@@ -332,8 +313,37 @@ function DonationInline({ label, given, received }: { label: string; given: numb
 }
 
 // ---------------------------------------------------------------------------
-// Section 5: Rushed analysis
+// Section 5: Activity Score & Rushed analysis
 // ---------------------------------------------------------------------------
+
+function ActivityScoreSection({ detail }: { detail: MemberDetailView }) {
+  const score = detail.donations.activityScore;
+  if (score === null) return null;
+
+  return (
+    <div className="rounded-xl border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
+      <SectionLabel noMargin>Activity Score</SectionLabel>
+      <div className="mt-4 flex items-center gap-6">
+        <div className="text-center">
+          <p className="font-display text-4xl font-bold text-umbra-purple">{Math.round(score)}</p>
+          <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">out of 100</p>
+        </div>
+        <div className="flex-1">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {detail.donations.activityScoreComponents.map((c, i) => (
+              <div key={i} className="rounded-lg bg-white/[.03] px-2 py-2 text-center">
+                <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{c.name}</p>
+                <p className={`mt-0.5 font-mono text-sm font-bold ${c.available ? "text-white" : "text-umbra-muted/40"}`}>
+                  {c.available ? `+${Math.round(c.points)} pts` : "N/A"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function RushedSection({ detail }: { detail: MemberDetailView }) {
   const r = detail.rushed;
