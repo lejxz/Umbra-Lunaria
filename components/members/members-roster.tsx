@@ -84,6 +84,8 @@ export function MembersRoster({
     });
 
     return result;
+  }, [roster.entries, sortField, sortDir, filterRole, filterWarPref, filterActiveOnly]);
+
   const selectedDetail = selectedTag ? memberDetails[selectedTag] : null;
 
   return (
