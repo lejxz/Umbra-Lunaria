@@ -30,9 +30,8 @@ export function AttentionPanel({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="glass flex flex-col rounded-2xl p-5 h-[350px]"
       aria-labelledby={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
-      style={{ minHeight: "400px", maxHeight: "600px" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
