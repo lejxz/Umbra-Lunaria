@@ -46,7 +46,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
       {/* Row 2: War record | Current war | Capital overview — 3 even columns */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <WarRecordCard record={data.warRecord} />
-        <CurrentWarCard warSummary={data.warSummary} />
+        <CurrentWarCard warSummary={data.warSummary} clanBadgeUrls={data.clan.badgeUrls} />
         <CapitalSummaryCard capital={data.capital} />
       </div>
 

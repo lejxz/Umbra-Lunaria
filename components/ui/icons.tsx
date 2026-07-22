@@ -211,3 +211,12 @@ export function IconDonationEmpty(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconWarEmpty(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M24 4C14 4 10 10 10 10V22C10 32 22 42 24 44C26 42 38 32 38 22V10C38 10 34 4 24 4Z" strokeDasharray="2 4" strokeOpacity="0.3" />
+      <path d="M17 17L31 31M31 17L17 31" />
+    </svg>
+  );
+}

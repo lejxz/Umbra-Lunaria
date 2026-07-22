@@ -220,6 +220,7 @@ export interface WarSummaryView {
   state: "notInWar" | "preparation" | "inWar" | "warEnded" | null;
   opponentName: string | null;
   opponentTag: string | null;
+  opponentBadgeUrls: ClanBadgeUrls | null;
   teamSize: number | null;
   ownStars: number | null;
   opponentStars: number | null;
