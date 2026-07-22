@@ -35,9 +35,6 @@ export function Navigation() {
             LUNARIA
           </span>
         </Link>
-        <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.12em] text-umbra-muted">
-          Clan observatory
-        </p>
       </div>
       <nav
         className="mx-auto flex max-w-md justify-around p-2 lg:block lg:max-w-none lg:space-y-1 lg:p-4"
