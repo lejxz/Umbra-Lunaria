@@ -25,6 +25,10 @@ import {
   syncCwlWars,
   backfillWarLog,
 } from "@/lib/ingest/war-sync";
+import {
+  reconcileMembership,
+  computeActivityFlags,
+} from "@/lib/ingest/membership";
 
 /**
  * POST /api/ingest
@@ -110,11 +114,11 @@ async function runLightPoll(): Promise<IngestResult> {
   await upsertClan(clanTag, clanData, capturedAt, /* isBatch */ false);
 
   // ---- Membership reconciliation ----
+  // The decision logic (join/leave/rejoin/refresh) lives in the pure
+  // `reconcileMembership` function (lib/ingest/membership.ts), tested without
+  // a DB. This route applies the resulting operations to the database.
   const liveMembers = clanData.memberList ?? [];
-  const liveTags = new Set(liveMembers.map((m) => m.tag));
 
-  // Fetch every known member row (retained AND departed) once. We need both:
-  // retained → leave detection; departed → rejoin detection.
   const knownMembers = await db
     .select({
       playerTag: members.playerTag,
@@ -122,74 +126,79 @@ async function runLightPoll(): Promise<IngestResult> {
       leftAt: members.leftAt,
     })
     .from(members);
-  const knownMap = new Map(knownMembers.map((m) => [m.playerTag, m]));
 
-  for (const liveMember of liveMembers) {
-    const known = knownMap.get(liveMember.tag);
+  const { operations, events: recoEvents } = reconcileMembership(
+    liveMembers,
+    knownMembers,
+    capturedAt,
+    clanConfig.memberRetentionDays,
+  );
+  events.joins = recoEvents.joins;
+  events.leaves = recoEvents.leaves;
+  events.rejoins = recoEvents.rejoins;
 
-    if (!known) {
-      // ---- New join ----
-      events.joins++;
+  // Build a lookup of live members by tag so we can apply refresh fields.
+  const liveMap = new Map(liveMembers.map((m) => [m.tag, m]));
+
+  for (const op of operations) {
+    if (op.type === "join") {
+      const live = liveMap.get(op.tag)!;
       await db
         .insert(members)
         .values({
-          playerTag: liveMember.tag,
+          playerTag: op.tag,
           joinedAt: capturedAt,
-          ...memberRefreshFields(liveMember),
+          ...memberRefreshFields(live),
         });
       await db.insert(membershipEvents).values({
-        playerTag: liveMember.tag,
-        nameAtEvent: liveMember.name,
+        playerTag: op.tag,
+        nameAtEvent: op.name,
         eventType: "join",
         eventTime: capturedAt,
       });
-    } else if (known.leftAt) {
-      // ---- Rejoin (was departed, retention window not yet expired) ----
-      events.rejoins++;
+    } else if (op.type === "rejoin") {
+      const live = liveMap.get(op.tag)!;
       await db
         .update(members)
         .set({
-          ...memberRefreshFields(liveMember),
+          ...memberRefreshFields(live),
           leftAt: null,
           purgeAt: null,
         })
-        .where(eq(members.playerTag, liveMember.tag));
+        .where(eq(members.playerTag, op.tag));
       await db.insert(membershipEvents).values({
-        playerTag: liveMember.tag,
-        nameAtEvent: liveMember.name,
+        playerTag: op.tag,
+        nameAtEvent: op.name,
         eventType: "rejoin",
         eventTime: capturedAt,
       });
-    } else {
-      // ---- Existing retained member ----
+    } else if (op.type === "leave") {
+      await db
+        .update(members)
+        .set({ leftAt: capturedAt, purgeAt: op.purgeAt })
+        .where(eq(members.playerTag, op.tag));
+      await db.insert(membershipEvents).values({
+        playerTag: op.tag,
+        nameAtEvent: op.name,
+        eventType: "leave",
+        eventTime: capturedAt,
+      });
+    }
+    // "refresh" operations need no membership-event row; the member
+    // refresh + snapshot happen in the live-member loop below.
+  }
+
+  // ---- Refresh retained members + insert activity snapshots ----
+  for (const liveMember of liveMembers) {
+    const known = knownMembers.find((k) => k.playerTag === liveMember.tag);
+    if (known && !known.leftAt) {
       await db
         .update(members)
         .set(memberRefreshFields(liveMember))
         .where(eq(members.playerTag, liveMember.tag));
     }
-
-    // ---- Reset-aware activity snapshot ----
+    // Reset-aware activity snapshot (uses computeActivityFlags).
     await insertMemberSnapshot(liveMember, capturedAt);
-  }
-
-  // ---- Detect leaves (retained members missing from this poll) ----
-  for (const known of knownMembers) {
-    if (known.leftAt) continue; // already departed — no change
-    if (liveTags.has(known.playerTag)) continue; // still in clan
-
-    events.leaves++;
-    const purgeAt = new Date(capturedAt);
-    purgeAt.setDate(purgeAt.getDate() + clanConfig.memberRetentionDays);
-    await db
-      .update(members)
-      .set({ leftAt: capturedAt, purgeAt })
-      .where(eq(members.playerTag, known.playerTag));
-    await db.insert(membershipEvents).values({
-      playerTag: known.playerTag,
-      nameAtEvent: known.name,
-      eventType: "leave",
-      eventTime: capturedAt,
-    });
   }
 
   // ---- War sync (best-effort — failure does not invalidate the poll) ----
@@ -398,26 +407,24 @@ async function insertMemberSnapshot(m: CocClanMember, capturedAt: Date) {
     .orderBy(desc(memberSnapshots.capturedAt))
     .limit(1);
 
-  const donationsIncreased = lastSnap
-    ? m.donations > lastSnap.donations
-    : false;
-  const receivedIncreased = lastSnap
-    ? m.donationsReceived > lastSnap.donationsReceived
-    : false;
-  const trophiesChanged = lastSnap ? m.trophies !== lastSnap.trophies : false;
-  const bbTrophiesChanged =
-    lastSnap &&
-    m.builderBaseTrophies != null &&
-    lastSnap.builderBaseTrophies != null
-      ? m.builderBaseTrophies !== lastSnap.builderBaseTrophies
-      : false;
-
-  const activityFlag =
-    donationsIncreased ||
-    receivedIncreased ||
-    trophiesChanged ||
-    bbTrophiesChanged;
-  const loginDayFlag = donationsIncreased || receivedIncreased;
+  // Activity-flag logic extracted to the pure `computeActivityFlags` function
+  // (lib/ingest/membership.ts) so it can be unit-tested without a DB.
+  const { activityFlag, loginDayFlag } = computeActivityFlags(
+    {
+      donations: m.donations,
+      donationsReceived: m.donationsReceived,
+      trophies: m.trophies,
+      builderBaseTrophies: m.builderBaseTrophies ?? null,
+    },
+    lastSnap
+      ? {
+          donations: lastSnap.donations,
+          donationsReceived: lastSnap.donationsReceived,
+          trophies: lastSnap.trophies,
+          builderBaseTrophies: lastSnap.builderBaseTrophies,
+        }
+      : null,
+  );
 
   await db.insert(memberSnapshots).values({
     playerTag: m.tag,

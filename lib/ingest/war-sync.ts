@@ -27,6 +27,7 @@ import {
   type CocCurrentWar,
   type CocWarLogEntry,
 } from "@/lib/coc-client/client";
+import { matchExistingWar } from "@/lib/ingest/war-identity";
 
 // ---------------------------------------------------------------------------
 // Pure helpers
@@ -104,15 +105,17 @@ export async function syncCurrentWar(
   const startTime = parseCoCTime(currentWar.startTime);
 
   // ---- Find existing war by stable identity ----
-  let existingWar: typeof wars.$inferSelect | undefined;
+  // The DB WHERE clause pre-filters; matchExistingWar (pure, in war-identity.ts)
+  // confirms the match against the identity rule. Tested independently.
+  let candidates: typeof wars.$inferSelect[] = [];
   if (warType === "cwl" && warTag) {
-    [existingWar] = await db
+    candidates = await db
       .select()
       .from(wars)
       .where(eq(wars.warTag, warTag))
       .limit(1);
   } else if (currentWar.opponent.tag && startTime) {
-    [existingWar] = await db
+    candidates = await db
       .select()
       .from(wars)
       .where(
@@ -123,6 +126,14 @@ export async function syncCurrentWar(
       )
       .limit(1);
   }
+  const matched = matchExistingWar(
+    candidates,
+    { opponentTag: currentWar.opponent.tag, startTime },
+    warTag,
+  );
+  const existingWar = matched
+    ? candidates.find((c) => c.id === matched.id)
+    : undefined;
 
   const result = computeWarResult(currentWar);
   const warFieldSet = {

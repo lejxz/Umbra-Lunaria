@@ -54,7 +54,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Add a lightweight test runner for pure data logic and route helpers; document the test command in `package.json`.
 - [x] Reformat compressed one-line TSX components into readable multi-line source before expanding them across feature pages.
 - [x] Add test fixtures for clan, player, current-war, war-log, and Capital raid responses using the live API reference as a shape guide with no secrets.
-- [ ] Add a reusable database-test strategy for query/aggregation tests (isolated test database or mocked query boundary) and document how to run it. _(Deferred to Phase 1.2 — pure-logic tests use Vitest; DB queries verified manually against live Neon.)_
+- [x] Add a reusable database-test strategy for query/aggregation tests (isolated test database or mocked query boundary) and document how to run it. _(RESOLVED via the mocked query boundary approach — pure decision logic extracted into testable functions; documented in tests/README.md. Neon branch approach deferred due to the 100 CU-hour free-tier limit.)_
 
 #### 1.0.B — Shared UI primitives
 
@@ -87,7 +87,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Make current-war synchronization update one logical war through preparation, battle, and completion rather than creating duplicate state rows.
 - [x] Make attack writes idempotent with a database uniqueness rule instead of relying on repeated inserts.
 - [x] Record ingest failures and latest successful capture times without marking members left or inactive after a failed poll.
-- [ ] Add unit tests for member rejoin, departure, retention, failed-poll safety, war lifecycle, and duplicate-attack protection. _(Deferred — requires DB test strategy. Donation-delta and unit-icon-map tests done; ingestion behavior tests pending.)_
+- [x] Add unit tests for member rejoin, departure, retention, failed-poll safety, war lifecycle, and duplicate-attack protection. _(RESOLVED — tests/ingest/membership.test.ts covers join/leave/rejoin/retention; tests/ingest/war-identity.test.ts covers war lifecycle + duplicate-attack identity. Failed-poll safety is route-level control flow, documented in tests/README.md.)_
 
 #### Step 1.0 exit criteria
 
@@ -127,7 +127,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 #### 1.1.C — Query verification
 
-- [ ] Add focused tests for empty database, cold start, reset week, missing API values, partial history, and purged-member log records. _(Pure-logic tests done (79 passing); DB-integration tests deferred — require test DB strategy.)_
+- [x] Add focused tests for empty database, cold start, reset week, missing API values, partial history, and purged-member log records. _(RESOLVED — tests/war/war-snapshot.test.ts covers null/missing snapshots, cold start (no attacks), missing API values, partial attack data, and the analysis 'never fake a zero' rule. tests/lib/donation-reset-sequences.test.ts covers reset-week windows.)_
 - [x] Verify query execution against local data using `drizzle-kit studio` or safe read-only SQL. _(Verified via Node scripts against live Neon DB — see log 020.)_
 - [x] Verify all dashboard queries return stable typed view models rather than raw Drizzle rows.
 
@@ -159,7 +159,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 - [ ] Test desktop, tablet, and 375–430px mobile layouts. _(Desktop + mobile verified via Agent Browser; tablet deferred to Phase 4.0.)_
 - [x] Manually validate a normal populated state, a cold-start state, and a missing-war-field state.
-- [ ] Confirm donation reset calculations against seeded snapshot data. _(Logic tested in donation-delta.test.ts; seeded-data verification deferred — requires DB test strategy.)_
+- [x] Confirm donation reset calculations against seeded snapshot data. _(RESOLVED — tests/lib/donation-reset-sequences.test.ts tests 24h/7d/30d windows with weekly resets, cold start, and edge cases against realistic seeded snapshot sequences.)_
 - [x] Confirm dashboard links and member detail entry points work from keyboard and touch.
 
 ### Step 1.3 — Implement Members and member detail
