@@ -1,12 +1,15 @@
 import { getMemberRoster, getMemberDetail } from "@/lib/db/member-queries";
+import { getMemberActivityScore } from "@/lib/db/queries";
 import { MembersRoster } from "@/components/members/members-roster";
+import { ScoreLeaderboard } from "@/components/members/score-leaderboard";
 import { PageScaffold } from "@/components/page-scaffold";
 import { ErrorState } from "@/components/ui/state-primitives";
 import type { MemberDetailView } from "@/lib/view-models/members";
 
 /**
- * Members page — full clan roster with sortable table, filters, and
- * member detail sheet. See concept/06-members.md.
+ * Members page — Activity Score leaderboard + full clan roster with
+ * sortable table, filters, and member detail sheet.
+ * See concept/06-members.md.
  */
 export default async function MembersPage() {
   let roster;
@@ -27,13 +30,16 @@ export default async function MembersPage() {
     );
   }
 
-  // Fetch member details for all retained members (in parallel)
-  const detailEntries = await Promise.all(
-    roster.entries.map(async (m) => {
-      const detail = await getMemberDetail(m.playerTag);
-      return [m.playerTag, detail] as const;
-    }),
-  );
+  // Fetch member details + activity score in parallel
+  const [detailEntries, activityScore] = await Promise.all([
+    Promise.all(
+      roster.entries.map(async (m) => {
+        const detail = await getMemberDetail(m.playerTag);
+        return [m.playerTag, detail] as const;
+      }),
+    ),
+    getMemberActivityScore("30d"),
+  ]);
 
   const memberDetails: Record<string, MemberDetailView> = {};
   for (const [tag, detail] of detailEntries) {
@@ -47,6 +53,7 @@ export default async function MembersPage() {
       description="A clear read on activity, contribution, and war readiness."
       eyebrow="member browser"
     >
+      <ScoreLeaderboard leaderboard={activityScore} />
       <MembersRoster roster={roster} memberDetails={memberDetails} />
     </PageScaffold>
   );

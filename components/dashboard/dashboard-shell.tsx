@@ -81,7 +81,11 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             "7d": data.activityTimeline7d,
             "30d": data.activityTimeline30d,
           }}
-          leaderboard={data.activityScore}
+          leaderboardByWindow={{
+            "24h": data.activityScore,
+            "7d": data.activityScore7d,
+            "30d": data.activityScore30d,
+          }}
           onMemberClick={setSelectedMember}
         />
       </div>

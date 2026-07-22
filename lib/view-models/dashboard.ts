@@ -93,6 +93,7 @@ export interface DonationLeaderboardEntry {
   name: string;
   role: string;
   townHallLevel: number | null;
+  leagueTier: { name: string; iconUrls?: ClanBadgeUrls } | null;
   total: number;
   rank: number;
 }
@@ -263,8 +264,10 @@ export interface DashboardData {
   activityTimeline: ActivityTimeline;
   activityTimeline7d: ActivityTimeline;
   activityTimeline30d: ActivityTimeline;
-  // 30-day activity score (the leaderboard uses 30d)
+  // Activity scores for all 3 windows (tabs switch between them)
   activityScore: ActivityScoreLeaderboard;
+  activityScore7d: ActivityScoreLeaderboard;
+  activityScore30d: ActivityScoreLeaderboard;
   needsAttention: NeedsAttention;
   clanLog: ClanLog;
   warSummary: WarSummaryView;

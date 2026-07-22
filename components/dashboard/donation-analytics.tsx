@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import type {
   DonationTotals,
   DonationTimeline,
@@ -125,10 +126,20 @@ export function DonationAnalytics({
                     key={donor.playerTag}
                     className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] ${badgeStyle}`}
                   >
-                    <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-[13px] font-bold ${rankColor}`}>
                         #{donor.rank}
                       </span>
+                      {donor.leagueTier?.iconUrls?.small && (
+                        <Image
+                          src={donor.leagueTier.iconUrls.small}
+                          alt=""
+                          width={18}
+                          height={18}
+                          className="h-[18px] w-[18px] shrink-0"
+                          unoptimized
+                        />
+                      )}
                       <span className="truncate text-[13px] font-medium text-umbra-lilac">
                         {donor.name}
                       </span>

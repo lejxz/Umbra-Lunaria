@@ -21,21 +21,21 @@ import {
 
 /**
  * Activity Analytics — unified panel for activity timeline + member score.
- * Styled to match DonationAnalytics exactly: same minHeight, same header
- * pattern, same chart-in-grid layout. The 24h/7d/30d tabs control the
- * timeline chart; the score leaderboard is always 30d (per concept/05 §5).
+ * The 24h/7d/30d tabs switch BOTH the timeline chart and the score leaderboard.
+ * Styled to match DonationAnalytics exactly.
  */
 export function ActivityAnalytics({
   dataByWindow,
-  leaderboard,
+  leaderboardByWindow,
   onMemberClick,
 }: {
   dataByWindow: Record<DonationWindow, ActivityTimeline>;
-  leaderboard: ActivityScoreLeaderboard;
+  leaderboardByWindow: Record<DonationWindow, ActivityScoreLeaderboard>;
   onMemberClick?: (playerTag: string) => void;
 }) {
   const [window, setWindow] = useState<DonationWindow>("24h");
   const current = dataByWindow[window];
+  const leaderboard = leaderboardByWindow[window];
   const { entries } = leaderboard;
 
   return (
@@ -44,22 +44,18 @@ export function ActivityAnalytics({
       aria-labelledby="activity-title"
       style={{ minHeight: "380px" }}
     >
-      {/* Header + Stats + Tabs — same pattern as DonationAnalytics */}
+      {/* Header + Stats + Tabs */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
             Roster signal & support
           </p>
-          <h3
-            id="activity-title"
-            className="mt-1 font-display text-lg text-umbra-lilac"
-          >
+          <h3 id="activity-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Activity Analytics
           </h3>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          {/* Compact stats card — same style as DonationAnalytics TotalChip */}
           <div className="hidden md:flex items-center rounded-xl bg-white/5 p-1">
             <StatChip
               label={`Active · ${window}`}
@@ -88,9 +84,9 @@ export function ActivityAnalytics({
         </div>
       </div>
 
-      {/* Chart + Leaderboard — same grid pattern as DonationAnalytics */}
+      {/* Chart + Leaderboard */}
       <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">
-        {/* Chart — explicit height like DonationAnalytics */}
+        {/* Chart */}
         <div className="h-[220px]">
           {current.buckets.length > 0 ? (
             <ActivityChart buckets={current.buckets} />
@@ -105,42 +101,59 @@ export function ActivityAnalytics({
           )}
         </div>
 
-        {/* Leaderboard — right side, same border treatment as DonationAnalytics */}
+        {/* Leaderboard — podium styling matching DonationAnalytics top donors */}
         <div className="flex flex-col lg:border-l lg:border-white/5 lg:pl-6">
           <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
-            Activity Score · 30d
+            Activity Score · {window}
           </p>
           {entries.length > 0 ? (
             <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "220px" }}>
-              {entries.slice(0, 8).map((entry) => (
-                <button
-                  key={entry.playerTag}
-                  onClick={() => onMemberClick?.(entry.playerTag)}
-                  className="flex items-center justify-between rounded-lg bg-white/[.02] border border-white/5 px-3 py-2.5 transition-colors hover:bg-white/[.07]"
-                >
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <span className="font-mono text-[13px] font-bold text-umbra-purple">
-                      {entry.rank}
+              {entries.slice(0, 8).map((entry) => {
+                // Podium styling — same as DonationAnalytics top donors
+                let rankColor = "text-umbra-purple";
+                let badgeStyle = "bg-white/[.02] border border-white/5";
+
+                if (entry.rank === 1) {
+                  rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
+                  badgeStyle = "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
+                } else if (entry.rank === 2) {
+                  rankColor = "text-slate-300";
+                  badgeStyle = "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
+                } else if (entry.rank === 3) {
+                  rankColor = "text-orange-400";
+                  badgeStyle = "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
+                }
+
+                return (
+                  <button
+                    key={entry.playerTag}
+                    onClick={() => onMemberClick?.(entry.playerTag)}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] ${badgeStyle}`}
+                  >
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <span className={`font-mono text-[13px] font-bold ${rankColor}`}>
+                        #{entry.rank}
+                      </span>
+                      {entry.leagueTier?.iconUrls?.small && (
+                        <Image
+                          src={entry.leagueTier.iconUrls.small}
+                          alt=""
+                          width={18}
+                          height={18}
+                          className="h-[18px] w-[18px] shrink-0"
+                          unoptimized
+                        />
+                      )}
+                      <span className="truncate text-[13px] font-medium text-umbra-lilac">
+                        {entry.name}
+                      </span>
+                    </div>
+                    <span className="shrink-0 font-mono text-[13px] font-semibold text-emerald-400">
+                      {entry.totalScore.toFixed(1)}
                     </span>
-                    {entry.leagueTier?.iconUrls?.small && (
-                      <Image
-                        src={entry.leagueTier.iconUrls.small}
-                        alt=""
-                        width={18}
-                        height={18}
-                        className="h-[18px] w-[18px] shrink-0"
-                        unoptimized
-                      />
-                    )}
-                    <span className="truncate text-[13px] font-medium text-umbra-lilac">
-                      {entry.name}
-                    </span>
-                  </div>
-                  <span className="shrink-0 font-mono text-[13px] font-semibold text-emerald-400">
-                    {entry.totalScore.toFixed(1)}
-                  </span>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <p className="text-[13px] text-umbra-muted">No scores yet</p>
@@ -151,39 +164,20 @@ export function ActivityAnalytics({
   );
 }
 
-/** Compact inline stat — matches DonationAnalytics TotalChip exactly */
-function StatChip({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function StatChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
-      <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-        {label}
-      </span>
-      <span className="font-display text-xs font-bold text-white">
-        {value}
-      </span>
+      <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{label}</span>
+      <span className="font-display text-xs font-bold text-white">{value}</span>
     </div>
   );
 }
 
 function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
-  const data = buckets.map((b) => ({
-    label: b.label,
-    active: b.activeMembers,
-  }));
-
+  const data = buckets.map((b) => ({ label: b.label, active: b.activeMembers }));
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={data}
-        margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
-        barCategoryGap="20%"
-      >
+      <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barCategoryGap="20%">
         <XAxis
           dataKey="label"
           tick={{ fill: "#A89CC4", fontSize: 9, fontFamily: "JetBrains Mono" }}
@@ -227,14 +221,7 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
 
 function ActivityEmptyIcon() {
   return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
+    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
       <path
         d="M8 24H16L20 12L28 36L32 24H40"
         stroke="currentColor"
