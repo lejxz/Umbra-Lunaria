@@ -8,6 +8,12 @@ project's polling architecture (concept/04) to project free-tier consumption
 and identify the first constraint that will be hit. It is a planning aid, not
 a SLA — re-measure after schema or traffic changes.
 
+**Bottom line:** on the current Vercel Hobby + Neon Free tiers, the app has
+ample headroom at any clan size up to the CoC 50-member cap. The first
+constraint that could surface is the Supercell API rate limit on the shared
+RoyaleAPI proxy IP (already handled gracefully by failed-poll safety), not
+Vercel or Neon. See §6 for the verified limit numbers.
+
 ---
 
 ## 1. Architecture recap (what consumes each free tier)
@@ -145,15 +151,17 @@ usage stays under 10%.
 ### Function execution duration
 
 The daily batch is the longest function (5 sequential player fetches + war-log
-backfill). Measured: ~3–8 seconds. Vercel Hobby caps function duration at 10
-seconds (synchronous) / 60 seconds (streaming). The daily batch is within the
-10s cap for a 5-member clan. **At 50 members the daily batch would exceed 10s**
-(50 × ~1.5s/player fetch). Mitigation: either (a) paginate the daily batch
-across multiple cron invocations, or (b) use `maxDuration` config to raise the
-route to 60s (Hobby allows this for streaming/edge, check current Vercel docs).
+backfill). Measured: ~3–8 seconds at 5 members.
 
-The light poll is ~1–2s (2 API calls + 5 member upserts) — comfortably within
-limits.
+**Verified Vercel Hobby limit (2026-07, per vercel.com/docs/functions/configuring-functions/duration):**
+the **default** maximum function duration on Hobby is **300 seconds (5 minutes)**
+— not 10s. (Vercel raised this from the older 10s/60s defaults.) The Hobby
+extended maximum is also 300s; Pro goes to 800s and beyond.
+
+At ~1.5s per player fetch, 300s allows **~200 sequential fetches** — far beyond
+the CoC hard clan cap of 50 members. So the daily batch is well within the
+Hobby default at **any** clan size, and **no `maxDuration` config is required**.
+The light poll (~1–2s) and every other route are even shorter.
 
 ---
 
@@ -190,36 +198,35 @@ fetch).
 
 | Constraint | Limit | 1-year projection | First-to-hit rank |
 |---|---|---|---|
-| Neon storage | 512 MB | ~110 MB | 4th (only if clan grows to 50+) |
+| Neon storage | 512 MB | ~110 MB | 2nd (only if clan grows to 50+ or churns heavily) |
 | Neon compute | ~3,000 hours | ~1.3 hours | 5th (never) |
 | Vercel function invocations | 100k/month | ~5k/month | 3rd (safe until ~20× traffic) |
-| Vercel function duration | 10s (Hobby) | daily batch ~8s at 5 members | **1st** (at ~8 members the daily batch exceeds 10s) |
-| Supercell API rate | soft, per IP | ~295 calls/day | 2nd (tolerable; proxy-shared risk) |
+| Vercel function duration | 300s (Hobby default) | daily batch ~8s at 5 members | 4th (never — 300s covers ~200 members, far past the CoC 50 cap) |
+| Supercell API rate | soft, per IP | ~295 calls/day | **1st** (tolerable; proxy-shared risk) |
 
-### The first real ceiling: Vercel function duration (daily batch)
+### The first real ceiling: Supercell API rate (proxy-shared IP)
 
-At 5 members, the daily batch takes ~3–8s (5 sequential player fetches). Each
-player fetch is ~1–1.5s. At **~8 members the daily batch crosses the 10-second
-Hobby limit**. This is the first constraint that will be hit as the clan
-grows.
+The Vercel function-duration ceiling previously listed here was based on an
+outdated 10s Hobby limit. **Verified 2026-07: Vercel Hobby's default function
+duration is 300s**, which covers ~200 sequential player fetches — far beyond
+the CoC hard clan cap of 50. Function duration is no longer a constraint on
+any free tier.
 
-**Mitigations (in order of preference):**
-1. Set `export const maxDuration = 60` on the ingest route (Vercel Hobby allows
-   up to 60s for serverless functions in some configurations — verify current
-   docs). This defers the ceiling to ~40 members.
-2. Split the daily batch into chunks: the cron sends `{"batch": true,
-   "chunk": 0}` and the route processes a subset of members per call, with the
-   cron firing 2–3 times in sequence. Defers to any clan size.
-3. Upgrade to Vercel Pro ($20/month) for 300s function duration — only if the
-   clan exceeds ~100 members.
+The actual first ceiling is the Supercell API rate limit on the shared
+RoyaleAPI proxy IP (`45.79.218.79`). If the proxy IP is shared with many other
+RoyaleAPI consumers, a rate-limit hit could cause intermittent failed polls.
+This is already handled gracefully (failed-poll safety — concept/04 #3: never
+mark members inactive on a failed fetch). No structural change needed unless
+failures become persistent — in which case a dedicated proxy IP or a lower
+poll cadence (every 15 min instead of 10) is the lever.
 
-### The second ceiling: Supercell API rate (proxy-shared IP)
+### The second ceiling: Neon storage (only at scale)
 
-If RoyaleAPI's proxy IP is shared with many other consumers, a Supercell
-rate-limit hit could cause intermittent failed polls. This is already handled
-gracefully (failed-poll safety). No structural change needed unless failures
-become persistent — in which case a dedicated proxy IP or a lower poll
-cadence (every 15 min instead of 10) is the lever.
+At 5 members, the DB is 9.4 MB with ~5× headroom to the 512 MB limit even at
+1 year. The ceiling only approaches if the clan grows to ~50 members AND
+churns (departed-member snapshots accumulate). The purge route deletes
+profiles after 14 days but does not currently prune their snapshots —
+recommendation #1 below addresses this.
 
 ---
 
@@ -229,10 +236,9 @@ cadence (every 15 min instead of 10) is the lever.
    (keep only the last pre-departure row for the clan log). Prevents unbounded
    `member_snapshots` growth if the clan churns. Priority: medium (needed only
    if clan grows beyond ~20 members or churns heavily).
-2. **`maxDuration` on ingest route** — set `export const maxDuration = 60` on
-   `app/api/ingest/route.ts` proactively, so the daily batch has headroom as
-   the clan grows past 5 members. Priority: low now, high before the clan
-   exceeds ~8 members.
+2. **No `maxDuration` config needed** — Vercel Hobby's default 300s already
+   covers any clan size up to the CoC 50-member cap. (If Vercel ever reverts
+   the default, set `export const maxDuration = 300` on the ingest route.)
 3. **Keep the 45s refresh TTL** — it prevents refresh-button bursts from
    multiplying Supercell calls. Do not lower it below 30s.
 4. **Monitor Neon storage monthly** — re-run the stats script
