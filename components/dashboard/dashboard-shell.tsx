@@ -134,7 +134,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
 
       {/* Row 6: Hall of Fame — full width */}
       <div className="mt-5">
-        <HallOfFameCard data={data.hallOfFame} />
+        <HallOfFameCard data={data.hallOfFame} onMemberClick={setSelectedMember} />
       </div>
 
       {/* Row 7: Navigation summary — full width strip */}

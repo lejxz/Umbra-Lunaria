@@ -44,17 +44,21 @@ const AWARD_META: Record<
   },
 };
 
-const AWARD_ORDER: HallOfFameAwardKey[] = [
-  "philanthropist",
-  "vanguard",
-  "dedicated",
-  "capitalist",
-  "unsleeping",
+const CARD_ORDER: Array<{ key: HallOfFameAwardKey; gridClass: string }> = [
+  { key: "unsleeping", gridClass: "lg:col-start-2 lg:col-span-2" },
+  { key: "dedicated", gridClass: "lg:col-span-2" },
+  { key: "philanthropist", gridClass: "lg:col-span-2 lg:col-start-1" },
+  { key: "vanguard", gridClass: "lg:col-span-2" },
+  { key: "capitalist", gridClass: "lg:col-span-2" },
 ];
 
-const RANK_COLORS = ["text-yellow-400", "text-slate-300", "text-amber-600"];
-
-export function HallOfFameCard({ data }: { data: HallOfFame }) {
+export function HallOfFameCard({
+  data,
+  onMemberClick,
+}: {
+  data: HallOfFame;
+  onMemberClick?: (playerTag: string) => void;
+}) {
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -67,18 +71,18 @@ export function HallOfFameCard({ data }: { data: HallOfFame }) {
         </h2>
       </div>
 
-      {/* Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
-        {AWARD_ORDER.map((key) => {
+      {/* Grid Layout - 6 columns to allow centering 2 items (span 2 each) then 3 items */}
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 lg:gap-5">
+        {CARD_ORDER.map(({ key, gridClass }) => {
           const meta = AWARD_META[key];
           const board = data.leaderboards.find((lb) => lb.awardKey === key);
           return (
             <div
               key={key}
-              className="flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden"
+              className={`flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden h-[350px] ${gridClass}`}
             >
               {/* Category header */}
-              <div className={`relative flex items-center justify-center border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20`}>
+              <div className={`relative flex items-center justify-center border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20 shrink-0`}>
                 <span className={`absolute left-4 ${meta.color}`}>{meta.icon}</span>
                 <div className="text-center">
                   <p className={`font-display text-[13px] font-bold ${meta.color} leading-none`}>{meta.title}</p>
@@ -87,13 +91,18 @@ export function HallOfFameCard({ data }: { data: HallOfFame }) {
               </div>
 
               {/* Ranked rows */}
-              <div className="p-3 flex-1">
+              <div className="p-3 flex-1 overflow-y-auto scrollbar-none">
                 {!board || board.entries.length === 0 ? (
                   <EmptyLeaderboard />
                 ) : (
-                  <div className="space-y-1">
-                    {board.entries.map((entry) => (
-                      <RankRow key={entry.playerTag} entry={entry} meta={meta} />
+                  <div className="flex flex-col gap-2">
+                    {board.entries.slice(0, 5).map((entry) => (
+                      <RankRow
+                        key={entry.playerTag}
+                        entry={entry}
+                        meta={meta}
+                        onClick={() => onMemberClick?.(entry.playerTag)}
+                      />
                     ))}
                   </div>
                 )}
@@ -109,23 +118,33 @@ export function HallOfFameCard({ data }: { data: HallOfFame }) {
 function RankRow({
   entry,
   meta,
+  onClick,
 }: {
   entry: HallOfFameLeaderboard["entries"][number];
   meta: (typeof AWARD_META)[HallOfFameAwardKey];
+  onClick?: () => void;
 }) {
-  const isTop3 = entry.rank <= 3;
-  const rankColor = RANK_COLORS[entry.rank - 1] ?? "text-umbra-muted";
+  let rankColor = "text-umbra-muted";
+  let badgeStyle = "bg-white/[.02] border border-white/5";
+
+  if (entry.rank === 1) {
+    rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
+    badgeStyle = "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
+  } else if (entry.rank === 2) {
+    rankColor = "text-slate-300";
+    badgeStyle = "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
+  } else if (entry.rank === 3) {
+    rankColor = "text-orange-400";
+    badgeStyle = "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
+  }
 
   return (
-    <div
-      className={`flex items-center gap-2 rounded-lg px-2 py-2 transition-colors hover:bg-white/[.04] ${
-        isTop3 ? "bg-white/[.02]" : ""
-      }`}
+    <button
+      onClick={onClick}
+      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/[.07] focus-ring text-left ${badgeStyle}`}
     >
       {/* Rank */}
-      <span
-        className={`w-5 shrink-0 text-center font-mono text-xs font-bold ${rankColor}`}
-      >
+      <span className={`w-5 shrink-0 text-center font-mono text-xs font-bold ${rankColor}`}>
         {entry.rank === 1 ? "👑" : `#${entry.rank}`}
       </span>
 
@@ -135,7 +154,7 @@ function RankRow({
           <span className="truncate font-semibold text-[13px] text-white/90">
             {entry.name}
           </span>
-          <span className={`shrink-0 font-mono text-[11px] font-bold ${isTop3 ? meta.color : "text-umbra-lilac/70"}`}>
+          <span className={`shrink-0 font-mono text-[11px] font-bold ${entry.rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>
             {entry.valueLabel}
           </span>
         </div>
@@ -146,7 +165,7 @@ function RankRow({
           </span>
         )}
       </div>
-    </div>
+    </button>
   );
 }
 
