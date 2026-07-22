@@ -48,7 +48,7 @@ export function ScoreLeaderboard({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="text-[11px] font-medium uppercase tracking-wider text-umbra-purple hover:text-umbra-lilac transition-colors"
+            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.02] hover:text-white"
           >
             View Full List &rarr;
           </button>
@@ -60,13 +60,13 @@ export function ScoreLeaderboard({
 
       {/* True Podium (Top 3) */}
       <div className="mx-auto max-w-2xl px-4">
-        <div className="flex items-end justify-center gap-2 sm:gap-4 h-[250px]">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 h-[200px]">
           {/* Rank 2 - Silver (Left) */}
           <div className="flex-1 max-w-[180px] order-2 sm:order-1">
             {rank2 && (
               <TruePodiumCard
                 entry={rank2}
-                heightClass="h-[210px]"
+                heightClass="h-[170px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -77,7 +77,7 @@ export function ScoreLeaderboard({
             {rank1 && (
               <TruePodiumCard
                 entry={rank1}
-                heightClass="h-[240px]"
+                heightClass="h-[200px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -88,7 +88,7 @@ export function ScoreLeaderboard({
             {rank3 && (
               <TruePodiumCard
                 entry={rank3}
-                heightClass="h-[180px]"
+                heightClass="h-[150px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -155,19 +155,19 @@ function TruePodiumCard({
   return (
     <button
       onClick={() => onMemberClick?.(entry.playerTag)}
-      className={`flex w-full flex-col items-center justify-between rounded-t-xl px-2 py-4 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle} ${heightClass}`}
+      className={`flex w-full flex-col items-center justify-between rounded-t-xl px-2 py-3 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle} ${heightClass}`}
     >
-      <div className="flex flex-col items-center gap-1.5 w-full">
-        <span className={`font-mono text-lg font-black ${rankColor}`}>
+      <div className="flex flex-col items-center gap-1 w-full">
+        <span className={`font-mono text-base font-black ${rankColor}`}>
           #{entry.rank}
         </span>
         {entry.leagueTier?.iconUrls?.small && (
           <Image
             src={entry.leagueTier.iconUrls.small}
             alt=""
-            width={24}
-            height={24}
-            className="h-[24px] w-[24px] shrink-0 drop-shadow-md"
+            width={20}
+            height={20}
+            className="h-[20px] w-[20px] shrink-0 drop-shadow-md"
             unoptimized
           />
         )}
@@ -181,11 +181,11 @@ function TruePodiumCard({
         </div>
       </div>
       
-      <div className="text-center w-full mt-2 pt-2 border-t border-white/5">
-        <span className="block font-mono text-[16px] font-semibold text-emerald-400">
+      <div className="text-center w-full mt-1 pt-1.5 border-t border-white/5">
+        <span className="block font-mono text-[14px] font-semibold text-emerald-400">
           {entry.totalScore.toFixed(1)}
         </span>
-        <div className="mt-1.5 flex justify-center gap-1">
+        <div className="mt-1 flex justify-center gap-1">
           {entry.components.map((c) => (
             <div
               key={c.name}
