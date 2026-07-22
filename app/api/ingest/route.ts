@@ -24,6 +24,22 @@ import { clanConfig } from "@/config/clan.config";
 import type { IngestResult } from "@/lib/ingest/types";
 
 /**
+ * Parse a Clash of Clans API timestamp.
+ * The API returns times in the format "YYYYMMDDTHHMMSS.000Z" (no dashes/colons),
+ * which JavaScript's `new Date()` cannot parse. This converts it to ISO 8601.
+ */
+function parseCoCTime(time: string | undefined | null): Date | null {
+  if (!time) return null;
+  // Format: "20260722T051024.000Z" → "2026-07-22T05:10:24.000Z"
+  const iso = time.replace(
+    /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/,
+    "$1-$2-$3T$4:$5:$6",
+  );
+  const date = new Date(iso);
+  return isNaN(date.getTime()) ? null : date;
+}
+
+/**
  * POST /api/ingest
  *
  * Called by the GitHub Actions workflow (.github/workflows/poll.yml) on two
@@ -363,8 +379,7 @@ async function syncCurrentWar(
   if (!currentWar.clan || !currentWar.opponent) return;
 
   const warType: "regular" | "cwl" = warTag ? "cwl" : "regular";
-  const startTime =
-    currentWar.startTime != null ? new Date(currentWar.startTime) : null;
+  const startTime = parseCoCTime(currentWar.startTime);
 
   // ---- Find existing war by stable identity ----
   let existingWar: typeof wars.$inferSelect | undefined;
@@ -406,12 +421,8 @@ async function syncCurrentWar(
     opponentAttacks: currentWar.opponent.attacks,
     result,
     startTime,
-    endTime:
-      currentWar.endTime != null ? new Date(currentWar.endTime) : null,
-    preparationStartTime:
-      currentWar.preparationStartTime != null
-        ? new Date(currentWar.preparationStartTime)
-        : null,
+    endTime: parseCoCTime(currentWar.endTime),
+    preparationStartTime: parseCoCTime(currentWar.preparationStartTime),
     lastSyncedAt: capturedAt,
   };
 
