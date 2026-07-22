@@ -60,13 +60,13 @@ export function ScoreLeaderboard({
 
       {/* True Podium (Top 3) */}
       <div className="mx-auto max-w-2xl px-4">
-        <div className="flex items-end justify-center gap-2 sm:gap-4 h-[210px]">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 h-[250px]">
           {/* Rank 2 - Silver (Left) */}
           <div className="flex-1 max-w-[180px] order-2 sm:order-1">
             {rank2 && (
               <TruePodiumCard
                 entry={rank2}
-                heightClass="h-[170px]"
+                heightClass="h-[210px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -77,7 +77,7 @@ export function ScoreLeaderboard({
             {rank1 && (
               <TruePodiumCard
                 entry={rank1}
-                heightClass="h-[200px]"
+                heightClass="h-[240px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -88,7 +88,7 @@ export function ScoreLeaderboard({
             {rank3 && (
               <TruePodiumCard
                 entry={rank3}
-                heightClass="h-[150px]"
+                heightClass="h-[180px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -253,7 +253,6 @@ function LeaderboardRow({
           <span className="block truncate text-[11px] text-umbra-muted">
             TH{entry.townHallLevel}
             {entry.leagueTier?.name && ` · ${entry.leagueTier.name}`}
-            {entry.limitedData && " · limited"}
           </span>
         </div>
       </div>
