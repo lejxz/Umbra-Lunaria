@@ -60,13 +60,13 @@ export function ScoreLeaderboard({
 
       {/* True Podium (Top 3) */}
       <div className="mx-auto max-w-2xl px-4">
-        <div className="flex items-end justify-center gap-2 sm:gap-4 h-[180px]">
+        <div className="flex items-end justify-center gap-2 sm:gap-4 h-[210px]">
           {/* Rank 2 - Silver (Left) */}
           <div className="flex-1 max-w-[180px] order-2 sm:order-1">
             {rank2 && (
               <TruePodiumCard
                 entry={rank2}
-                heightClass="h-[130px]"
+                heightClass="h-[170px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -77,7 +77,7 @@ export function ScoreLeaderboard({
             {rank1 && (
               <TruePodiumCard
                 entry={rank1}
-                heightClass="h-[160px]"
+                heightClass="h-[200px]"
                 onMemberClick={onMemberClick}
               />
             )}
@@ -88,7 +88,7 @@ export function ScoreLeaderboard({
             {rank3 && (
               <TruePodiumCard
                 entry={rank3}
-                heightClass="h-[110px]"
+                heightClass="h-[150px]"
                 onMemberClick={onMemberClick}
               />
             )}
