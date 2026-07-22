@@ -862,11 +862,25 @@ export async function getClanLog(
 // ---------------------------------------------------------------------------
 
 export async function getDashboardWarSummary(): Promise<WarSummaryView> {
-  const [currentWar] = await db
+  // First try to get the active war (preparation or inWar)
+  const [activeWar] = await db
     .select()
     .from(wars)
-    .orderBy(desc(wars.id))
+    .where(inArray(wars.state, ["preparation", "inWar"]))
+    .orderBy(desc(wars.startTime))
     .limit(1);
+
+  // If no active war, get the most recently ended war
+  const [lastEndedWar] = !activeWar
+    ? await db
+        .select()
+        .from(wars)
+        .where(eq(wars.state, "warEnded"))
+        .orderBy(desc(wars.endTime))
+        .limit(1)
+    : [null];
+
+  const currentWar = activeWar || lastEndedWar;
 
   if (!currentWar) {
     return {
