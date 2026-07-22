@@ -85,14 +85,14 @@ export function ActivityAnalytics({
         </div>
       </div>
 
-      {/* Chart + Leaderboard */}
+      {/* Chart + Leaderboard — chart fills remaining height */}
       <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">
-        {/* Chart */}
-        <div className="h-[220px]">
+        {/* Chart — fills remaining height of the card */}
+        <div className="min-h-[180px]">
           {current.buckets.length > 0 ? (
             <ActivityChart buckets={current.buckets} />
           ) : (
-            <div className="flex h-full items-center justify-center">
+            <div className="flex h-full min-h-[180px] items-center justify-center">
               <EmptyState
                 icon={<IconActivityEmpty />}
                 title="No activity yet"
@@ -105,11 +105,11 @@ export function ActivityAnalytics({
         {/* Leaderboard — podium styling matching DonationAnalytics top donors */}
         <div className="flex flex-col lg:border-l lg:border-white/5 lg:pl-6">
           <p className="mb-3 font-mono text-label uppercase tracking-wider text-umbra-muted">
-            Activity Score · {window}
+            Top 5 Activity · {window}
           </p>
           {entries.length > 0 ? (
-            <div className="flex flex-col gap-2 overflow-y-auto" style={{ maxHeight: "220px" }}>
-              {entries.slice(0, 8).map((entry) => {
+            <div className="flex flex-col gap-2">
+              {entries.slice(0, 5).map((entry) => {
                 // Podium styling — same as DonationAnalytics top donors
                 let rankColor = "text-umbra-purple";
                 let badgeStyle = "bg-white/[.02] border border-white/5";
