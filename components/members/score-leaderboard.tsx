@@ -1,10 +1,13 @@
 "use client";
 
+import { useState } from "react";
+
 import Image from "next/image";
 import type {
   ActivityScoreLeaderboard,
   MemberActivityScore,
 } from "@/lib/view-models/dashboard";
+import { Modal } from "@/components/ui/modal";
 
 /**
  * Standalone Activity Score leaderboard for the Members page.
@@ -18,6 +21,7 @@ export function ScoreLeaderboard({
   leaderboard: ActivityScoreLeaderboard;
   onMemberClick?: (playerTag: string) => void;
 }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { entries, window } = leaderboard;
 
   if (entries.length === 0) {
@@ -89,19 +93,48 @@ export function ScoreLeaderboard({
         </div>
       </div>
 
-      {/* Ranks 4+ (Grid below podium) */}
+      {/* Ranks 4+ (Hidden behind button) */}
       {rest.length > 0 && (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 border-t border-white/5 pt-6">
+        <div className="mt-6 flex justify-center border-t border-white/5 pt-6">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-6 py-2.5 text-sm font-medium text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.02] hover:text-white"
+          >
+            View Full Leaderboard
+          </button>
+        </div>
+      )}
+
+      {/* Full Leaderboard Modal */}
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        ariaLabel="Full Activity Score Leaderboard"
+        maxWidth="max-w-2xl"
+      >
+        <div className="mb-6">
+          <h2 className="font-display text-xl text-umbra-lilac">
+            Full Activity Score Leaderboard
+          </h2>
+          <p className="mt-1 text-sm text-umbra-muted">
+            Ranks 4 through {entries.length} based on {window === "all" ? "lifetime" : window} data.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-2">
           {rest.map((entry) => (
             <PodiumCard
               key={entry.playerTag}
               entry={entry}
               heightClass="h-[64px]"
-              onMemberClick={onMemberClick}
+              onMemberClick={(tag) => {
+                setIsModalOpen(false);
+                onMemberClick?.(tag);
+              }}
             />
           ))}
         </div>
-      )}
+      </Modal>
     </section>
   );
 }
