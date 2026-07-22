@@ -135,7 +135,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
   const totalDays = a.buckets.length;
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <SectionLabel>Activity</SectionLabel>
 
       {/* Summary line */}
@@ -151,24 +151,24 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
         )}
       </div>
 
-      {/* Heatmap strip — GitHub style 7x7 grid */}
+      {/* Heatmap strip — full width barcode style */}
       {a.buckets.length > 0 && (
-        <div className="mt-4 flex flex-col items-center">
-          <div className="grid grid-flow-col grid-rows-7 gap-[3px]">
+        <div className="mt-4 flex w-full flex-1 flex-col">
+          <div className="flex flex-1 gap-[2px]">
             {a.buckets.map((b, i) => (
               <div
                 key={i}
                 title={`${b.label}: ${b.active ? "active" : "inactive"}`}
-                className={`h-3 w-3 rounded-sm transition-all hover:scale-125 ${
+                className={`flex-1 rounded-sm transition-all hover:scale-y-[1.05] ${
                   b.active
-                    ? "bg-umbra-purple shadow-[0_0_8px_rgba(182,120,255,0.4)]"
-                    : "bg-white/[.04] border border-white/5"
+                    ? "bg-gradient-to-t from-umbra-indigo/40 to-umbra-purple shadow-[0_0_8px_rgba(182,120,255,0.2)]"
+                    : "bg-white/[.03] border border-white/5"
                 }`}
               />
             ))}
           </div>
           {/* Date labels */}
-          <div className="mt-2 flex w-full max-w-[120px] justify-between font-mono text-[9px] uppercase tracking-widest text-umbra-muted/60">
+          <div className="mt-3 flex w-full justify-between font-mono text-[9px] uppercase tracking-widest text-umbra-muted/60">
             <span>{a.buckets[0]?.label ?? ""}</span>
             <span>{a.buckets[a.buckets.length - 1]?.label ?? ""}</span>
           </div>
@@ -176,7 +176,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
       )}
 
       {/* Last active + tracking info */}
-      <div className="mt-3 flex items-center gap-4 text-xs">
+      <div className="mt-5 flex items-center gap-4 text-xs">
         <div className="flex items-center gap-1.5">
           <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Last active</span>
           <span className="font-semibold text-white">{fmtDate(a.lastActiveAt)}</span>
@@ -187,13 +187,6 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           <span className="text-umbra-muted">{fmtDate(a.trackingStart)}</span>
         </div>
       </div>
-
-      {a.hasPartialData && (
-        <p className="mt-2 text-[10px] text-amber-400">⚠ Partial tracking data</p>
-      )}
-      <p className="mt-1 text-[10px] text-umbra-muted/60">
-        Estimated from observed changes — not online presence.
-      </p>
     </div>
   );
 }
