@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
 import { WarRecordCard } from "./war-record-card";
@@ -140,13 +140,13 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Compact data freshness footer */}
-      <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 rounded-lg border border-umbra-line/30 bg-umbra-ink/30 px-4 py-2.5">
-        <FreshnessChip label="Last poll" date={data.clan.lastPolledAt} />
-        <FreshnessChip label="Daily batch" date={data.clan.lastDailyBatchAt} />
-        <FreshnessChip label="Tracking started" date={data.trackingStart} />
-        <FreshnessChip label="War synced" date={data.warSummary.lastSyncedAt} />
-      </div>
+      {/* Compact data freshness footer with next-poll countdown */}
+      <FreshnessFooter
+        lastPoll={data.clan.lastPolledAt}
+        lastBatch={data.clan.lastDailyBatchAt}
+        trackingStart={data.trackingStart}
+        warSynced={data.warSummary.lastSyncedAt}
+      />
 
       {/* Footer */}
       <footer className="mt-6 border-t border-umbra-line pt-4 text-center">
@@ -164,28 +164,94 @@ export function DashboardShell({ data }: { data: DashboardData }) {
   );
 }
 
-function FreshnessChip({
-  label,
-  date,
+/**
+ * Freshness footer with live countdown to the next expected poll.
+ * The poll interval is 10 minutes (GitHub Actions every-10-min cron).
+ * The countdown shows how long until the next poll should fire.
+ */
+function FreshnessFooter({
+  lastPoll,
+  lastBatch,
+  trackingStart,
+  warSynced,
 }: {
-  label: string;
-  date: Date | string | null;
+  lastPoll: Date | string | null;
+  lastBatch: Date | string | null;
+  trackingStart: Date | string | null;
+  warSynced: Date | string | null;
 }) {
-  const formatted = date
-    ? new Date(date).toLocaleString("en-US", {
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone: "Asia/Manila",
-      })
-    : "—";
+  const POLL_INTERVAL_MINUTES = 10;
+  const [now, setNow] = useState(Date.now());
+
+  // Update every second for the countdown
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Calculate next poll time: last poll + 10 min
+  const lastPollDate = lastPoll ? new Date(lastPoll) : null;
+  const nextPollDate = lastPollDate
+    ? new Date(lastPollDate.getTime() + POLL_INTERVAL_MINUTES * 60 * 1000)
+    : null;
+  const msUntilNext = nextPollDate ? nextPollDate.getTime() - now : null;
+  const isOverdue = msUntilNext !== null && msUntilNext < 0;
+
+  // Format countdown
+  const countdownText = (() => {
+    if (msUntilNext === null) return "—";
+    if (isOverdue) return "overdue";
+    const totalSeconds = Math.floor(msUntilNext / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  })();
+
+  const fmt = (d: Date | string | null) =>
+    d
+      ? new Date(d).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZone: "Asia/Manila",
+        })
+      : "—";
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 rounded-lg border border-umbra-line/30 bg-umbra-ink/30 px-4 py-3">
+      <Chip label="Last poll" value={fmt(lastPoll)} />
+      <Chip label="Daily batch" value={fmt(lastBatch)} />
+      <Chip label="Tracking" value={fmt(trackingStart)} />
+      <Chip label="War synced" value={fmt(warSynced)} />
+      {/* Next poll countdown */}
+      <div className="flex items-center gap-1.5 border-l border-umbra-line/30 pl-5">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+          Next poll
+        </span>
+        <span
+          className={`font-mono text-[10px] font-bold ${
+            isOverdue
+              ? "text-amber-400"
+              : msUntilNext !== null && msUntilNext < 60000
+                ? "text-amber-400"
+                : "text-emerald-400"
+          }`}
+        >
+          {countdownText}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function Chip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-mono text-[10px] text-umbra-lilac">{formatted}</span>
+      <span className="font-mono text-[10px] text-umbra-lilac">{value}</span>
     </div>
   );
 }
