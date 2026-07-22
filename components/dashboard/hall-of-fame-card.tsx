@@ -1,43 +1,44 @@
 "use client";
 
+import { Gift, Swords, Flame, Coins, Eye } from "lucide-react";
 import type { HallOfFame, HallOfFameAwardKey, HallOfFameLeaderboard } from "@/lib/view-models/dashboard";
 
 const AWARD_META: Record<
   HallOfFameAwardKey,
-  { title: string; subtitle: string; icon: string; color: string; accent: string }
+  { title: string; subtitle: string; icon: React.ReactNode; color: string; accent: string }
 > = {
   philanthropist: {
     title: "The Philanthropist",
     subtitle: "Highest all-time donations",
-    icon: "🎁",
+    icon: <Gift className="w-5 h-5" />,
     color: "text-emerald-400",
     accent: "border-emerald-400/40 bg-emerald-400/5",
   },
   vanguard: {
     title: "The Vanguard",
     subtitle: "Most 3-star war attacks",
-    icon: "⚔️",
+    icon: <Swords className="w-5 h-5" />,
     color: "text-amber-400",
     accent: "border-amber-400/40 bg-amber-400/5",
   },
   dedicated: {
     title: "The Dedicated",
     subtitle: "Longest login streak",
-    icon: "🔥",
+    icon: <Flame className="w-5 h-5" />,
     color: "text-orange-400",
     accent: "border-orange-400/40 bg-orange-400/5",
   },
   capitalist: {
     title: "The Capitalist",
     subtitle: "Best single raid weekend",
-    icon: "💰",
+    icon: <Coins className="w-5 h-5" />,
     color: "text-yellow-400",
     accent: "border-yellow-400/40 bg-yellow-400/5",
   },
   unsleeping: {
     title: "The Unsleeping",
     subtitle: "Highest all-time raw activity",
-    icon: "👁️",
+    icon: <Eye className="w-5 h-5" />,
     color: "text-umbra-purple",
     accent: "border-umbra-purple/40 bg-umbra-purple/5",
   },
@@ -55,13 +56,13 @@ const RANK_COLORS = ["text-yellow-400", "text-slate-300", "text-amber-600"];
 
 export function HallOfFameCard({ data }: { data: HallOfFame }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="px-1">
+      <div className="text-center pb-2">
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
           All-time clan records
         </p>
-        <h2 className="mt-0.5 font-display text-2xl font-semibold text-umbra-lilac">
+        <h2 className="mt-1 font-display text-2xl font-semibold text-umbra-lilac">
           Hall of Fame
         </h2>
       </div>
@@ -77,11 +78,11 @@ export function HallOfFameCard({ data }: { data: HallOfFame }) {
               className="flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden"
             >
               {/* Category header */}
-              <div className={`flex flex-col items-center gap-1.5 border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20`}>
-                <span className="text-3xl">{meta.icon}</span>
-                <div>
-                  <p className={`font-display text-sm font-bold ${meta.color}`}>{meta.title}</p>
-                  <p className="font-mono text-[9px] text-umbra-muted opacity-80 mt-0.5">{meta.subtitle}</p>
+              <div className={`flex items-center justify-center gap-2 border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20`}>
+                <span className={`${meta.color}`}>{meta.icon}</span>
+                <div className="text-left">
+                  <p className={`font-display text-[13px] font-bold ${meta.color} leading-none`}>{meta.title}</p>
+                  <p className="font-mono text-[9px] text-umbra-muted opacity-80 mt-1">{meta.subtitle}</p>
                 </div>
               </div>
 
@@ -139,7 +140,7 @@ function RankRow({
           </span>
         </div>
         {/* Meta label (secondary stat) */}
-        {entry.metaLabel && (
+        {entry.metaLabel && entry.metaLabel !== "Since tracking began" && (
           <span className="font-mono text-[9px] text-umbra-muted truncate">
             {entry.metaLabel}
           </span>
