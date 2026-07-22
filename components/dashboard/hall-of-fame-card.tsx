@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
+
 import { Gift, Swords, Flame, Coins, Eye } from "lucide-react";
 import type { HallOfFame, HallOfFameAwardKey, HallOfFameLeaderboard } from "@/lib/view-models/dashboard";
+import { Modal } from "@/components/ui/modal";
+import { IconX } from "@/components/ui/icons";
 
 const AWARD_META: Record<
   HallOfFameAwardKey,
@@ -59,6 +63,10 @@ export function HallOfFameCard({
   data: HallOfFame;
   onMemberClick?: (playerTag: string) => void;
 }) {
+  const [viewAllAward, setViewAllAward] = useState<HallOfFameAwardKey | null>(null);
+  const activeBoard = data.leaderboards.find((lb) => lb.awardKey === viewAllAward);
+  const activeMeta = viewAllAward ? AWARD_META[viewAllAward] : null;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -97,22 +105,80 @@ export function HallOfFameCard({
                 {!board || board.entries.length === 0 ? (
                   <EmptyLeaderboard />
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {board.entries.slice(0, 5).map((entry) => (
-                      <RankRow
-                        key={entry.playerTag}
-                        entry={entry}
-                        meta={meta}
-                        onClick={() => onMemberClick?.(entry.playerTag)}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="flex flex-col gap-2">
+                      {board.entries.slice(0, 5).map((entry) => (
+                        <RankRow
+                          key={entry.playerTag}
+                          entry={entry}
+                          meta={meta}
+                          onClick={() => onMemberClick?.(entry.playerTag)}
+                        />
+                      ))}
+                    </div>
+                    {board.entries.length > 5 && (
+                      <button
+                        onClick={() => setViewAllAward(key)}
+                        className="mt-2 flex w-full items-center justify-center rounded-lg border border-umbra-line/30 bg-white/[0.02] py-2.5 text-xs font-medium text-umbra-muted transition-colors hover:bg-white/[0.04] hover:text-umbra-lilac"
+                      >
+                        View all {board.entries.length} rankings
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>
           );
         })}
       </div>
+
+      {activeBoard && activeMeta && (
+        <Modal
+          open={viewAllAward !== null}
+          onClose={() => setViewAllAward(null)}
+          maxWidth="max-w-lg"
+        >
+          <div className="flex flex-col max-h-[85vh] bg-umbra-ink border border-umbra-line rounded-2xl overflow-hidden shadow-2xl">
+            {/* Header */}
+            <div className={`flex items-center justify-between border-b border-umbra-line/50 px-5 py-4 ${activeMeta.accent} bg-opacity-20`}>
+              <div className="flex items-center gap-3">
+                <div className={activeMeta.color}>{activeMeta.icon}</div>
+                <div>
+                  <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-muted/80">
+                    {activeMeta.subtitle}
+                  </p>
+                  <h3 className={`font-display text-lg font-semibold ${activeMeta.color}`}>
+                    {activeMeta.title}
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewAllAward(null)}
+                className="rounded-full p-2 text-umbra-muted transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <IconX className="h-5 w-5" />
+              </button>
+            </div>
+            
+            {/* Scrollable list */}
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-umbra-line scrollbar-track-transparent">
+              <div className="flex flex-col gap-2">
+                {activeBoard.entries.map((entry) => (
+                  <RankRow
+                    key={entry.playerTag}
+                    entry={entry}
+                    meta={activeMeta}
+                    onClick={() => {
+                      setViewAllAward(null);
+                      onMemberClick?.(entry.playerTag);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

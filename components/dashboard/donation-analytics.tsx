@@ -95,7 +95,7 @@ export function DonationAnalytics({
               <EmptyState
                 icon={<IconDonationEmpty />}
                 title="No donation activity yet"
-                description="Donations will appear once members start donating between polls."
+                description="Donations will appear once members start donating between updates."
               />
             </div>
           )}

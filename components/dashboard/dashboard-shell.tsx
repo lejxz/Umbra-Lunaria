@@ -227,14 +227,14 @@ function FreshnessFooter({
 
   return (
     <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 rounded-lg border border-umbra-line/30 bg-umbra-ink/30 px-4 py-3">
-      <Chip label="Last poll" value={fmt(lastPoll)} />
+      <Chip label="Last update" value={fmt(lastPoll)} />
       <Chip label="Daily batch" value={fmt(lastBatch)} />
       <Chip label="Tracking" value={fmt(trackingStart)} />
       <Chip label="War synced" value={fmt(warSynced)} />
       {/* Next poll countdown */}
       <div className="flex items-center gap-1.5 border-l border-umbra-line/30 pl-5">
         <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
-          Next poll
+          Next update
         </span>
         <span
           className={`font-mono text-label font-bold ${
