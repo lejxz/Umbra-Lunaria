@@ -13,12 +13,17 @@ import { IconSwords, IconWarEmpty } from "@/components/ui/icons";
 export function CurrentWarCard({
   warSummary,
   clanBadgeUrls,
+  clanName,
 }: {
   warSummary: WarSummaryView;
   clanBadgeUrls?: ClanBadgeUrls | null;
+  clanName?: string;
 }) {
   const isWarActive =
     warSummary.state === "preparation" || warSummary.state === "inWar";
+
+  const countdownTarget =
+    warSummary.state === "preparation" ? warSummary.startTime : warSummary.endTime;
 
   return (
     <section
@@ -37,14 +42,16 @@ export function CurrentWarCard({
             Current war
           </h3>
         </div>
-        {warSummary.endTime && isWarActive && (
+        {countdownTarget && isWarActive && (
           <div className="flex flex-col items-end">
-            <span className="font-mono text-[10px] text-umbra-muted bg-black/20 px-2 py-0.5 rounded border border-white/5 whitespace-nowrap">
-              <span className="mr-1.5 opacity-50">
-                {warSummary.state === "preparation" ? "STARTS IN" : "ENDS IN"}
+            <div className="flex flex-col items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 shadow-sm backdrop-blur-sm">
+              <span className="mb-0.5 font-mono text-[9px] font-medium uppercase tracking-wider text-umbra-muted">
+                {warSummary.state === "preparation" ? "Starts in" : "Ends in"}
               </span>
-              <LiveCountdown targetDate={warSummary.endTime} />
-            </span>
+              <span className="font-mono text-xs font-bold tracking-widest text-umbra-lilac">
+                <LiveCountdown targetDate={countdownTarget} />
+              </span>
+            </div>
           </div>
         )}
       </div>
@@ -86,21 +93,18 @@ export function CurrentWarCard({
           <div className="mt-3 flex flex-1 items-center justify-center gap-3">
             {/* Our clan */}
             <div className="flex-1 flex flex-col items-center text-center">
-              <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted mb-2">
-                Our clan
-              </p>
               {clanBadgeUrls?.small && (
                 <div className="relative h-10 w-10 mb-1">
                   <Image
                     src={clanBadgeUrls.small}
-                    alt="Our Clan Badge"
+                    alt={clanName ?? "Our Clan"}
                     fill
                     className="object-contain drop-shadow-md"
                   />
                 </div>
               )}
               <p className="font-display text-[15px] font-medium text-umbra-lilac leading-tight line-clamp-2">
-                OUR CLAN
+                {clanName ?? "Our Clan"}
               </p>
               <div className="mt-2 flex flex-col items-center">
                 <p className="font-display text-2xl font-bold text-umbra-purple">
@@ -128,9 +132,6 @@ export function CurrentWarCard({
 
             {/* Enemy clan */}
             <div className="flex-1 flex flex-col items-center text-center">
-              <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted mb-2">
-                Enemy
-              </p>
               {warSummary.opponentBadgeUrls?.small && (
                 <div className="relative h-10 w-10 mb-1">
                   <Image
