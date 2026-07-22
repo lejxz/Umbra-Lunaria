@@ -752,15 +752,18 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
 
     // Inactive check
     if (!lastActive || lastActive < threshold) {
+      let detailStr = "No tracked activity yet";
+      if (lastActive) {
+        const days = Math.floor((Date.now() - lastActive.getTime()) / (1000 * 60 * 60 * 24));
+        detailStr = `${days} days inactive`;
+      }
       inactive.push({
         playerTag: member.playerTag,
         name: member.name,
         role: member.role,
         townHallLevel: member.townHallLevel,
         reason: "Inactive",
-        detail: lastActive
-          ? `Last active ${lastActive.toISOString().split("T")[0]}`
-          : "No tracked activity yet",
+        detail: detailStr,
       });
     }
 
