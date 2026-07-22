@@ -21,7 +21,7 @@ import type {
   MemberDetailView,
 } from "@/lib/view-models/members";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
-import { computeWindow } from "@/lib/time/windows";
+import { computeWindow, generateBuckets } from "@/lib/time/windows";
 import { calculateDonationWindow } from "@/lib/scoring/donations";
 import { computeWarMetrics } from "@/lib/scoring/war-metrics";
 import { computeRushed } from "@/lib/scoring/rushed";
@@ -261,16 +261,24 @@ async function getActivityDetail(playerTag: string) {
 
   const trackingStart = await getTrackingStart();
 
-  // Build 30-day activity buckets
-  const buckets = snapshots.map((s) => ({
-    label: new Date(s.capturedAt).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      timeZone: clanConfig.timezone,
-    }),
-    active: s.activityFlag,
-    timestamp: s.capturedAt,
-  }));
+  // Build 30-day activity buckets by grouping snapshots into daily intervals
+  const generatedBuckets = generateBuckets(win);
+  
+  const buckets = generatedBuckets.map((b, i) => {
+    const bucketStart = b.timestamp;
+    const bucketEnd = i < generatedBuckets.length - 1 ? generatedBuckets[i + 1]!.timestamp : win.to;
+    
+    // A day is active if any snapshot within that 24h window had activityFlag = true
+    const active = snapshots.some(
+      (s) => s.capturedAt >= bucketStart && s.capturedAt < bucketEnd && s.activityFlag
+    );
+    
+    return {
+      label: b.label,
+      active,
+      timestamp: bucketStart,
+    };
+  });
 
   // Login days (where loginDayFlag is true)
   const loginDays = snapshots
