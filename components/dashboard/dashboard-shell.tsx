@@ -8,10 +8,11 @@ import { CurrentWarCard } from "./current-war-card";
 import { CapitalSummaryCard } from "./capital-summary-card";
 import { DonationAnalytics } from "./donation-analytics";
 import { ActivityAnalytics } from "./activity-analytics";
-import { NeedsAttentionPanel } from "./needs-attention";
+import { AttentionPanel } from "./needs-attention";
 import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
 import { MemberDetailSheet } from "./member-detail-sheet";
+import { Clock, Swords, ShieldOff } from "lucide-react";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -91,10 +92,38 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 5: Needs Attention | Clan Log — 2 cols */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
-        <NeedsAttentionPanel
-          attention={data.needsAttention}
+      {/* Row 5: Needs Attention | Clan Log — 3 cols */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <AttentionPanel
+          title="Attention Queue"
+          subtitle="Inactive & Issues"
+          groups={[
+            {
+              label: "Attacks remaining",
+              tone: "warning",
+              icon: Swords,
+              members: data.needsAttention.attacksRemaining,
+            },
+            {
+              label: `Inactive (${data.needsAttention.inactivityThresholdDays}d+)`,
+              tone: "danger",
+              icon: Clock,
+              members: data.needsAttention.inactive,
+            }
+          ]}
+          onMemberClick={setSelectedMember}
+        />
+        <AttentionPanel
+          title="Opted Out"
+          subtitle="War Preference"
+          groups={[
+            {
+              label: "Opted out of wars",
+              tone: "muted",
+              icon: ShieldOff,
+              members: data.needsAttention.warPreferenceOut,
+            }
+          ]}
           onMemberClick={setSelectedMember}
         />
         <ClanLogPanel

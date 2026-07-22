@@ -3,88 +3,75 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Clock, Swords, ShieldOff } from "lucide-react";
 
-/**
- * Needs-attention panel. Shows three separate lists:
- * 1. Members inactive beyond the configured threshold
- * 2. Members in an active war with attacks remaining
- * 3. Members whose war preference is "out" (informational, not an error)
- * See concept/05-dashboard.md §7.
- */
-export function NeedsAttentionPanel({
-  attention,
+export function AttentionPanel({
+  title,
+  subtitle,
+  groups,
   onMemberClick,
 }: {
-  attention: NeedsAttentionData;
+  title: string;
+  subtitle: string;
+  groups: Array<{
+    label: string;
+    tone: "warning" | "danger" | "muted";
+    icon: React.ElementType;
+    members: Array<{
+      playerTag: string;
+      name: string;
+      role: string;
+      townHallLevel: number | null;
+      reason: string;
+      detail: string | null;
+    }>;
+  }>;
   onMemberClick?: (playerTag: string) => void;
 }) {
-  const totalSignals =
-    attention.inactive.length +
-    attention.attacksRemaining.length +
-    attention.warPreferenceOut.length;
+  const totalSignals = groups.reduce((acc, group) => acc + group.members.length, 0);
 
   return (
     <section
       className="glass flex flex-col rounded-2xl p-5"
-      aria-labelledby="attention-title"
+      aria-labelledby={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
       style={{ minHeight: "400px", maxHeight: "600px" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
         <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
-          Attention queue
+          {subtitle}
         </p>
-        <Badge tone={totalSignals > 0 ? "warning" : "muted"}>
+        <Badge tone={totalSignals > 0 ? (groups.some(g => g.tone === "danger" || g.tone === "warning") ? "warning" : "muted") : "muted"}>
           {totalSignals} {totalSignals === 1 ? "signal" : "signals"}
         </Badge>
       </div>
       <h3
-        id="attention-title"
+        id={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
         className="mt-1 font-display text-lg text-umbra-lilac"
       >
-        Attention Queue
+        {title}
       </h3>
 
       {totalSignals === 0 ? (
         <div className="mt-4 flex flex-1 items-center justify-center">
           <EmptyState
-            title="No attention items"
-            description="All members are active and up to date."
+            title="All clear"
+            description="No members found for this queue."
           />
         </div>
       ) : (
         <div className="mt-4 flex-1 space-y-4 overflow-y-auto pr-2">
-          {/* Attacks remaining */}
-          {attention.attacksRemaining.length > 0 && (
-            <AttentionGroup
-              label="Attacks remaining"
-              tone="warning"
-              icon={Swords}
-              members={attention.attacksRemaining}
-              onMemberClick={onMemberClick}
-            />
-          )}
-
-          {/* Inactive */}
-          {attention.inactive.length > 0 && (
-            <AttentionGroup
-              label={`Inactive (${attention.inactivityThresholdDays}d+)`}
-              tone="danger"
-              icon={Clock}
-              members={attention.inactive}
-              onMemberClick={onMemberClick}
-            />
-          )}
-
-          {/* War preference out */}
-          {attention.warPreferenceOut.length > 0 && (
-            <AttentionGroup
-              label="Opted out of wars"
-              tone="muted"
-              icon={ShieldOff}
-              members={attention.warPreferenceOut}
-              onMemberClick={onMemberClick}
-            />
-          )}
+          {groups.map((group) => {
+            if (group.members.length === 0) return null;
+            return (
+              <AttentionGroup
+                key={group.label}
+                label={group.label}
+                tone={group.tone}
+                icon={group.icon}
+                members={group.members}
+                onMemberClick={onMemberClick}
+              />
+            );
+          })}
         </div>
       )}
     </section>
