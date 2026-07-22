@@ -50,11 +50,11 @@ export function IconClock(props: React.SVGProps<SVGSVGElement>) {
 
 export function IconSwords(props: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M14.5 4h5v5l-10 10-5-5 10-10z" />
-      <path d="M4 20l5-5" strokeOpacity="0.3" />
-      <path d="M9.5 4h-5v5l10 10 5-5-10-10z" strokeOpacity="0.3" />
-      <path d="M20 20l-5-5" />
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
+      <path d="M8 16L21 3" strokeOpacity="0.3" />
+      <path d="M3 21L8 16M6 14L10 18" />
+      <path d="M16 16L3 3" strokeOpacity="0.3" />
+      <path d="M21 21L16 16M18 14L14 18" />
     </svg>
   );
 }
