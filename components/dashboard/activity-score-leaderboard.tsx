@@ -20,9 +20,8 @@ export function ActivityScoreLeaderboard({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="glass flex h-[520px] flex-col rounded-2xl p-5"
       aria-labelledby="activity-score-title"
-      style={{ height: "380px" }}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -49,7 +48,7 @@ export function ActivityScoreLeaderboard({
         <>
           {/* Leaderboard — fills remaining height */}
           <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto pr-2">
-            {entries.slice(0, 15).map((entry) => (
+            {entries.map((entry) => (
               <button
                 key={entry.playerTag}
                 onClick={() => onMemberClick?.(entry.playerTag)}
@@ -100,11 +99,6 @@ export function ActivityScoreLeaderboard({
             ))}
           </div>
 
-          {totalMembers > 15 && (
-            <p className="mt-3 shrink-0 text-xs text-umbra-muted">
-              Top 15 of {totalMembers}.
-            </p>
-          )}
         </>
       )}
     </section>
