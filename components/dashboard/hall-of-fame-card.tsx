@@ -78,9 +78,9 @@ export function HallOfFameCard({ data }: { data: HallOfFame }) {
               className="flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden"
             >
               {/* Category header */}
-              <div className={`flex items-center justify-center gap-2 border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20`}>
-                <span className={`${meta.color}`}>{meta.icon}</span>
-                <div className="text-left">
+              <div className={`relative flex items-center justify-center border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20`}>
+                <span className={`absolute left-4 ${meta.color}`}>{meta.icon}</span>
+                <div className="text-center">
                   <p className={`font-display text-[13px] font-bold ${meta.color} leading-none`}>{meta.title}</p>
                   <p className="font-mono text-[9px] text-umbra-muted opacity-80 mt-1">{meta.subtitle}</p>
                 </div>
