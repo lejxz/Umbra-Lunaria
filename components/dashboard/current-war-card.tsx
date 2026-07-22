@@ -70,24 +70,6 @@ export function CurrentWarCard({
         </div>
       ) : (
         <>
-          {/* State badge */}
-          <div className="mt-3 flex items-center justify-center">
-            <span
-              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
-                warSummary.state === "inWar"
-                  ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
-                  : warSummary.state === "preparation"
-                    ? "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple"
-                    : "border-white/10 bg-white/5 text-umbra-muted"
-              }`}
-            >
-              {warSummary.state === "inWar"
-                ? "● Battle day"
-                : warSummary.state === "preparation"
-                  ? "○ Preparation"
-                  : "War ended"}
-            </span>
-          </div>
 
           {/* VS layout: Our clan | VS icon | Enemy clan */}
           <div className="mt-3 flex flex-1 items-center justify-center gap-3">
@@ -121,18 +103,38 @@ export function CurrentWarCard({
               </div>
             </div>
 
-            {/* VS icon & team size */}
+            {/* Center column: Status | Icon | Team size */}
             <div className="flex flex-col items-center justify-center px-2 shrink-0">
+              {/* State badge */}
+              <span
+                className={`mb-2.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap ${
+                  warSummary.state === "inWar"
+                    ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
+                    : warSummary.state === "preparation"
+                      ? "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple"
+                      : "border-white/10 bg-white/5 text-umbra-muted"
+                }`}
+              >
+                {warSummary.state === "inWar"
+                  ? "● Battle day"
+                  : warSummary.state === "preparation"
+                    ? "○ Preparation"
+                    : "War ended"}
+              </span>
+
+              {/* VS Icon */}
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20 text-umbra-purple/80 shadow-[inset_0_0_12px_rgba(182,120,255,0.15)]">
+                <IconSwords className="h-6 w-6" />
+              </div>
+
+              {/* Team size */}
               {warSummary.teamSize && (
-                <div className="mb-2.5 rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
+                <div className="mt-2.5 rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
                   <span className="font-mono text-[10px] font-bold tracking-[0.2em] text-umbra-purple/90 ml-[0.2em]">
                     {warSummary.teamSize}V{warSummary.teamSize}
                   </span>
                 </div>
               )}
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20 text-umbra-purple/80 shadow-[inset_0_0_12px_rgba(182,120,255,0.15)]">
-                <IconSwords className="h-6 w-6" />
-              </div>
             </div>
 
             {/* Enemy clan */}
