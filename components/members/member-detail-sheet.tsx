@@ -7,7 +7,6 @@ import { Badge, UnavailableValue } from "@/components/ui";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
-import { Star } from "lucide-react";
 
 const TZ = "Asia/Manila";
 
@@ -417,7 +416,14 @@ function AchievementsSection({ detail }: { detail: MemberDetailView }) {
                 {a.stars !== undefined && (
                   <div className="flex items-center text-amber-400 shrink-0">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <Star key={i} className={`w-3 h-3 ${(a.stars ?? 0) > i ? "fill-current" : "fill-transparent opacity-20"}`} />
+                      <svg 
+                        key={i} 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        viewBox="0 0 24 24" 
+                        className={`w-3.5 h-3.5 ${(a.stars ?? 0) > i ? "fill-current text-amber-400" : "fill-transparent stroke-current stroke-2 text-amber-400/20"}`}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
                     ))}
                   </div>
                 )}
