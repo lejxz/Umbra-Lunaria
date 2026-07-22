@@ -1,5 +1,6 @@
 import type { WarSummaryView } from "@/lib/view-models/dashboard";
 import { UnavailableValue } from "@/components/ui/state-primitives";
+import { LiveCountdown } from "@/components/ui/live-countdown";
 
 /**
  * Current war card — compact Our-clan vs Enemy-clan layout.
@@ -32,23 +33,6 @@ export function CurrentWarCard({
             Current war
           </h3>
         </div>
-
-        {warSummary.endTime && isWarActive && (
-          <div className="rounded-lg border border-umbra-line bg-umbra-purple/10 px-3 py-1.5 text-right">
-            <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-              {warSummary.state === "preparation" ? "Battle starts" : "Battle ends"}
-            </p>
-            <p className="mt-0.5 font-mono text-xs font-bold text-umbra-lilac">
-              {new Date(warSummary.endTime).toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                timeZone: "Asia/Manila",
-              })}
-            </p>
-          </div>
-        )}
       </div>
 
       {warSummary.state === null || warSummary.state === "notInWar" ? (
@@ -65,8 +49,8 @@ export function CurrentWarCard({
         </div>
       ) : (
         <>
-          {/* State badge */}
-          <div className="mt-3 flex items-center justify-center">
+          {/* State badge & Countdown */}
+          <div className="mt-3 flex items-center justify-center gap-2">
             <span
               className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                 warSummary.state === "inWar"
@@ -82,6 +66,15 @@ export function CurrentWarCard({
                   ? "○ Preparation"
                   : "War ended"}
             </span>
+
+            {warSummary.endTime && isWarActive && (
+              <span className="font-mono text-[10px] text-umbra-muted bg-black/20 px-2 py-0.5 rounded border border-white/5">
+                <span className="mr-1.5 opacity-50">
+                  {warSummary.state === "preparation" ? "STARTS IN" : "ENDS IN"}
+                </span>
+                <LiveCountdown targetDate={warSummary.endTime} />
+              </span>
+            )}
           </div>
 
           {/* VS layout: Our clan | VS icon | Enemy clan */}

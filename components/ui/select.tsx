@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { ChevronDown } from "lucide-react";
+import { IconChevronDown } from "@/components/ui/icons";
 
 interface SelectProps {
   value: string;
@@ -34,7 +34,7 @@ export function Select({ value, onChange, options, className = "" }: SelectProps
         className="flex w-full items-center justify-between gap-2 rounded-lg border border-umbra-line bg-umbra-ink/60 px-3 py-1.5 text-xs text-umbra-lilac transition hover:border-umbra-purple/50 focus:outline-none focus:ring-1 focus:ring-umbra-purple/50"
       >
         <span className="truncate">{selectedLabel}</span>
-        <ChevronDown className="h-3.5 w-3.5 shrink-0 text-umbra-muted transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
+        <IconChevronDown className="h-3.5 w-3.5 shrink-0 text-umbra-muted transition-transform duration-200" style={{ transform: open ? 'rotate(180deg)' : 'none' }} />
       </button>
 
       {open && (

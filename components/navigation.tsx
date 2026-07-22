@@ -2,13 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  NavIconDashboard,
+  NavIconMembers,
+  NavIconWar,
+  NavIconCapital,
+  NavIconPlanning,
+} from "@/components/ui/icons";
 
 const links = [
-  ["◈", "Dashboard", "/"],
-  ["♙", "Members", "/members"],
-  ["⚔", "War center", "/war"],
-  ["✦", "Capital", "/capital"],
-  ["≡", "Planning", "/planning"],
+  [<NavIconDashboard key="dash" />, "Dashboard", "/"],
+  [<NavIconMembers key="members" />, "Members", "/members"],
+  [<NavIconWar key="war" />, "War center", "/war"],
+  [<NavIconCapital key="cap" />, "Capital", "/capital"],
+  [<NavIconPlanning key="plan" />, "Planning", "/planning"],
 ] as const;
 
 export function Navigation() {

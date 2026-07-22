@@ -1,7 +1,7 @@
 import type { ClanLog as ClanLogData } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { UserPlus, UserMinus, UserCheck } from "lucide-react";
+import { IconUserPlus, IconUserMinus, IconUserCheck } from "@/components/ui/icons";
 
 /**
  * Clan activity log. Renders a most-recent-first feed of joins, departures,
@@ -50,20 +50,14 @@ export function ClanLogPanel({
                 : entry.eventType === "leave"
                   ? "danger"
                   : "brand";
-                  
-            const Icon = 
-              entry.eventType === "join"
-                ? UserPlus
-                : entry.eventType === "leave"
-                  ? UserMinus
-                  : UserCheck;
 
-            const iconColor = 
-              entry.eventType === "join"
-                ? "text-emerald-400"
-                : entry.eventType === "leave"
-                  ? "text-red-400"
-                  : "text-umbra-purple";
+            const renderIcon = (type: string) => {
+              if (type === "join")
+                return <IconUserPlus className="h-[14px] w-[14px] text-emerald-400" />;
+              if (type === "leave")
+                return <IconUserMinus className="h-[14px] w-[14px] text-red-400" />;
+              return <IconUserCheck className="h-[14px] w-[14px] text-amber-400" />;
+            };
 
             return (
               <button
@@ -80,7 +74,7 @@ export function ClanLogPanel({
               >
                 <div className="flex min-w-0 items-center gap-2.5">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20">
-                    <Icon className={`h-3.5 w-3.5 ${iconColor}`} />
+                    {renderIcon(entry.eventType)}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm text-umbra-lilac">

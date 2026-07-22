@@ -12,7 +12,6 @@ import { AttentionPanel } from "./needs-attention";
 import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
 import { MemberDetailSheet } from "./member-detail-sheet";
-import { Clock, Swords, ShieldOff } from "lucide-react";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -101,13 +100,13 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             {
               label: "Attacks remaining",
               tone: "warning",
-              icon: Swords,
+              icon: "swords",
               members: data.needsAttention.attacksRemaining,
             },
             {
               label: `Inactive (${data.needsAttention.inactivityThresholdDays}d+)`,
               tone: "danger",
-              icon: Clock,
+              icon: "clock",
               members: data.needsAttention.inactive,
             }
           ]}
@@ -120,7 +119,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
             {
               label: "Opted out of wars",
               tone: "muted",
-              icon: ShieldOff,
+              icon: "shield",
               members: data.needsAttention.warPreferenceOut,
             }
           ]}

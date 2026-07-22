@@ -1,7 +1,8 @@
 import type { NeedsAttention as NeedsAttentionData } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Clock, Swords, ShieldOff } from "lucide-react";
+import { MemberDetailSheet } from "@/components/members/member-detail-sheet";
+import { IconClock, IconSwords, IconShieldOff } from "@/components/ui/icons";
 
 export function AttentionPanel({
   title,
@@ -14,7 +15,7 @@ export function AttentionPanel({
   groups: Array<{
     label: string;
     tone: "warning" | "danger" | "muted";
-    icon: React.ElementType;
+    icon: "clock" | "swords" | "shield";
     members: Array<{
       playerTag: string;
       name: string;
@@ -80,13 +81,13 @@ export function AttentionPanel({
 function AttentionGroup({
   label,
   tone,
-  icon: Icon,
+  icon,
   members,
   onMemberClick,
 }: {
   label: string;
   tone: "warning" | "danger" | "muted";
-  icon: React.ElementType;
+  icon: "clock" | "swords" | "shield";
   members: Array<{
     playerTag: string;
     name: string;
@@ -114,8 +115,10 @@ function AttentionGroup({
             className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition hover:bg-white/[.06] focus-ring"
           >
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20">
-                <Icon className={`h-3.5 w-3.5 ${color}`} />
+              <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20 ${color}`}>
+                {icon === "clock" && <IconClock className="h-4 w-4" />}
+                {icon === "swords" && <IconSwords className="h-4 w-4" />}
+                {icon === "shield" && <IconShieldOff className="h-4 w-4" />}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm text-umbra-lilac">{m.name}</p>

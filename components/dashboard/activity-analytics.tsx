@@ -18,6 +18,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { IconActivityEmpty } from "@/components/ui/icons";
 
 /**
  * Activity Analytics — unified panel for activity timeline + member score.
@@ -93,7 +94,7 @@ export function ActivityAnalytics({
           ) : (
             <div className="flex h-full items-center justify-center">
               <EmptyState
-                icon={<ActivityEmptyIcon />}
+                icon={<IconActivityEmpty />}
                 title="No activity yet"
                 description="Observed activity will appear once members change donations or trophies between polls."
               />
@@ -216,20 +217,5 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
         </Bar>
       </BarChart>
     </ResponsiveContainer>
-  );
-}
-
-function ActivityEmptyIcon() {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-      <path
-        d="M8 24H16L20 12L28 36L32 24H40"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="2 4"
-      />
-    </svg>
   );
 }

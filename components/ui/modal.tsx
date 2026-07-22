@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { IconX } from "@/components/ui/icons";
 
 /**
  * Modal & Sheet — shared overlay primitives. See concept/10-mobile-support.md
@@ -170,7 +170,7 @@ export function Modal({
           aria-label="Close"
           className="focus-ring absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-umbra-line bg-umbra-surface/80 text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
         >
-          <X className="h-4 w-4" aria-hidden />
+          <IconX className="h-5 w-5" aria-hidden="true" />
         </button>
         {/* Single scrollable content area — no nested overflow */}
         <div className="overflow-y-auto p-6">{children}</div>
@@ -237,7 +237,7 @@ export function Sheet({
           aria-label="Close"
           className="focus-ring absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-umbra-line bg-umbra-surface/80 text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
         >
-          <X className="h-4 w-4" aria-hidden />
+          <IconX className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="overflow-y-auto p-6">{children}</div>
       </div>

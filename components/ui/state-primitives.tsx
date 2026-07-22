@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { LoaderCircle, RotateCw, TriangleAlert } from "lucide-react";
+import { IconLoader, IconSync, IconAlert } from "@/components/ui/icons";
 
 /**
  * State primitives — the small display atoms used across the dashboard,
@@ -78,7 +78,7 @@ export function LoadingState({ label = "Loading…" }: { label?: string }) {
       role="status"
       aria-live="polite"
     >
-      <LoaderCircle className="h-4 w-4 animate-spin text-umbra-purple" aria-hidden />
+      <IconLoader className="h-5 w-5 animate-spin text-umbra-purple" aria-hidden />
       <span className="text-sm">{label}</span>
     </div>
   );
@@ -102,7 +102,7 @@ export function ErrorState({
       role="alert"
       aria-live="assertive"
     >
-      <TriangleAlert
+      <IconAlert
         className="mt-0.5 h-4 w-4 shrink-0 text-red-400"
         aria-hidden
       />
@@ -114,7 +114,7 @@ export function ErrorState({
             onClick={onRetry}
             className="focus-ring mt-3 inline-flex items-center gap-1.5 rounded-full border border-umbra-line bg-umbra-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
           >
-            <RotateCw className="h-3 w-3" aria-hidden />
+            <IconSync className="h-3 w-3" aria-hidden />
             Retry
           </button>
         )}

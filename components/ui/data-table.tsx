@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState, type KeyboardEvent, type ReactNode } from "react";
-import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
+import { IconChevronDown, IconChevronUp, IconChevronsUpDown } from "@/components/ui/icons";
 import { EmptyState } from "./empty-state";
 
 /**
@@ -292,12 +292,12 @@ function SortIcon({
   direction?: "asc" | "desc";
 }) {
   if (!active || !direction) {
-    return <ChevronsUpDown className="h-3 w-3 opacity-50" aria-hidden />;
+    return <IconChevronsUpDown className="h-3 w-3 opacity-50" aria-hidden />;
   }
   return direction === "asc" ? (
-    <ChevronUp className="h-3 w-3 text-umbra-purple" aria-hidden />
+    <IconChevronUp className="h-3 w-3 text-umbra-purple" aria-hidden />
   ) : (
-    <ChevronDown className="h-3 w-3 text-umbra-purple" aria-hidden />
+    <IconChevronDown className="h-3 w-3 text-umbra-purple" aria-hidden />
   );
 }
 

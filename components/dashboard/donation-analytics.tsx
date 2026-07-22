@@ -9,6 +9,7 @@ import type {
   DonationWindow,
 } from "@/lib/view-models/dashboard";
 import { Tabs, UnavailableValue, EmptyState } from "@/components/ui";
+import { IconDonationEmpty } from "@/components/ui/icons";
 import { DonationChart } from "./donation-chart";
 
 /**
@@ -92,7 +93,7 @@ export function DonationAnalytics({
           ) : (
             <div className="flex h-full min-h-[180px] items-center justify-center">
               <EmptyState
-                icon={<DonationEmptyIcon />}
+                icon={<IconDonationEmpty />}
                 title="No donation activity yet"
                 description="Donations will appear once members start donating between polls."
               />
@@ -180,34 +181,5 @@ function TotalChip({
         {value ?? <UnavailableValue />}
       </span>
     </div>
-  );
-}
-
-function DonationEmptyIcon() {
-  return (
-    <svg
-      width="48"
-      height="48"
-      viewBox="0 0 48 48"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M24 10V20M24 20L18 14M24 20L30 14"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10 24H38M14 24L18 36H30L34 24"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeDasharray="2 4"
-      />
-    </svg>
   );
 }
