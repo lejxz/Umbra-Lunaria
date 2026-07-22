@@ -212,4 +212,13 @@ export interface MemberDetailView {
       percent: number | null;
     }>;
   };
+
+  // Hall of Fame rankings — all-time clan records per category
+  hallOfFame: {
+    philanthropist: { rank: number; valueLabel: string } | null;
+    vanguard: { rank: number; valueLabel: string } | null;
+    dedicated: { rank: number; valueLabel: string } | null;
+    capitalist: { rank: number; valueLabel: string } | null;
+    unsleeping: { rank: number; valueLabel: string } | null;
+  };
 }
