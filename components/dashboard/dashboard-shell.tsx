@@ -7,8 +7,7 @@ import { WarRecordCard } from "./war-record-card";
 import { CurrentWarCard } from "./current-war-card";
 import { CapitalSummaryCard } from "./capital-summary-card";
 import { DonationAnalytics } from "./donation-analytics";
-import { ActivityTimelinePanel } from "./activity-timeline";
-import { ActivityScoreLeaderboard } from "./activity-score-leaderboard";
+import { ActivityAnalytics } from "./activity-analytics";
 import { NeedsAttentionPanel } from "./needs-attention";
 import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
@@ -74,23 +73,17 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 4: Activity Timeline (wide) | Activity Score Leaderboard — 3 cols */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <ActivityTimelinePanel
-            dataByWindow={{
-              "24h": data.activityTimeline,
-              "7d": data.activityTimeline7d,
-              "30d": data.activityTimeline30d,
-            }}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <ActivityScoreLeaderboard
-            leaderboard={data.activityScore}
-            onMemberClick={setSelectedMember}
-          />
-        </div>
+      {/* Row 4: Unified Activity Analytics (Timeline + Score) */}
+      <div className="mt-5">
+        <ActivityAnalytics
+          dataByWindow={{
+            "24h": data.activityTimeline,
+            "7d": data.activityTimeline7d,
+            "30d": data.activityTimeline30d,
+          }}
+          leaderboard={data.activityScore}
+          onMemberClick={setSelectedMember}
+        />
       </div>
 
       {/* Row 5: Needs Attention | Clan Log — 2 cols */}
