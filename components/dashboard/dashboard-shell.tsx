@@ -180,7 +180,7 @@ function FreshnessFooter({
   trackingStart: Date | string | null;
   warSynced: Date | string | null;
 }) {
-  const POLL_INTERVAL_MINUTES = 5;
+  const POLL_INTERVAL_MINUTES = 10;
   const [now, setNow] = useState(Date.now());
 
   // Update every second for the countdown
