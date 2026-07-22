@@ -329,8 +329,13 @@ function buildRosterMember(
   const bestDestruction = ownAttacks.length
     ? Math.max(...ownAttacks.map((a) => a.destructionPercentage ?? 0))
     : null;
-  const bestDefenseStars = defenseAttacks.length
-    ? Math.min(...defenseAttacks.map((a) => a.stars ?? 0))
+  // Defensive state of the base = the WORST attack against it (max stars +
+  // max destruction opponents achieved). null when the base is untouched.
+  const worstDefenseStars = defenseAttacks.length
+    ? Math.max(...defenseAttacks.map((a) => a.stars ?? 0))
+    : null;
+  const worstDefenseDestruction = defenseAttacks.length
+    ? Math.max(...defenseAttacks.map((a) => a.destructionPercentage ?? 0))
     : null;
   return {
     tag: m.tag ?? "",
@@ -343,7 +348,8 @@ function buildRosterMember(
     bestStars,
     bestDestruction,
     defendedAgainst: defenseAttacks.length,
-    bestDefenseStars,
+    worstDefenseStars,
+    worstDefenseDestruction,
     isOwnClan,
   };
 }
@@ -482,7 +488,7 @@ function buildAnalysis(
   return {
     ownAttacksUsed,
     ownAttacksTotal,
-    opponentAttacksUsed,
+    opponentAttacksUsed: oppAttacksUsed,
     opponentAttacksTotal,
     ownThreeStarRate: ownAttacksUsed > 0 ? ownThree / ownAttacksUsed : null,
     opponentThreeStarRate: oppAttacksUsed > 0 ? oppThree / oppAttacksUsed : null,

@@ -21,13 +21,18 @@ export interface WarRosterMember {
   attacksUsed: number;
   attacksAllowed: number;
   attacksRemaining: number;
-  // Best single attack this member made (stars + destruction). null when the
-  // member has not attacked yet — the UI shows a prominent no-attack state.
+  // Best single attack this member made (offense). null when the member has
+  // not attacked yet — used in the detail sheet, not the compact roster row.
   bestStars: number | null;
   bestDestruction: number | null;
-  // Attacks defended against (from opponentAttacks on this member).
+  // Defensive state of this member's BASE — the worst attack against it (max
+  // stars + max destruction opponents achieved). null when the base hasn't
+  // been attacked yet (preparation, or battle day with no attacks in yet).
+  // This is what the compact roster row shows right-aligned: "is this base
+  // destroyed?" A 3★ 100% means fully destroyed.
   defendedAgainst: number;
-  bestDefenseStars: number | null; // lowest stars conceded in one defense, null if never defended
+  worstDefenseStars: number | null; // max stars conceded in one attack
+  worstDefenseDestruction: number | null; // max destruction conceded
   // True for our clan, false for the opponent — drives whether the row links
   // into the shared member detail sheet (opponent tags are not in `members`).
   isOwnClan: boolean;

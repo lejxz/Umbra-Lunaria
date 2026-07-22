@@ -7,13 +7,16 @@ import { WarHero } from "./war-hero";
 import { WarRosters } from "./war-rosters";
 import { WarAttackLog } from "./war-attack-log";
 import { WarHistory } from "./war-history";
+import { WarDetailSheet } from "./war-detail-sheet";
 import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
 
 /**
- * War Center shell — the client-side composition root. Holds the shared
- * member-detail-sheet state (selectedTag) so every clickable own-clan member
- * — in the roster, the attack log, or anywhere else — opens the same sheet
- * the Dashboard and Members pages use.
+ * War Center shell — the client-side composition root. Holds two pieces of
+ * shared state:
+ *   - selectedTag  → opens the member detail sheet (own-clan roster/attack-log
+ *     clicks), reusing the dashboard's MemberDetailSheet for UI consistency.
+ *   - detailWarId  → opens the war detail sheet (history "View details"
+ *     clicks), which fetches /api/war/[id] and renders the full analysis.
  *
  * Layout (concept/07): hero summary first, then roster + attack log for the
  * current war, then the full history list. Every section renders its own
@@ -29,6 +32,7 @@ export function WarShell({
   clanName?: string | null;
 }) {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [detailWarId, setDetailWarId] = useState<number | null>(null);
 
   return (
     <div className="space-y-5">
@@ -58,9 +62,16 @@ export function WarShell({
         history={data.history}
         warLogPublic={data.warLogPublic}
         trackingStart={data.trackingStart}
+        onViewDetail={setDetailWarId}
       />
 
       <MemberDetailSheet playerTag={selectedTag} onClose={() => setSelectedTag(null)} />
+      <WarDetailSheet
+        warId={detailWarId}
+        clanBadgeUrls={clanBadgeUrls}
+        clanName={clanName}
+        onClose={() => setDetailWarId(null)}
+      />
     </div>
   );
 }
