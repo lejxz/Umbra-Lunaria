@@ -271,14 +271,55 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
 // Section 6: Progression (Tabs)
 // ---------------------------------------------------------------------------
 
+const SIEGE_MACHINE_NAMES = new Set([
+  "Wall Wrecker", "Battle Blimp", "Stone Slammer", 
+  "Siege Barracks", "Log Launcher", "Flame Flinger", "Battle Drill"
+]);
+
 function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   const p = detail.progression;
+  
+  const troops = p.troops.filter(t => !SIEGE_MACHINE_NAMES.has(t.name));
+  const siegeMachines = p.troops.filter(t => SIEGE_MACHINE_NAMES.has(t.name));
+
   const categories = [
-    { id: "troops", label: "Troops", items: p.troops },
-    { id: "heroes", label: "Heroes & Equip", items: [...p.heroes, ...p.heroEquipment] },
-    { id: "spells", label: "Spells & Pets", items: [...p.spells, ...p.pets] },
-    { id: "builder", label: "Builder Base", items: [...p.builderBaseTroops, ...p.builderBaseHeroes] },
-  ].filter(c => c.items.length > 0);
+    { 
+      id: "troops", 
+      label: "Troops & Siege", 
+      count: troops.length + siegeMachines.length,
+      groups: [
+        { title: "Troops", items: troops },
+        { title: "Siege Machines", items: siegeMachines }
+      ] 
+    },
+    { 
+      id: "heroes", 
+      label: "Heroes & Equip", 
+      count: p.heroes.length + p.heroEquipment.length,
+      groups: [
+        { title: "Heroes", items: p.heroes },
+        { title: "Equipment", items: p.heroEquipment }
+      ] 
+    },
+    { 
+      id: "spells", 
+      label: "Spells & Pets",
+      count: p.spells.length + p.pets.length, 
+      groups: [
+        { title: "Spells", items: p.spells },
+        { title: "Pets", items: p.pets }
+      ] 
+    },
+    { 
+      id: "builder", 
+      label: "Builder Base",
+      count: p.builderBaseTroops.length + p.builderBaseHeroes.length, 
+      groups: [
+        { title: "BB Troops", items: p.builderBaseTroops },
+        { title: "BB Heroes", items: p.builderBaseHeroes }
+      ] 
+    },
+  ].filter(c => c.count > 0);
 
   const [activeTab, setActiveTab] = useState(categories[0]?.id);
 
@@ -310,15 +351,22 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
                   : "text-umbra-muted hover:bg-white/[.04] hover:text-umbra-lilac"
               }`}
             >
-              {cat.label} ({cat.items.length})
+              {cat.label} ({cat.count})
             </button>
           ))}
         </div>
 
         {/* Tab content */}
-        <div className="grid grid-cols-8 gap-2 sm:grid-cols-10 md:grid-cols-12">
-          {activeCat.items.map((item) => (
-            <ProgressionCard key={item.name} name={item.name} level={item.level} maxLevel={item.maxLevel} />
+        <div className="space-y-4">
+          {activeCat.groups.filter(g => g.items.length > 0).map(group => (
+            <div key={group.title}>
+              <h4 className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">{group.title}</h4>
+              <div className="grid grid-cols-8 gap-2 sm:grid-cols-10 md:grid-cols-12">
+                {group.items.map((item) => (
+                  <ProgressionCard key={item.name} name={item.name} level={item.level} maxLevel={item.maxLevel} />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>
