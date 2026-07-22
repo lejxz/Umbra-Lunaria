@@ -360,7 +360,18 @@ function buildDonationBuckets(
   }>,
   win: { from: Date; to: Date },
 ) {
-  // Simple per-day bucketing for 30d
+  // Use generateBuckets to get exact daily boundaries
+  const generatedBuckets = generateBuckets({ kind: "30d", from: win.from, to: win.to });
+  
+  const givenSnaps = snapshots.map((s) => ({
+    capturedAt: s.capturedAt,
+    donations: s.donations,
+  }));
+  const recvSnaps = snapshots.map((s) => ({
+    capturedAt: s.capturedAt,
+    donations: s.donationsReceived,
+  }));
+
   const days: Array<{
     label: string;
     given: number;
@@ -368,25 +379,17 @@ function buildDonationBuckets(
     timestamp: Date;
   }> = [];
 
-  for (let i = 0; i < 30; i++) {
-    const dayStart = new Date(win.from);
-    dayStart.setDate(dayStart.getDate() + i);
-    const dayEnd = new Date(dayStart);
-    dayEnd.setDate(dayEnd.getDate() + 1);
+  for (let i = 0; i < generatedBuckets.length; i++) {
+    const bucketStart = generatedBuckets[i]!.timestamp;
+    const bucketEnd = i < generatedBuckets.length - 1 ? generatedBuckets[i + 1]!.timestamp : win.to;
 
-    const inDay = snapshots.filter(
-      (s) => s.capturedAt >= dayStart && s.capturedAt < dayEnd,
-    );
-
+    const dayWindow = { from: bucketStart, to: bucketEnd };
+    
     days.push({
-      label: dayStart.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        timeZone: clanConfig.timezone,
-      }),
-      given: inDay.reduce((sum, s) => sum + s.donations, 0),
-      received: inDay.reduce((sum, s) => sum + s.donationsReceived, 0),
-      timestamp: dayStart,
+      label: generatedBuckets[i]!.label,
+      given: calculateDonationWindow(givenSnaps, dayWindow),
+      received: calculateDonationWindow(recvSnaps, dayWindow),
+      timestamp: bucketStart,
     });
   }
 
