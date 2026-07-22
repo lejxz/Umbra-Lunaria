@@ -80,7 +80,16 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
               <Badge tone={p.warPreference === "in" ? "success" : "muted"}>{p.warPreference}</Badge>
             )}
           </div>
-          <p className="font-mono text-xs text-umbra-muted">{p.playerTag} · <span className="capitalize">{p.role}</span> · {p.clanRank ? `Rank ${p.clanRank}` : 'Unranked'}</p>
+          <p className="font-mono text-xs text-umbra-muted mt-1">
+            {p.playerTag} · <span className="capitalize">{p.role}</span>
+            {detail.donations.activityScoreRank ? (
+              <span className="ml-2 inline-flex items-center rounded bg-umbra-purple/20 px-1.5 py-0.5 text-[10px] font-semibold text-umbra-lilac">
+                #{detail.donations.activityScoreRank} Activity Rank
+              </span>
+            ) : (
+              <span className="ml-2">· {p.clanRank ? `Clan Rank ${p.clanRank}` : 'Unranked'}</span>
+            )}
+          </p>
         </div>
         {p.townHallLevel && (
           <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-4 py-2 text-center shadow-[0_0_15px_rgba(182,120,255,0.1)]">
@@ -150,6 +159,26 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           </span>
         )}
       </div>
+
+      {/* Activity Score Breakdown */}
+      {detail.donations.activityScore !== null && (
+        <div className="mt-2 flex flex-col gap-1.5 rounded-lg bg-white/[.02] p-3 border border-white/[.05]">
+          <div className="flex items-center justify-between">
+            <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Activity Score</span>
+            <span className="font-semibold text-umbra-purple">{Math.round(detail.donations.activityScore)} / 100</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {detail.donations.activityScoreComponents.map((c, i) => (
+              <div key={i} className="flex flex-col rounded bg-white/[.03] px-2 py-1.5">
+                <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted/70">{c.name}</span>
+                <span className={`text-xs font-medium ${c.available ? "text-white" : "text-umbra-muted/40"}`}>
+                  {c.available ? `+${Math.round(c.points)} pts` : "N/A"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Heatmap strip — full width barcode style */}
       {a.buckets.length > 0 && (

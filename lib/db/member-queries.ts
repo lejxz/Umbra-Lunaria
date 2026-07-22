@@ -23,6 +23,7 @@ import type {
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { computeWindow, generateBuckets } from "@/lib/time/windows";
 import { calculateDonationWindow } from "@/lib/scoring/donations";
+import { getMemberActivityScore } from "@/lib/db/queries";
 import { computeWarMetrics } from "@/lib/scoring/war-metrics";
 import { computeRushed } from "@/lib/scoring/rushed";
 
@@ -337,6 +338,9 @@ async function getDonationDetail(playerTag: string) {
   // 30-day donation buckets (daily)
   const buckets = win30d ? buildDonationBuckets(snapshots, win30d) : [];
 
+  const activityLeaderboard = await getMemberActivityScore("30d");
+  const memberScore = activityLeaderboard.entries.find((e) => e.playerTag === playerTag);
+
   return {
     given24h,
     received24h,
@@ -346,9 +350,9 @@ async function getDonationDetail(playerTag: string) {
     received30d,
     ratio: received30d > 0 ? given30d / received30d : null,
     buckets,
-    activityScore: null, // TODO: compute from getMemberActivityScore
-    activityScoreRank: null,
-    activityScoreComponents: [],
+    activityScore: memberScore ? memberScore.totalScore : null,
+    activityScoreRank: memberScore ? memberScore.rank : null,
+    activityScoreComponents: memberScore ? memberScore.components : [],
   };
 }
 
