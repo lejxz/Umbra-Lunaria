@@ -347,7 +347,7 @@ function FilterSelect({
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded-lg border border-umbra-line bg-umbra-ink/60 px-3 py-1.5 text-xs text-umbra-lilac transition focus:border-umbra-purple/50 focus:outline-none"
+      className="select-input"
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>
