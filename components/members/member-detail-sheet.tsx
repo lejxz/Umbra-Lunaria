@@ -145,6 +145,14 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
   const activeDays = a.buckets.filter((b) => b.active).length;
   const totalDays = a.buckets.length;
 
+  // Compute current login streak from buckets (most recent is last in array)
+  const reversed = [...a.buckets].reverse();
+  let streak = 0;
+  for (const b of reversed) {
+    if (b.active) streak++;
+    else break;
+  }
+
   return (
     <div className="flex h-full flex-col">
       <SectionLabel>Log In Activity</SectionLabel>
@@ -155,6 +163,9 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
           <span className="font-display text-2xl font-bold text-umbra-purple">{activeDays}</span>
           <span className="text-sm text-umbra-muted"> / {totalDays} active days</span>
         </div>
+        {streak > 0 && (
+          <span className="ml-auto font-mono text-xs text-emerald-400">{streak} day login streak</span>
+        )}
       </div>
 
       {/* Heatmap strip — full width barcode style */}
@@ -181,17 +192,13 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
         </div>
       )}
 
-      {/* Last active + tracking info */}
-      <div className="mt-5 flex items-center gap-4 text-xs">
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Last active</span>
-          <span className="font-semibold text-white">{fmtDate(a.lastActiveAt)}</span>
-        </div>
+      {/* Last active + tracking info — shared footer style */}
+      <div className="mt-4 flex items-center gap-3 text-xs">
+        <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Last active</span>
+        <span className="font-semibold text-white">{fmtDate(a.lastActiveAt)}</span>
         <div className="h-3 w-px bg-umbra-line/30" />
-        <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Tracking</span>
-          <span className="text-umbra-muted">{fmtDate(a.trackingStart)}</span>
-        </div>
+        <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Tracking</span>
+        <span className="text-umbra-muted">{fmtDate(a.trackingStart)}</span>
       </div>
     </div>
   );
@@ -232,7 +239,7 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
   const participationPct = w.participationRate !== null ? Math.round(w.participationRate * 100) : null;
 
   return (
-    <div>
+    <div className="flex h-full flex-col">
       <SectionLabel>War Record</SectionLabel>
       {/* Big participation number */}
       <div className="flex items-baseline gap-3">
@@ -262,9 +269,11 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
         <CompactStat label="Stars earned" value={w.starsEarned} accent="amber" />
       </div>
 
+      {/* Current war status — shared footer style */}
       {w.currentWarStatus && (
-        <div className="mt-3 rounded-lg bg-umbra-purple/10 border border-umbra-purple/20 px-3 py-1.5 text-center text-xs text-umbra-lilac">
-          Current war: <span className="font-semibold">{w.currentWarStatus}</span>
+        <div className="mt-4 flex items-center gap-3 text-xs">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Current war</span>
+          <span className="font-semibold text-umbra-lilac">{w.currentWarStatus}</span>
         </div>
       )}
     </div>
