@@ -1,7 +1,6 @@
 import { getMemberRoster, getMemberDetail } from "@/lib/db/member-queries";
 import { getMemberActivityScore } from "@/lib/db/queries";
-import { MembersRoster } from "@/components/members/members-roster";
-import { ScoreLeaderboard } from "@/components/members/score-leaderboard";
+import { MembersShell } from "@/components/members/members-shell";
 import { PageScaffold } from "@/components/page-scaffold";
 import { ErrorState } from "@/components/ui/state-primitives";
 import type { MemberDetailView } from "@/lib/view-models/members";
@@ -53,8 +52,11 @@ export default async function MembersPage() {
       description="A clear read on activity, contribution, and war readiness."
       eyebrow="member browser"
     >
-      <ScoreLeaderboard leaderboard={activityScore} />
-      <MembersRoster roster={roster} memberDetails={memberDetails} />
+      <MembersShell
+        roster={roster}
+        memberDetails={memberDetails}
+        activityScore={activityScore}
+      />
     </PageScaffold>
   );
 }

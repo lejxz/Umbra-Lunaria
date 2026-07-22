@@ -21,9 +21,13 @@ import type { MemberDetailView } from "@/lib/view-models/members";
 export function MembersRoster({
   roster,
   memberDetails,
+  selectedTag,
+  onMemberClick,
 }: {
   roster: MemberRoster;
   memberDetails: Record<string, MemberDetailView>;
+  selectedTag?: string | null;
+  onMemberClick?: (tag: string | null) => void;
 }) {
   const [sortField, setSortField] = useState<MemberSortField>("clanRank");
   const [sortDir, setSortDir] = useState<SortDirection>("asc");
@@ -31,7 +35,10 @@ export function MembersRoster({
   const [filterRole, setFilterRole] = useState<string>("");
   const [filterWarPref, setFilterWarPref] = useState<string>("");
   const [filterActiveOnly, setFilterActiveOnly] = useState(false);
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [internalSelectedTag, setInternalSelectedTag] = useState<string | null>(null);
+
+  const activeSelectedTag = selectedTag !== undefined ? selectedTag : internalSelectedTag;
+  const handleMemberClick = onMemberClick ?? setInternalSelectedTag;
 
   const sorted = useMemo(() => {
     let result = [...roster.entries];
@@ -95,7 +102,7 @@ export function MembersRoster({
     return result;
   }, [roster.entries, sortField, sortDir, filterRole, filterWarPref, filterActiveOnly, searchQuery]);
 
-  const selectedDetail = selectedTag ? memberDetails[selectedTag] : null;
+  const selectedDetail = activeSelectedTag ? memberDetails[activeSelectedTag] : null;
 
   return (
     <div>
@@ -200,7 +207,7 @@ export function MembersRoster({
                 {sorted.map((m) => (
                   <tr
                     key={m.playerTag}
-                    onClick={() => setSelectedTag(m.playerTag)}
+                    onClick={() => handleMemberClick(m.playerTag)}
                     className="cursor-pointer transition hover:bg-white/[.04] focus-ring"
                   >
                     {/* Rank */}
@@ -286,7 +293,7 @@ export function MembersRoster({
             {sorted.map((m) => (
               <button
                 key={m.playerTag}
-                onClick={() => setSelectedTag(m.playerTag)}
+                onClick={() => handleMemberClick(m.playerTag)}
                 className="glass flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-white/[.04] focus-ring"
               >
                 {m.leagueTier?.iconUrls?.small && (
@@ -324,10 +331,10 @@ export function MembersRoster({
       )}
 
       {/* Member detail sheet */}
-      {selectedTag && selectedDetail && (
+      {activeSelectedTag && selectedDetail && (
         <MemberDetailSheet
           detail={selectedDetail}
-          onClose={() => setSelectedTag(null)}
+          onClose={() => handleMemberClick(null)}
         />
       )}
     </div>
