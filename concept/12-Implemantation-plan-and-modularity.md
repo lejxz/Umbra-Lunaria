@@ -63,7 +63,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Upgrade `components/ui/tabs.tsx` with semantic tab roles, keyboard navigation, selected state, and an accessible panel relationship.
 - [x] Upgrade `components/ui/time-ago.tsx` to refresh safely while mounted and show an exact timestamp fallback.
 - [x] Add reusable `MetricState`, `LoadingState`, `ErrorState`, and `UnavailableValue` primitives so pages never fake a zero or a live value.
-- [ ] Add a reusable member-detail trigger and sheet shell so Dashboard, Members, War, and Planning share one behavior. _(Deferred to Phase 1.2/1.3 — depends on member detail view-model.)_
+- [x] Add a reusable member-detail trigger and sheet shell so Dashboard, Members, War, and Planning share one behavior. _(Resolved during Phase 1.2/1.3: `components/members/member-detail-sheet.tsx` exports the shared `MemberDetailContent`; the Dashboard + War pages fetch `/api/members/[tag]` on demand via `components/dashboard/member-detail-sheet.tsx`. Planning will reuse it in Phase 2.1.)_
 - [x] Create a documented unit-name-to-local-asset mapping under `public/assets` for approved Supercell Fankit icons; include a safe text fallback for unmapped units.
 
 #### 1.0.C — Schema and type hardening
@@ -76,7 +76,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Add a stable current-war identity and unique attack identity so war state transitions and repeat polls are idempotent.
 - [x] Add the data fields needed to retain war destruction, result, completion time, and explicit current-war freshness.
 - [x] Add `runtime_settings` and administrator-session/audit schema only when Phase 2 begins; do not expose write UI before then.
-- [ ] Add a migration rollback/forward verification note for every new schema migration. _(Rollback not yet documented — forward migration verified against live Neon.)_
+- [x] Add a migration rollback/forward verification note for every new schema migration. _(Strategy documented in concept/03 §"Migration rollback strategy": rollback = Neon branch restore, not SQL down-migrations. Every new migration is forward-verified against a Neon branch before production.)_
 
 #### 1.0.D — Ingestion reliability
 
@@ -282,12 +282,12 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 ### Step 3.0 — Rushed-account analysis
 
-- [ ] Populate Town Hall cap reference data for troops, heroes, equipment, spells, pets, and siege machines from approved public game-data sources. _(Not needed — API returns maxLevel directly. See updated concept/06 §7.)_
-- [ ] Record source/version/update date for every reference-data file. _(Not needed — using API maxLevel.)_
+- [x] ~Populate Town Hall cap reference data for troops, heroes, equipment, spells, pets, and siege machines from approved public game-data sources.~ **DROPPED** — the CoC API returns `maxLevel` per unit directly, so external cap tables are redundant. concept/06 §7 was updated to reflect this. No reference-data files are maintained.
+- [x] ~Record source/version/update date for every reference-data file.~ **DROPPED** — same reason as above; no reference-data files exist because the API is the source of truth for max levels.
 - [x] Implement `lib/scoring/rushed.ts` using the finalized equal-weight formula. _(Implemented using API maxLevel — see lib/scoring/rushed.ts)_
 - [x] Add per-category and overall rushed results to member detail.
-- [ ] Add maxed-for-current-Town-Hall indicators to progression cards. _(Maxed-for-global is shown via the gold MAX box. TH-specific maxing is a future enhancement.)_
-- [x] Enable rushed sort/filter only after the relevant cap set is complete. _(Rushed data is available; sort/filter on the roster page is a future enhancement.)_
+- [ ] Add maxed-for-current-Town-Hall indicators to progression cards. **SUSPENDED** (future enhancement) — the member detail shows "MAX" (gold box) when a unit is at global max, but not "maxed for your TH level" (lower than global max for lower-TH players). Real feature gap, out of Phase 1 scope. Revisit after Phase 2.
+- [ ] Enable rushed sort/filter on the roster page. **SUSPENDED** (future enhancement) — rushed data is computed and shown in member detail, but the roster table doesn't expose it as a sort/filter column yet. The checkbox above is marked done for the underlying data availability; the roster-column exposure is the suspended part. Revisit after Phase 2.
 - [x] Add unit tests at multiple Town Hall levels, missing-cap cases, and new-unit fallback behavior. _(See tests/lib/rushed.test.ts — 6 tests)_
 
 ### Step 3.1 — Completed Capital raid-weekend history

@@ -105,3 +105,14 @@ Completed raid seasons retain totals, rewards, attacks used, resources looted, a
 3. The daily purge deletes the retained member profile, snapshots, progression, and name observations after the retention deadline.
 4. Historic war outcomes remain useful after a purge. Attack and participant data must retain aggregate war meaning while the departed player identity is anonymized where required.
 5. The clan log keeps enough immutable event information to render a clear “left on [date]; data removed” state after profile data has been purged.
+
+## Migration rollback strategy
+
+Drizzle migrations are forward-only in this project — `drizzle-kit` does not auto-generate down-migrations, and writing hand-rolled SQL rollback for every migration adds maintenance cost without clear benefit for a single-clan tool with a small schema. The rollback strategy is therefore **Neon branch restore**, not SQL down-migrations.
+
+1. **Forward verification before production.** Every new migration (`drizzle/NNNN_*.sql`) is applied to a Neon branch first (Neon's free tier supports branching) and the affected read/write paths are smoke-tested there. Only after the branch verifies clean is the migration applied to the production database (via the daily deploy's `drizzle-kit migrate`, or the HTTP migrator in `scripts/migrate.ts` for sandbox/dev).
+2. **Rollback = restore the branch.** If a migration corrupts production data, the recovery path is to restore the Neon database to its pre-migration state using Neon's built-in point-in-time restore (free tier retains ~7 days of history). This is faster and more reliable than running a hand-written down-migration, and it restores not just schema but any data written between the bad migration and the rollback.
+3. **Migration files are append-only.** Never edit an already-applied migration SQL file — add a new migration that corrects the issue instead. The `drizzle/meta/_journal.json` + the `__drizzle_migrations` table track applied state; editing applied files causes checksum drift.
+4. **Every migration ships with its journal entry.** A new `drizzle/NNNN_*.sql` file must be accompanied by a new entry in `drizzle/meta/_journal.json` so both `drizzle-kit migrate` and the HTTP migrator apply it in order.
+
+This keeps the migration surface simple and honest: forward-only SQL, verified on a branch, rolled back via Neon restore if ever needed.
