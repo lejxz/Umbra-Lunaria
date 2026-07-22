@@ -916,7 +916,6 @@ export async function getDashboardWarSummary(): Promise<WarSummaryView> {
 // ---------------------------------------------------------------------------
 
 export async function getHallOfFame(): Promise<HallOfFame> {
-  const LIMIT = 10;
   const ORDER: HallOfFameAwardKey[] = [
     "philanthropist",
     "vanguard",
@@ -925,16 +924,33 @@ export async function getHallOfFame(): Promise<HallOfFame> {
     "unsleeping",
   ];
 
-  // --- 1. Load cached record holders (single all-time best per category) ---
   let recordRows: (typeof hallOfFameRecords.$inferSelect)[] = [];
   try {
-    recordRows = await db.select().from(hallOfFameRecords);
+    recordRows = await db
+      .select()
+      .from(hallOfFameRecords)
+      .orderBy(hallOfFameRecords.awardKey, hallOfFameRecords.rank);
   } catch {
     // table may not exist yet
   }
 
+  const leaderboards: HallOfFameLeaderboard[] = ORDER.map((key) => {
+    const entriesForAward = recordRows.filter((r) => r.awardKey === key);
+    return {
+      awardKey: key,
+      entries: entriesForAward.map((r) => ({
+        rank: r.rank,
+        playerTag: r.holderTag,
+        name: r.holderName,
+        value: r.recordValue,
+        valueLabel: r.valueLabel,
+        metaLabel: r.periodLabel ?? undefined,
+      })),
+    };
+  });
+
   const records = ORDER.flatMap((key) => {
-    const row = recordRows.find((r) => r.awardKey === key);
+    const row = recordRows.find((r) => r.awardKey === key && r.rank === 1);
     if (!row) return [];
     return [{
       awardKey: key,
@@ -947,171 +963,7 @@ export async function getHallOfFame(): Promise<HallOfFame> {
     }];
   });
 
-  // --- 2. Compute top-10 leaderboards from raw tables ---
-  const allMembersRaw = await db
-    .select({ playerTag: members.playerTag, name: members.name })
-    .from(members);
-
-  if (allMembersRaw.length === 0) {
-    return { records, leaderboards: ORDER.map((k) => ({ awardKey: k, entries: [] })) };
-  }
-
-  const tags = allMembersRaw.map((m) => m.playerTag);
-  const nameMap = new Map(allMembersRaw.map((m) => [m.playerTag, m.name]));
-  const winAll = computeWindow("all");
-
-  // ── Philanthropist: all-time cumulative donations (reset-aware) ──
-  const allSnaps = await db
-    .select({
-      playerTag: memberSnapshots.playerTag,
-      capturedAt: memberSnapshots.capturedAt,
-      donations: memberSnapshots.donations,
-      loginDayFlag: memberSnapshots.loginDayFlag,
-      activityFlag: memberSnapshots.activityFlag,
-    })
-    .from(memberSnapshots)
-    .where(inArray(memberSnapshots.playerTag, tags))
-    .orderBy(memberSnapshots.capturedAt);
-
-  const philoScores: { tag: string; value: number }[] = [];
-  for (const m of allMembersRaw) {
-    const snaps = allSnaps
-      .filter((s) => s.playerTag === m.playerTag)
-      .map((s) => ({ capturedAt: s.capturedAt, donations: s.donations }));
-    philoScores.push({ tag: m.playerTag, value: calculateDonationWindow(snaps, winAll) });
-  }
-  philoScores.sort((a, b) => b.value - a.value);
-  const philanthropist: HallOfFameLeaderboard = {
-    awardKey: "philanthropist",
-    entries: philoScores.slice(0, LIMIT).map((s, i) => ({
-      rank: i + 1,
-      playerTag: s.tag,
-      name: nameMap.get(s.tag) ?? s.tag,
-      value: s.value,
-      valueLabel: `${s.value.toLocaleString()} troops`,
-    })),
-  };
-
-  // ── Vanguard: most 3-star war attacks all time ──
-  const warRows = await db
-    .select({
-      attackerTag: warAttacks.attackerTag,
-      totalAttacks: sql<number>`cast(count(*) as int)`,
-      threeStars: sql<number>`cast(sum(case when ${warAttacks.stars} = 3 then 1 else 0 end) as int)`,
-    })
-    .from(warAttacks)
-    .where(inArray(warAttacks.attackerTag, tags))
-    .groupBy(warAttacks.attackerTag);
-
-  warRows.sort((a, b) => b.threeStars - a.threeStars);
-  const vanguard: HallOfFameLeaderboard = {
-    awardKey: "vanguard",
-    entries: warRows.slice(0, LIMIT).map((r, i) => {
-      const pct = r.totalAttacks > 0 ? Math.round((r.threeStars / r.totalAttacks) * 100) : 0;
-      return {
-        rank: i + 1,
-        playerTag: r.attackerTag,
-        name: nameMap.get(r.attackerTag) ?? r.attackerTag,
-        value: r.threeStars,
-        valueLabel: `${r.threeStars} three-stars`,
-        metaLabel: `${pct}% rate`,
-      };
-    }),
-  };
-
-  // ── Dedicated: longest consecutive daily login streak ──
-  const loginSnaps = allSnaps.filter((s) => s.loginDayFlag);
-  const dedicatedScores: { tag: string; value: number }[] = [];
-  for (const m of allMembersRaw) {
-    const memberLogins = loginSnaps
-      .filter((s) => s.playerTag === m.playerTag)
-      .map((s) => s.capturedAt);
-    if (memberLogins.length === 0) { dedicatedScores.push({ tag: m.playerTag, value: 0 }); continue; }
-    const uniqueDays: Date[] = [];
-    for (const ts of memberLogins) {
-      const last = uniqueDays[uniqueDays.length - 1];
-      if (!last || !isSameDayInClanTz(ts, last)) uniqueDays.push(ts);
-    }
-    let streak = 1, maxStreak = 1;
-    for (let i = 1; i < uniqueDays.length; i++) {
-      const diffDays = (uniqueDays[i]!.getTime() - uniqueDays[i - 1]!.getTime()) / 86400000;
-      if (diffDays <= 1.5) { streak++; maxStreak = Math.max(maxStreak, streak); } else { streak = 1; }
-    }
-    dedicatedScores.push({ tag: m.playerTag, value: maxStreak });
-  }
-  dedicatedScores.sort((a, b) => b.value - a.value);
-  const dedicated: HallOfFameLeaderboard = {
-    awardKey: "dedicated",
-    entries: dedicatedScores.filter((s) => s.value > 0).slice(0, LIMIT).map((s, i) => ({
-      rank: i + 1,
-      playerTag: s.tag,
-      name: nameMap.get(s.tag) ?? s.tag,
-      value: s.value,
-      valueLabel: `${s.value} days`,
-    })),
-  };
-
-  // ── Capitalist: best single raid weekend loot ──
-  const raidSeasonIds = (await db.select({ id: capitalRaidSeasons.id }).from(capitalRaidSeasons)).map((r) => r.id);
-  const capitalEntries: { tag: string; value: number }[] = [];
-  if (raidSeasonIds.length > 0) {
-    const contribs = await db
-      .select({ playerTag: capitalContributions.playerTag, looted: capitalContributions.capitalResourcesLooted })
-      .from(capitalContributions)
-      .where(and(inArray(capitalContributions.playerTag, tags), inArray(capitalContributions.raidSeasonId, raidSeasonIds)));
-    const bestPerMember = new Map<string, number>();
-    for (const c of contribs) {
-      bestPerMember.set(c.playerTag, Math.max(bestPerMember.get(c.playerTag) ?? 0, c.looted));
-    }
-    for (const m of allMembersRaw) {
-      capitalEntries.push({ tag: m.playerTag, value: bestPerMember.get(m.playerTag) ?? 0 });
-    }
-  } else {
-    for (const m of allMembersRaw) capitalEntries.push({ tag: m.playerTag, value: 0 });
-  }
-  capitalEntries.sort((a, b) => b.value - a.value);
-  const capitalist: HallOfFameLeaderboard = {
-    awardKey: "capitalist",
-    entries: capitalEntries.filter((s) => s.value > 0).slice(0, LIMIT).map((s, i) => ({
-      rank: i + 1,
-      playerTag: s.tag,
-      name: nameMap.get(s.tag) ?? s.tag,
-      value: s.value,
-      valueLabel: `${s.value.toLocaleString()} gold`,
-    })),
-  };
-
-  // ── Unsleeping: highest raw all-time activity composite ──
-  const warStarMap = new Map(warRows.map((r) => [r.attackerTag, r.threeStars]));
-  const capitalMap = new Map(capitalEntries.map((e) => [e.tag, e.value]));
-  const unsleepingScores: { tag: string; value: number }[] = [];
-  for (const m of allMembersRaw) {
-    const snaps = allSnaps.filter((s) => s.playerTag === m.playerTag);
-    const donated = calculateDonationWindow(snaps.map((s) => ({ capturedAt: s.capturedAt, donations: s.donations })), winAll);
-    const loginDaysUniq: Date[] = [];
-    for (const s of snaps.filter((s) => s.loginDayFlag)) {
-      const last = loginDaysUniq[loginDaysUniq.length - 1];
-      if (!last || !isSameDayInClanTz(s.capturedAt, last)) loginDaysUniq.push(s.capturedAt);
-    }
-    const raw = donated + loginDaysUniq.length * 100 + (warStarMap.get(m.playerTag) ?? 0) * 500 + Math.round((capitalMap.get(m.playerTag) ?? 0) / 10);
-    unsleepingScores.push({ tag: m.playerTag, value: raw });
-  }
-  unsleepingScores.sort((a, b) => b.value - a.value);
-  const unsleeping: HallOfFameLeaderboard = {
-    awardKey: "unsleeping",
-    entries: unsleepingScores.filter((s) => s.value > 0).slice(0, LIMIT).map((s, i) => ({
-      rank: i + 1,
-      playerTag: s.tag,
-      name: nameMap.get(s.tag) ?? s.tag,
-      value: s.value,
-      valueLabel: `${s.value.toLocaleString()} pts`,
-    })),
-  };
-
-  return {
-    records,
-    leaderboards: [philanthropist, vanguard, dedicated, capitalist, unsleeping],
-  };
+  return { records, leaderboards };
 }
 
 

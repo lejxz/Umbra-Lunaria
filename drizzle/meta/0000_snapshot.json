@@ -14,8 +14,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "player_tag": {
-          "name": "player_tag",
+        "holder_tag": {
+          "name": "holder_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -55,10 +55,10 @@
           "tableFrom": "capital_contributions",
           "tableTo": "members",
           "columnsFrom": [
-            "player_tag"
+            "holder_tag"
           ],
           "columnsTo": [
-            "player_tag"
+            "holder_tag"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -69,7 +69,7 @@
           "name": "capital_contributions_raid_season_id_player_tag_pk",
           "columns": [
             "raid_season_id",
-            "player_tag"
+            "holder_tag"
           ]
         }
       },
@@ -316,8 +316,8 @@
             "cycle": false
           }
         },
-        "player_tag": {
-          "name": "player_tag",
+        "holder_tag": {
+          "name": "holder_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -374,10 +374,10 @@
           "tableFrom": "member_snapshots",
           "tableTo": "members",
           "columnsFrom": [
-            "player_tag"
+            "holder_tag"
           ],
           "columnsTo": [
-            "player_tag"
+            "holder_tag"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -393,8 +393,8 @@
       "name": "members",
       "schema": "",
       "columns": {
-        "player_tag": {
-          "name": "player_tag",
+        "holder_tag": {
+          "name": "holder_tag",
           "type": "text",
           "primaryKey": true,
           "notNull": true
@@ -460,8 +460,8 @@
       "name": "unit_levels",
       "schema": "",
       "columns": {
-        "player_tag": {
-          "name": "player_tag",
+        "holder_tag": {
+          "name": "holder_tag",
           "type": "text",
           "primaryKey": true,
           "notNull": true
@@ -516,10 +516,10 @@
           "tableFrom": "unit_levels",
           "tableTo": "members",
           "columnsFrom": [
-            "player_tag"
+            "holder_tag"
           ],
           "columnsTo": [
-            "player_tag"
+            "holder_tag"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -627,8 +627,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "player_tag": {
-          "name": "player_tag",
+        "holder_tag": {
+          "name": "holder_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -681,10 +681,10 @@
           "tableFrom": "war_participants",
           "tableTo": "members",
           "columnsFrom": [
-            "player_tag"
+            "holder_tag"
           ],
           "columnsTo": [
-            "player_tag"
+            "holder_tag"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -695,7 +695,7 @@
           "name": "war_participants_war_id_player_tag_pk",
           "columns": [
             "war_id",
-            "player_tag"
+            "holder_tag"
           ]
         }
       },
@@ -731,8 +731,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "player_tag": {
-          "name": "player_tag",
+        "holder_tag": {
+          "name": "holder_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -764,10 +764,10 @@
           "tableFrom": "war_roster_slots",
           "tableTo": "members",
           "columnsFrom": [
-            "player_tag"
+            "holder_tag"
           ],
           "columnsTo": [
-            "player_tag"
+            "holder_tag"
           ],
           "onDelete": "no action",
           "onUpdate": "no action"

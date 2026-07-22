@@ -8,6 +8,7 @@ import {
   primaryKey,
   index,
   uniqueIndex,
+  unique,
 } from "drizzle-orm/pg-core";
 
 // See concept/03-data-model-and-database.md for the full design rationale
@@ -385,18 +386,28 @@ export const warRosterSlots = pgTable(
 // source of truth). Populated by the daily batch via records-updater.ts.
 // ---------------------------------------------------------------------------
 
-export const hallOfFameRecords = pgTable("hall_of_fame_records", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  // "philanthropist" | "vanguard" | "dedicated" | "capitalist" | "unsleeping"
-  awardKey: text("award_key").notNull().unique(),
-  holderTag: text("holder_tag").notNull(),
-  holderName: text("holder_name").notNull(), // preserved even after member purge
-  recordValue: integer("record_value").notNull(), // raw int (donations, stars, days, gold, raw score)
-  valueLabel: text("value_label").notNull(), // e.g. "9,616 troops", "15 three-stars"
-  periodLabel: text("period_label"), // e.g. "Jul 2026", "Raid Jul 20"
-  achievedAt: timestamp("achieved_at", { withTimezone: true }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const hallOfFameRecords = pgTable(
+  "hall_of_fame_records",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    // "philanthropist" | "vanguard" | "dedicated" | "capitalist" | "unsleeping"
+    awardKey: text("award_key").notNull(),
+    rank: integer("rank").notNull().default(0),
+    holderTag: text("holder_tag").notNull(),
+    holderName: text("holder_name").notNull(), // preserved even after member purge
+    recordValue: integer("record_value").notNull(), // raw int (donations, stars, days, gold, raw score)
+    valueLabel: text("value_label").notNull(), // e.g. "9,616 troops", "15 three-stars"
+    periodLabel: text("period_label"), // e.g. "Jul 2026", "Raid Jul 20"
+    achievedAt: timestamp("achieved_at", { withTimezone: true }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    awardRankUnique: unique("hall_of_fame_records_award_key_rank_unique").on(
+      t.awardKey,
+      t.rank,
+    ),
+  }),
+);
 
 // ---------------------------------------------------------------------------
 // runtime_settings — administrator-editable DB values. Phase 2 writes; the
