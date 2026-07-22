@@ -20,17 +20,36 @@ export function CurrentWarCard({
       className="glass flex flex-col rounded-2xl p-5"
       aria-labelledby="current-war-title"
     >
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
-          Live status
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+            Live status
+          </p>
+          <h3
+            id="current-war-title"
+            className="mt-1 font-display text-lg text-umbra-lilac"
+          >
+            Current war
+          </h3>
+        </div>
+
+        {warSummary.endTime && isWarActive && (
+          <div className="rounded-lg border border-umbra-line bg-umbra-purple/10 px-3 py-1.5 text-right">
+            <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+              {warSummary.state === "preparation" ? "Battle starts" : "Battle ends"}
+            </p>
+            <p className="mt-0.5 font-mono text-xs font-bold text-umbra-lilac">
+              {new Date(warSummary.endTime).toLocaleString("en-US", {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: "Asia/Manila",
+              })}
+            </p>
+          </div>
+        )}
       </div>
-      <h3
-        id="current-war-title"
-        className="mt-1 font-display text-lg text-umbra-lilac"
-      >
-        Current war
-      </h3>
 
       {warSummary.state === null || warSummary.state === "notInWar" ? (
         <div className="mt-4 flex flex-1 flex-col items-center justify-center py-6">
@@ -46,8 +65,8 @@ export function CurrentWarCard({
         </div>
       ) : (
         <>
-          {/* State badge + team size */}
-          <div className="mt-3 flex items-center justify-center gap-2">
+          {/* State badge */}
+          <div className="mt-3 flex items-center justify-center">
             <span
               className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                 warSummary.state === "inWar"
@@ -63,11 +82,6 @@ export function CurrentWarCard({
                   ? "○ Preparation"
                   : "War ended"}
             </span>
-            {warSummary.teamSize && (
-              <span className="font-mono text-[10px] text-umbra-muted">
-                {warSummary.teamSize}v{warSummary.teamSize}
-              </span>
-            )}
           </div>
 
           {/* VS layout: Our clan | VS icon | Enemy clan */}
@@ -87,8 +101,15 @@ export function CurrentWarCard({
               </p>
             </div>
 
-            {/* VS icon */}
-            <VsIcon />
+            {/* VS icon & team size */}
+            <div className="flex flex-col items-center justify-center">
+              {warSummary.teamSize && (
+                <span className="mb-2 font-mono text-[10px] font-semibold tracking-wider text-umbra-muted">
+                  {warSummary.teamSize}v{warSummary.teamSize}
+                </span>
+              )}
+              <VsIcon />
+            </div>
 
             {/* Enemy clan */}
             <div className="flex-1 text-center">
@@ -106,25 +127,6 @@ export function CurrentWarCard({
             </div>
           </div>
 
-          {/* Timer */}
-          {warSummary.endTime && isWarActive && (
-            <div className="mt-3 rounded-lg bg-umbra-purple/10 px-3 py-2 text-center">
-              <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
-                {warSummary.state === "preparation"
-                  ? "Battle starts"
-                  : "Battle ends"}
-              </p>
-              <p className="mt-0.5 font-mono text-xs text-umbra-lilac">
-                {new Date(warSummary.endTime).toLocaleString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  timeZone: "Asia/Manila",
-                })}
-              </p>
-            </div>
-          )}
         </>
       )}
     </section>
