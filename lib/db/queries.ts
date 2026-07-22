@@ -915,28 +915,34 @@ export async function getDashboardWarSummary(): Promise<WarSummaryView> {
 // ---------------------------------------------------------------------------
 
 export async function getHallOfFame(): Promise<HallOfFame> {
-  const rows = await db.select().from(hallOfFameRecords);
-  const ORDER: HallOfFameAwardKey[] = [
-    "philanthropist",
-    "vanguard",
-    "dedicated",
-    "capitalist",
-    "unsleeping",
-  ];
-  const entries: HallOfFameEntry[] = ORDER.flatMap((key) => {
-    const row = rows.find((r) => r.awardKey === key);
-    if (!row) return [];
-    return [{
-      awardKey: key,
-      holderName: row.holderName,
-      holderTag: row.holderTag,
-      recordValue: row.recordValue,
-      valueLabel: row.valueLabel,
-      periodLabel: row.periodLabel,
-      achievedAt: row.achievedAt,
-    }];
-  });
-  return { entries };
+  try {
+    const rows = await db.select().from(hallOfFameRecords);
+    const ORDER: HallOfFameAwardKey[] = [
+      "philanthropist",
+      "vanguard",
+      "dedicated",
+      "capitalist",
+      "unsleeping",
+    ];
+    const entries: HallOfFameEntry[] = ORDER.flatMap((key) => {
+      const row = rows.find((r) => r.awardKey === key);
+      if (!row) return [];
+      return [{
+        awardKey: key,
+        holderName: row.holderName,
+        holderTag: row.holderTag,
+        recordValue: row.recordValue,
+        valueLabel: row.valueLabel,
+        periodLabel: row.periodLabel,
+        achievedAt: row.achievedAt,
+      }];
+    });
+    return { entries };
+  } catch {
+    // Table may not exist yet or DB is briefly unreachable — return empty
+    // so the dashboard still loads. Records will populate after first daily batch.
+    return { entries: [] };
+  }
 }
 
 export async function getDashboard(): Promise<DashboardData> {
