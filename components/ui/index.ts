@@ -10,6 +10,8 @@
 export { Badge } from "./badge";
 export { EmptyState } from "./empty-state";
 export { StatCard } from "./stat-card";
+export { Select } from "./select";
+export { Toggle } from "./toggle";
 export { Tabs } from "./tabs";
 export { TimeAgo } from "./time-ago";
 export { Modal, Sheet } from "./modal";

@@ -7,7 +7,7 @@ import type {
   MemberSortField,
   SortDirection,
 } from "@/lib/view-models/members";
-import { Badge, EmptyState } from "@/components/ui";
+import { Badge, EmptyState, Select, Toggle } from "@/components/ui";
 import { MemberDetailSheet } from "./member-detail-sheet";
 import type { MemberDetailView } from "@/lib/view-models/members";
 
@@ -95,18 +95,18 @@ export function MembersRoster({
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Filter</span>
         </div>
-        <FilterSelect
+        <Select
           value={filterRole}
           onChange={setFilterRole}
           options={[
             { value: "", label: "All roles" },
             { value: "leader", label: "Leader" },
-            { value: "coLeader", label: "Co-leader" },
-            { value: "admin", label: "Admin" },
+            { value: "coLeader", label: "Co-Leader" },
+            { value: "admin", label: "Elder" },
             { value: "member", label: "Member" },
           ]}
         />
-        <FilterSelect
+        <Select
           value={filterWarPref}
           onChange={setFilterWarPref}
           options={[
@@ -115,15 +115,13 @@ export function MembersRoster({
             { value: "out", label: "Out" },
           ]}
         />
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-umbra-lilac">
-          <input
-            type="checkbox"
+        <div className="flex items-center mt-0.5 ml-2">
+          <Toggle
             checked={filterActiveOnly}
-            onChange={(e) => setFilterActiveOnly(e.target.checked)}
-            className="h-3.5 w-3.5 accent-umbra-purple"
+            onChange={setFilterActiveOnly}
+            label="Active only"
           />
-          Active only
-        </label>
+        </div>
         
         {/* Separator */}
         <div className="mx-2 hidden h-4 w-px bg-umbra-line/50 sm:block"></div>
@@ -131,7 +129,7 @@ export function MembersRoster({
         <div className="flex items-center gap-2">
           <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Sort</span>
         </div>
-        <FilterSelect
+        <Select
           value={sortField}
           onChange={(v) => setSortField(v as MemberSortField)}
           options={[
@@ -334,29 +332,7 @@ function roleOrder(role: string): number {
   }
 }
 
-function FilterSelect({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  options: Array<{ value: string; label: string }>;
-}) {
-  return (
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="select-input"
-    >
-      {options.map((o) => (
-        <option key={o.value} value={o.value}>
-          {o.label}
-        </option>
-      ))}
-    </select>
-  );
-}
+
 
 function ActivityIndicator({
   isActive,
