@@ -41,18 +41,8 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         </p>
       </header>
 
-      {/* Row 1: Identity card & Activity Score — top priority */}
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <ClanIdentityCard clan={data.clan} />
-        </div>
-        <div className="lg:col-span-1">
-          <ActivityScoreLeaderboard
-            leaderboard={data.activityScore}
-            onMemberClick={setSelectedMember}
-          />
-        </div>
-      </div>
+      {/* Row 1: Identity card — full width */}
+      <ClanIdentityCard clan={data.clan} />
 
       {/* Row 2: War record | Current war | Capital overview — 3 even columns */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
@@ -95,8 +85,12 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 5: Attention queue | Clan log — 2 columns */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-2">
+      {/* Row 5: Member Activity Score | Attention queue | Clan log — 3 columns */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <ActivityScoreLeaderboard
+          leaderboard={data.activityScore}
+          onMemberClick={setSelectedMember}
+        />
         <NeedsAttentionPanel
           attention={data.needsAttention}
           onMemberClick={setSelectedMember}
