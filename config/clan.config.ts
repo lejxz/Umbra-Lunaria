@@ -29,7 +29,7 @@ export const clanConfig = {
   // Target poll cadence, in minutes. Informational only — the actual
   // schedule lives in .github/workflows/poll.yml as a cron expression;
   // changing this value alone does not change anything at runtime.
-  pollIntervalMinutes: 10,
+  pollIntervalMinutes: 5,
 
   // Minimum observed wars before a member's auto-select ranking is shown
   // with full confidence rather than a "limited data" flag.

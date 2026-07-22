@@ -2,10 +2,10 @@ name: Poll Clash of Clans data
 
 on:
   schedule:
-    # Light poll: members + currentwar if a war is on. 10 min target — GitHub
-    # Actions cron has a 5-min floor and isn't guaranteed to fire exactly on
-    # time under load. See concept/04-activity-tracking-and-polling.md.
-    - cron: "*/10 * * * *"
+    # Light poll: members + currentwar if a war is on. 5 min target.
+    # GitHub Actions cron has a 5-min floor and isn't guaranteed to fire
+    # exactly on time under load. See concept/04-activity-tracking-and-polling.md.
+    - cron: "*/5 * * * *"
     # Daily batch: full player detail, clan cache refresh, capital districts.
     # Time is UTC — adjust if you want it to land at a specific local hour.
     - cron: "17 4 * * *"
