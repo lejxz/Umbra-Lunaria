@@ -181,9 +181,11 @@ function FreshnessFooter({
 }) {
   const POLL_INTERVAL_MINUTES = 10;
   const [now, setNow] = useState(Date.now());
+  const [mounted, setMounted] = useState(false);
 
   // Update every second for the countdown
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -207,7 +209,7 @@ function FreshnessFooter({
   })();
 
   const fmt = (d: Date | string | null) =>
-    d
+    d && mounted
       ? new Date(d).toLocaleString("en-US", {
           month: "short",
           day: "numeric",
@@ -236,8 +238,9 @@ function FreshnessFooter({
                 ? "text-amber-400"
                 : "text-emerald-400"
           }`}
+          suppressHydrationWarning
         >
-          {countdownText}
+          {mounted ? countdownText : "—"}
         </span>
       </div>
     </div>
@@ -250,7 +253,9 @@ function Chip({ label, value }: { label: string; value: string }) {
       <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-mono text-[10px] text-umbra-lilac">{value}</span>
+      <span className="font-mono text-[10px] text-umbra-lilac" suppressHydrationWarning>
+        {value}
+      </span>
     </div>
   );
 }

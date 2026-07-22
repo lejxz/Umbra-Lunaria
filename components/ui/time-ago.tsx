@@ -11,7 +11,10 @@ export function TimeAgo({ date }: { date: Date | string }) {
   const [text, setText] = useState(formatRelative(date));
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
+    setMounted(true);
     // Re-render every 30s so "3m ago" becomes "4m ago" without a page refresh.
     timerRef.current = setInterval(() => {
       setText(formatRelative(date));
@@ -22,8 +25,12 @@ export function TimeAgo({ date }: { date: Date | string }) {
   }, [date]);
 
   return (
-    <time dateTime={iso} title={new Date(date).toLocaleString()}>
-      {text}
+    <time 
+      dateTime={iso} 
+      title={mounted ? new Date(date).toLocaleString() : ""}
+      suppressHydrationWarning
+    >
+      {mounted ? text : formatRelative(date)}
     </time>
   );
 }
