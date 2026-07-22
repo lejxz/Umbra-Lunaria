@@ -36,7 +36,7 @@ export function AttentionPanel({
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           {subtitle}
         </p>
         <Badge tone={totalSignals > 0 ? (groups.some(g => g.tone === "danger" || g.tone === "warning") ? "warning" : "muted") : "muted"}>
@@ -122,7 +122,7 @@ function AttentionGroup({
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
-                <p className="truncate text-[11px] text-umbra-muted">
+                <p className="truncate text-2xs text-umbra-muted">
                   {m.detail ?? m.reason}
                 </p>
               </div>

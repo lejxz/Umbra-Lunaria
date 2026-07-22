@@ -48,7 +48,7 @@ export function ActivityAnalytics({
       {/* Header + Stats + Tabs */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Roster signal & support
           </p>
           <h3 id="activity-title" className="mt-1 font-display text-lg text-umbra-lilac">
@@ -72,7 +72,7 @@ export function ActivityAnalytics({
               }
             />
             {current.hasPartialData && (
-              <span className="ml-2 pr-3 text-[10px] text-amber-400">⚠ Partial</span>
+              <span className="ml-2 pr-3 text-label text-amber-400">⚠ Partial</span>
             )}
           </div>
 
@@ -104,7 +104,7 @@ export function ActivityAnalytics({
 
         {/* Leaderboard — podium styling matching DonationAnalytics top donors */}
         <div className="flex flex-col lg:border-l lg:border-white/5 lg:pl-6">
-          <p className="mb-3 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+          <p className="mb-3 font-mono text-label uppercase tracking-wider text-umbra-muted">
             Activity Score · {window}
           </p>
           {entries.length > 0 ? (
@@ -168,7 +168,7 @@ export function ActivityAnalytics({
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
-      <span className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{label}</span>
+      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{label}</span>
       <span className="font-display text-xs font-bold text-white">{value}</span>
     </div>
   );

@@ -107,7 +107,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
               {clan.labels.map((label) => (
                 <span
                   key={label.name}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-umbra-ink/50 px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-umbra-muted backdrop-blur-sm shadow-md"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-umbra-ink/50 px-2 py-1 text-micro font-semibold uppercase tracking-wider text-umbra-muted backdrop-blur-sm shadow-md"
                 >
                   {label.iconUrls?.small && (
                     <Image
@@ -143,7 +143,7 @@ function StatRow({
 }) {
   return (
     <div className="flex items-center justify-between border-b border-white/5 py-2.5 last:border-0 last:pb-0">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+      <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
       <span className="text-right text-[13px] font-semibold text-white">

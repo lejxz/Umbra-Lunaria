@@ -17,7 +17,7 @@ export function CapitalSummaryCard({
       aria-labelledby="capital-title"
     >
       <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Clan capital
         </p>
       </div>
@@ -47,7 +47,7 @@ export function CapitalSummaryCard({
       {/* League — centered, fills remaining space */}
       <div className="mt-3 flex flex-1 items-center justify-center rounded-xl bg-white/[.035] p-3">
         <div className="text-center">
-          <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+          <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
             Capital league
           </p>
           <p className="mt-1 font-display text-lg font-bold text-umbra-lilac">
@@ -68,7 +68,7 @@ function MiniStat({
 }) {
   return (
     <div className="rounded-lg bg-white/[.035] p-2.5 text-center">
-      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+      <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </p>
       <p className="mt-1 font-display text-lg font-bold text-white">{value}</p>

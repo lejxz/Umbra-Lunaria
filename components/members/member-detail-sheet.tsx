@@ -86,7 +86,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           <p className="font-mono text-xs text-umbra-muted mt-1">
             {p.playerTag} · <span className="capitalize">{p.role}</span>
             {detail.donations.activityScoreRank ? (
-              <span className="ml-2 inline-flex items-center rounded bg-umbra-purple/20 px-1.5 py-0.5 text-[10px] font-semibold text-umbra-lilac">
+              <span className="ml-2 inline-flex items-center rounded bg-umbra-purple/20 px-1.5 py-0.5 text-label font-semibold text-umbra-lilac">
                 #{detail.donations.activityScoreRank} Activity Rank
               </span>
             ) : (
@@ -96,7 +96,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
         </div>
         {p.townHallLevel && (
           <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-4 py-2 text-center shadow-[0_0_15px_rgba(182,120,255,0.1)]">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">TH</p>
+            <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">TH</p>
             <p className="font-display text-2xl font-bold text-umbra-purple">{p.townHallLevel}</p>
           </div>
         )}
@@ -117,10 +117,10 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
       {/* Builder Base (if present) */}
       {(p.builderHallLevel || p.builderBaseTrophies) && (
         <div className="mt-3 flex items-center gap-4 rounded-lg bg-white/[.02] px-4 py-2">
-          <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Builder Base</p>
+          <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">Builder Base</p>
           <div className="h-4 w-px bg-umbra-line/30" />
           <p className="font-mono text-xs text-white">BH {p.builderHallLevel ?? "—"}</p>
-          <p className="font-mono text-xs text-white">🏆 {p.builderBaseTrophies ?? "—"} <span className="text-umbra-muted text-[10px]">(Best: {p.bestBuilderBaseTrophies ?? "—"})</span></p>
+          <p className="font-mono text-xs text-white">🏆 {p.builderBaseTrophies ?? "—"} <span className="text-umbra-muted text-label">(Best: {p.bestBuilderBaseTrophies ?? "—"})</span></p>
         </div>
       )}
     </div>
@@ -131,7 +131,7 @@ function CompactStat({ label, value, accent }: { label: string; value: React.Rea
   const colorClass = accent === "emerald" ? "text-emerald-400" : accent === "amber" ? "text-amber-400" : accent === "purple" ? "text-umbra-purple" : "text-white";
   return (
     <div className="flex flex-col justify-center rounded-lg bg-white/[.03] px-3 py-2 border border-white/[.02]">
-      <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">{label}</p>
+      <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">{label}</p>
       <p className={`mt-0.5 text-sm font-semibold ${colorClass}`}>{value}</p>
     </div>
   );
@@ -186,7 +186,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
             ))}
           </div>
           {/* Date labels */}
-          <div className="mt-3 flex w-full justify-between font-mono text-[9px] uppercase tracking-widest text-umbra-muted/60">
+          <div className="mt-3 flex w-full justify-between font-mono text-micro uppercase tracking-widest text-umbra-muted/60">
             <span>{a.buckets[0]?.label ?? ""}</span>
             <span>{a.buckets[a.buckets.length - 1]?.label ?? ""}</span>
           </div>
@@ -195,10 +195,10 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
 
       {/* Last active + tracking info — shared footer style */}
       <div className="mt-4 flex items-center gap-3 text-xs">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Last active</span>
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Last active</span>
         <span className="font-semibold text-white">{fmtDate(a.lastActiveAt)}</span>
         <div className="h-3 w-px bg-umbra-line/30" />
-        <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Tracking</span>
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Tracking</span>
         <span className="text-umbra-muted">{fmtDate(a.trackingStart)}</span>
       </div>
     </div>
@@ -229,7 +229,7 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
             </g>
           </svg>
           <p className="mt-2 text-sm text-umbra-muted">No wars tracked yet</p>
-          <p className="mt-0.5 text-[11px] text-umbra-muted/60">
+          <p className="mt-0.5 text-2xs text-umbra-muted/60">
             War history will appear here once the tracker observes a war.
           </p>
         </div>
@@ -273,7 +273,7 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
       {/* Current war status — shared footer style */}
       {w.currentWarStatus && (
         <div className="mt-4 flex items-center gap-3 text-xs">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Current war</span>
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Current war</span>
           <span className="font-semibold text-umbra-lilac">{w.currentWarStatus}</span>
         </div>
       )}
@@ -298,7 +298,7 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
       
       {d.buckets.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">30-day trend</p>
+          <p className="mb-2 font-mono text-label uppercase tracking-wider text-umbra-muted">30-day trend</p>
           <div className="h-[140px]"><DonationChart buckets={d.buckets} /></div>
         </div>
       )}
@@ -309,7 +309,7 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
 function DonationInline({ label, given, received }: { label: string; given: number; received: number }) {
   return (
     <div className="flex items-center gap-2 font-mono">
-      <span className="text-[10px] uppercase tracking-wider text-umbra-muted">{label}:</span>
+      <span className="text-label uppercase tracking-wider text-umbra-muted">{label}:</span>
       <div className="flex items-baseline gap-1.5">
         <span className="text-sm font-bold text-emerald-400">↑{given}</span>
         <span className="text-xs text-umbra-muted">↓{received}</span>
@@ -332,13 +332,13 @@ function ActivityScoreSection({ detail }: { detail: MemberDetailView }) {
       <div className="mt-4 flex items-center gap-6">
         <div className="text-center">
           <p className="font-display text-4xl font-bold text-umbra-purple">{Math.round(score)}</p>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">out of 100</p>
+          <p className="mt-1 font-mono text-label uppercase tracking-wider text-umbra-muted">out of 100</p>
         </div>
         <div className="flex-1">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
             {detail.donations.activityScoreComponents.map((c, i) => (
               <div key={i} className="rounded-lg bg-white/[.03] px-2 py-2 text-center">
-                <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{c.name}</p>
+                <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{c.name}</p>
                 <p className={`mt-0.5 font-mono text-sm font-bold ${c.available ? "text-white" : "text-umbra-muted/40"}`}>
                   {c.available ? `+${Math.round(c.points)} pts` : "N/A"}
                 </p>
@@ -367,13 +367,13 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
       <div className="mt-4 flex items-center gap-6">
         <div className="text-center">
           <p className={`font-display text-4xl font-bold ${toneClass}`}>{pct.toFixed(1)}%</p>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">overall rushed</p>
+          <p className="mt-1 font-mono text-label uppercase tracking-wider text-umbra-muted">overall rushed</p>
         </div>
         <div className="flex-1">
           <div className="grid grid-cols-5 gap-2">
             {r.categoryBreakdown.map((c) => (
               <div key={c.category} className="rounded-lg bg-white/[.03] px-2 py-2 text-center">
-                <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{c.category}</p>
+                <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{c.category}</p>
                 <p className={`mt-0.5 font-mono text-sm font-bold ${c.percent !== null && c.percent >= 30 ? "text-red-400" : c.percent !== null && c.percent >= 10 ? "text-amber-400" : "text-emerald-400"}`}>
                   {c.percent !== null ? `${c.percent.toFixed(0)}%` : "—"}
                 </p>
@@ -479,7 +479,7 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
         <div className="space-y-4">
           {activeCat.groups.filter(g => g.items.length > 0).map(group => (
             <div key={group.title}>
-              <h4 className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-umbra-muted">{group.title}</h4>
+              <h4 className="mb-1.5 font-mono text-label uppercase tracking-wider text-umbra-muted">{group.title}</h4>
               <div className="grid grid-cols-8 gap-2 sm:grid-cols-10 md:grid-cols-12">
                 {group.items.map((item) => (
                   <ProgressionCard key={item.name} name={item.name} level={item.level} maxLevel={item.maxLevel} />
@@ -500,7 +500,7 @@ function ProgressionCard({ name, level, maxLevel }: { name: string; level: numbe
     <div className="group relative" title={`${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`}>
       <div className={`relative aspect-square w-full overflow-hidden rounded-md border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
         <Image src={icon} alt={name} fill className="object-contain p-1" unoptimized />
-        <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-[11px] font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
+        <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
           {isMaxed ? "MAX" : level}
         </div>
       </div>
@@ -521,7 +521,7 @@ function AchievementsSection({ detail }: { detail: MemberDetailView }) {
     <div>
       <div className="flex items-center justify-between border-b border-umbra-line/50 pb-1 mb-2">
         <h3 className="font-display text-sm font-semibold text-umbra-lilac">Achievements</h3>
-        <button onClick={() => setShowAll(!showAll)} className="font-mono text-[10px] uppercase tracking-wider text-umbra-purple transition hover:text-umbra-lilac">
+        <button onClick={() => setShowAll(!showAll)} className="font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:text-umbra-lilac">
           {showAll ? "Hide" : "Show"} {c.achievements.length} achievements
         </button>
       </div>
@@ -547,7 +547,7 @@ function AchievementsSection({ detail }: { detail: MemberDetailView }) {
                   </div>
                 )}
               </div>
-              <span className="shrink-0 font-mono text-umbra-muted/80 text-[11px] ml-4">
+              <span className="shrink-0 font-mono text-umbra-muted/80 text-2xs ml-4">
                 {a.value.toLocaleString()}{a.target && ` / ${a.target.toLocaleString()}`}
               </span>
             </div>
@@ -597,12 +597,12 @@ function HallOfFameSection({ detail }: { detail: MemberDetailView }) {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 w-full">
           {awards.map((c) => (
             <div key={c.key} className="relative overflow-hidden rounded-lg bg-white/[.03] px-2 py-2 text-center">
-              <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">{c.name}</p>
+              <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{c.name}</p>
               <p className={`mt-0.5 font-mono text-sm font-bold ${c.data ? "text-white" : "text-umbra-muted/40"}`}>
                 {c.data ? c.data.valueLabel : "—"}
               </p>
               {c.data && (
-                <span className={`absolute top-1.5 right-1.5 font-mono text-[9px] ${c.data.rank === 1 ? "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]" : c.data.rank === 2 ? "text-slate-300" : c.data.rank === 3 ? "text-orange-400" : "text-umbra-purple/70"}`}>
+                <span className={`absolute top-1.5 right-1.5 font-mono text-micro ${c.data.rank === 1 ? "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]" : c.data.rank === 2 ? "text-slate-300" : c.data.rank === 3 ? "text-orange-400" : "text-umbra-purple/70"}`}>
                   {c.data.rank === 1 ? "👑" : `#${c.data.rank}`}
                 </span>
               )}

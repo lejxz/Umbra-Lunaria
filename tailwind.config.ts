@@ -8,9 +8,12 @@ export default {
       fontFamily: { display: ["var(--font-display)"], sans: ["var(--font-sans)"], mono: ["var(--font-mono)"] }, 
       boxShadow: { glow: "0 0 22px rgba(182, 120, 255, .42)" },
       fontSize: {
-        xs: ['0.8125rem', { lineHeight: '1.25rem' }], // 13px (up from 12px)
-        sm: ['0.9375rem', { lineHeight: '1.375rem' }], // 15px (up from 14px)
-        base: ['1.0625rem', { lineHeight: '1.625rem' }], // 17px (up from 16px)
+        micro: ['0.5625rem', { lineHeight: '1rem' }],    //  9px
+        label: ['0.625rem',  { lineHeight: '1rem' }],    // 10px
+        '2xs':  ['0.6875rem', { lineHeight: '1.125rem' }], // 11px
+        xs:    ['0.8125rem', { lineHeight: '1.25rem' }],  // 13px (up from 12px)
+        sm:    ['0.9375rem', { lineHeight: '1.375rem' }], // 15px (up from 14px)
+        base:  ['1.0625rem', { lineHeight: '1.625rem' }], // 17px (up from 16px)
       }
     },
   },

@@ -16,7 +16,7 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
       aria-labelledby="war-record-title"
     >
       <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           All-time record
         </p>
       </div>
@@ -38,14 +38,14 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
       {/* Win rate — centered, prominent */}
       <div className="mt-3 flex flex-1 items-center justify-center rounded-xl bg-white/[.035] p-3">
         <div className="text-center">
-          <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+          <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
             Win rate
           </p>
           <p className="mt-1 font-display text-3xl font-bold text-white">
             {winRatePct ?? <UnavailableValue />}
           </p>
           {record.winRate === null && (
-            <p className="mt-1 text-[10px] text-umbra-muted">
+            <p className="mt-1 text-label text-umbra-muted">
               Requires W/T/L from API
             </p>
           )}
@@ -75,7 +75,7 @@ function Stat({
 
   return (
     <div className="rounded-lg bg-white/[.035] p-2.5 text-center">
-      <p className="font-mono text-[9px] uppercase tracking-wider text-umbra-muted">
+      <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </p>
       <p className={`mt-1 font-display text-lg font-bold ${color}`}>

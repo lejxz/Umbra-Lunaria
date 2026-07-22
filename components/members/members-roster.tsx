@@ -109,7 +109,7 @@ export function MembersRoster({
       {/* Filter and Sort bar */}
       <div className="relative z-20 glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Filter</span>
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Filter</span>
         </div>
         <input
           type="text"
@@ -150,7 +150,7 @@ export function MembersRoster({
         <div className="mx-2 hidden h-4 w-px bg-umbra-line/50 sm:block"></div>
         
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">Sort</span>
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Sort</span>
         </div>
         <Select
           value={sortField}
@@ -174,7 +174,7 @@ export function MembersRoster({
         </button>
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="font-mono text-[10px] text-umbra-muted">
+          <span className="font-mono text-label text-umbra-muted">
             {sorted.length} of {roster.totalMembers}
           </span>
         </div>
@@ -193,14 +193,14 @@ export function MembersRoster({
             <table className="w-full text-left">
               <thead className="border-b border-umbra-line bg-white/[.02]">
                 <tr>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">#</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Member</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">TH</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Trophies</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Donations</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Activity</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">Wars</th>
-                  <th className="px-4 py-3 font-mono text-[9px] uppercase tracking-wider text-umbra-muted">War</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">#</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Member</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">TH</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Trophies</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Donations</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Activity</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Wars</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">War</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-umbra-line/50">
@@ -229,7 +229,7 @@ export function MembersRoster({
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-umbra-lilac">{m.name}</p>
-                          <p className="font-mono text-[10px] text-umbra-muted">
+                          <p className="font-mono text-label text-umbra-muted">
                             {m.playerTag} · <span className="capitalize">{m.role}</span>
                           </p>
                         </div>
@@ -245,7 +245,7 @@ export function MembersRoster({
                     <td className="px-4 py-3 font-mono text-sm text-white">
                       {m.trophies ?? "—"}
                       {m.leagueTier?.name && (
-                        <span className="ml-1 text-[10px] text-umbra-muted">
+                        <span className="ml-1 text-label text-umbra-muted">
                           {m.leagueTier.name}
                         </span>
                       )}
@@ -311,10 +311,10 @@ export function MembersRoster({
                     <p className="truncate text-sm font-medium text-umbra-lilac">{m.name}</p>
                     <ActivityDot isActive={m.isActive} />
                   </div>
-                  <p className="font-mono text-[10px] text-umbra-muted">
+                  <p className="font-mono text-label text-umbra-muted">
                     TH{m.townHallLevel} · <span className="capitalize">{m.role}</span>
                   </p>
-                  <p className="font-mono text-[10px] text-umbra-muted">
+                  <p className="font-mono text-label text-umbra-muted">
                     ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
                     {m.warsTracked > 0 && ` · ${m.warsMissed}/${m.warsTracked} missed`}
                   </p>
@@ -373,7 +373,7 @@ function ActivityIndicator({
             : "bg-umbra-muted/40"
         }`}
       />
-      <span className="font-mono text-[10px] text-umbra-muted">
+      <span className="font-mono text-label text-umbra-muted">
         {lastActive
           ? lastActive.toLocaleDateString("en-US", {
               month: "short",

@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     return (
       <div className="mx-auto max-w-[1380px] p-5 sm:p-8 lg:p-10">
         <header className="mb-8">
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Command center / overview
           </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">

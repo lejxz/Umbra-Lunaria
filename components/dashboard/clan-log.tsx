@@ -22,7 +22,7 @@ export function ClanLogPanel({
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Roster history
         </p>
         <Badge tone="muted">{log.entries.length} recent</Badge>
@@ -85,7 +85,7 @@ export function ClanLogPanel({
                         </span>
                       )}
                     </p>
-                    <p className="truncate text-[11px] text-umbra-muted">
+                    <p className="truncate text-2xs text-umbra-muted">
                       <span className="font-mono">{entry.playerTag}</span> ·{" "}
                       {new Date(entry.eventTime).toLocaleDateString("en-US", {
                         month: "short",

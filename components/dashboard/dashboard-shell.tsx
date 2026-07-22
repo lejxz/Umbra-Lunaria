@@ -30,7 +30,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
     <div className="mx-auto max-w-[1380px] p-5 sm:p-8 lg:p-10">
       {/* Header */}
       <header className="mb-8">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Command center / overview
         </p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
@@ -155,7 +155,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
 
       {/* Footer */}
       <footer className="mt-6 border-t border-umbra-line pt-4 text-center">
-        <p className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+        <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">
           Umbra Lunaria · Clan Observatory · Single-clan deployment
         </p>
       </footer>
@@ -233,11 +233,11 @@ function FreshnessFooter({
       <Chip label="War synced" value={fmt(warSynced)} />
       {/* Next poll countdown */}
       <div className="flex items-center gap-1.5 border-l border-umbra-line/30 pl-5">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
           Next poll
         </span>
         <span
-          className={`font-mono text-[10px] font-bold ${
+          className={`font-mono text-label font-bold ${
             isOverdue
               ? "text-amber-400"
               : msUntilNext !== null && msUntilNext < 60000
@@ -256,10 +256,10 @@ function FreshnessFooter({
 function Chip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+      <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-mono text-[10px] text-umbra-lilac" suppressHydrationWarning>
+      <span className="font-mono text-label text-umbra-lilac" suppressHydrationWarning>
         {value}
       </span>
     </div>

@@ -32,7 +32,7 @@ export function CurrentWarCard({
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Live status
           </p>
           <h3
@@ -44,7 +44,7 @@ export function CurrentWarCard({
         </div>
         {countdownTarget && isWarActive && (
           <div className="flex flex-col items-end text-right">
-            <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
               {warSummary.state === "preparation" ? "Starts in" : "Ends in"}
             </p>
             <p className="mt-1 font-mono text-lg text-umbra-lilac font-medium tracking-wider">
@@ -92,7 +92,7 @@ export function CurrentWarCard({
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.ownStars ?? <UnavailableValue />}
                   </span>
-                  <span className="font-mono text-[11px] font-medium text-umbra-muted">
+                  <span className="font-mono text-2xs font-medium text-umbra-muted">
                     {warSummary.ownDestructionPercentage !== null
                       ? `${warSummary.ownDestructionPercentage}%`
                       : "—"}
@@ -105,7 +105,7 @@ export function CurrentWarCard({
             <div className="flex flex-col items-center justify-center px-2 shrink-0">
               {/* State badge */}
               <span
-                className={`mb-2.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap ${
+                className={`mb-2.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider whitespace-nowrap ${
                   warSummary.state === "inWar"
                     ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
                     : warSummary.state === "preparation"
@@ -128,7 +128,7 @@ export function CurrentWarCard({
               {/* Team size */}
               {warSummary.teamSize && (
                 <div className="mt-2.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-umbra-purple/90">
+                  <span className="text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
                     {warSummary.teamSize}v{warSummary.teamSize}
                   </span>
                 </div>
@@ -156,7 +156,7 @@ export function CurrentWarCard({
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.opponentStars ?? <UnavailableValue />}
                   </span>
-                  <span className="font-mono text-[11px] font-medium text-umbra-muted">
+                  <span className="font-mono text-2xs font-medium text-umbra-muted">
                     {warSummary.opponentDestructionPercentage !== null
                       ? `${warSummary.opponentDestructionPercentage}%`
                       : "—"}

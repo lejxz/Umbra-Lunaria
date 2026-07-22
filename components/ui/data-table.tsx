@@ -383,7 +383,7 @@ function MobileCard<T>({
         <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
           {columns.slice(1).map((column) => (
             <div key={column.key}>
-              <dt className="font-mono text-[10px] uppercase tracking-wider text-umbra-muted">
+              <dt className="font-mono text-label uppercase tracking-wider text-umbra-muted">
                 {column.label}
               </dt>
               <dd className="mt-0.5 text-sm text-umbra-lilac">

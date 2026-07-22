@@ -20,7 +20,7 @@ export function NavSummaries({
       {/* Current war strip */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Navigation summary
           </p>
           <h3 className="mt-1 font-display text-lg text-umbra-lilac">
@@ -69,7 +69,7 @@ export function NavSummaries({
         </div>
         <Link
           href="/war"
-          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
         >
           Open War Center →
         </Link>
@@ -101,7 +101,7 @@ export function NavSummaries({
         </div>
         <Link
           href="/capital"
-          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-[10px] uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
         >
           Open Capital →
         </Link>

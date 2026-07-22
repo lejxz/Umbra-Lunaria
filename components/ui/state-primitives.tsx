@@ -55,7 +55,7 @@ export function MetricState({
         </span>
         {meta && (
           <span
-            className={`inline-flex rounded-full border px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider ${meta.tone}`}
+            className={`inline-flex rounded-full border px-2 py-0.5 font-mono text-label font-semibold uppercase tracking-wider ${meta.tone}`}
             title={`Source: ${meta.label}`}
           >
             {meta.label}
@@ -112,7 +112,7 @@ export function ErrorState({
           <button
             type="button"
             onClick={onRetry}
-            className="focus-ring mt-3 inline-flex items-center gap-1.5 rounded-full border border-umbra-line bg-umbra-surface px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+            className="focus-ring mt-3 inline-flex items-center gap-1.5 rounded-full border border-umbra-line bg-umbra-surface px-3 py-1.5 font-mono text-label uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
           >
             <IconSync className="h-3 w-3" aria-hidden />
             Retry
@@ -136,7 +136,7 @@ export function UnavailableValue({ label = "Unavailable" }: { label?: string }) 
       aria-label={label}
     >
       <span aria-hidden className="text-lg leading-none">—</span>
-      <span className="font-mono text-[10px] uppercase tracking-wider">
+      <span className="font-mono text-label uppercase tracking-wider">
         {label}
       </span>
     </span>

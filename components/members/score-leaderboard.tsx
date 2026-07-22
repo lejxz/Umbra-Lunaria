@@ -35,7 +35,7 @@ export function ScoreLeaderboard({
     >
       <div className="flex items-center justify-between mb-8">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Observed clan support
           </p>
           <h3
@@ -48,11 +48,11 @@ export function ScoreLeaderboard({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.02] hover:text-white"
+            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-4 py-2 text-label font-bold uppercase tracking-wider text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.02] hover:text-white"
           >
             View Full List &rarr;
           </button>
-          <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-amber-300 bg-amber-500/20 px-2 py-1 rounded drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]">
+          <span className="font-mono text-label font-bold uppercase tracking-wider text-amber-300 bg-amber-500/20 px-2 py-1 rounded drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]">
             {window === "all" ? "LIFETIME" : window}
           </span>
         </div>
@@ -175,7 +175,7 @@ function TruePodiumCard({
           <span className="block truncate text-center text-[13px] font-bold text-umbra-lilac w-full">
             {entry.name}
           </span>
-          <span className="block truncate text-center text-[9px] text-umbra-muted">
+          <span className="block truncate text-center text-micro text-umbra-muted">
             TH{entry.townHallLevel}
           </span>
         </div>
@@ -250,7 +250,7 @@ function LeaderboardRow({
           <span className="block truncate text-[14px] font-medium text-umbra-lilac">
             {entry.name}
           </span>
-          <span className="block truncate text-[11px] text-umbra-muted">
+          <span className="block truncate text-2xs text-umbra-muted">
             TH{entry.townHallLevel}
             {entry.leagueTier?.name && ` · ${entry.leagueTier.name}`}
           </span>

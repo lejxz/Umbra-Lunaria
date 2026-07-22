@@ -17,7 +17,7 @@ export function PageScaffold({
     <div className="mx-auto max-w-[1380px] p-5 sm:p-8 lg:p-10">
       <header className="mb-8 flex flex-wrap items-start justify-between gap-5">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             {section} / {eyebrow}
           </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
@@ -27,7 +27,7 @@ export function PageScaffold({
         </div>
         <Link
           href="/"
-          className="rounded-full border border-umbra-line px-3 py-2 font-mono text-[10px] uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="rounded-full border border-umbra-line px-3 py-2 font-mono text-label uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
         >
           Back to overview
         </Link>
@@ -46,7 +46,7 @@ export function ComingSoon({
 }) {
   return (
     <section className="glass rounded-2xl p-8 sm:p-10">
-      <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+      <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
         {label}
       </p>
       <h2 className="mt-3 font-display text-2xl text-umbra-lilac">

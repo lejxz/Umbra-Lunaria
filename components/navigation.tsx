@@ -47,7 +47,7 @@ export function Navigation() {
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className={`focus-ring flex flex-col items-center gap-1 rounded-[10px] border px-3 py-2 text-[10px] transition lg:flex-row lg:gap-3 lg:px-4 lg:py-3 lg:text-sm ${
+              className={`focus-ring flex flex-col items-center gap-1 rounded-[10px] border px-3 py-2 text-label transition lg:flex-row lg:gap-3 lg:px-4 lg:py-3 lg:text-sm ${
                 active
                   ? "border-umbra-line bg-umbra-purple/10 text-umbra-lilac"
                   : "border-transparent text-umbra-muted hover:bg-white/5 hover:text-umbra-lilac"
@@ -62,7 +62,7 @@ export function Navigation() {
         })}
       </nav>
       <div className="absolute bottom-5 hidden border-t border-umbra-line px-6 pt-5 text-xs leading-5 text-umbra-muted lg:block">
-        <span className="font-mono text-[10px] uppercase tracking-wider text-emerald-300">
+        <span className="font-mono text-label uppercase tracking-wider text-emerald-300">
           ● Systems nominal
         </span>
         <br />

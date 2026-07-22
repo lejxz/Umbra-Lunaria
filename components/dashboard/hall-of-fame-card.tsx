@@ -63,7 +63,7 @@ export function HallOfFameCard({
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center pb-2">
-        <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           All-time clan records
         </p>
         <h2 className="mt-1 font-display text-2xl font-semibold text-umbra-lilac">
@@ -85,7 +85,7 @@ export function HallOfFameCard({
               <div className={`relative flex flex-col justify-center border-b border-umbra-line/50 p-5 text-center ${meta.accent} bg-opacity-20 shrink-0 min-h-[90px]`}>
                 <span className={`absolute left-5 ${meta.color} opacity-80`}>{meta.icon}</span>
                 <div className="text-center">
-                  <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-muted">
+                  <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-muted">
                     {meta.subtitle}
                   </p>
                   <h3 className={`mt-1 font-display text-lg ${meta.color}`}>
@@ -158,13 +158,13 @@ function RankRow({
           <span className="truncate font-semibold text-[13px] text-white/90">
             {entry.name}
           </span>
-          <span className={`shrink-0 font-mono text-[11px] font-bold ${entry.rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>
+          <span className={`shrink-0 font-mono text-2xs font-bold ${entry.rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>
             {entry.valueLabel}
           </span>
         </div>
         {/* Meta label (secondary stat) */}
         {entry.metaLabel && entry.metaLabel !== "Since tracking began" && (
-          <span className="font-mono text-[9px] text-umbra-muted truncate">
+          <span className="font-mono text-micro text-umbra-muted truncate">
             {entry.metaLabel}
           </span>
         )}
@@ -176,7 +176,7 @@ function RankRow({
 function EmptyLeaderboard() {
   return (
     <div className="py-8 text-center flex items-center justify-center h-full">
-      <p className="font-mono text-[10px] text-umbra-muted/50">
+      <p className="font-mono text-label text-umbra-muted/50">
         No records yet.
       </p>
     </div>
