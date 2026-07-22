@@ -106,9 +106,6 @@ function AttentionGroup({
 
   return (
     <div>
-      <div className="sticky top-0 z-10 mb-2 border-b border-umbra-line/50 bg-[#0c0a1a]/80 pb-1 backdrop-blur-md">
-        <p className={`text-xs font-semibold ${color}`}>{label}</p>
-      </div>
       <div className="space-y-1.5">
         {members.map((m) => (
           <button
