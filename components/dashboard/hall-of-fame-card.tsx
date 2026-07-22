@@ -82,11 +82,15 @@ export function HallOfFameCard({
               className={`flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden h-[350px] ${gridClass}`}
             >
               {/* Category header */}
-              <div className={`relative flex items-center justify-center border-b border-umbra-line/50 p-4 text-center ${meta.accent} bg-opacity-20 shrink-0`}>
-                <span className={`absolute left-4 ${meta.color}`}>{meta.icon}</span>
+              <div className={`relative flex flex-col justify-center border-b border-umbra-line/50 p-5 text-center ${meta.accent} bg-opacity-20 shrink-0 min-h-[90px]`}>
+                <span className={`absolute left-5 ${meta.color} opacity-80`}>{meta.icon}</span>
                 <div className="text-center">
-                  <p className={`font-display text-[13px] font-bold ${meta.color} leading-none`}>{meta.title}</p>
-                  <p className="font-mono text-[9px] text-umbra-muted opacity-80 mt-1">{meta.subtitle}</p>
+                  <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-muted">
+                    {meta.subtitle}
+                  </p>
+                  <h3 className={`mt-1 font-display text-lg ${meta.color}`}>
+                    {meta.title}
+                  </h3>
                 </div>
               </div>
 
