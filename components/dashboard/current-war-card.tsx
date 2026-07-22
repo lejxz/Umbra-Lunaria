@@ -69,14 +69,11 @@ export function CurrentWarCard({
           </p>
         </div>
       ) : (
-        <div className="mt-4 flex flex-1 flex-col justify-end">
-          {/* Header area with State badge */}
-          <div className="mb-2 flex items-center justify-between px-1">
-            <span className="font-mono text-[9px] font-bold tracking-widest text-umbra-muted">
-              {warSummary.teamSize && `${warSummary.teamSize}V${warSummary.teamSize} `}MATCHUP
-            </span>
+        <>
+          {/* State badge */}
+          <div className="mt-3 flex items-center justify-center">
             <span
-              className={`inline-flex items-center rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
+              className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
                 warSummary.state === "inWar"
                   ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
                   : warSummary.state === "preparation"
@@ -85,19 +82,19 @@ export function CurrentWarCard({
               }`}
             >
               {warSummary.state === "inWar"
-                ? "BATTLE DAY"
+                ? "● Battle day"
                 : warSummary.state === "preparation"
-                  ? "PREPARATION"
-                  : "WAR ENDED"}
+                  ? "○ Preparation"
+                  : "War ended"}
             </span>
           </div>
 
-          {/* Arena Box */}
-          <div className="relative flex w-full items-stretch justify-between rounded-xl bg-black/20 border border-white/5 p-4 shadow-inner">
+          {/* VS layout: Our clan | VS icon | Enemy clan */}
+          <div className="mt-3 flex flex-1 items-center justify-center gap-3">
             {/* Our clan */}
-            <div className="flex w-2/5 flex-col items-center text-center">
+            <div className="flex-1 flex flex-col items-center text-center">
               {clanBadgeUrls?.small && (
-                <div className="relative h-14 w-14 mb-3">
+                <div className="relative h-12 w-12 mb-2">
                   <Image
                     src={clanBadgeUrls.small}
                     alt={clanName ?? "Our Clan"}
@@ -110,37 +107,43 @@ export function CurrentWarCard({
                 {clanName ?? "Our Clan"}
               </p>
               
-              <div className="mt-3 flex items-baseline justify-center gap-1.5">
-                <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">
-                  ★{warSummary.ownStars ?? <UnavailableValue />}
-                </span>
-                <span className="font-mono text-[11px] font-medium text-umbra-muted">
-                  {warSummary.ownDestructionPercentage !== null
-                    ? `${warSummary.ownDestructionPercentage}%`
-                    : "—"}
-                </span>
+              <div className="mt-3 flex w-full flex-col items-center">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-black/20 px-3 py-1.5 border border-white/5 shadow-inner">
+                  <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
+                    ★{warSummary.ownStars ?? <UnavailableValue />}
+                  </span>
+                  <span className="font-mono text-[11px] font-medium text-umbra-muted">
+                    {warSummary.ownDestructionPercentage !== null
+                      ? `${warSummary.ownDestructionPercentage}%`
+                      : "—"}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* VS Center */}
-            <div className="relative flex w-1/5 flex-col items-center justify-center shrink-0">
-               {/* Vertical divider line */}
-               <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-               {/* VS Icon */}
-               <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-umbra-ink border border-umbra-purple/20 text-umbra-purple/90 shadow-[0_0_12px_rgba(182,120,255,0.15)]">
-                 <IconSwords className="h-5 w-5" />
-               </div>
+            {/* VS icon & team size */}
+            <div className="flex flex-col items-center justify-center px-2 shrink-0">
+              {warSummary.teamSize && (
+                <div className="mb-2.5 rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
+                  <span className="font-mono text-[10px] font-bold tracking-[0.2em] text-umbra-purple/90 ml-[0.2em]">
+                    {warSummary.teamSize}V{warSummary.teamSize}
+                  </span>
+                </div>
+              )}
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20 text-umbra-purple/80 shadow-[inset_0_0_12px_rgba(182,120,255,0.15)]">
+                <IconSwords className="h-6 w-6" />
+              </div>
             </div>
 
             {/* Enemy clan */}
-            <div className="flex w-2/5 flex-col items-center text-center">
+            <div className="flex-1 flex flex-col items-center text-center">
               {warSummary.opponentBadgeUrls?.small && (
-                <div className="relative h-14 w-14 mb-3">
+                <div className="relative h-12 w-12 mb-2">
                   <Image
                     src={warSummary.opponentBadgeUrls.small}
                     alt={`${warSummary.opponentName ?? "Enemy"} Badge`}
                     fill
-                    className="object-contain drop-shadow-md grayscale opacity-90 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                    className="object-contain drop-shadow-md grayscale hover:grayscale-0 transition-all duration-300"
                   />
                 </div>
               )}
@@ -148,19 +151,21 @@ export function CurrentWarCard({
                 {warSummary.opponentName ?? "Enemy"}
               </p>
               
-              <div className="mt-3 flex items-baseline justify-center gap-1.5">
-                <span className="font-display text-2xl font-bold text-white leading-none tracking-tight drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
-                  ★{warSummary.opponentStars ?? <UnavailableValue />}
-                </span>
-                <span className="font-mono text-[11px] font-medium text-umbra-muted">
-                  {warSummary.opponentDestructionPercentage !== null
-                    ? `${warSummary.opponentDestructionPercentage}%`
-                    : "—"}
-                </span>
+              <div className="mt-3 flex w-full flex-col items-center">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-black/20 px-3 py-1.5 border border-white/5 shadow-inner">
+                  <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
+                    ★{warSummary.opponentStars ?? <UnavailableValue />}
+                  </span>
+                  <span className="font-mono text-[11px] font-medium text-umbra-muted">
+                    {warSummary.opponentDestructionPercentage !== null
+                      ? `${warSummary.opponentDestructionPercentage}%`
+                      : "—"}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </section>
   );
