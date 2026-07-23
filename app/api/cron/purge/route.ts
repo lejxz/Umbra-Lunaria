@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { and, eq, lt, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
@@ -136,6 +137,10 @@ export async function GET(req: NextRequest) {
       AND war_type = 'regular'
   `);
   result.prunedWars = prunedWars.rowCount ?? 0;
+
+  // Bust the ISR cache so the dashboard/members/capital pages reflect the
+  // pruned data on the next page view (not up to 15 min later).
+  revalidatePath("/", "layout");
 
   return NextResponse.json({ ok: true, ...result });
 }

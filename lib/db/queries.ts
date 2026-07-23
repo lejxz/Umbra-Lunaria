@@ -169,6 +169,9 @@ export async function getDonationTotals(
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
+  // Fetch ALL snapshots up to `to` (no gte(from)) so calculateDonationWindow
+  // can find the baseline snapshot just before the window start. The function
+  // internally filters to the window — we just need the baseline available.
   const snapshots = await db
     .select({
       playerTag: memberSnapshots.playerTag,
@@ -180,7 +183,6 @@ export async function getDonationTotals(
     .where(
       and(
         inArray(memberSnapshots.playerTag, tags),
-        gte(memberSnapshots.capturedAt, win.from),
         lte(memberSnapshots.capturedAt, win.to),
       ),
     )
@@ -242,6 +244,8 @@ export async function getDonationLeaderboard(
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
+  // Fetch ALL snapshots up to `to` (no gte(from)) so calculateDonationWindow
+  // can find the baseline snapshot just before the window start.
   const snapshots = await db
     .select({
       playerTag: memberSnapshots.playerTag,
@@ -253,7 +257,6 @@ export async function getDonationLeaderboard(
     .where(
       and(
         inArray(memberSnapshots.playerTag, tags),
-        gte(memberSnapshots.capturedAt, win.from),
         lte(memberSnapshots.capturedAt, win.to),
       ),
     )
