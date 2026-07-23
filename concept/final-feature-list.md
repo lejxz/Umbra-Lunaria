@@ -15,7 +15,7 @@ This document is the implementation feature inventory. It separates values retur
 
 ## 2. Polling and historical tracking
 
-1. Poll the clan roster approximately every 15 minutes.
+1. Poll the clan roster approximately every 30 minutes.
 2. Run a daily full refresh.
 3. Detect new members, departures, and rejoining members.
 4. Store member snapshots over time.

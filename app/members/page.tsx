@@ -9,7 +9,12 @@ import type { MemberDetailView } from "@/lib/view-models/members";
  * Members page — Activity Score leaderboard + full clan roster with
  * sortable table, filters, and member detail sheet.
  * See concept/06-members.md.
+ *
+ * ISR caching: revalidates every 900s (15 min). Member detail sheets are
+ * fetched client-side on click (not cached) — only the roster list is cached.
  */
+export const revalidate = 900;
+
 export default async function MembersPage() {
   let roster;
   try {

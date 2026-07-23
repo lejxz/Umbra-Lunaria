@@ -7,9 +7,12 @@ import { getCapitalPage } from "@/lib/db/capital-queries";
  * Clan Capital page — current overview, district list, district upgrade
  * timeline, and a truthful raid-weekend pending state. See concept/08.
  *
- * Server component: all reads happen here (concept/01 "No browser route calls
- * Supercell directly"). The client shell owns the district-filter state.
+ * ISR caching: revalidates every 900s (15 min). Capital data changes slowly
+ * (district levels take days to upgrade), so a 15-min cache is well within
+ * the data's natural freshness window.
  */
+export const revalidate = 900;
+
 export default async function CapitalPage() {
   let data;
   try {
