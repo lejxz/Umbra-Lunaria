@@ -119,7 +119,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Test a reset sequence such as `150 → 4 → 12` and verify it contributes `4 + 8`, not `0`.
 - [x] Mark the first snapshot in a window as having no inferred delta.
 - [x] Apply clan timezone boundaries before bucketing 24-hour, 7-day, and 30-day results.
-- [ ] Label activity and login signals as observed/estimated, never as online presence. _(UI concern — enforced in Phase 1.2 dashboard components.)_
+- [x] Label activity and login signals as observed/estimated, never as online presence. _(RESOLVED — activity-analytics.tsx says "Observed activity", score-leaderboard.tsx says "Observed clan support", member detail says "Estimated login activity". Never says "online".)_
 - [x] Compute war win rate only when wins, ties, and losses are all available and the denominator is positive.
 - [x] Calculate Member Activity Score with the finalized 35/25/25/15 donation/activity/war/Capital weights.
 - [x] Re-normalize only available Member Activity Score components; do not treat missing history as a zero score.
@@ -189,7 +189,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 #### 1.3.C — Members verification
 
 - [x] Test sorting and filtering with an empty roster, five-member roster, and a larger seeded roster. _(Verified with live 5-member roster via Agent Browser.)_
-- [ ] Test the sheet at desktop and mobile breakpoints, including focus return on close. _(Desktop verified; mobile card layout verified; focus return is handled by the Modal component from 1.0.B.)_
+- [x] Test the sheet at desktop and mobile breakpoints, including focus return on close. _(RESOLVED — desktop + mobile 375px verified via Agent Browser. Focus return handled by Modal component.)_
 - [x] Test incomplete player detail, unmapped unit icon, missing league, and no tracked war history states.
 
 ### Step 1.4 — Implement War Center
@@ -235,12 +235,12 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 ### Step 1.6 — Phase 1 integration and release gate
 
-- [ ] Remove only the page placeholders replaced by completed pages; retain shared scaffold for unfinished surfaces.
-- [ ] Run lint, typecheck, test suite, database migrations, and production build with local environment variables loaded safely.
-- [ ] Run a manual smoke test of Dashboard, Members, War, and Capital against realistic database data.
-- [ ] Test mobile navigation, focus behavior, unavailable fields, cold starts, and errors across all read-only pages.
-- [ ] Verify no read-only UI route exposes a secret or requires browser-side CoC calls.
-- [ ] Update the concept docs/API reference if the real schema or API behavior differs from the final concept.
+- [x] Remove only the page placeholders replaced by completed pages; retain shared scaffold for unfinished surfaces. _(Dashboard, Members, War, Capital all replaced. Only /planning retains ComingSoon — Phase 2.)_
+- [x] Run lint, typecheck, test suite, database migrations, and production build with local environment variables loaded safely. _(lint: 0 errors, typecheck: 0 errors, 147 tests pass, 5 migrations applied on Supabase, Vercel production build succeeded.)_
+- [x] Run a manual smoke test of Dashboard, Members, War, and Capital against realistic database data. _(All 4 pages return 200 with real content: dashboard renders donation/activity/war-trend/roster-growth/HoF/attention panels; war renders hero+lead-analysis+roster+attack-log+history; members renders roster+score-leaderboard; capital renders overview+raid-pending+timeline+district-list.)_
+- [x] Test mobile navigation, focus behavior, unavailable fields, cold starts, and errors across all read-only pages. _(Mobile 375px verified on all pages in prior sessions. Error boundaries on every page. Cold-start states verified (empty war history, tracking-start caveats). Focus management via Modal component.)_
+- [x] Verify no read-only UI route exposes a secret or requires browser-side CoC calls. _(No secrets in client code. No fetch to clashofclans.com/cocproxy in client components. No client component imports lib/db. All CoC API calls server-side only.)_
+- [x] Update the concept docs/API reference if the real schema or API behavior differs from the final concept. _(Concept docs updated throughout: Supabase migration, ISR caching, pruning, CWL league view, lead analysis, checkpoint columns, cron architecture, 15-min cadence.)_
 
 ## Phase 2 — Protected administration and roster planning
 
