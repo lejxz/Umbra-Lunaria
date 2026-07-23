@@ -101,7 +101,11 @@ These facts come from the full war roster, not merely attack rows, so a zero-att
 
 Career values are lifetime Supercell totals and must be labeled separately from data tracked since Umbra Lunaria began observing the player.
 
-### 6. Progression cards — API fact
+### 6. All-time records — derived
+
+Show this member's clan-wide rank in each Hall of Fame category (`05-dashboard.md` section 8, `03-data-model-and-database.md` `hall_of_fame_records`): Philanthropist, Vanguard, Dedicated, Capitalist, Unsleeping. Display rank and value even when the member holds none of the top-5 spots in a category — "not currently ranked" is a real, expected state, not an error. If this member *is* a top-5 holder in any category, link back to that Hall of Fame entry so the two views stay connected rather than presenting the same underlying ranking as two disconnected features.
+
+### 7. Progression cards — API fact
 
 Render an in-game-inspired card grid for:
 
@@ -119,7 +123,7 @@ Every card shows unit icon, name, current level, API-reported global maximum whe
 
 Icons come from the approved Supercell Fankit source, copied into local project assets and referenced through a maintained API-unit-name mapping. The page must fall back to a text label when an asset mapping is missing.
 
-### 7. Rushed-account analysis — derived
+### 8. Rushed-account analysis — derived
 
 For a member at Town Hall `T`, compare each eligible unit level with its known maximum at `T`:
 

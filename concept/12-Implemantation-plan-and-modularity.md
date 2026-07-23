@@ -36,7 +36,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Initial Drizzle schema and migration exist for clans, members, snapshots, progression, wars, Capital, and roster drafts.
 - [x] Protected `/api/ingest` runs light polls and daily batches.
 - [x] Protected `/api/cron/purge` removes expired member profile data.
-- [x] A third-party cron-job web service triggers the ingest route every ten minutes (light poll) and once daily (batch); `.github/workflows/poll.yml` is retained as a manual `workflow_dispatch` fallback. _(See concept/04 — moved off GitHub Actions cron for schedule consistency.)_
+- [x] A third-party cron-job web service triggers the ingest route every 15 minutes (light poll) and once daily (batch); `.github/workflows/poll.yml` is retained as a manual `workflow_dispatch` fallback. _(See concept/04 — moved off GitHub Actions cron for schedule consistency.)_
 - [x] Vercel Cron invokes the daily purge route.
 - [x] Shared navigation, dark design tokens, basic UI primitives, page scaffold, and placeholder routes exist.
 - [x] Modal and sheet surfaces render through a viewport-level portal.

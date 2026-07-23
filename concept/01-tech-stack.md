@@ -10,7 +10,7 @@
 | ORM | Drizzle ORM | Typed schema, migrations, and server-side queries. |
 | Charts | Recharts | Donation and activity windows with accessible tooltips. |
 | Drag and drop | `@dnd-kit` | Desktop roster planning; tap-to-add remains available on touch. |
-| Polling | Third-party cron-job web service + protected Next.js route | Ten-minute light polls and daily full batches. (Replaced GitHub Actions for schedule consistency; `.github/workflows/poll.yml` kept as a manual fallback.) |
+| Polling | Third-party cron-job web service + protected Next.js route | 15-minute light polls and daily full batches. (Replaced GitHub Actions for schedule consistency; `.github/workflows/poll.yml` kept as a manual fallback.) |
 | Scheduled purge | Vercel Cron | Daily retention cleanup. |
 | Deployment | Vercel | Hosting and route execution. |
 | CoC access | RoyaleAPI proxy | Fixed outbound IP for Supercell API-key allowlisting. |

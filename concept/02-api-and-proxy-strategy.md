@@ -16,7 +16,7 @@ The proxy solves IP allowlisting only. It does not increase Supercell rate limit
 | Endpoint | Direct facts used by the product | Historical use |
 |---|---|---|
 | `GET /clans/{clanTag}` | Clan identity, description, badges, location, points, leagues, labels, requirements, war record, Capital hall, districts. | Daily clan cache and district snapshots. |
-| `GET /clans/{clanTag}/members` | Current roster, roles, donations, trophies, rank, selected league fields. | Ten-minute member snapshots and join/leave detection. |
+| `GET /clans/{clanTag}/members` | Current roster, roles, donations, trophies, rank, selected league fields. | 15-minute member snapshots and join/leave detection. |
 | `GET /players/{playerTag}` | Full player profile, war preference, career data, achievements, progression arrays, Capital contribution total. | Daily detail cache and on-demand stale-cache refresh. |
 | `GET /clans/{clanTag}/currentwar` | War state, timers, rosters, attacks, stars, destruction, opponent data. | Poll while preparation or battle is active. |
 | `GET /clans/{clanTag}/warlog` | Public regular-war outcomes. | Optional historical backfill only when war log is public. |
@@ -42,7 +42,7 @@ The proxy solves IP allowlisting only. It does not increase Supercell rate limit
 ## Rate-limit policy
 
 1. A light poll makes one roster request and polls current war only when a war is active or in preparation.
-2. Full player responses run in the daily batch, not every ten minutes.
+2. Full player responses run in the daily batch, not every 15 minutes.
 3. A member-detail refresh may happen on demand only when the cached detail is stale and must use a short server cache.
 4. Browser refreshes never fan out directly to Supercell; `/api/war/refresh` applies a 30–60 second shared cache.
 5. The UI shows the most recent successful capture time rather than implying live, second-by-second data.

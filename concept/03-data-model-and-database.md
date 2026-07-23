@@ -84,6 +84,20 @@ One row per district per daily clan capture. Diffs between consecutive snapshots
 
 Completed raid seasons retain totals, rewards, attacks used, resources looted, and per-member contribution. These tables drive Capital history, zero-attack attention, participation, and the Capital component of Member Activity Score.
 
+## Hall of Fame and history entities
+
+### `hall_of_fame_records`
+
+Top-5 leaderboard per award category (`philanthropist`, `vanguard`, `dedicated`, `capitalist`, `unsleeping` — full definitions in `05-dashboard.md` section 8), one row per award/rank pair, overwritten on each daily batch rather than accumulated. `holder_name` is stored directly on the row and preserved after the source member is purged, so a historical record stays displayable even once the underlying `members` row is gone. Populated by `lib/db/records-updater.ts`.
+
+### `membership_events`
+
+Append-only join/leave/rejoin log, one row per event, keyed by player tag with the display name captured at event time. This is the correct fix for a real gap in an earlier version of this schema: a single mutable row per member can't represent "left, then rejoined" as two distinct events, and loses the leave date entirely once purged. This table is exempt from both the 14-day member retention purge and the snapshot pruning pass — see "NOT pruned" below — specifically so the clan activity log (`05-dashboard.md` section 9) keeps working after the member row itself is gone.
+
+### `cwl_seasons`
+
+One row per Clan War League season: season identifier, state, the full league-group API response as JSONB, and capture time. Stored as a raw payload rather than normalized, since the War Center reads the league group structure directly rather than reconstructing it from separate rounds/clans tables.
+
 ## Planning and settings entities
 
 1. `war_rosters` stores draft/finalized roster metadata, creator, title, and war size.
@@ -159,7 +173,7 @@ Checkpoints are computed:
 
 | Job | Platform | Schedule (PHT) | Purpose |
 |---|---|---|---|
-| Light poll | Third-party cron (cron-job.org) | Every 30 min | Roster + snapshots + war sync |
+| Light poll | Third-party cron (cron-job.org) | Every 15 min | Roster + snapshots + war sync |
 | Daily batch | Third-party cron (cron-job.org) | 00:00 midnight | Full player details + war-log backfill + checkpoints + HoF |
 | Purge | Vercel Cron | 02:00 AM (`0 18 * * *` UTC) | Safety checkpoint → prune |
 

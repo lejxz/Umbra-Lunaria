@@ -83,16 +83,30 @@ Use separate, readable lists for:
 
 Every member item opens the same detail sheet. An opt-out is informational, not an error state.
 
-### 8. Clan activity log
+### 8. Hall of Fame
 
-Render a most-recent-first feed of joins and departures with name, player tag, event type, and timestamp. A click opens:
+Five all-time award categories, each a top-5 leaderboard (not just a single record holder), populated by the daily batch and persisted in `hall_of_fame_records` (`03-data-model-and-database.md`). Definitions taken directly from the implementation (`lib/db/records-updater.ts`), not re-derived:
+
+| Award | Measures |
+|---|---|
+| **Philanthropist** | Highest all-time cumulative donations given (reset-aware, from the `cumulative_donations_given` checkpoint). |
+| **Vanguard** | Most 3-star war attacks all-time, with best 3-star % as the tiebreak. |
+| **Dedicated** | Longest consecutive daily login streak on record. |
+| **Capitalist** | Highest capital gold looted in a single raid weekend. |
+| **Unsleeping** | Highest raw activity score — a sum of raw component values (not the normalized 100-point Member Activity Score from section 5; a separate, cumulative measure). |
+
+Each entry is clickable and opens the member detail sheet, same as every other member reference on this page. Entries preserve `holder_name` even after the underlying member row is purged (`03-data-model-and-database.md` retention contract), so a historical record doesn't silently disappear the way a live member reference would.
+
+### 9. Clan activity log
+
+Render a most-recent-first feed of joins and departures with name, player tag, event type, and timestamp — sourced from `membership_events` (`03-data-model-and-database.md`), not the mutable `members` row directly. That distinction is what makes the click behavior below actually work: the event log is immutable and never pruned, so a "left 20 days ago" entry stays visible and correct even after the member's own row has been purged. A click opens:
 
 1. The normal member detail sheet for a retained player.
-2. A purpose-built “left on [date]; data removed under the retention policy” state for a purged player.
+2. A purpose-built "left on [date]; data removed under the retention policy" state for a purged player.
 
 The default feed is the latest 20 events or 30 days, whichever is smaller.
 
-### 9. Navigation summaries
+### 10. Navigation summaries
 
 The dashboard ends with two clear navigation strips:
 
