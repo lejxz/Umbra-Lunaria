@@ -34,7 +34,7 @@ import {
  * POST /api/ingest
  *
  * Called by the GitHub Actions workflow (.github/workflows/poll.yml) on two
- * schedules: a light poll every 30 min, and a daily batch. See
+ * schedules: a light poll every 15 min, and a daily batch. See
  * concept/04-activity-tracking-and-polling.md for the full design.
  *
  * Auth: `Authorization: Bearer <INGEST_SECRET>`.
