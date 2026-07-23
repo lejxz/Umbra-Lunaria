@@ -20,7 +20,7 @@ Vercel or Neon. See §6 for the verified limit numbers.
 
 | Trigger | Work | Vercel function calls | Neon queries | Supercell API calls |
 |---|---|---|---|---|
-| Cron light poll (every 10 min) | Roster + snapshots + current war | 1 (`/api/ingest` `batch:false`) | ~5 members × 3 writes + 1 war sync | 2 (`/clans/{tag}`, `/clans/{tag}/currentwar`) |
+| Cron light poll (every 15 min) | Roster + snapshots + current war | 1 (`/api/ingest` `batch:false`) | ~5 members × 3 writes + 1 war sync | 2 (`/clans/{tag}`, `/clans/{tag}/currentwar`) |
 | Cron daily batch (1×/day) | Full player details + war-log backfill + Hall of Fame | 1 (`/api/ingest` `batch:true`) | ~5 × 3 writes + ~50 war upserts + 5 queries | 1 + 5 + 1 = 7 (`/clans`, 5× `/players`, `/warlog`) |
 | Vercel Cron purge (1×/day) | Retention cleanup | 1 (`/api/cron/purge`) | 1–2 deletes | 0 |
 | Page view (dashboard/members/war/capital) | Server-side read | 1 per page | 5–15 reads | 0 |
@@ -47,29 +47,31 @@ All server-side. No browser → Supercell calls. No client-side DB access.
 ### Growth rate
 
 The dominant write table is `member_snapshots` (one row per member per light
-poll). At the configured 10-minute cadence with 5 retained members:
+poll). At the configured **15-minute cadence** (updated 2026-07-23 from 10 min
+to reduce Neon CU consumption) with 5 retained members:
 
 ```
-snapshots/day  = members × polls/day = 5 × 144 = 720 (theoretical max)
-measured peak  = 255/day (cron ran ~51 times — see note below)
+snapshots/day  = members × polls/day = 5 × 96 = 480 (theoretical max)
+measured peak  = 255/day (at the old 10-min cadence; ~51 polls that day)
 ```
 
-The measured 255/day is lower than the 720 theoretical max because the cron
-service does not always hit exactly 144 polls/day (network jitter, brief
-downtime). For capacity planning, use the **theoretical max** (720/day) as the
-worst case and the **measured** (255/day) as the realistic case.
+The measured 255/day was lower than the old 720/day theoretical max (10-min
+cadence) because the cron service does not always hit exactly 96 polls/day
+(network jitter, brief downtime). At the new 15-min cadence the theoretical
+max drops to 480/day. For capacity planning, use the **theoretical max**
+(480/day) as the worst case.
 
 ### 30/90/365-day storage projection (snapshots only)
 
-| Horizon | Rows (measured) | Size (measured) | Rows (theoretical max) | Size (theoretical max) |
-|---|---|---|---|---|
-| 30 days | 7,650 | ~2.6 MB | 21,600 | ~7.4 MB |
-| 90 days | 22,950 | ~7.8 MB | 64,800 | ~22 MB |
-| 365 days | 93,075 | ~32 MB | 262,800 | ~90 MB |
+| Horizon | Rows (at 15-min cadence) | Size |
+|---|---|---|
+| 30 days | 14,400 | ~4.9 MB |
+| 90 days | 43,200 | ~14.7 MB |
+| 365 days | 175,200 | ~60 MB |
 
 `unit_levels` adds 5 rows/day (one per member, daily batch) = ~1.8k rows/year
 (~230 kB). `wars` + `war_attacks` grow with war frequency (~1–2 wars/week,
-each ~50v50 attacks max) = negligible. **Total DB at 1 year: ~40–110 MB.**
+each ~50v50 attacks max) = negligible. **Total DB at 1 year: ~60–80 MB.**
 
 ---
 
@@ -77,29 +79,36 @@ each ~50v50 attacks max) = negligible. **Total DB at 1 year: ~40–110 MB.**
 
 Neon's free tier (as of 2026-07):
 
-| Resource | Free allowance | Projected usage (1 year, theoretical max) | Status |
+| Resource | Free allowance | Projected usage (1 year, 15-min cadence) | Status |
 |---|---|---|---|
-| **Storage** | 0.5 GB (512 MB) | ~110 MB (all tables) | ✅ ~22% of limit |
-| **Compute time** | 1,944 AU-hours/month (~3,000 hours on the smallest compute) | See below | ✅ far under |
+| **Storage** | 0.5 GB (512 MB) | ~60–80 MB (all tables) | ✅ ~12–16% of limit |
+| **Compute (CU-hours)** | **100 CU-hours/month** | ~360 CU/month (observed rate, 15-min cadence) | ⚠️ **over limit — see below** |
 | **Projects** | 1 | 1 | ✅ |
 | **Branches** | 10 | 1 (main) | ✅ |
 
-### Compute time
+### Compute time (observed)
 
-Neon bills compute in "Active time" (seconds the compute is running). On the
-free tier the compute auto-suspends after 5 minutes of inactivity and
-auto-resumes on the next query (cold start ~300–800 ms).
+Neon bills compute in Compute Units (CU). The free tier allows **100 CU-hours
+per month**. Each poll wakes the suspended compute (cold start ~300–800 ms) +
+runs ~20 queries (~1s active), so the real CU cost is higher than the pure
+active-query time suggests.
 
-- **Light poll**: 1 DB session, ~20 queries, <1 second active → ~1 sec × 144
-  polls/day = **144 sec/day** = 2.4 min/day = **~72 min/month**.
-- **Daily batch**: ~30 queries + 5 player upserts, ~5 seconds → **~150
-  sec/month**.
-- **Page views**: each page view wakes the compute. 10 page views/day × ~0.5
-  sec = 5 sec/day = **~2.5 min/month**.
-- **Total**: ~75 min/month active compute = **~1.25 hours/month**.
+**Observed CU consumption** (2026-07-23, at the old 10-min cadence):
 
-The free tier allows ~3,000 hours of active compute (1,944 AU-hours on the
-0.25 CU size). **Usage is <0.05% of the allowance.**
+| Time | Cumulative CU | Delta |
+|---|---|---|
+| 5:00 PM | 4.4 CU | — |
+| 8:40 PM | 7.14 CU | +2.74 CU in 3h40m |
+
+That rate (~0.75 CU/hour) extrapolates to ~18 CU/day → **~540 CU/month** at
+the old 10-min cadence — well over the 100 CU free-tier limit. The cadence
+was therefore reduced to **15 minutes** (96 polls/day instead of 144), which
+cuts the poll-driven CU by ~33%.
+
+**Revised estimate at 15-min cadence:** ~0.5 CU/hour → ~12 CU/day →
+**~360 CU/month**. This is still above the 100 CU free-tier limit, so further
+reductions may be needed (see recommendations). The dominant cost is the
+cold-start wake per poll, not the query time itself.
 
 ### Cold-start caveat
 
@@ -126,7 +135,7 @@ snapshot before departure for the clan log).
 
 | Resource | Free allowance | Projected usage (1 year) | Status |
 |---|---|---|---|
-| **Function invocations** | 100,000/month | ~4,500/month (see below) | ✅ ~4.5% of limit |
+| **Function invocations** | 100,000/month | ~3,500/month (see below) | ✅ ~3.5% of limit |
 | **Function execution time** | 100 GB-hours/month | <1 GB-hour/month | ✅ |
 | **Edge requests** | 1,000,000/month | ~5,000/month | ✅ |
 | **Cron jobs** | 2 (Hobby) | 1 (`/api/cron/purge`) | ✅ |
@@ -137,13 +146,13 @@ snapshot before departure for the clan log).
 
 | Source | Calls/day | Calls/month |
 |---|---|---|
-| Light poll (cron) | 144 | 4,320 |
+| Light poll (cron) | 96 | 2,880 |
 | Daily batch (cron) | 1 | 30 |
 | Purge (Vercel Cron) | 1 | 30 |
 | Page views | ~10 (assumed) | 300 |
 | War refresh (TTL-cached) | ~5 | 150 |
 | Member detail sheet | ~10 | 300 |
-| **Total** | | **~5,130/month** |
+| **Total** | | **~3,690/month** |
 
 Well under the 100,000/month limit. Even at 10× the assumed page-view traffic,
 usage stays under 10%.
@@ -178,9 +187,9 @@ IP `45.79.218.79`).
 | `/players/{tag}` × N members | 0 | 5 |
 | `/clans/{tag}/warlog` | 0 | 1 |
 
-**Light-poll API budget**: 2 calls × 144 polls/day = **288 API calls/day**.
+**Light-poll API budget**: 2 calls × 96 polls/day = **192 API calls/day**.
 **Daily-batch API budget**: 7 calls/day.
-**Total**: ~295 API calls/day.
+**Total**: ~199 API calls/day.
 
 Supercell's published limit is not a hard number, but the developer tier is
 generally tolerant of low-frequency polling. The 45-second shared TTL on
@@ -196,56 +205,58 @@ fetch).
 
 ## 6. Summary: what hits first, and when
 
-| Constraint | Limit | 1-year projection | First-to-hit rank |
+| Constraint | Limit | Projection (15-min cadence) | First-to-hit rank |
 |---|---|---|---|
-| Neon storage | 512 MB | ~110 MB | 2nd (only if clan grows to 50+ or churns heavily) |
-| Neon compute | ~3,000 hours | ~1.3 hours | 5th (never) |
-| Vercel function invocations | 100k/month | ~5k/month | 3rd (safe until ~20× traffic) |
-| Vercel function duration | 300s (Hobby default) | daily batch ~8s at 5 members | 4th (never — 300s covers ~200 members, far past the CoC 50 cap) |
-| Supercell API rate | soft, per IP | ~295 calls/day | **1st** (tolerable; proxy-shared risk) |
+| **Neon compute (CU)** | **100 CU-hours/month** | ~360 CU/month (observed) | **1st — over limit** |
+| Supercell API rate | soft, per IP | ~199 calls/day | 2nd (tolerable; proxy-shared risk) |
+| Vercel function invocations | 100k/month | ~3.7k/month | 3rd (safe until ~25× traffic) |
+| Neon storage | 512 MB | ~60–80 MB | 4th (only if clan grows to 50+) |
+| Vercel function duration | 300s (Hobby default) | daily batch ~8s at 5 members | 5th (never) |
 
-### The first real ceiling: Supercell API rate (proxy-shared IP)
+### The first real ceiling: Neon CU-hours (100/month limit)
 
-The Vercel function-duration ceiling previously listed here was based on an
-outdated 10s Hobby limit. **Verified 2026-07: Vercel Hobby's default function
-duration is 300s**, which covers ~200 sequential player fetches — far beyond
-the CoC hard clan cap of 50. Function duration is no longer a constraint on
-any free tier.
+**Observed (2026-07-23):** Neon CU consumption rose from 4.4 CU at 5:00 PM to
+7.14 CU at 8:40 PM — a rate of ~0.75 CU/hour at the old 10-min cadence. That
+extrapolates to ~540 CU/month, far over the 100 CU free-tier limit.
 
-The actual first ceiling is the Supercell API rate limit on the shared
-RoyaleAPI proxy IP (`45.79.218.79`). If the proxy IP is shared with many other
-RoyaleAPI consumers, a rate-limit hit could cause intermittent failed polls.
-This is already handled gracefully (failed-poll safety — concept/04 #3: never
-mark members inactive on a failed fetch). No structural change needed unless
-failures become persistent — in which case a dedicated proxy IP or a lower
-poll cadence (every 15 min instead of 10) is the lever.
+The cadence was reduced to **15 minutes** (96 polls/day instead of 144),
+cutting the poll-driven CU by ~33% to an estimated ~360 CU/month. **This is
+still above the 100 CU limit**, so further action is needed (see
+recommendations below). The dominant cost is the Neon compute cold-start wake
+per poll, not the query time itself.
 
-### The second ceiling: Neon storage (only at scale)
+### Mitigations for Neon CU
 
-At 5 members, the DB is 9.4 MB with ~5× headroom to the 512 MB limit even at
-1 year. The ceiling only approaches if the clan grows to ~50 members AND
-churns (departed-member snapshots accumulate). The purge route deletes
-profiles after 14 days but does not currently prune their snapshots —
-recommendation #1 below addresses this.
+1. **Raise the cadence further** — 30-min cadence (48 polls/day) would halve
+   the CU again to ~180/month. Donation counters and war state don't change
+   faster than every 30 min, so data quality is preserved.
+2. **Batch the DB writes** — combine the light poll's per-member snapshot
+   inserts into a single batch insert. This reduces per-poll active time but
+   not the cold-start cost.
+3. **Upgrade to Neon Pro** ($19/month) — raises the CU limit to 1,920
+   CU-hours/month. Only needed if the free-tier CU limit is genuinely hit.
+
+### The second ceiling: Supercell API rate (proxy-shared IP)
+
+At 15-min cadence the API budget is ~199 calls/day — well within Supercell's
+tolerance. If RoyaleAPI's proxy IP is shared with many other consumers, a
+rate-limit hit could cause intermittent failed polls, handled gracefully by
+failed-poll safety (concept/04 #3).
 
 ---
 
 ## 7. Recommendations for free-tier sustainability
 
-1. **Snapshot pruning** — add a purge step for departed-member snapshots
+1. **Monitor Neon CU weekly** — the 100 CU/month limit is the real constraint.
+   If consumption approaches 80 CU before month-end, raise the cadence to 30
+   min or consider Neon Pro.
+2. **Snapshot pruning** — add a purge step for departed-member snapshots
    (keep only the last pre-departure row for the clan log). Prevents unbounded
-   `member_snapshots` growth if the clan churns. Priority: medium (needed only
-   if clan grows beyond ~20 members or churns heavily).
-2. **No `maxDuration` config needed** — Vercel Hobby's default 300s already
-   covers any clan size up to the CoC 50-member cap. (If Vercel ever reverts
-   the default, set `export const maxDuration = 300` on the ingest route.)
-3. **Keep the 45s refresh TTL** — it prevents refresh-button bursts from
+   `member_snapshots` growth if the clan churns. Priority: medium.
+3. **No `maxDuration` config needed** — Vercel Hobby's default 300s already
+   covers any clan size up to the CoC 50-member cap.
+4. **Keep the 45s refresh TTL** — it prevents refresh-button bursts from
    multiplying Supercell calls. Do not lower it below 30s.
-4. **Monitor Neon storage monthly** — re-run the stats script
-   (`SELECT pg_size_pretty(pg_database_size(current_database()))`) after major
-   schema changes or clan growth. The 512 MB limit has ~5× headroom at 5
-   members but only ~1× at 50.
-5. **Do not raise poll cadence below 10 min** — the light poll does 2 Supercell
-   calls each; at 5-min cadence that doubles to 576 calls/day, increasing
-   rate-limit risk without meaningful data-quality gain (donation counters and
-   war state don't change faster than every 10 min).
+5. **Do not lower poll cadence below 15 min** — the light poll does 2 Supercell
+   calls each; 15 min is the current sweet spot between CU savings and data
+   freshness.

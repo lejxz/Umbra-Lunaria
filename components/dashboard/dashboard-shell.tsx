@@ -171,8 +171,9 @@ export function DashboardShell({ data }: { data: DashboardData }) {
 
 /**
  * Freshness footer with live countdown to the next expected poll.
- * The poll interval is 10 minutes (GitHub Actions every-10-min cron).
- * The countdown shows how long until the next poll should fire.
+ * The poll interval is 15 minutes (third-party cron-job service, every-15-min
+ * schedule — see concept/04). The countdown shows how long until the next
+ * poll should fire.
  */
 function FreshnessFooter({
   lastPoll,
@@ -185,7 +186,7 @@ function FreshnessFooter({
   trackingStart: Date | string | null;
   warSynced: Date | string | null;
 }) {
-  const POLL_INTERVAL_MINUTES = 10;
+  const POLL_INTERVAL_MINUTES = 15;
   const [now, setNow] = useState(Date.now());
   const [mounted, setMounted] = useState(false);
 
@@ -196,7 +197,7 @@ function FreshnessFooter({
     return () => clearInterval(timer);
   }, []);
 
-  // Calculate next poll time: last poll + 10 min
+  // Calculate next poll time: last poll + 15 min
   const lastPollDate = lastPoll ? new Date(lastPoll) : null;
   const nextPollDate = lastPollDate
     ? new Date(lastPollDate.getTime() + POLL_INTERVAL_MINUTES * 60 * 1000)
