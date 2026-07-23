@@ -221,6 +221,21 @@ export function IconChevronRight(props: React.SVGProps<SVGSVGElement>) {
 }
 
 // ===========================================================================
+// Capital — district / building landmark
+// ===========================================================================
+
+export function IconCapital(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M3 21h18" />
+      <path d="M5 21V8l7-5 7 5v13" />
+      <path d="M9 21v-6h6v6" />
+      <path d="M9 11h.01M15 11h.01" strokeOpacity="0.4" />
+    </svg>
+  );
+}
+
+// ===========================================================================
 // Empty States (48x48)
 // ===========================================================================
 

@@ -225,13 +225,13 @@ These are existing, verified baseline capabilities. They are not permission to s
 
 **Goal:** Replace `/capital` placeholder with the current API-backed Capital page, without presenting unimplemented raid history as real.
 
-- [ ] Add `getCapitalOverview()` and `getDistrictUpgradeHistory()` query functions.
-- [ ] Diff daily district snapshots into chronological upgrade events.
-- [ ] Render Capital Hall, points, league, district list, district levels, latest capture time, and upgrade timeline.
-- [ ] Render a truthful raid-weekend pending state until completed-season ingestion is available.
-- [ ] Render an explicit unavailable state for live upgrade cost/progress.
-- [ ] Link Capital summary from dashboard to `/capital`.
-- [ ] Test no snapshot, one snapshot, and level-increase timeline states.
+- [x] Add `getCapitalOverview()` and `getDistrictUpgradeHistory()` query functions. _(lib/db/capital-queries.ts — getCapitalPage() runs both in parallel.)_
+- [x] Diff daily district snapshots into chronological upgrade events. _(Pure diffDistrictSnapshots() in lib/capital/district-diff.ts, tested independently.)_
+- [x] Render Capital Hall, points, league, district list, district levels, latest capture time, and upgrade timeline. _(components/capital/* — overview card, district list, upgrade timeline with district filter.)_
+- [x] Render a truthful raid-weekend pending state until completed-season ingestion is available. _(components/capital/raid-pending-card.tsx — does not fabricate a leaderboard from lifetime totals.)_
+- [x] Render an explicit unavailable state for live upgrade cost/progress. _(Overview card footer: 'Live upgrade cost & progress are not provided by the API.')_
+- [x] Link Capital summary from dashboard to `/capital`. _(Already linked — components/dashboard/nav-summaries.tsx line 103.)_
+- [x] Test no snapshot, one snapshot, and level-increase timeline states. _(tests/capital/district-diff.test.ts — 10 tests covering cold start, single snapshot, level increases, no-change, decreases, unsorted input.)_
 
 ### Step 1.6 — Phase 1 integration and release gate
 
