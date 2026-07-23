@@ -57,8 +57,9 @@ export function MemberDetailSheet({
       maxWidth="max-w-3xl"
     >
       {loading && (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex flex-col items-center justify-center gap-3 py-16">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-umbra-purple border-t-transparent" />
+          <p className="text-sm text-umbra-muted">Loading member…</p>
         </div>
       )}
       {error && (
