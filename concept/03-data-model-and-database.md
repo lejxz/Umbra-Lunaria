@@ -116,3 +116,51 @@ Drizzle migrations are forward-only in this project — `drizzle-kit` does not a
 4. **Every migration ships with its journal entry.** A new `drizzle/NNNN_*.sql` file must be accompanied by a new entry in `drizzle/meta/_journal.json` so both `drizzle-kit migrate` and the HTTP migrator apply it in order.
 
 This keeps the migration surface simple and honest: forward-only SQL, verified on a branch, rolled back via Neon restore if ever needed.
+
+## Retention and pruning
+
+The database runs on Neon's free tier (512 MB storage, 100 CU-hours/month). Without pruning, `member_snapshots` — the dominant write table — would grow unbounded (48 polls/day × N members × 365 days). Pruning keeps the database bounded at any clan size.
+
+### Checkpoint columns
+
+Three columns on `members` store cumulative lifetime totals, computed from ALL snapshots before pruning:
+
+| Column | Computed from | Used by |
+|---|---|---|
+| `cumulative_donations_given` | Reset-aware lifetime donation delta (given) | HoF Philanthropist, HoF Unsleeping, Activity Score ("all" window) |
+| `cumulative_donations_received` | Reset-aware lifetime donation delta (received) | HoF Unsleeping (via Philanthropist) |
+| `cumulative_login_days` | Distinct calendar days with `loginDayFlag = true` | HoF Dedicated, HoF Unsleeping |
+
+Checkpoints are computed:
+1. During the daily batch (00:00 PHT, before HoF) — primary.
+2. During the purge route (02:00 PHT, before pruning) — safety re-compute in case the daily batch failed.
+
+### Pruning schedule (runs daily at 02:00 AM PHT via Vercel Cron)
+
+| Pass | What | Rule | Rationale |
+|---|---|---|---|
+| 1. Departed members | Delete members + snapshots + unit_levels | `purge_at < now()` | Existing 14-day retention policy. |
+| 2. Intra-day snapshots | Delete snapshots >7 days old, keep LAST per member per day | `captured_at < 7d AND id NOT IN (DISTINCT ON (player_tag, day) ... ORDER BY captured_at DESC)` | The last snapshot of each day has the highest donation counter (preserves delta chain) and the most accurate flags. Cuts ~98% of growth. |
+| 3. Capital snapshots | Delete `capital_district_snapshots` >90 days | `captured_at < 90d` | Upgrade timeline derives from diffs; old raw snapshots aren't needed for display. |
+| 4. Old backfill wars | Delete wars >365 days with no snapshot, `war_type='regular'` | `end_time < 365d AND war_snapshot IS NULL` | History list shows 50, trend chart shows 20 — old backfill rows have no detail and aren't referenced. |
+
+### NOT pruned (by design)
+
+| Table | Why kept |
+|---|---|
+| `membership_events` | Immutable log, tiny (~100/year). |
+| `war_attacks` | Small (~500/year), referenced by HoF Vanguard (3-star count) + attack distribution donut. |
+| `war_participants` | Small (~200/year), referenced by member war history (all-time). |
+| `hall_of_fame_records` | 5 rows per award, overwritten not accumulated. |
+| `cwl_seasons` | ~12/year, tiny. |
+| Daily last-of-day snapshots | Kept forever — preserve the donation-delta chain and login-day flags. The checkpoint columns cover the lifetime totals. |
+
+### Cron architecture
+
+| Job | Platform | Schedule (PHT) | Purpose |
+|---|---|---|---|
+| Light poll | Third-party cron (cron-job.org) | Every 30 min | Roster + snapshots + war sync |
+| Daily batch | Third-party cron (cron-job.org) | 00:00 midnight | Full player details + war-log backfill + checkpoints + HoF |
+| Purge | Vercel Cron | 02:00 AM (`0 18 * * *` UTC) | Safety checkpoint → prune |
+
+The 2-hour gap between the daily batch (00:00) and the purge (02:00) guarantees checkpoints are computed before pruning. The purge route also re-computes checkpoints as a safety net.

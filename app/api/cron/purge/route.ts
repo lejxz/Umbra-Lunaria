@@ -5,53 +5,53 @@ import {
   members,
   memberSnapshots,
   unitLevels,
-  capitalDistrictSnapshots,
-  wars,
 } from "@/lib/db/schema";
+import { computeCheckpoints } from "@/lib/ingest/checkpoints";
 
 /**
  * GET /api/cron/purge
- * Triggered by Vercel Cron once a day (vercel.json). Performs four cleanup
- * passes to keep the database bounded on the Neon free tier (512 MB). See
- * concept/03 §"Retention and pruning" for the full strategy.
+ * Triggered by Vercel Cron once a day (vercel.json, `0 18 * * *` = 02:00 AM
+ * Asia/Manila). Runs 2 hours after the daily batch (00:00 PHT on the
+ * third-party cron service) to guarantee checkpoints are computed before
+ * pruning.
  *
- * CRON_SECRET must be set as a Vercel environment variable by hand — Vercel
- * does NOT generate this value for you, it only forwards whatever you set
- * as the Authorization header when it invokes this route.
+ * As a safety net, this route ALSO re-computes checkpoints before pruning —
+ * in case the daily batch failed or was delayed.
+ *
+ * CRON_SECRET must be set as a Vercel environment variable.
  *
  * Pruning passes (in order):
  *
- * 1. Departed-member purge (existing): delete members whose purge_at has
- *    passed + their snapshots + unit levels. The membership_events row is
- *    kept (immutable log — concept/03).
+ * 0. Safety checkpoint: re-compute cumulative totals from ALL snapshots
+ *    (in case the daily batch didn't run).
  *
- * 2. Intra-day snapshot pruning: for member_snapshots older than 7 days,
- *    keep only the FIRST snapshot per member per calendar day. The other
- *    ~47 intra-day snapshots per member per day have no analytical value
- *    after 7 days — the donation/activity analytics use daily buckets, and
- *    the reset-aware donation delta only needs consecutive pairs (which the
- *    daily first-of-day snapshots preserve). This cuts ~98% of snapshot
- *    growth without affecting any dashboard, Hall of Fame, or lifetime
- *    computation.
+ * 1. Departed-member purge: delete members whose purge_at has passed + their
+ *    snapshots + unit levels. membership_events kept (immutable log).
  *
- * 3. Capital district snapshot pruning: delete capital_district_snapshots
- *    older than 90 days. The upgrade timeline is derived from diffs — once
- *    the diff is computed and displayed, the raw snapshots older than 90
- *    days have no analytical value (the 30-day window is the longest view).
+ * 2. Intra-day snapshot pruning: for snapshots older than 7 days, keep only
+ *    the LAST snapshot per member per calendar day. The other ~47 intra-day
+ *    snapshots have no analytical value after 7 days. The LAST snapshot has
+ *    the highest donation counter (preserving the delta chain) and the most
+ *    accurate activity/login flags.
+ *
+ * 3. Capital district snapshot pruning: delete snapshots older than 90 days.
+ *    The upgrade timeline derives from diffs — old raw snapshots aren't needed
+ *    for display once the diff is computed.
  *
  * 4. Old backfill war pruning: delete wars older than 365 days that have no
- *    snapshot (war-log backfill rows). These have no roster/attack detail
- *    and the history list only shows 50. Live-tracked wars (with snapshots)
- *    are kept — they're small and may be referenced by the detail sheet.
+ *    snapshot (war-log backfill rows). Live-tracked wars (with snapshots) are
+ *    kept.
  *
- * What is NOT pruned (by design):
- *   - membership_events: immutable log, tiny (~100/year).
- *   - war_attacks: small (~500/year), referenced by Hall of Fame Vanguard.
+ * NOT pruned (by design):
+ *   - membership_events: immutable log, tiny.
+ *   - war_attacks: small, referenced by HoF Vanguard + attack distribution.
+ *   - war_participants: small, referenced by member war history.
  *   - hall_of_fame_records: 5 rows per award, overwritten not accumulated.
  *   - cwl_seasons: ~12/year, tiny.
- *   - Daily first-of-day snapshots: kept forever — they preserve the
- *     donation-delta chain and login-day flags for Hall of Fame lifetime
- *     computations (Philanthropist, Dedicated, Unsleeping).
+ *   - Daily last-of-day snapshots: kept forever — they preserve the
+ *     donation-delta chain and login-day flags. The checkpoint columns on
+ *     members cover the lifetime totals that would have been computed from
+ *     the deleted intra-day snapshots.
  */
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -62,11 +62,25 @@ export async function GET(req: NextRequest) {
 
   const now = new Date();
   const result = {
+    checkpoints: false,
     purgedMembers: 0,
     prunedSnapshots: 0,
     prunedCapitalSnaps: 0,
     prunedWars: 0,
   };
+
+  // ── 0. Safety checkpoint re-computation ──
+  try {
+    await computeCheckpoints();
+    result.checkpoints = true;
+  } catch {
+    // If checkpoint fails, DON'T prune — old snapshots are the only source
+    // of lifetime totals. Pruning without checkpoints would corrupt HoF.
+    return NextResponse.json(
+      { ok: false, error: "checkpoint computation failed — pruning aborted", ...result },
+      { status: 500 },
+    );
+  }
 
   // ── 1. Departed-member purge ──
   const toPurge = await db
@@ -81,17 +95,10 @@ export async function GET(req: NextRequest) {
   }
   result.purgedMembers = toPurge.length;
 
-  // ── 2. Intra-day snapshot pruning (keep first per member per day, >7 days old) ──
-  // Deletes all snapshots older than 7 days EXCEPT the first one per member
-  // per calendar day. Uses a CTE to identify the "keep" rows, then deletes
-  // everything else older than the cutoff.
-  //
-  // This preserves:
-  //   - All snapshots from the last 7 days (full resolution for reset detection).
-  //   - One snapshot per member per day for all time (daily donation-delta chain
-  //     + login-day flags for Hall of Fame lifetime computations).
-  //
-  // Cuts ~98% of long-term snapshot growth (47 of 48 daily rows per member).
+  // ── 2. Intra-day snapshot pruning (keep LAST per member per day, >7 days old) ──
+  // Deletes all snapshots older than 7 days EXCEPT the last one per member
+  // per calendar day. The last snapshot has the highest donation counter
+  // (preserving the reset-aware delta chain) and the most accurate flags.
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
@@ -103,7 +110,7 @@ export async function GET(req: NextRequest) {
           id
         FROM member_snapshots
         WHERE captured_at < ${sevenDaysAgo}
-        ORDER BY player_tag, date_trunc('day', captured_at), captured_at ASC
+        ORDER BY player_tag, date_trunc('day', captured_at), captured_at DESC
       )
   `);
   result.prunedSnapshots = prunedSnaps.rowCount ?? 0;

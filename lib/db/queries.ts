@@ -614,12 +614,18 @@ export async function getMemberActivityScore(
   for (const member of retainedMembers) {
     const memberSnaps = allSnapshots.filter((s) => s.playerTag === member.playerTag);
 
-    // Donations given (reset-aware)
+    // Donations given (reset-aware). For the "all" window, use the checkpoint
+    // column directly (computed from ALL snapshots before pruning). For
+    // windowed queries (24h/7d/30d), use the snapshots — the 30d window has
+    // daily snapshots for days 8-30 which preserve the delta chain.
     const donationSnaps: DonationSnapshot[] = memberSnaps.map((s) => ({
       capturedAt: s.capturedAt,
       donations: s.donations,
     }));
-    const donationsGiven = calculateDonationWindow(donationSnaps, win);
+    const donationsGiven =
+      windowKind === "all"
+        ? member.cumulativeDonationsGiven ?? 0
+        : calculateDonationWindow(donationSnaps, win);
 
     // Observed activity rate
     const activeIntervals = memberSnaps.filter((s) => s.activityFlag).length;
@@ -1097,6 +1103,9 @@ async function getRetainedMembers() {
       warPreference: members.warPreference,
       league: members.league,
       leagueTier: members.leagueTier,
+      cumulativeDonationsGiven: members.cumulativeDonationsGiven,
+      cumulativeDonationsReceived: members.cumulativeDonationsReceived,
+      cumulativeLoginDays: members.cumulativeLoginDays,
     })
     .from(members)
     .where(isNull(members.leftAt));

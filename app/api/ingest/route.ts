@@ -353,6 +353,18 @@ async function runDailyBatch(): Promise<string[]> {
       });
   }
 
+  // ---- Checkpoint computation (before HoF + before purge) ----
+  // Computes cumulative lifetime totals from ALL snapshots and stores them
+  // on the members table. Must run BEFORE checkHallOfFameRecords (which now
+  // reads checkpoints) and BEFORE the purge route prunes old snapshots.
+  try {
+    const { computeCheckpoints } = await import("@/lib/ingest/checkpoints");
+    await computeCheckpoints();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`checkpoint computation failed: ${msg}`);
+  }
+
   // ---- Hall of Fame records (checked once per daily batch) ----
   try {
     const hofErrors = await checkHallOfFameRecords();

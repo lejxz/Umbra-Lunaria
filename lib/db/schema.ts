@@ -109,6 +109,15 @@ export const members = pgTable("members", {
   lastDetailCaptureAt: timestamp("last_detail_capture_at", {
     withTimezone: true,
   }),
+
+  // ── Checkpoint columns for safe snapshot pruning ──
+  // Computed from ALL member_snapshots during the daily batch (before pruning).
+  // After pruning, HoF awards and 30d-window donation queries use these as
+  // baselines instead of reading pruned snapshots. See concept/03 §"Retention
+  // and pruning".
+  cumulativeDonationsGiven: integer("cumulative_donations_given").default(0),
+  cumulativeDonationsReceived: integer("cumulative_donations_received").default(0),
+  cumulativeLoginDays: integer("cumulative_login_days").default(0),
 });
 
 // ---------------------------------------------------------------------------

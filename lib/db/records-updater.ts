@@ -24,8 +24,7 @@ import {
   capitalRaidSeasons,
   hallOfFameRecords,
 } from "@/lib/db/schema";
-import { calculateDonationWindow } from "@/lib/scoring/donations";
-import { computeWindow, isSameDayInClanTz } from "@/lib/time/windows";
+import { isSameDayInClanTz } from "@/lib/time/windows";
 
 export type AwardKey =
   | "philanthropist"
@@ -51,37 +50,33 @@ export async function checkHallOfFameRecords(): Promise<string[]> {
   const LIMIT = 1000;
 
   const allMembersRaw = await db
-    .select({ playerTag: members.playerTag, name: members.name })
+    .select({
+      playerTag: members.playerTag,
+      name: members.name,
+      cumulativeDonationsGiven: members.cumulativeDonationsGiven,
+      cumulativeDonationsReceived: members.cumulativeDonationsReceived,
+      cumulativeLoginDays: members.cumulativeLoginDays,
+    })
     .from(members);
 
   if (allMembersRaw.length === 0) return errors;
 
   const tags = allMembersRaw.map((m) => m.playerTag);
   const nameMap = new Map(allMembersRaw.map((m) => [m.playerTag, m.name]));
-  const winAll = computeWindow("all");
 
   const candidates: RecordCandidate[] = [];
   const now = new Date();
 
   try {
-    const allSnaps = await db
-      .select({
-        playerTag: memberSnapshots.playerTag,
-        capturedAt: memberSnapshots.capturedAt,
-        donations: memberSnapshots.donations,
-        loginDayFlag: memberSnapshots.loginDayFlag,
-      })
-      .from(memberSnapshots)
-      .where(inArray(memberSnapshots.playerTag, tags))
-      .orderBy(memberSnapshots.capturedAt);
-
-    // ── Philanthropist ──
+    // ── Philanthropist ── (uses checkpoint columns — computed by the daily
+    // batch before this runs, and re-computed by the purge route as a safety
+    // net. No need to re-read all snapshots.)
     const philoScores: { tag: string; value: number }[] = [];
     for (const m of allMembersRaw) {
-      const snaps = allSnaps
-        .filter((s) => s.playerTag === m.playerTag)
-        .map((s) => ({ capturedAt: s.capturedAt, donations: s.donations }));
-      philoScores.push({ tag: m.playerTag, value: calculateDonationWindow(snaps, winAll) });
+      philoScores.push({
+        tag: m.playerTag,
+        value: m.cumulativeDonationsGiven ?? 0,
+      });
     }
     philoScores.sort((a, b) => b.value - a.value);
     
@@ -126,14 +121,37 @@ export async function checkHallOfFameRecords(): Promise<string[]> {
       });
     });
 
-    // ── Dedicated ──
-    const loginSnaps = allSnaps.filter((s) => s.loginDayFlag);
+    // ── Dedicated ── (uses checkpoint column for login days count.
+    // Note: the checkpoint stores total unique login days, not the longest
+    // streak. For the streak we'd still need the daily snapshots. However,
+    // the daily last-of-day snapshots are kept forever (not pruned), so the
+    // streak can still be computed from them. We use the checkpoint as a
+    // fallback when snapshots are insufficient.)
     const dedicatedScores: { tag: string; value: number }[] = [];
+    // Fetch only the daily snapshots (last per day) for streak computation.
+    // These are the snapshots that survive pruning — safe to read.
+    const dailyLoginSnaps = await db
+      .select({
+        playerTag: memberSnapshots.playerTag,
+        capturedAt: memberSnapshots.capturedAt,
+        loginDayFlag: memberSnapshots.loginDayFlag,
+      })
+      .from(memberSnapshots)
+      .where(inArray(memberSnapshots.playerTag, tags))
+      .orderBy(memberSnapshots.playerTag, memberSnapshots.capturedAt);
+
     for (const m of allMembersRaw) {
-      const memberLogins = loginSnaps
-        .filter((s) => s.playerTag === m.playerTag)
+      const memberLogins = dailyLoginSnaps
+        .filter((s) => s.playerTag === m.playerTag && s.loginDayFlag)
         .map((s) => s.capturedAt);
-      if (memberLogins.length === 0) continue;
+      if (memberLogins.length === 0) {
+        // Fallback: use the checkpoint count as a rough value.
+        const checkpointDays = m.cumulativeLoginDays ?? 0;
+        if (checkpointDays > 0) {
+          dedicatedScores.push({ tag: m.playerTag, value: checkpointDays });
+        }
+        continue;
+      }
       const uniqueDays: Date[] = [];
       for (const ts of memberLogins) {
         const last = uniqueDays[uniqueDays.length - 1];
@@ -194,19 +212,14 @@ export async function checkHallOfFameRecords(): Promise<string[]> {
       });
     });
 
-    // ── Unsleeping ──
+    // ── Unsleeping ── (uses checkpoint columns for donations + login days)
     const warStarMap = new Map(warRows.map((r) => [r.attackerTag, r.threeStars]));
     const capitalMap = new Map(capitalEntries.map((e) => [e.tag, e.value]));
     const unsleepingScores: { tag: string; value: number }[] = [];
     for (const m of allMembersRaw) {
-      const snaps = allSnaps.filter((s) => s.playerTag === m.playerTag);
-      const donated = calculateDonationWindow(snaps.map((s) => ({ capturedAt: s.capturedAt, donations: s.donations })), winAll);
-      const loginDaysUniq: Date[] = [];
-      for (const s of snaps.filter((s) => s.loginDayFlag)) {
-        const last = loginDaysUniq[loginDaysUniq.length - 1];
-        if (!last || !isSameDayInClanTz(s.capturedAt, last)) loginDaysUniq.push(s.capturedAt);
-      }
-      const raw = donated + loginDaysUniq.length * 100 + (warStarMap.get(m.playerTag) ?? 0) * 500 + Math.round((capitalMap.get(m.playerTag) ?? 0) / 10);
+      const donated = m.cumulativeDonationsGiven ?? 0;
+      const loginDays = m.cumulativeLoginDays ?? 0;
+      const raw = donated + loginDays * 100 + (warStarMap.get(m.playerTag) ?? 0) * 500 + Math.round((capitalMap.get(m.playerTag) ?? 0) / 10);
       unsleepingScores.push({ tag: m.playerTag, value: raw });
     }
     unsleepingScores.sort((a, b) => b.value - a.value);
