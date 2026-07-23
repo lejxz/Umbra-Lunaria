@@ -3,12 +3,14 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
- * District list — the full current district view (concept/08 §"Current Capital
- * overview" #4: "District names and current district hall levels"). The
- * dashboard shows a compact version; this is the full list.
+ * District list — the full current district reference (concept/08 §"Current
+ * Capital overview" #4). Positioned last on the page because district levels
+ * change infrequently (a level-up is a multi-day event), so this is the
+ * least-urgent section.
  *
- * Districts are sorted by name. Each row shows the district name + its hall
- * level. A cold-start state is shown when no districts payload exists yet.
+ * Compact two-column grid. Districts sorted by level (descending) so the
+ * highest-level districts — the ones closest to a milestone — surface first.
+ * A cold-start state is shown when no districts payload exists yet.
  */
 export function DistrictList({
   districts,
@@ -17,11 +19,16 @@ export function DistrictList({
   districts: CapitalDistrict[];
   hasDistricts: boolean;
 }) {
+  // Sort by level descending (highest first), then by name for stability.
+  const sorted = [...districts].sort(
+    (a, b) => b.districtHallLevel - a.districtHallLevel || a.name.localeCompare(b.name),
+  );
+
   return (
     <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="district-list-title">
       <div className="flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          Districts · current levels
+          Districts · reference
         </p>
         {hasDistricts && (
           <span className="text-2xs text-umbra-muted">{districts.length} districts</span>
@@ -40,22 +47,27 @@ export function DistrictList({
           />
         </div>
       ) : (
-        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
-          {districts.map((d) => (
+        <ul className="mt-4 grid gap-1.5 sm:grid-cols-2">
+          {sorted.map((d) => (
             <li
               key={d.name}
-              className="flex items-center justify-between rounded-xl border border-umbra-line bg-white/[.02] px-3 py-2"
+              className="flex items-center justify-between rounded-lg border border-umbra-line/60 bg-white/[.02] px-3 py-1.5"
             >
               <span className="truncate text-xs text-umbra-lilac" title={d.name}>
                 {d.name}
               </span>
-              <span className="shrink-0 rounded-full border border-umbra-purple/30 bg-umbra-purple/10 px-2 py-0.5 text-2xs font-semibold text-umbra-purple">
+              <span className="shrink-0 font-mono text-2xs font-semibold text-umbra-purple">
                 Lv {d.districtHallLevel}
               </span>
             </li>
           ))}
         </ul>
       )}
+
+      <p className="mt-3 text-2xs text-umbra-muted/50">
+        District levels update infrequently — a level-up is a multi-day Capital
+        Gold effort. See the upgrade timeline above for observed changes.
+      </p>
     </section>
   );
 }

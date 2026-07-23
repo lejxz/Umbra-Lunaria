@@ -9,14 +9,13 @@ import { IconCapital, IconChevronRight } from "@/components/ui/icons";
 /**
  * District upgrade timeline — chronological events diffed from daily
  * district-snapshot captures (concept/08 §"District upgrade history"). Each
- * event is a completed level increase: "Barbarian Camp reached level 4 on
- * 2026-07-20".
+ * event is a completed level increase: "Barbarian Camp reached level 4".
  *
  * A district filter narrows the timeline. States:
  *   - Cold start (one snapshot per district): explains history begins after
  *     the next observed change.
  *   - No snapshots at all: empty state.
- *   - Events present: chronological list, newest-first.
+ *   - Events present: chronological list, newest-first, on a timeline rail.
  */
 export function UpgradeTimeline({
   history,
@@ -39,7 +38,7 @@ export function UpgradeTimeline({
           Upgrade history · tracked
         </p>
         {history.events.length > 0 && (
-          <span className="text-2xs text-umbra-muted">
+          <span className="rounded-full border border-umbra-purple/30 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold text-umbra-purple">
             {history.events.length} {history.events.length === 1 ? "upgrade" : "upgrades"}
           </span>
         )}
@@ -51,11 +50,7 @@ export function UpgradeTimeline({
       {/* District filter */}
       {history.districtNames.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          <FilterChip
-            active={filter === "all"}
-            onClick={() => onFilterChange("all")}
-            label="All"
-          />
+          <FilterChip active={filter === "all"} onClick={() => onFilterChange("all")} label="All" />
           {history.districtNames.map((name) => (
             <FilterChip
               key={name}
@@ -88,20 +83,19 @@ export function UpgradeTimeline({
           <ol className="relative space-y-2 border-l border-umbra-line pl-4">
             {filteredEvents.map((e, i) => (
               <li key={`${e.districtName}-${e.observedAt.getTime()}-${i}`} className="relative">
-                {/* Timeline dot */}
-                <span className="absolute -left-[1.4rem] top-1.5 flex h-2.5 w-2.5 items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/20" />
-                <div className="rounded-xl border border-umbra-line bg-white/[.02] px-3 py-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-umbra-lilac">
+                <span className="absolute -left-[1.4rem] top-2 flex h-2.5 w-2.5 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/20" />
+                <div className="rounded-lg border border-umbra-line/60 bg-white/[.02] px-3 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs font-medium text-umbra-lilac">
                       {e.districtName}
                     </span>
-                    <span className="flex items-center gap-1 font-mono text-2xs text-umbra-muted">
-                      <span>Lv {e.fromLevel}</span>
-                      <IconChevronRight className="h-3 w-3" aria-hidden />
+                    <span className="flex shrink-0 items-center gap-1 font-mono text-2xs">
+                      <span className="text-umbra-muted">Lv {e.fromLevel}</span>
+                      <IconChevronRight className="h-3 w-3 text-umbra-muted/60" aria-hidden />
                       <span className="text-emerald-400">Lv {e.toLevel}</span>
                     </span>
                   </div>
-                  <p className="mt-0.5 text-2xs text-umbra-muted">
+                  <p className="mt-0.5 text-micro text-umbra-muted/70">
                     <TimeAgo date={e.observedAt} />
                   </p>
                 </div>
@@ -112,7 +106,7 @@ export function UpgradeTimeline({
       </div>
 
       {history.trackingStart && !history.isColdStart && (
-        <p className="mt-3 text-2xs text-umbra-muted">
+        <p className="mt-3 text-2xs text-umbra-muted/60">
           Tracking began {formatRelative(history.trackingStart)}. Upgrades before
           this date are not recorded.
         </p>
@@ -121,15 +115,7 @@ export function UpgradeTimeline({
   );
 }
 
-function FilterChip({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
+function FilterChip({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
     <button
       type="button"
@@ -146,10 +132,7 @@ function FilterChip({
 }
 
 function formatRelative(date: Date): string {
-  const seconds = Math.max(
-    0,
-    Math.floor((Date.now() - new Date(date).getTime()) / 1000),
-  );
+  const seconds = Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 1000));
   if (seconds < 60) return "just now";
   if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
   if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;

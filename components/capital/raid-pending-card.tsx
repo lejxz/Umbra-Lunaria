@@ -1,14 +1,17 @@
-import { EmptyState } from "@/components/ui/empty-state";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
- * Raid-weekend pending state (concept/08 §"Raid-weekend history"). Phase 3.1
+ * Raid-weekend history card (concept/08 §"Raid-weekend history"). Phase 3.1
  * adds completed-season ingestion (`capitalraidseasons` + `capital_contributions`).
- * Until then, this card truthfully says raid history is coming — it does NOT
- * fabricate a leaderboard from lifetime player totals.
+ *
+ * Positioned directly after the overview because raid weekends are the
+ * high-value seasonal content users expect to see. Until Phase 3.1 lands,
+ * this card truthfully says raid history is coming — it does NOT fabricate a
+ * leaderboard from lifetime player totals.
  *
  * When `available` is true (Phase 3.1+), this card will be replaced by the
- * full raid-history view.
+ * full raid-history view (completed seasons, contribution leaderboard,
+ * participation rate, zero-attack list).
  */
 export function RaidPendingCard({ available }: { available: boolean }) {
   if (available) {
@@ -17,24 +20,35 @@ export function RaidPendingCard({ available }: { available: boolean }) {
   }
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="raid-pending-title">
-      <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-        Raid weekends · pending
-      </p>
-      <h3 id="raid-pending-title" className="mt-1 font-display text-lg text-umbra-lilac">
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="raid-history-title">
+      <div className="flex items-center justify-between">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+          Raid weekends
+        </p>
+        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-micro font-semibold uppercase tracking-wider text-amber-400">
+          Pending
+        </span>
+      </div>
+      <h3 id="raid-history-title" className="mt-1 font-display text-lg text-umbra-lilac">
         Raid-weekend history
       </h3>
-      <div className="mt-4">
-        <EmptyState
-          title="Raid history coming soon"
-          description="Completed raid-weekend results, the per-member contribution leaderboard, and participation rates will appear here once raid-season ingestion is active. This page does not fabricate a leaderboard from lifetime player totals."
-          icon={<IconCapital className="h-10 w-10" />}
-        />
+
+      <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-umbra-line bg-white/[.02] px-4 py-8 text-center">
+        <div className="mb-3 flex justify-center text-umbra-purple/40">
+          <IconCapital className="h-12 w-12" aria-hidden />
+        </div>
+        <p className="font-display text-base text-umbra-lilac">Coming soon</p>
+        <p className="mt-1.5 max-w-md text-2xs leading-5 text-umbra-muted">
+          Completed raid-weekend results, the per-member contribution leaderboard,
+          and participation rates will appear here once raid-season ingestion is
+          active. This page does not fabricate a leaderboard from lifetime totals.
+        </p>
       </div>
-      <p className="mt-3 rounded-lg border border-umbra-line bg-white/[.02] px-3 py-2 text-2xs text-umbra-muted">
-        The player profile&apos;s <code className="text-umbra-lilac">clanCapitalContributions</code>{" "}
-        is a lifetime total — it is shown in member detail, but it is not a
-        substitute for a season leaderboard.
+
+      <p className="mt-3 text-2xs text-umbra-muted/60">
+        The player profile&apos;s{" "}
+        <code className="text-umbra-lilac">clanCapitalContributions</code> is a
+        lifetime total — shown in member detail, but not a season leaderboard.
       </p>
     </section>
   );
