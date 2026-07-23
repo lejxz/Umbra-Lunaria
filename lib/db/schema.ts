@@ -417,6 +417,20 @@ export const hallOfFameRecords = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// cwl_seasons — one row per CWL season. Stores the full league-group response
+// (8 clans, 7 rounds, season name, state) so the War Center can render league
+// standings + day-by-day round tabs. See concept/07 §"Clan War League".
+// ---------------------------------------------------------------------------
+
+export const cwlSeasons = pgTable("cwl_seasons", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  season: text("season").notNull().unique(),
+  state: text("state").notNull(),
+  leagueGroup: jsonb("league_group").notNull(),
+  capturedAt: timestamp("captured_at", { withTimezone: true }).notNull(),
+});
+
+// ---------------------------------------------------------------------------
 // runtime_settings — administrator-editable DB values. Phase 2 writes; the
 // schema is ready now per concept/12 Step 1.0.C.
 // ---------------------------------------------------------------------------

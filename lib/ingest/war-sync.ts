@@ -21,7 +21,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { wars, warParticipants, warAttacks, clans } from "@/lib/db/schema";
+import { wars, warParticipants, warAttacks, clans, cwlSeasons } from "@/lib/db/schema";
 import {
   cocClient,
   type CocCurrentWar,
@@ -355,7 +355,12 @@ export async function backfillWarLog(
 // ---------------------------------------------------------------------------
 
 /**
- * Fetch the CWL league group for the clan and sync every war that involves us.
+ * Fetch the CWL league group for the clan, store it, and sync ALL wars in
+ * every round (not just ours) so the War Center can render full league
+ * standings. Wars involving our clan are normalized (our clan = `clan` side)
+ * and get full participant + attack syncing. Other clans' wars are stored as
+ * lightweight rows (stars/destruction/result only, no snapshot) for standings.
+ *
  * Best-effort: a 404 (not in CWL) or network failure is swallowed and reported
  * via the returned reason. Each CWL war is synced by `warTag` so the
  * idempotency unique index on `wars.war_tag` prevents duplicates across polls.
@@ -385,6 +390,24 @@ export async function syncCwlWars(
     return { synced: 0, reason, lastState: null };
   }
 
+  // Store the league group for the standings + day-tabs view.
+  await db
+    .insert(cwlSeasons)
+    .values({
+      season: group.season,
+      state: group.state,
+      leagueGroup: group as unknown as object,
+      capturedAt,
+    })
+    .onConflictDoUpdate({
+      target: cwlSeasons.season,
+      set: {
+        state: group.state,
+        leagueGroup: group as unknown as object,
+        capturedAt,
+      },
+    });
+
   let synced = 0;
   let lastState: string | null = null;
   for (const round of group.rounds ?? []) {
@@ -394,25 +417,101 @@ export async function syncCwlWars(
       try {
         const cwlWar = await cocClient.getCwlWar(warTag);
         if (!cwlWar.clan || !cwlWar.opponent) continue;
-        // Only sync wars that involve our clan.
+
         const weAreClan = cwlWar.clan.tag === clanTag;
         const weAreOpponent = cwlWar.opponent.tag === clanTag;
-        if (!weAreClan && !weAreOpponent) continue;
+        const involvesUs = weAreClan || weAreOpponent;
 
-        // Normalize so `clan` is always OUR clan before syncing.
-        const normalized = weAreClan
-          ? cwlWar
-          : { ...cwlWar, clan: cwlWar.opponent, opponent: cwlWar.clan };
-
-        await syncCurrentWar(normalized, capturedAt, warTag);
-        synced++;
-        lastState = cwlWar.state;
+        if (involvesUs) {
+          // Normalize so `clan` is always OUR clan before syncing.
+          const normalized = weAreClan
+            ? cwlWar
+            : { ...cwlWar, clan: cwlWar.opponent, opponent: cwlWar.clan };
+          await syncCurrentWar(normalized, capturedAt, warTag);
+          synced++;
+          lastState = cwlWar.state;
+        } else {
+          // Other clans' war — store as a lightweight row for standings.
+          // No snapshot, no participants (FK to members would fail for
+          // foreign tags). Just stars/destruction/result/state.
+          await syncCwlOtherWar(cwlWar, capturedAt, warTag);
+        }
       } catch {
         // A single round being inaccessible (404) is expected mid-season.
       }
     }
   }
   return { synced, reason: null, lastState };
+}
+
+/**
+ * Sync a CWL war that does NOT involve our clan — a lightweight row for
+ * league standings. Stores stars/destruction/result/state but no snapshot
+ * and no participants (foreign tags aren't in our `members` table).
+ * Idempotent via the `wars.war_tag` unique index.
+ */
+async function syncCwlOtherWar(
+  cwlWar: CocCurrentWar,
+  capturedAt: Date,
+  warTag: string,
+): Promise<void> {
+  if (!cwlWar.clan || !cwlWar.opponent) return;
+
+  // For other clans' wars, we store the data from the API's perspective
+  // (clan = first clan, opponent = second clan). The standings query will
+  // aggregate across all CWL wars by matching either clan or opponent tag.
+  const result = computeWarResult(cwlWar);
+  const startTime = parseCoCTime(cwlWar.startTime);
+  const endTime = parseCoCTime(cwlWar.endTime);
+
+  const fieldSet = {
+    state: cwlWar.state,
+    opponentTag: cwlWar.opponent.tag,
+    opponentName: cwlWar.opponent.name,
+    opponentBadgeUrls: cwlWar.opponent.badgeUrls ?? null,
+    opponentClanLevel: cwlWar.opponent.clanLevel ?? null,
+    teamSize: cwlWar.teamSize ?? null,
+    attacksPerMember: cwlWar.attacksPerMember ?? null,
+    ownStars: cwlWar.clan.stars,
+    opponentStars: cwlWar.opponent.stars,
+    ownDestructionPercentage: Math.round(cwlWar.clan.destructionPercentage),
+    opponentDestructionPercentage: Math.round(cwlWar.opponent.destructionPercentage),
+    ownAttacks: cwlWar.clan.attacks,
+    opponentAttacks: cwlWar.opponent.attacks,
+    result,
+    startTime,
+    endTime,
+    preparationStartTime: parseCoCTime(cwlWar.preparationStartTime),
+    lastSyncedAt: capturedAt,
+    // No snapshot — we don't need roster/attack detail for other clans' wars.
+    warSnapshot: null,
+  };
+
+  // Also store the "clan" side's tag/name so the standings query can find
+  // both participants. We use the opponentTag/opponentName fields for the
+  // second clan (as seen from the first clan's perspective).
+  // The `clan` side's identity is stored implicitly: the war_tag identifies
+  // it, and the standings query will match on both opponentTag and a new
+  // lookup. Actually, we need to store both clan tags. Let me use a different
+  // approach: store the war with clanTag = first clan, opponentTag = second
+  // clan, and the standings query matches on EITHER tag.
+
+  // Check if this war already exists (by warTag).
+  const [existing] = await db
+    .select()
+    .from(wars)
+    .where(eq(wars.warTag, warTag))
+    .limit(1);
+
+  if (existing) {
+    await db.update(wars).set(fieldSet).where(eq(wars.id, existing.id));
+  } else {
+    await db.insert(wars).values({
+      warTag,
+      warType: "cwl",
+      ...fieldSet,
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------

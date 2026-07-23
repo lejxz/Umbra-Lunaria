@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { CurrentWarDetail, WarHistoryEntry } from "@/lib/view-models/war";
+import type { CurrentWarDetail, WarHistoryEntry, WarLeadAnalysis } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { LiveCountdown } from "@/components/ui/live-countdown";
 import { TimeAgo } from "@/components/ui/time-ago";
@@ -20,12 +20,14 @@ export function WarHero({
   clanBadgeUrls,
   clanName,
   lastResult,
+  leadAnalysis,
   refreshTtlSeconds,
 }: {
   currentWar: CurrentWarDetail | null;
   clanBadgeUrls?: ClanBadgeUrls | null;
   clanName?: string | null;
   lastResult?: WarHistoryEntry | null;
+  leadAnalysis?: WarLeadAnalysis;
   refreshTtlSeconds: number;
 }) {
   if (!currentWar) {
@@ -167,6 +169,31 @@ export function WarHero({
           </span>
         )}
       </div>
+
+      {/* Lead analysis — "who's winning" highlight */}
+      {leadAnalysis && leadAnalysis.leader !== "unknown" && (
+        <div
+          className={`mt-3 flex items-center justify-center rounded-xl border px-4 py-2 ${
+            leadAnalysis.leader === "own"
+              ? "border-emerald-400/30 bg-emerald-400/5"
+              : leadAnalysis.leader === "opponent"
+                ? "border-red-400/30 bg-red-400/5"
+                : "border-amber-400/30 bg-amber-400/5"
+          }`}
+        >
+          <p
+            className={`font-display text-sm font-semibold ${
+              leadAnalysis.leader === "own"
+                ? "text-emerald-400"
+                : leadAnalysis.leader === "opponent"
+                  ? "text-red-400"
+                  : "text-amber-400"
+            }`}
+          >
+            {leadAnalysis.summary}
+          </p>
+        </div>
+      )}
 
       {/* VS matchup */}
       <div className="mt-4 flex items-stretch gap-3">

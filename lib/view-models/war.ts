@@ -147,29 +147,72 @@ export interface WarAnalysis {
 }
 
 // ---------------------------------------------------------------------------
+// War lead analysis — "who's winning" highlight for the hero.
+// ---------------------------------------------------------------------------
+
+export interface WarLeadAnalysis {
+  leader: "own" | "opponent" | "tied" | "unknown";
+  /** Human-readable summary, e.g. "Leading by 2 stars", "Tied on stars, ahead on destruction" */
+  summary: string;
+}
+
+// ---------------------------------------------------------------------------
+// CWL league view — standings + day-by-day rounds.
+// ---------------------------------------------------------------------------
+
+export interface CwlClanStanding {
+  tag: string;
+  name: string;
+  clanLevel: number | null;
+  badgeUrls: ClanBadgeUrls | null;
+  warsPlayed: number;
+  wins: number;
+  losses: number;
+  ties: number;
+  starsFor: number;
+  starsAgainst: number;
+  destructionPercentage: number | null;
+  isOwnClan: boolean;
+}
+
+export interface CwlRoundWar {
+  warTag: string | null;
+  roundIndex: number;
+  // Our clan's opponent for this round (null if round hasn't opened).
+  opponentName: string | null;
+  opponentTag: string | null;
+  opponentBadgeUrls: ClanBadgeUrls | null;
+  result: "win" | "loss" | "tie" | null;
+  ownStars: number | null;
+  opponentStars: number | null;
+  state: string | null; // preparation | inWar | warEnded | null (not started)
+  warId: number | null; // for linking to the detail sheet
+}
+
+export interface CwlSeasonView {
+  season: string;
+  state: string;
+  rounds: CwlRoundWar[];
+  standings: CwlClanStanding[];
+  ourRank: number | null;
+  isOwnClanInLeague: boolean;
+  capturedAt: Date | null;
+}
+
+// ---------------------------------------------------------------------------
 // Aggregate returned by getWarCenter()
 // ---------------------------------------------------------------------------
 
 export interface WarCenterData {
-  // The active war (preparation/inWar) if one exists. null when the clan is at
-  // peace — the hero then renders the no-active-war state. Ended wars are NOT
-  // promoted to this field (they live in `history`); a backfill row without a
-  // snapshot can't render the roster/attack detail.
   currentWar: CurrentWarDetail | null;
-  // Attack log for currentWar (empty during preparation, before any attacks).
   attackLog: WarAttackLogEntry[];
-  // History list, most-recent first.
   history: WarHistoryEntry[];
-  // Most recent ended war, surfaced as a one-line "last result" in the hero
-  // when there is no active war (concept/07 §landing state). null on cold
-  // start (no wars at all) or when an active war is already shown.
   lastResult: WarHistoryEntry | null;
-  // Clan war-log visibility — drives the private-war-log notice.
   warLogPublic: boolean | null;
-  // Earliest tracked war/snapshot time — for the "history before tracking may
-  // be incomplete" caveat on the history list.
   trackingStart: Date | null;
-  // Shared TTL the refresh route enforces, surfaced so the UI can show
-  // "try again in Ns" while rate-limited.
   refreshTtlSeconds: number;
+  // "Who's winning" analysis for the current war hero.
+  leadAnalysis: WarLeadAnalysis;
+  // CWL league view — null when not in CWL.
+  cwlSeason: CwlSeasonView | null;
 }
