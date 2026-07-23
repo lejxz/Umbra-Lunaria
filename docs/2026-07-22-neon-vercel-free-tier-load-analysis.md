@@ -82,7 +82,7 @@ Neon's free tier (as of 2026-07):
 | Resource | Free allowance | Projected usage (1 year, 15-min cadence) | Status |
 |---|---|---|---|
 | **Storage** | 0.5 GB (512 MB) | ~60–80 MB (all tables) | ✅ ~12–16% of limit |
-| **Compute (CU-hours)** | **100 CU-hours/month** | ~360 CU/month (observed rate, 15-min cadence) | ⚠️ **over limit — see below** |
+| **Compute (CU-hours)** | **100 CU-hours/month** | ~84 CU/month (observed rate, 15-min cadence) | ✅ under limit (~16% headroom) |
 | **Projects** | 1 | 1 | ✅ |
 | **Branches** | 10 | 1 (main) | ✅ |
 
@@ -98,17 +98,17 @@ active-query time suggests.
 | Time | Cumulative CU | Delta |
 |---|---|---|
 | 5:00 PM | 4.4 CU | — |
-| 8:40 PM | 7.14 CU | +2.74 CU in 3h40m |
+| 8:40 AM (next day) | 7.14 CU | +2.74 CU in 15h40m |
 
-That rate (~0.75 CU/hour) extrapolates to ~18 CU/day → **~540 CU/month** at
-the old 10-min cadence — well over the 100 CU free-tier limit. The cadence
+That rate (~0.175 CU/hour) extrapolates to ~4.2 CU/day → **~126 CU/month** at
+the old 10-min cadence — slightly over the 100 CU free-tier limit. The cadence
 was therefore reduced to **15 minutes** (96 polls/day instead of 144), which
 cuts the poll-driven CU by ~33%.
 
-**Revised estimate at 15-min cadence:** ~0.5 CU/hour → ~12 CU/day →
-**~360 CU/month**. This is still above the 100 CU free-tier limit, so further
-reductions may be needed (see recommendations). The dominant cost is the
-cold-start wake per poll, not the query time itself.
+**Revised estimate at 15-min cadence:** ~0.12 CU/hour → ~2.8 CU/day →
+**~84 CU/month**. This is **under the 100 CU free-tier limit**, with ~16%
+headroom. The dominant cost is the cold-start wake per poll, not the query
+time itself.
 
 ### Cold-start caveat
 
@@ -207,36 +207,32 @@ fetch).
 
 | Constraint | Limit | Projection (15-min cadence) | First-to-hit rank |
 |---|---|---|---|
-| **Neon compute (CU)** | **100 CU-hours/month** | ~360 CU/month (observed) | **1st — over limit** |
+| **Neon compute (CU)** | **100 CU-hours/month** | ~84 CU/month (observed, 15-min cadence) | ✅ under limit (~16% headroom) |
 | Supercell API rate | soft, per IP | ~199 calls/day | 2nd (tolerable; proxy-shared risk) |
 | Vercel function invocations | 100k/month | ~3.7k/month | 3rd (safe until ~25× traffic) |
 | Neon storage | 512 MB | ~60–80 MB | 4th (only if clan grows to 50+) |
 | Vercel function duration | 300s (Hobby default) | daily batch ~8s at 5 members | 5th (never) |
 
-### The first real ceiling: Neon CU-hours (100/month limit)
+### Neon CU — under control at 15-min cadence
 
 **Observed (2026-07-23):** Neon CU consumption rose from 4.4 CU at 5:00 PM to
-7.14 CU at 8:40 PM — a rate of ~0.75 CU/hour at the old 10-min cadence. That
-extrapolates to ~540 CU/month, far over the 100 CU free-tier limit.
+7.14 CU at 8:40 AM the next day — a rate of ~0.175 CU/hour at the old 10-min
+cadence. That extrapolates to ~126 CU/month, slightly over the 100 CU free-tier
+limit.
 
 The cadence was reduced to **15 minutes** (96 polls/day instead of 144),
-cutting the poll-driven CU by ~33% to an estimated ~360 CU/month. **This is
-still above the 100 CU limit**, so further action is needed (see
-recommendations below). The dominant cost is the Neon compute cold-start wake
-per poll, not the query time itself.
+cutting the poll-driven CU by ~33% to an estimated **~84 CU/month** — under
+the 100 CU limit with ~16% headroom. The dominant cost is the Neon compute
+cold-start wake per poll, not the query time itself.
 
-### Mitigations for Neon CU
+**If CU consumption rises** (e.g. clan grows, page-view traffic increases),
+the mitigations are:
+1. **Raise the cadence to 30 min** (48 polls/day) — halves the CU to ~42/month.
+   Donation counters and war state don't change faster than every 30 min.
+2. **Batch the DB writes** — combine per-member snapshot inserts into one batch.
+3. **Upgrade to Neon Pro** ($19/month) — raises the CU limit to 1,920 CU-hours.
 
-1. **Raise the cadence further** — 30-min cadence (48 polls/day) would halve
-   the CU again to ~180/month. Donation counters and war state don't change
-   faster than every 30 min, so data quality is preserved.
-2. **Batch the DB writes** — combine the light poll's per-member snapshot
-   inserts into a single batch insert. This reduces per-poll active time but
-   not the cold-start cost.
-3. **Upgrade to Neon Pro** ($19/month) — raises the CU limit to 1,920
-   CU-hours/month. Only needed if the free-tier CU limit is genuinely hit.
-
-### The second ceiling: Supercell API rate (proxy-shared IP)
+### The soft first ceiling: Supercell API rate (proxy-shared IP)
 
 At 15-min cadence the API budget is ~199 calls/day — well within Supercell's
 tolerance. If RoyaleAPI's proxy IP is shared with many other consumers, a
@@ -247,9 +243,10 @@ failed-poll safety (concept/04 #3).
 
 ## 7. Recommendations for free-tier sustainability
 
-1. **Monitor Neon CU weekly** — the 100 CU/month limit is the real constraint.
-   If consumption approaches 80 CU before month-end, raise the cadence to 30
-   min or consider Neon Pro.
+1. **Monitor Neon CU monthly** — at 15-min cadence the projected ~84 CU/month
+   fits under the 100 CU limit with ~16% headroom. If consumption approaches
+   90 CU before month-end (e.g. clan grows or traffic increases), raise the
+   cadence to 30 min or consider Neon Pro.
 2. **Snapshot pruning** — add a purge step for departed-member snapshots
    (keep only the last pre-departure row for the clan log). Prevents unbounded
    `member_snapshots` growth if the clan churns. Priority: medium.
