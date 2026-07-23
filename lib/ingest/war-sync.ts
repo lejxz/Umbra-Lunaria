@@ -325,7 +325,7 @@ export async function backfillWarLog(
       ),
       ownAttacks: entry.clan.attacks ?? null,
       opponentAttacks: entry.opponent.attacks ?? null,
-      result: entry.result ?? null,
+      result: entry.result === "lose" ? "loss" : (entry.result ?? null),
       endTime,
       state: "warEnded" as const,
       lastSyncedAt: new Date(),

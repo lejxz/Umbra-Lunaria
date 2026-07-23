@@ -241,7 +241,7 @@ export interface CocCurrentWar {
 }
 
 export interface CocWarLogEntry {
-  result?: "win" | "loss" | "tie";
+  result?: "win" | "lose" | "tie";
   endTime: string;
   teamSize: number;
   attacksPerMember?: number;

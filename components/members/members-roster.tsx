@@ -261,12 +261,12 @@ export function MembersRoster({
                     <td className="px-4 py-3">
                       <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
                     </td>
-                    {/* Wars */}
+                    {/* Wars — attended / tracked (X out of Y = how many you participated in) */}
                     <td className="px-4 py-3 font-mono text-xs text-white">
                       {m.warsTracked > 0 ? (
                         <span>
                           <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
-                            {m.warsMissed}
+                            {m.warsTracked - m.warsMissed}
                           </span>
                           <span className="text-umbra-muted">/{m.warsTracked}</span>
                         </span>
@@ -316,7 +316,7 @@ export function MembersRoster({
                   </p>
                   <p className="font-mono text-label text-umbra-muted">
                     ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
-                    {m.warsTracked > 0 && ` · ${m.warsMissed}/${m.warsTracked} missed`}
+                    {m.warsTracked > 0 && ` · ${m.warsTracked - m.warsMissed}/${m.warsTracked} wars`}
                   </p>
                 </div>
                 {m.warPreference && (
