@@ -203,7 +203,7 @@ export function parseWarSnapshot(row: WarRow): {
         duration: a.duration ?? null,
       };
     })
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => b.order - a.order);
 
   const detail: CurrentWarDetail = {
     warId: row.id,

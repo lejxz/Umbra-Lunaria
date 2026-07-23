@@ -63,7 +63,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
           <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Stars per war
           </h3>
-          <div className="mt-3 h-64 flex-1">
+          <div className="mt-3 h-56">
             <WarPerformanceChart trend={data.warPerformanceTrend} />
           </div>
         </section>
@@ -147,10 +147,10 @@ export function DashboardShell({ data }: { data: DashboardData }) {
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <AttentionPanel
           title="Attention Queue"
-          subtitle="Inactive & Issues"
+          subtitle="Inactive & No-shows"
           groups={[
             {
-              label: "Attacks remaining",
+              label: "No attacks in current war",
               tone: "warning",
               icon: "swords",
               members: data.needsAttention.attacksRemaining,

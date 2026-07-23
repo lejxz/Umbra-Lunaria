@@ -775,19 +775,22 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
       });
     }
 
-    // Attacks remaining in active war
+    // Missed attacks in active war — only flag members who have used ZERO
+    // attacks during battle day (not everyone who still has attacks left,
+    // which would flood the queue with every participant early in battle day).
+    // This surfaces genuine "no-show" members who haven't attacked at all.
     if (currentWar && currentWar.state === "inWar") {
       const wp = warAttackMap.get(member.playerTag);
-      if (wp && wp.used < wp.allowed) {
+      if (wp && wp.used === 0 && wp.allowed > 0) {
         attacksRemaining.push({
           playerTag: member.playerTag,
           name: member.name,
           role: member.role,
           townHallLevel: member.townHallLevel,
-          reason: `${wp.allowed - wp.used} attack(s) remaining`,
+          reason: "No attacks used in current war",
           detail: currentWar.opponentName
-            ? `vs ${currentWar.opponentName}`
-            : null,
+            ? `${wp.allowed} attack(s) available vs ${currentWar.opponentName}`
+            : `${wp.allowed} attack(s) available`,
         });
       }
     }

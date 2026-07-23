@@ -153,13 +153,14 @@ describe("parseWarSnapshot — battle day with attacks", () => {
     const row = makeRow({ warSnapshot: snap, state: "inWar" });
     const parsed = parseWarSnapshot(row);
     expect(parsed!.attackLog).toHaveLength(2);
-    expect(parsed!.attackLog[0]!.order).toBe(1);
-    expect(parsed!.attackLog[1]!.order).toBe(2);
+    // Sorted descending (newest-first — log style, oldest at bottom)
+    expect(parsed!.attackLog[0]!.order).toBe(2);
+    expect(parsed!.attackLog[1]!.order).toBe(1);
     // Attack log enrichment: attacker/defender names + isOwnClan
-    expect(parsed!.attackLog[0]!.attackerName).toBe("Eva");
-    expect(parsed!.attackLog[0]!.attackerIsOwnClan).toBe(false);
-    expect(parsed!.attackLog[0]!.defenderName).toBe("Alice");
-    expect(parsed!.attackLog[0]!.defenderIsOwnClan).toBe(true);
+    expect(parsed!.attackLog[1]!.attackerName).toBe("Eva");
+    expect(parsed!.attackLog[1]!.attackerIsOwnClan).toBe(false);
+    expect(parsed!.attackLog[1]!.defenderName).toBe("Alice");
+    expect(parsed!.attackLog[1]!.defenderIsOwnClan).toBe(true);
     // Base state (defense): Alice's base was attacked once, worst = 1★ 45%
     expect(parsed!.detail.clan.members[0]!.worstDefenseStars).toBe(1);
     expect(parsed!.detail.clan.members[0]!.worstDefenseDestruction).toBe(45);
