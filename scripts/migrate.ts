@@ -1,15 +1,11 @@
 /**
- * HTTP-based Drizzle migration runner.
+ * Drizzle migration runner using `pg` (node-postgres) + Supabase.
  *
- * `drizzle-kit migrate` uses the `@neondatabase/serverless` connection POOL,
- * which speaks websockets — blocked in some sandboxes. This script uses the
- * `neon()` HTTP client (plain fetch) via `drizzle-orm/neon-http/migrator`,
- * which works everywhere the runtime can do HTTPS. It applies every migration
- * in `./drizzle` idempotently (Drizzle tracks applied migrations in the
- * `__drizzle_migrations` journal table).
+ * Applies every migration in `./drizzle` idempotently (Drizzle tracks applied
+ * migrations in the `__drizzle_migrations` journal table). Uses a `pg` Pool
+ * with SSL — matches the runtime driver in `lib/db/index.ts`.
  *
- * Run with: `bun run db:migrate` (or `db:push`, which is aliased to the same
- * script so the sandbox dev-tooling's `bun run db:push` step succeeds).
+ * Run with: `bun run db:migrate` (or `db:push`, aliased to the same script).
  */
 import { drizzle } from "drizzle-orm/node-postgres";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
@@ -27,6 +23,7 @@ async function main() {
   console.log("→ applying migrations from ./drizzle …");
   await migrate(db, { migrationsFolder: "./drizzle" });
   console.log("✓ migrations applied");
+  await pool.end();
 }
 
 main().catch((err) => {

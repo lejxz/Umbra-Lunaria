@@ -257,3 +257,20 @@ failed-poll safety (concept/04 #3).
 5. **Do not lower poll cadence below 30 min** — the light poll does 2 Supercell
    calls each; 30 min is the current sweet spot between CU savings and data
    freshness.
+
+---
+
+## Post-migration update (2026-07-23)
+
+The database was migrated from Neon to Supabase. The CU-hour constraint no
+longer applies — Supabase's free tier does not meter compute. The storage
+analysis (~7 MB at 50 members with pruning) remains valid; the pruning
+strategy remains good practice for staying under Supabase's 500 MB limit.
+
+**What changed:**
+- Neon CU-hour limit (100 CU/month) → **eliminated** (Supabase doesn't meter compute).
+- Neon storage limit (512 MB) → Supabase storage limit (500 MB) — essentially the same.
+- Neon auto-suspend cold starts (~300-800ms) → Supabase has no auto-suspend (always warm during active use).
+- The ISR caching strategy remains valuable (reduces Vercel function invocations + DB query load).
+- The pruning strategy remains valuable (keeps storage bounded).
+- The poll cadence (15 min) can stay or be lowered without CU concerns.

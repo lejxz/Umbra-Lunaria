@@ -22,7 +22,7 @@ Scheduled delivery is best effort: the UI must tolerate delayed or missed sample
 
 ## Page-view caching (ISR)
 
-To avoid unnecessary Neon compute (CU) usage from page views, the read-only pages use Next.js **Incremental Static Regeneration (ISR)** with a `revalidate` window matching the poll cadence:
+To avoid unnecessary compute usage from page views, the read-only pages use Next.js **Incremental Static Regeneration (ISR)** with a `revalidate` window matching the poll cadence:
 
 | Page | `revalidate` | Rationale |
 |---|---|---|
@@ -33,7 +33,7 @@ To avoid unnecessary Neon compute (CU) usage from page views, the read-only page
 
 Between revalidations, Vercel serves the cached HTML from the edge — **0 DB queries** per page view. Only the background revalidation (every 5 min) triggers a DB hit. The ingest route and the war refresh route both call `revalidatePath()` to bust the cache immediately after a fresh capture, so the next page view always shows the latest data.
 
-This eliminates DB round-trips for regular page views entirely — only the scheduled revalidation window triggers a DB read. See `docs/2026-07-22-neon-vercel-free-tier-load-analysis.md` for the original load analysis (written during Neon era; the storage-efficiency rationale remains valid under Supabase).
+This eliminates DB round-trips for regular page views entirely — only the scheduled revalidation window triggers a DB read. See `docs/2026-07-22-supabase-vercel-free-tier-load-analysis.md` for the original load analysis (written during Supabase era; the storage-efficiency rationale remains valid under Supabase).
 
 ## Light-poll sequence
 

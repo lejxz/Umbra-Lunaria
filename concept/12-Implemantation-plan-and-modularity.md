@@ -30,7 +30,7 @@ verified foundation
 
 These are existing, verified baseline capabilities. They are not permission to skip the unchecked hardening tasks in Phase 1.
 
-- [x] Next.js App Router, TypeScript, Tailwind, Drizzle, Neon, Recharts, and `@dnd-kit` dependencies are installed.
+- [x] Next.js App Router, TypeScript, Tailwind, Drizzle, Supabase, Recharts, and `@dnd-kit` dependencies are installed.
 - [x] Single-clan configuration is set to `#2JPCYP98L` with Asia/Manila timezone and retention/poll defaults.
 - [x] Typed, server-only CoC proxy client exists in `lib/coc-client/client.ts` with tag URL encoding.
 - [x] Initial Drizzle schema and migration exist for clans, members, snapshots, progression, wars, Capital, and roster drafts.
@@ -54,7 +54,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Add a lightweight test runner for pure data logic and route helpers; document the test command in `package.json`.
 - [x] Reformat compressed one-line TSX components into readable multi-line source before expanding them across feature pages.
 - [x] Add test fixtures for clan, player, current-war, war-log, and Capital raid responses using the live API reference as a shape guide with no secrets.
-- [x] Add a reusable database-test strategy for query/aggregation tests (isolated test database or mocked query boundary) and document how to run it. _(RESOLVED via the mocked query boundary approach — pure decision logic extracted into testable functions; documented in tests/README.md. Neon branch approach deferred due to the 100 CU-hour free-tier limit.)_
+- [x] Add a reusable database-test strategy for query/aggregation tests (isolated test database or mocked query boundary) and document how to run it. _(RESOLVED via the mocked query boundary approach — pure decision logic extracted into testable functions; documented in tests/README.md. Neon branch approach deferred (historical — now on Supabase which has no compute-hour limit).)_
 
 #### 1.0.B — Shared UI primitives
 
@@ -76,7 +76,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Add a stable current-war identity and unique attack identity so war state transitions and repeat polls are idempotent.
 - [x] Add the data fields needed to retain war destruction, result, completion time, and explicit current-war freshness.
 - [x] Add `runtime_settings` and administrator-session/audit schema only when Phase 2 begins; do not expose write UI before then.
-- [x] Add a migration rollback/forward verification note for every new schema migration. _(Strategy documented in concept/03 §"Migration rollback strategy": rollback = Neon branch restore, not SQL down-migrations. Every new migration is forward-verified against a Neon branch before production.)_
+- [x] Add a migration rollback/forward verification note for every new schema migration. _(Strategy documented in concept/03 §"Migration rollback strategy": rollback = Supabase backup restore, not SQL down-migrations. Every new migration is forward-verified against a Supabase staging project before production.)_
 
 #### 1.0.D — Ingestion reliability
 
@@ -128,7 +128,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 #### 1.1.C — Query verification
 
 - [x] Add focused tests for empty database, cold start, reset week, missing API values, partial history, and purged-member log records. _(RESOLVED — tests/war/war-snapshot.test.ts covers null/missing snapshots, cold start (no attacks), missing API values, partial attack data, and the analysis 'never fake a zero' rule. tests/lib/donation-reset-sequences.test.ts covers reset-week windows.)_
-- [x] Verify query execution against local data using `drizzle-kit studio` or safe read-only SQL. _(Verified via Node scripts against live Neon DB — see log 020.)_
+- [x] Verify query execution against local data using `drizzle-kit studio` or safe read-only SQL. _(Verified via Node scripts against live DB — see log 020.)_
 - [x] Verify all dashboard queries return stable typed view models rather than raw Drizzle rows.
 
 ### Step 1.2 — Implement the dashboard
