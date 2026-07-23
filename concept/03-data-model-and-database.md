@@ -2,7 +2,7 @@
 
 ## Database role
 
-Neon PostgreSQL is the product memory. Supercell supplies the latest state; the database stores the state needed to render fast pages and the observations needed to explain change over time.
+Supabase PostgreSQL is the product memory. Supercell supplies the latest state; the database stores the state needed to render fast pages and the observations needed to explain change over time.
 
 All timestamps are stored as `timestamptz` in UTC and rendered in `clanConfig.timezone`. Tags are stored as text with the leading `#`. Integer values are used for counts and levels; JSONB is reserved for nested API payloads that are read together rather than queried independently.
 
@@ -122,18 +122,18 @@ One row per Clan War League season: season identifier, state, the full league-gr
 
 ## Migration rollback strategy
 
-Drizzle migrations are forward-only in this project — `drizzle-kit` does not auto-generate down-migrations, and writing hand-rolled SQL rollback for every migration adds maintenance cost without clear benefit for a single-clan tool with a small schema. The rollback strategy is therefore **Neon branch restore**, not SQL down-migrations.
+Drizzle migrations are forward-only in this project — `drizzle-kit` does not auto-generate down-migrations, and writing hand-rolled SQL rollback for every migration adds maintenance cost without clear benefit for a single-clan tool with a small schema. The rollback strategy is therefore **database restore**, not SQL down-migrations.
 
-1. **Forward verification before production.** Every new migration (`drizzle/NNNN_*.sql`) is applied to a Neon branch first (Neon's free tier supports branching) and the affected read/write paths are smoke-tested there. Only after the branch verifies clean is the migration applied to the production database (via the daily deploy's `drizzle-kit migrate`, or the HTTP migrator in `scripts/migrate.ts` for sandbox/dev).
-2. **Rollback = restore the branch.** If a migration corrupts production data, the recovery path is to restore the Neon database to its pre-migration state using Neon's built-in point-in-time restore (free tier retains ~7 days of history). This is faster and more reliable than running a hand-written down-migration, and it restores not just schema but any data written between the bad migration and the rollback.
+1. **Forward verification before production.** Every new migration (`drizzle/NNNN_*.sql`) is applied to a local or staging database first and the affected read/write paths are smoke-tested there. Only after it verifies clean is the migration applied to the production database (via the daily deploy's `drizzle-kit migrate`, or the HTTP migrator in `scripts/migrate.ts` for sandbox/dev).
+2. **Rollback = restore the backup.** If a migration corrupts production data, the recovery path is to restore the Supabase database to its pre-migration state using Supabase's backups. This is faster and more reliable than running a hand-written down-migration, and it restores not just schema but any data written between the bad migration and the rollback.
 3. **Migration files are append-only.** Never edit an already-applied migration SQL file — add a new migration that corrects the issue instead. The `drizzle/meta/_journal.json` + the `__drizzle_migrations` table track applied state; editing applied files causes checksum drift.
 4. **Every migration ships with its journal entry.** A new `drizzle/NNNN_*.sql` file must be accompanied by a new entry in `drizzle/meta/_journal.json` so both `drizzle-kit migrate` and the HTTP migrator apply it in order.
 
-This keeps the migration surface simple and honest: forward-only SQL, verified on a branch, rolled back via Neon restore if ever needed.
+This keeps the migration surface simple and honest: forward-only SQL, verified on staging, rolled back via Supabase restore if ever needed.
 
 ## Retention and pruning
 
-The database runs on Neon's free tier (512 MB storage, 100 CU-hours/month). Without pruning, `member_snapshots` — the dominant write table — would grow unbounded (48 polls/day × N members × 365 days). Pruning keeps the database bounded at any clan size.
+The database runs on Supabase's free tier (500 MB storage, unlimited compute). Without pruning, `member_snapshots` — the dominant write table — would grow unbounded (48 polls/day × N members × 365 days). Pruning keeps the database storage bounded well within the 500 MB limit.
 
 ### Checkpoint columns
 
@@ -173,7 +173,7 @@ Checkpoints are computed:
 
 | Job | Platform | Schedule (PHT) | Purpose |
 |---|---|---|---|
-| Light poll | Third-party cron (cron-job.org) | Every 15 min | Roster + snapshots + war sync |
+| Light poll | Third-party cron (cron-job.org) | Every 5 min | Roster + snapshots + war sync |
 | Daily batch | Third-party cron (cron-job.org) | 00:00 midnight | Full player details + war-log backfill + checkpoints + HoF |
 | Purge | Vercel Cron | 02:00 AM (`0 18 * * *` UTC) | Safety checkpoint → prune |
 

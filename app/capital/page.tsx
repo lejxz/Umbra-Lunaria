@@ -7,11 +7,11 @@ import { getCapitalPage } from "@/lib/db/capital-queries";
  * Clan Capital page — current overview, district list, district upgrade
  * timeline, and a truthful raid-weekend pending state. See concept/08.
  *
- * ISR caching: revalidates every 900s (15 min). Capital data changes slowly
- * (district levels take days to upgrade), so a 15-min cache is well within
+ * ISR caching: revalidates every 300s (5 min). Capital data changes slowly
+ * (district levels take days to upgrade), so a 5-min cache is well within
  * the data's natural freshness window.
  */
-export const revalidate = 900;
+export const revalidate = 300;
 
 export default async function CapitalPage() {
   let data;

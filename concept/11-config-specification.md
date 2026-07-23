@@ -37,7 +37,7 @@ The external cron-job service (e.g. cron-job.org / EasyCron / UptimeRobot Cron) 
 
 | Job | Schedule | Method | URL | Headers | Body |
 |---|---|---|---|---|---|
-| Light poll | every 15 min | POST | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": false}` |
+| Light poll | every 5 min | POST | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": false}` |
 | Daily batch | once daily (e.g. 04:00 Asia/Manila) | POST | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": true}` |
 
 The `INGEST_SECRET` configured in the cron service must exactly match the Vercel environment value. Use the service's "request timeout" ≥ 30s for the daily batch (full player-detail fetches take longer than the light poll).
@@ -60,7 +60,7 @@ INGEST_SECRET=
 | `clanTag` | `#2JPCYP98L` | The one clan tracked by this deployment. |
 | `timezone` | `Asia/Manila` | Day boundaries and rendered timestamps. |
 | `memberRetentionDays` | `14` | Retained departed-member data duration. |
-| `pollIntervalMinutes` | `15` | Target light-poll cadence; the third-party cron-job service schedule must match it. |
+| `pollIntervalMinutes` | `5` | Target light-poll cadence; the third-party cron-job service schedule must match it. |
 | `minWarsForConfidentRanking` | `3` | Threshold for a full-confidence auto-select score. |
 | `features` | per feature | Enable/disable incomplete or optional surfaces. |
 

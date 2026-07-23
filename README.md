@@ -8,7 +8,7 @@ https://umbra-lunaria.vercel.app/
 
 ## Status
 
-**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~15 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the Neon database. Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`concept/12-Implemantation-plan-and-modularity.md`](./concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
+**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~5 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the Supabase database. Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`concept/12-Implemantation-plan-and-modularity.md`](./concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
 
 ## Planned features
 
@@ -44,7 +44,7 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 - A Supercell ID / Clash of Clans developer account to create an API key.
 - A GitHub account (for the repo). The scheduled polling now runs on a **third-party cron-job web service** (e.g. cron-job.org) — see [`concept/04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md).
 - A Vercel account, for hosting.
-- A Neon account (or just use Vercel's Marketplace integration, which provisions one for you — see [`concept/03-data-model-and-database.md`](./concept/03-data-model-and-database.md)).
+- A Supabase account to host the Postgres database.
 
 ## Setup checklist
 
@@ -52,11 +52,11 @@ Do these in order — later steps need values from earlier ones.
 
 1. **Get a CoC API key** — see the step-by-step below. You'll come out of this with a token and your clan tag.
 2. **Set `config/clan.config.ts`** — ✅ already configured with the clan tag `#2Y8V8VGQ`.
-3. **Create the Vercel project and Neon database** — see "Vercel & database" below. You'll come out of this with a deployment URL and a `DATABASE_URL`.
+3. **Create the Vercel project and Supabase database** — see "Vercel & database" below. You'll come out of this with a deployment URL and a `DATABASE_URL`.
 4. **Set Vercel environment variables** — `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET` **and `CRON_SECRET`** (see "Configuration"). Not optional — the app throws immediately at runtime without these, by design (`lib/db/index.ts`, `lib/coc-client/client.ts`), and only you can set them since they live in your Vercel project. `CRON_SECRET` specifically: Vercel does **not** generate this for you — generate one yourself (`openssl rand -hex 32`) and set it like any other variable, then Vercel automatically forwards it as the Authorization header when it calls `/api/cron/purge`.
-5. **Configure the third-party cron-job service** — see "Polling cron jobs" below. Create two jobs (light poll every 15 min, daily batch once daily) pointing at `https://<your-vercel-app>/api/ingest` with `Authorization: Bearer <INGEST_SECRET>` and the `batch` body flag. The `.github/workflows/poll.yml` workflow remains as a manual (`workflow_dispatch`) fallback.
+5. **Configure the third-party cron-job service** — see "Polling cron jobs" below. Create two jobs (light poll every 5 min, daily batch once daily) pointing at `https://<your-vercel-app>/api/ingest` with `Authorization: Bearer <INGEST_SECRET>` and the `batch` body flag. The `.github/workflows/poll.yml` workflow remains as a manual (`workflow_dispatch`) fallback.
 6. **Deploy.** The build itself runs the database migration (`"build": "drizzle-kit migrate && next build"` in `package.json`), so there's no separate manual migration step — it happens automatically against whatever `DATABASE_URL` is set in Vercel at build time, every deploy. Safe to run repeatedly: already-applied migrations are skipped.
-7. **Verify it's working** — trigger the light-poll cron job in the cron service's dashboard (or Actions tab → "Poll Clash of Clans data" → Run workflow as a fallback). Check the run succeeded, then check the `members` and `member_snapshots` tables in Neon for rows.
+7. **Verify it's working** — trigger the light-poll cron job in the cron service's dashboard (or Actions tab → "Poll Clash of Clans data" → Run workflow as a fallback). Check the run succeeded, then check the `members` and `member_snapshots` tables in Supabase for rows.
 
 ## Getting a Clash of Clans API key — step by step
 
@@ -80,7 +80,7 @@ The Clash of Clans API is free, but every key is locked to specific IP addresses
 ## Vercel & database
 
 1. **New Project** in Vercel → import `lejxz/Umbra-Lunaria` from GitHub.
-2. **Storage** tab → Marketplace Database Providers → **Neon** → Create. This provisions a free-tier Postgres database and auto-populates `DATABASE_URL` in the project's environment variables — no separate Neon signup needed.
+2. **Create a Supabase project** → go to Project Settings → Database. Under connection string, select "Transaction Pooler" (port 6543) and copy it. Add this as the `DATABASE_URL` environment variable in Vercel.
 3. **Environment Variables** (Project Settings): add `COC_API_TOKEN`, `COC_API_BASE_URL`, `INGEST_SECRET`, and `CRON_SECRET` — see "Configuration" below for exact values. `CRON_SECRET` is not auto-generated by Vercel despite what an earlier version of this README said — generate it yourself, same as `INGEST_SECRET`.
 4. **Deploy.** Vercel picks up `vercel.json`'s cron entry automatically and will forward your `CRON_SECRET` value as the request's Authorization header when it calls `/api/cron/purge` — but only if you've actually set that variable in step 3.
 5. Copy the resulting deployment URL (e.g. `https://umbra-lunaria.vercel.app`) — you need it for the cron-job configuration below.
@@ -93,7 +93,7 @@ Configure two jobs in the cron service, both POSTing to your deployed Vercel app
 
 | Job | Schedule | URL | Headers | Body |
 |---|---|---|---|---|
-| Light poll | every 15 min | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": false}` |
+| Light poll | every 5 min | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": false}` |
 | Daily batch | once daily (e.g. 04:00 Asia/Manila) | `https://<vercel-app>/api/ingest` | `Authorization: Bearer <INGEST_SECRET>` | `{"batch": true}` |
 
 The `INGEST_SECRET` used here must be the **exact same value** as in Vercel's environment variables — if they don't match, `/api/ingest` returns 401 and every poll fails. Set the daily-batch job's request timeout to ≥ 30s (full player-detail fetches take longer than the light poll).

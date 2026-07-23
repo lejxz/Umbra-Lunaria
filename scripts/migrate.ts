@@ -11,14 +11,14 @@
  * Run with: `bun run db:migrate` (or `db:push`, which is aliased to the same
  * script so the sandbox dev-tooling's `bun run db:push` step succeeds).
  */
-import { neon } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-http";
-import { migrate } from "drizzle-orm/neon-http/migrator";
+import { drizzle } from "drizzle-orm/postgres-js";
+import { migrate } from "drizzle-orm/postgres-js/migrator";
+import postgres from "postgres";
 import { resolveDatabaseUrl } from "../lib/env";
 
 async function main() {
   const url = resolveDatabaseUrl();
-  const sql = neon(url);
+  const sql = postgres(url, { prepare: false });
   const db = drizzle(sql);
 
   console.log("→ applying migrations from ./drizzle …");

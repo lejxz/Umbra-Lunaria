@@ -1,6 +1,6 @@
 # Neon → Supabase Migration Plan
 
-Status: **proposed, not executed.** Nothing in this document has been done yet — this is the plan to review before anything runs. See the chat discussion this came from for the reasoning (Neon's free tier meters compute-hours and our 15-min polling defeats its 5-min scale-to-zero; Supabase's free tier doesn't meter compute at all, gated only by a 7-day inactivity pause instead).
+Status: **completed — 2026-07-23.** All steps have been executed. See the notes below for what changed from the original plan (primarily: a custom `scripts/dump_neon.ts` + `scripts/restore_supabase.ts` pair was used instead of `pg_dump`/`psql` because raw pg tools are blocked in the sandbox environment). The driver was changed to `pg` (node-postgres) via `drizzle-orm/node-postgres` rather than `postgres-js` due to Next.js static build worker compatibility. Polling cadence was also changed from 15 min to 5 min as part of this update.
 
 ## Why this is a small change, not a rewrite
 

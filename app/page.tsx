@@ -11,7 +11,7 @@ import { ErrorState } from "@/components/ui/state-primitives";
  * so tab switches are instant with no API calls or page reloads.
  *
  * ISR caching (concept/04 §"Page-view caching"): the page revalidates every
- * 900s (15 min, matching the poll cadence). Between revalidations, Vercel
+ * 300s (5 min, matching the poll cadence). Between revalidations, Vercel
  * serves the cached HTML from the edge — 0 DB queries, 0 Neon CU. Only the
  * background revalidation triggers a DB hit. The war refresh button and the
  * ingest route both call revalidatePath("/") to bust the cache immediately
@@ -20,7 +20,7 @@ import { ErrorState } from "@/components/ui/state-primitives";
  * See concept/05-dashboard.md for the full specification and
  * concept/12 Step 1.2 for the implementation plan.
  */
-export const revalidate = 900; // 15 min — matches poll cadence
+export const revalidate = 300; // 5 min — matches poll cadence
 
 export default async function DashboardPage() {
   let data;

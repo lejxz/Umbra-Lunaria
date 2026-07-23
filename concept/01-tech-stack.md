@@ -6,7 +6,7 @@
 |---|---|---|
 | App | Next.js App Router + TypeScript | Server-rendered pages, route handlers, and typed UI boundaries. |
 | Styling | Tailwind CSS + local UI primitives | Responsive, dark observatory interface. |
-| Database | Neon PostgreSQL | Persistent API cache, snapshots, histories, and plans. |
+| Database | Supabase PostgreSQL | Persistent API cache, snapshots, histories, and plans. |
 | ORM | Drizzle ORM | Typed schema, migrations, and server-side queries. |
 | Charts | Recharts | Donation and activity windows with accessible tooltips. |
 | Drag and drop | `@dnd-kit` | Desktop roster planning; tap-to-add remains available on touch. |
@@ -20,7 +20,7 @@
 ```text
 Supercell API → RoyaleAPI proxy → lib/coc-client → protected ingest route
                                                     ↓
-                                             Neon / Drizzle
+                                             Supabase / Drizzle
                                                     ↓
                                 server-side query layer → pages and UI components
 ```
