@@ -5,6 +5,7 @@ import type { MemberDetailView } from "@/lib/view-models/members";
 import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
+import { IconSwords } from "@/components/ui/icons";
 import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
 
@@ -218,16 +219,7 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
         <SectionLabel>War Record</SectionLabel>
         <div className="flex flex-col items-center justify-center py-6 text-center">
           {/* Crossed swords icon (dimmed) */}
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" className="opacity-30">
-            <g transform="translate(20 20) rotate(-45)">
-              <rect x="-0.8" y="-10" width="1.6" height="14" rx="0.5" fill="#9287AD" />
-              <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#9287AD" />
-            </g>
-            <g transform="translate(20 20) rotate(45)">
-              <rect x="-0.8" y="-10" width="1.6" height="14" rx="0.5" fill="#9287AD" />
-              <rect x="-3" y="4" width="6" height="1.5" rx="0.5" fill="#9287AD" />
-            </g>
-          </svg>
+          <IconSwords className="h-10 w-10 opacity-30" />
           <p className="mt-2 text-sm text-umbra-muted">No wars tracked yet</p>
           <p className="mt-0.5 text-2xs text-umbra-muted/60">
             War history will appear here once the tracker observes a war.
@@ -535,14 +527,12 @@ function AchievementsSection({ detail }: { detail: MemberDetailView }) {
                 {a.stars !== undefined && (
                   <div className="flex items-center text-amber-400 shrink-0">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <svg 
-                        key={i} 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        viewBox="0 0 24 24" 
-                        className={`w-3.5 h-3.5 ${(a.stars ?? 0) > i ? "fill-current text-amber-400" : "fill-transparent stroke-current stroke-2 text-amber-400/20"}`}
+                      <span
+                        key={i}
+                        className={`text-sm ${(a.stars ?? 0) > i ? "text-amber-400" : "text-amber-400/20"}`}
                       >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
+                        ★
+                      </span>
                     ))}
                   </div>
                 )}

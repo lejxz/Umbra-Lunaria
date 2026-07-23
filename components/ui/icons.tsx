@@ -1,275 +1,125 @@
-import * as React from "react";
+/**
+ * Unified icon system — all icons are re-exported from lucide-react for
+ * consistent stroke width (2px), viewBox (24×24), and visual style.
+ *
+ * This file maintains the existing export names so components don't need to
+ * change their imports. The old hand-drawn SVGs have been replaced with
+ * Lucide equivalents.
+ *
+ * Lucide icons accept the same props as React SVG elements (className, size,
+ * strokeWidth, etc.) plus a `size` prop for width/height.
+ */
 
-// ===========================================================================
-// Clan Log & Members
-// ===========================================================================
+import {
+  UserPlus,
+  UserMinus,
+  UserCheck,
+  Clock,
+  Swords,
+  ShieldOff,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  X,
+  Loader2,
+  RefreshCw,
+  AlertTriangle,
+  ArrowUp,
+  ArrowDown,
+  ChevronRight,
+  Check,
+  Building2,
+  LayoutGrid,
+  Users,
+  ClipboardList,
+  Activity,
+  TrendingUp,
+  Gift,
+  Flame,
+  Coins,
+  Eye,
+  Trophy,
+  Zap,
+  HeartHandshake,
+  Crown,
+  type LucideProps,
+} from "lucide-react";
 
-export function IconUserPlus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M19 8v6" strokeOpacity="0.3" />
-      <path d="M22 11h-6" strokeOpacity="0.3" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Membership & clan log
+// ---------------------------------------------------------------------------
 
-export function IconUserMinus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 11h-6" strokeOpacity="0.3" />
-    </svg>
-  );
-}
+export const IconUserPlus = (props: LucideProps) => <UserPlus {...props} />;
+export const IconUserMinus = (props: LucideProps) => <UserMinus {...props} />;
+export const IconUserCheck = (props: LucideProps) => <UserCheck {...props} />;
 
-export function IconUserCheck(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M16 11l2 2 4-4" strokeOpacity="0.4" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Needs attention & war
+// ---------------------------------------------------------------------------
 
-// ===========================================================================
-// Needs Attention
-// ===========================================================================
+export const IconClock = (props: LucideProps) => <Clock {...props} />;
+export const IconSwords = (props: LucideProps) => <Swords {...props} />;
+export const IconShieldOff = (props: LucideProps) => <ShieldOff {...props} />;
 
-export function IconClock(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="10" strokeOpacity="0.3" />
-      <path d="M12 6v6l4 2" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Data tables & UI primitives
+// ---------------------------------------------------------------------------
 
-export function IconSwords(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <path d="M8 16L21 3" />
-      <path d="M3 21L8 16M6 14L10 18" strokeWidth="2" />
-      <path d="M16 16L3 3" />
-      <path d="M21 21L16 16M18 14L14 18" strokeWidth="2" />
-    </svg>
-  );
-}
+export const IconChevronDown = (props: LucideProps) => <ChevronDown {...props} />;
+export const IconChevronUp = (props: LucideProps) => <ChevronUp {...props} />;
+export const IconChevronsUpDown = (props: LucideProps) => <ChevronsUpDown {...props} />;
+export const IconX = (props: LucideProps) => <X {...props} />;
+export const IconLoader = (props: LucideProps) => <Loader2 {...props} />;
+export const IconSync = (props: LucideProps) => <RefreshCw {...props} />;
+export const IconAlert = (props: LucideProps) => <AlertTriangle {...props} />;
 
-export function IconShieldOff(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M19.69 14a6.9 6.9 0 0 0 .31-2V5l-8-3-3.16 1.18" />
-      <path d="M4.73 4.73L4 5v7c0 6 8 10 8 10a20.29 20.29 0 0 0 5.62-4.38" />
-      <path d="M1 1l22 22" strokeOpacity="0.3" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Navigation icons
+// ---------------------------------------------------------------------------
 
-// ===========================================================================
-// Data Tables & UI Primitives
-// ===========================================================================
+export const NavIconDashboard = (props: LucideProps) => <LayoutGrid {...props} />;
+export const NavIconMembers = (props: LucideProps) => <Users {...props} />;
+export const NavIconWar = (props: LucideProps) => <Swords {...props} />;
+export const NavIconCapital = (props: LucideProps) => <Building2 {...props} />;
+export const NavIconPlanning = (props: LucideProps) => <ClipboardList {...props} />;
 
-export function IconChevronDown(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
-
-export function IconChevronUp(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M18 15l-6-6-6 6" />
-    </svg>
-  );
-}
-
-export function IconChevronsUpDown(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M7 15l5 5 5-5" strokeOpacity="0.3" />
-      <path d="M7 9l5-5 5 5" />
-    </svg>
-  );
-}
-
-export function IconX(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M18 6L6 18" />
-      <path d="M6 6l12 12" strokeOpacity="0.3" />
-    </svg>
-  );
-}
-
-export function IconLoader(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-    </svg>
-  );
-}
-
-export function IconSync(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
-      <path d="M21 3v5h-5" strokeOpacity="0.3" />
-    </svg>
-  );
-}
-
-export function IconAlert(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 2L2 22h20L12 2z" strokeOpacity="0.3" />
-      <path d="M12 16v.01" />
-      <path d="M12 8v4" />
-    </svg>
-  );
-}
-
-// ===========================================================================
-// Navigation Icons (Dashboard, Members, War, Capital, Planning)
-// ===========================================================================
-
-export function NavIconDashboard(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" strokeOpacity="0.3" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" strokeOpacity="0.3" />
-    </svg>
-  );
-}
-
-export function NavIconMembers(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeOpacity="0.3" />
-      <circle cx="9" cy="7" r="4" strokeOpacity="0.3" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-
-export function NavIconWar(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M14.5 4h5v5l-10 10-5-5 10-10z" />
-      <path d="M4 20l5-5" strokeOpacity="0.3" />
-      <path d="M9.5 4h-5v5l10 10 5-5-10-10z" strokeOpacity="0.3" />
-      <path d="M20 20l-5-5" />
-    </svg>
-  );
-}
-
-export function NavIconCapital(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" strokeOpacity="0.3" />
-      <polygon points="12 2 15.09 8.26 12 17.77 8.91 8.26 12 2" />
-    </svg>
-  );
-}
-
-export function NavIconPlanning(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M4 6h16" />
-      <path d="M4 12h16" strokeOpacity="0.3" />
-      <path d="M4 18h16" />
-    </svg>
-  );
-}
-
-// ===========================================================================
+// ---------------------------------------------------------------------------
 // War roster — TH advantage / disadvantage cues
-// ===========================================================================
+// ---------------------------------------------------------------------------
 
-export function IconArrowUp(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 19V5" />
-      <path d="M5 12l7-7 7 7" />
-    </svg>
-  );
-}
+export const IconArrowUp = (props: LucideProps) => <ArrowUp {...props} />;
+export const IconArrowDown = (props: LucideProps) => <ArrowDown {...props} />;
+export const IconChevronRight = (props: LucideProps) => <ChevronRight {...props} />;
+export const IconCheck = (props: LucideProps) => <Check {...props} />;
 
-export function IconArrowDown(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M12 5v14" />
-      <path d="M19 12l-7 7-7-7" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Capital
+// ---------------------------------------------------------------------------
 
-export function IconChevronRight(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M9 18l6-6-6-6" />
-    </svg>
-  );
-}
+export const IconCapital = (props: LucideProps) => <Building2 {...props} />;
 
-export function IconCheck(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M20 6L9 17l-5-5" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Empty states (48×48 — use size={48} or className="h-12 w-12")
+// ---------------------------------------------------------------------------
 
-// ===========================================================================
-// Capital — district / building landmark
-// ===========================================================================
+export const IconActivityEmpty = (props: LucideProps) => <Activity {...props} />;
+export const IconDonationEmpty = (props: LucideProps) => <HeartHandshake {...props} />;
+export const IconWarEmpty = (props: LucideProps) => <Swords {...props} />;
 
-export function IconCapital(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M3 21h18" />
-      <path d="M5 21V8l7-5 7 5v13" />
-      <path d="M9 21v-6h6v6" />
-      <path d="M9 11h.01M15 11h.01" strokeOpacity="0.4" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Hall of Fame — award icons (used by hall-of-fame-card.tsx)
+// ---------------------------------------------------------------------------
 
-// ===========================================================================
-// Empty States (48x48)
-// ===========================================================================
+export const IconGift = (props: LucideProps) => <Gift {...props} />;
+export const IconFlame = (props: LucideProps) => <Flame {...props} />;
+export const IconCoins = (props: LucideProps) => <Coins {...props} />;
+export const IconEye = (props: LucideProps) => <Eye {...props} />;
+export const IconTrophy = (props: LucideProps) => <Trophy {...props} />;
+export const IconZap = (props: LucideProps) => <Zap {...props} />;
+export const IconCrown = (props: LucideProps) => <Crown {...props} />;
 
-export function IconActivityEmpty(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <path d="M8 24H16L20 12L28 36L32 24H40" strokeOpacity="0.3" strokeDasharray="2 4" />
-      <circle cx="24" cy="24" r="16" strokeOpacity="0.1" />
-    </svg>
-  );
-}
+// ---------------------------------------------------------------------------
+// Charts & analytics
+// ---------------------------------------------------------------------------
 
-export function IconDonationEmpty(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <path d="M24 16v16M16 24h16" strokeOpacity="0.3" strokeDasharray="2 4" />
-      <rect x="10" y="10" width="28" height="28" rx="4" strokeOpacity="0.1" />
-    </svg>
-  );
-}
-
-export function IconWarEmpty(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>
-      <path d="M24 4C14 4 10 10 10 10V22C10 32 22 42 24 44C26 42 38 32 38 22V10C38 10 34 4 24 4Z" strokeDasharray="2 4" strokeOpacity="0.3" />
-      <path d="M17 17L31 31M31 17L17 31" />
-    </svg>
-  );
-}
+export const IconTrendingUp = (props: LucideProps) => <TrendingUp {...props} />;

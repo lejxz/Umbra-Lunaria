@@ -41,7 +41,7 @@ export function ActivityAnalytics({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5 sm:p-6"
+      className="glass flex flex-col rounded-2xl p-5"
       aria-labelledby="activity-title"
       style={{ minHeight: "380px" }}
     >

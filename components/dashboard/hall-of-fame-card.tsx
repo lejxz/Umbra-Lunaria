@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 
-import { Gift, Swords, Flame, Coins, Eye } from "lucide-react";
 import type { HallOfFame, HallOfFameAwardKey, HallOfFameLeaderboard } from "@/lib/view-models/dashboard";
 import { Modal } from "@/components/ui/modal";
-import { IconX } from "@/components/ui/icons";
+import { IconX, IconGift, IconSwords, IconFlame, IconCoins, IconEye } from "@/components/ui/icons";
 
 const AWARD_META: Record<
   HallOfFameAwardKey,
@@ -14,35 +13,35 @@ const AWARD_META: Record<
   philanthropist: {
     title: "The Philanthropist",
     subtitle: "Highest all-time donations",
-    icon: <Gift className="w-5 h-5" />,
+    icon: <IconGift className="w-5 h-5" />,
     color: "text-emerald-400",
     accent: "border-emerald-400/40 bg-emerald-400/5",
   },
   vanguard: {
     title: "The Vanguard",
     subtitle: "Most 3-star war attacks",
-    icon: <Swords className="w-5 h-5" />,
+    icon: <IconSwords className="w-5 h-5" />,
     color: "text-amber-400",
     accent: "border-amber-400/40 bg-amber-400/5",
   },
   dedicated: {
     title: "The Dedicated",
     subtitle: "Longest login streak",
-    icon: <Flame className="w-5 h-5" />,
+    icon: <IconFlame className="w-5 h-5" />,
     color: "text-orange-400",
     accent: "border-orange-400/40 bg-orange-400/5",
   },
   capitalist: {
     title: "The Capitalist",
     subtitle: "Best single raid weekend",
-    icon: <Coins className="w-5 h-5" />,
+    icon: <IconCoins className="w-5 h-5" />,
     color: "text-yellow-400",
     accent: "border-yellow-400/40 bg-yellow-400/5",
   },
   unsleeping: {
     title: "The Unsleeping",
     subtitle: "Highest all-time raw activity",
-    icon: <Eye className="w-5 h-5" />,
+    icon: <IconEye className="w-5 h-5" />,
     color: "text-umbra-purple",
     accent: "border-umbra-purple/40 bg-umbra-purple/5",
   },
