@@ -49,6 +49,9 @@ import type {
   HallOfFame,
   HallOfFameLeaderboard,
   HallOfFameAwardKey,
+  WarPerformanceTrend,
+  RosterSizeTrend,
+  WarAttackDistribution,
 } from "@/lib/view-models/dashboard";
 import {
   calculateDonationWindow,
@@ -1009,6 +1012,9 @@ export async function getDashboard(): Promise<DashboardData> {
     capitalNav,
     trackingStart,
     hallOfFame,
+    warPerformanceTrend,
+    rosterSizeTrend,
+    warAttackDistribution,
   ] = await Promise.all([
     getDashboardClan(),
     getCapitalSummary(),
@@ -1033,6 +1039,9 @@ export async function getDashboard(): Promise<DashboardData> {
     getCapitalNavSummary(),
     getTrackingStart(),
     getHallOfFame(),
+    getWarPerformanceTrend(),
+    getRosterSizeTrend(),
+    getWarAttackDistribution(),
   ]);
 
   return {
@@ -1064,6 +1073,10 @@ export async function getDashboard(): Promise<DashboardData> {
     capitalNav,
     hallOfFame,
     trackingStart,
+    // Analytical graphs
+    warPerformanceTrend,
+    rosterSizeTrend,
+    warAttackDistribution,
   };
 }
 
@@ -1141,3 +1154,109 @@ function emptyDonationTotals(
 
 // Re-export for backwards compat with any existing imports
 export { getRetainedMembers as getMembers };
+
+// ===========================================================================
+// Analytical graph queries (added 2026-07-23)
+// ===========================================================================
+
+/**
+ * War performance trend — the last N ended wars with stars, destruction, and
+ * result. Powers the war-performance line chart on the dashboard. Returns
+ * oldest-first so the chart reads left-to-right chronologically.
+ */
+export async function getWarPerformanceTrend(
+  limit = 20,
+): Promise<WarPerformanceTrend> {
+  const rows = await db
+    .select({
+      endTime: wars.endTime,
+      opponentName: wars.opponentName,
+      ownStars: wars.ownStars,
+      opponentStars: wars.opponentStars,
+      ownDestruction: wars.ownDestructionPercentage,
+      opponentDestruction: wars.opponentDestructionPercentage,
+      result: wars.result,
+    })
+    .from(wars)
+    .where(eq(wars.state, "warEnded"))
+    .orderBy(desc(wars.endTime))
+    .limit(limit);
+
+  // Reverse to oldest-first for the chart.
+  const points = rows
+    .filter((r) => r.endTime !== null)
+    .reverse()
+    .map((r) => ({
+      endTime: r.endTime!,
+      opponentName: r.opponentName ?? "Unknown",
+      ownStars: r.ownStars ?? 0,
+      opponentStars: r.opponentStars ?? 0,
+      ownDestruction: r.ownDestruction ?? 0,
+      result: r.result as "win" | "loss" | "tie" | null,
+    }));
+
+  return { points };
+}
+
+/**
+ * Roster size trend — distinct retained members per day from
+ * member_snapshots. Powers the roster-size area chart. Returns one point per
+ * day with a timestamp + count. Sparse during cold start; fills as tracking
+ * accumulates.
+ */
+export async function getRosterSizeTrend(
+  days = 30,
+): Promise<RosterSizeTrend> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const rows = await db
+    .select({
+      day: sql<Date>`date_trunc('day', ${memberSnapshots.capturedAt})`,
+      count: sql<number>`count(distinct ${memberSnapshots.playerTag})`,
+    })
+    .from(memberSnapshots)
+    .where(gte(memberSnapshots.capturedAt, since))
+    .groupBy(sql`date_trunc('day', ${memberSnapshots.capturedAt})`)
+    .orderBy(sql`date_trunc('day', ${memberSnapshots.capturedAt})`);
+
+  const points = rows.map((r) => ({
+    timestamp: r.day,
+    count: Number(r.count),
+  }));
+
+  return { points, windowDays: days };
+}
+
+/**
+ * War attack distribution — count of attacks by star value (0-3) across all
+ * live-tracked wars. Powers the attack-distribution donut chart. Returns
+ * zero-filled counts so the chart always renders all four segments. Sparse
+ * until more wars are live-tracked (backfilled wars have no attack detail).
+ */
+export async function getWarAttackDistribution(): Promise<WarAttackDistribution> {
+  const rows = await db
+    .select({
+      stars: warAttacks.stars,
+      count: sql<number>`count(*)`,
+    })
+    .from(warAttacks)
+    .groupBy(warAttacks.stars);
+
+  const dist: WarAttackDistribution = {
+    threeStar: 0,
+    twoStar: 0,
+    oneStar: 0,
+    zeroStar: 0,
+    total: 0,
+  };
+  for (const r of rows) {
+    const count = Number(r.count);
+    dist.total += count;
+    if (r.stars >= 3) dist.threeStar += count;
+    else if (r.stars === 2) dist.twoStar += count;
+    else if (r.stars === 1) dist.oneStar += count;
+    else dist.zeroStar += count;
+  }
+  return dist;
+}

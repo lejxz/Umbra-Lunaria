@@ -13,6 +13,9 @@ import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
 import { MemberDetailSheet } from "./member-detail-sheet";
 import { HallOfFameCard } from "./hall-of-fame-card";
+import { WarPerformanceChart } from "./war-performance-chart";
+import { WarAttackDistributionChart } from "./war-attack-distribution";
+import { RosterSizeChart } from "./roster-size-chart";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -49,6 +52,32 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         <WarRecordCard record={data.warRecord} />
         <CurrentWarCard warSummary={data.warSummary} clanBadgeUrls={data.clan.badgeUrls} clanName={data.clan.name} />
         <CapitalSummaryCard capital={data.capital} />
+      </div>
+
+      {/* Row 2b: War analytics — performance trend (2/3) + attack distribution donut (1/3) */}
+      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+        <section className="glass flex flex-col rounded-2xl p-5 lg:col-span-2" aria-labelledby="war-trend-title">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            War performance · last 20
+          </p>
+          <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
+            Stars per war
+          </h3>
+          <div className="mt-3 h-48">
+            <WarPerformanceChart trend={data.warPerformanceTrend} />
+          </div>
+        </section>
+        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="attack-dist-title">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Attack quality
+          </p>
+          <h3 id="attack-dist-title" className="mt-1 font-display text-lg text-umbra-lilac">
+            Star distribution
+          </h3>
+          <div className="mt-3 flex-1">
+            <WarAttackDistributionChart distribution={data.warAttackDistribution} />
+          </div>
+        </section>
       </div>
 
       {/* Row 3: Clan donations — full width (primary analytical panel) */}
@@ -90,6 +119,28 @@ export function DashboardShell({ data }: { data: DashboardData }) {
           }}
           onMemberClick={setSelectedMember}
         />
+      </div>
+
+      {/* Row 4b: Roster size trend — full width */}
+      <div className="mt-5">
+        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="roster-trend-title">
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+              Roster size · 30 days
+            </p>
+            <span className="text-2xs text-umbra-muted">
+              {data.rosterSizeTrend.points.length > 0
+                ? `${data.rosterSizeTrend.points[data.rosterSizeTrend.points.length - 1]?.count ?? 0} current`
+                : "—"}
+            </span>
+          </div>
+          <h3 id="roster-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
+            Roster growth
+          </h3>
+          <div className="mt-3 h-40">
+            <RosterSizeChart trend={data.rosterSizeTrend} />
+          </div>
+        </section>
       </div>
 
       {/* Row 5: Needs Attention | Clan Log — 3 cols */}

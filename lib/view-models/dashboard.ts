@@ -285,6 +285,43 @@ export interface HallOfFame {
 // Full dashboard aggregate (returned by getDashboard())
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Analytical graph view models (added 2026-07-23)
+// ---------------------------------------------------------------------------
+
+export interface WarPerformancePoint {
+  endTime: Date;
+  opponentName: string;
+  ownStars: number;
+  opponentStars: number;
+  ownDestruction: number;
+  result: "win" | "loss" | "tie" | null;
+}
+
+export interface WarPerformanceTrend {
+  points: WarPerformancePoint[]; // oldest-first for left-to-right charts
+}
+
+export interface RosterSizePoint {
+  timestamp: Date;
+  count: number;
+}
+
+export interface RosterSizeTrend {
+  points: RosterSizePoint[];
+  windowDays: number;
+}
+
+export interface WarAttackDistribution {
+  threeStar: number;
+  twoStar: number;
+  oneStar: number;
+  zeroStar: number;
+  total: number;
+}
+
+// ---------------------------------------------------------------------------
+
 export interface DashboardData {
   clan: DashboardClan;
   warRecord: WarRecordView;
@@ -315,5 +352,9 @@ export interface DashboardData {
   capitalNav: CapitalNavSummary;
   hallOfFame: HallOfFame;
   trackingStart: Date | null; // earliest member_snapshots.captured_at across the clan
+  // Analytical graphs
+  warPerformanceTrend: WarPerformanceTrend;
+  rosterSizeTrend: RosterSizeTrend;
+  warAttackDistribution: WarAttackDistribution;
 }
 
