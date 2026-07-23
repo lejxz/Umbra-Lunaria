@@ -272,23 +272,47 @@ export async function backfillWarLog(
   let processed = 0;
   for (const entry of entries) {
     const endTime = parseCoCTime(entry.endTime);
-    if (!entry.opponent?.tag || !endTime) continue;
+    if (!entry.opponent || !endTime) continue;
 
-    // Dedupe on (opponent_tag, end_time) for regular wars.
-    const [existing] = await db
-      .select()
-      .from(wars)
-      .where(
-        and(
-          eq(wars.opponentTag, entry.opponent.tag),
-          eq(wars.endTime, endTime),
-          eq(wars.warType, "regular"),
-        ),
-      )
-      .limit(1);
+    const oppTag = entry.opponent.tag ?? null;
+    const oppName = entry.opponent.name;
+
+    // Dedupe on (opponent_tag, end_time) when we have a tag; fall back to
+    // (opponent_name, end_time) when the tag is null. NULL ≠ NULL in SQL, so
+    // a tag-based eq match would miss older rows that were inserted without a
+    // tag — the name fallback catches them and prevents duplicate inserts on
+    // every daily-batch backfill run.
+    let existing: typeof wars.$inferSelect | undefined;
+    if (oppTag) {
+      [existing] = await db
+        .select()
+        .from(wars)
+        .where(
+          and(
+            eq(wars.opponentTag, oppTag),
+            eq(wars.endTime, endTime),
+            eq(wars.warType, "regular"),
+          ),
+        )
+        .limit(1);
+    }
+    if (!existing) {
+      [existing] = await db
+        .select()
+        .from(wars)
+        .where(
+          and(
+            eq(wars.opponentName, oppName),
+            eq(wars.endTime, endTime),
+            eq(wars.warType, "regular"),
+          ),
+        )
+        .limit(1);
+    }
 
     const fieldSet = {
-      opponentName: entry.opponent.name,
+      opponentTag: oppTag,
+      opponentName: oppName,
       opponentBadgeUrls: entry.opponent.badgeUrls ?? null,
       opponentClanLevel: entry.opponent.clanLevel ?? null,
       teamSize: entry.teamSize ?? null,

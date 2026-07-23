@@ -6,29 +6,22 @@ import {
   IconArrowUp,
   IconArrowDown,
   IconShieldOff,
+  IconCheck,
 } from "@/components/ui/icons";
 
 /**
  * Side-by-side own/opponent roster for the current war (concept/07 §"Roster
  * and attack status" + §"Preparation-day scouting").
  *
- * Compact row layout:
+ * Improved layout:
+ *   - Sticky column headers (Our clan / Opponent) that stay visible on scroll.
+ *   - A compact, scannable row: `# | Name TH | adv | right-column`.
+ *   - TH advantage is a graded pill (↑N green / ↓N red / = muted).
+ *   - The right column adapts to state + a user toggle:
+ *       Preparation → "base" (defense: base destroyed state).
+ *       Battle/ended → "attacks" (offense: best attack + urgency badge).
  *
- *   | # | Name | TH | TH adv/disadv |          [right column] |
- *
- * The RIGHT COLUMN adapts to the war state — this is the toggle (concept/07
- * wants BOTH offense "attacks used vs allowed + best stars" AND the defensive
- * "base state"; we can't fit both compactly, so the state picks the default
- * and the user can flip):
- *
- *   - Preparation → "base" (base state). No attacks exist yet, so this is
- *     purely the scouting view (TH adv/disadv is the real cue; base shows —).
- *   - Battle / ended → "attacks" by default: attacks used/allowed, best
- *     stars/destruction, and a prominent no-attack / attacks-left state. The
- *     user can toggle to "base" to see how destroyed each base is.
- *
- * Both rosters are ordered by map position. Own-clan rows link to the shared
- * member detail sheet; opponent rows don't.
+ * Own-clan rows link to the shared member detail sheet; opponent rows don't.
  */
 export function WarRosters({
   currentWar,
@@ -38,13 +31,10 @@ export function WarRosters({
   onMemberClick: (playerTag: string) => void;
 }) {
   const isPrep = currentWar.state === "preparation";
-  // Battle/ended default to "attacks" (urgency matters mid-war); prep defaults
-  // to "base" (no attacks exist, TH scouting is the cue).
   const [mode, setMode] = useState<"attacks" | "base">(
     isPrep ? "base" : "attacks",
   );
 
-  // Opponent TH by map position — for the adv/disadv cue.
   const opponentThByPos = new Map<number, number>();
   for (const m of currentWar.opponent.members) {
     opponentThByPos.set(m.mapPosition, m.townhallLevel);
@@ -64,23 +54,14 @@ export function WarRosters({
           <span className="text-2xs text-umbra-muted">
             {currentWar.clan.members.length} vs {currentWar.opponent.members.length}
           </span>
-          {/* Toggle — only meaningful once attacks exist (battle/ended). */}
           {!isPrep && (
             <div
               role="tablist"
               aria-label="Roster right-column view"
               className="flex rounded-full border border-umbra-line bg-umbra-ink/40 p-0.5"
             >
-              <ToggleTab
-                active={mode === "attacks"}
-                onClick={() => setMode("attacks")}
-                label="Attacks"
-              />
-              <ToggleTab
-                active={mode === "base"}
-                onClick={() => setMode("base")}
-                label="Base"
-              />
+              <ToggleTab active={mode === "attacks"} onClick={() => setMode("attacks")} label="Attacks" />
+              <ToggleTab active={mode === "base"} onClick={() => setMode("base")} label="Base" />
             </div>
           )}
         </div>
@@ -119,19 +100,16 @@ export function WarRosters({
           <IconArrowDown className="h-3 w-3 text-red-400" /> TH disadvantage
         </span>
         {mode === "base" ? (
-          <>
-            <span>
-              <span className="text-amber-400">★★★</span> base destroyed
-            </span>
-            <span>· = even / untouched</span>
-          </>
+          <span>
+            <span className="text-amber-400">★★★</span> base destroyed
+          </span>
         ) : (
           <>
             <span className="flex items-center gap-1">
-              <IconShieldOff className="h-3 w-3 text-red-400" /> no attacks used
+              <IconShieldOff className="h-3 w-3 text-red-400" /> no attacks
             </span>
-            <span>
-              <span className="text-amber-400">★★★</span> best attack
+            <span className="flex items-center gap-1">
+              <IconCheck className="h-3 w-3 text-emerald-400" /> all attacks used
             </span>
           </>
         )}
@@ -140,15 +118,7 @@ export function WarRosters({
   );
 }
 
-function ToggleTab({
-  active,
-  onClick,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  label: string;
-}) {
+function ToggleTab({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
     <button
       type="button"
@@ -156,9 +126,7 @@ function ToggleTab({
       aria-selected={active}
       onClick={onClick}
       className={`focus-ring rounded-full px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider transition ${
-        active
-          ? "bg-umbra-purple/20 text-umbra-lilac"
-          : "text-umbra-muted hover:text-umbra-lilac"
+        active ? "bg-umbra-purple/20 text-umbra-lilac" : "text-umbra-muted hover:text-umbra-lilac"
       }`}
     >
       {label}
@@ -184,31 +152,21 @@ function RosterColumn({
   opposingThByPos: Map<number, number>;
 }) {
   return (
-    <div className="flex flex-col rounded-xl border border-umbra-line bg-white/[.02]">
-      <div className="flex items-center justify-between border-b border-umbra-line px-3 py-2">
-        <span
-          className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"}`}
-        >
+    <div className="flex flex-col overflow-hidden rounded-xl border border-umbra-line bg-white/[.02]">
+      {/* Sticky header */}
+      <div className="sticky top-0 z-10 flex items-center justify-between border-b border-umbra-line bg-umbra-surface/95 px-3 py-2 backdrop-blur">
+        <span className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"}`}>
           {title}
         </span>
         <span className="font-mono text-2xs text-umbra-muted">{members.length}</span>
       </div>
       <div className="max-h-96 overflow-y-auto">
         {members.length === 0 ? (
-          <p className="px-3 py-6 text-center text-2xs text-umbra-muted">
-            No roster data
-          </p>
+          <p className="px-3 py-6 text-center text-2xs text-umbra-muted">No roster data</p>
         ) : (
-          <ul className="divide-y divide-umbra-line/60">
+          <ul className="divide-y divide-umbra-line/40">
             {members.map((m) => {
-              const content = (
-                <RosterRow
-                  m={m}
-                  opposingThByPos={opposingThByPos}
-                  isPrep={isPrep}
-                  mode={mode}
-                />
-              );
+              const content = <RosterRow m={m} opposingThByPos={opposingThByPos} isPrep={isPrep} mode={mode} />;
               if (tone === "own" && m.tag) {
                 return (
                   <li key={m.tag}>
@@ -236,8 +194,7 @@ function RosterColumn({
 }
 
 /**
- * One roster row. Grid: `# | Name | TH | adv | right-column`.
- * The right column is Attacks (offense) or Base (defense) depending on mode.
+ * One roster row. Grid: `# | Name+TH | adv | right-column`.
  */
 function RosterRow({
   m,
@@ -251,25 +208,22 @@ function RosterRow({
   mode: "attacks" | "base";
 }) {
   const opposingTh = opposingThByPos.get(m.mapPosition);
-  const diff =
-    typeof opposingTh === "number" ? m.townhallLevel - opposingTh : null;
+  const diff = typeof opposingTh === "number" ? m.townhallLevel - opposingTh : null;
 
   return (
-    <div className="grid w-full grid-cols-[1.5rem_1fr_auto] items-center gap-2 px-3 py-2 sm:grid-cols-[1.5rem_1fr_auto_auto_auto]">
+    <div className="grid w-full grid-cols-[1.75rem_1fr_auto] items-center gap-2 px-3 py-2 sm:grid-cols-[1.75rem_1fr_auto_auto]">
       {/* # — map position */}
-      <span className="flex h-6 w-6 items-center justify-center rounded-md bg-umbra-purple/15 font-mono text-2xs font-semibold text-umbra-purple">
+      <span className="flex h-5 w-5 items-center justify-center rounded bg-umbra-purple/15 font-mono text-micro font-semibold text-umbra-purple">
         {m.mapPosition}
       </span>
 
-      {/* Name */}
-      <span className="min-w-0 truncate text-xs text-umbra-lilac" title={m.name}>
-        {m.name}
-      </span>
-
-      {/* TH */}
-      <span className="hidden font-mono text-2xs text-umbra-muted sm:inline">
-        TH{m.townhallLevel}
-      </span>
+      {/* Name + TH (combined to save horizontal space) */}
+      <div className="min-w-0">
+        <span className="block truncate text-xs text-umbra-lilac" title={m.name}>
+          {m.name}
+        </span>
+        <span className="font-mono text-micro text-umbra-muted">TH{m.townhallLevel}</span>
+      </div>
 
       {/* TH advantage / disadvantage */}
       <ThAdvantage diff={diff} ownTh={m.townhallLevel} oppTh={opposingTh ?? null} />
@@ -295,54 +249,34 @@ function RosterRow({
   );
 }
 
-function ThAdvantage({
-  diff,
-  ownTh,
-  oppTh,
-}: {
-  diff: number | null;
-  ownTh: number;
-  oppTh: number | null;
-}) {
+function ThAdvantage({ diff, ownTh, oppTh }: { diff: number | null; ownTh: number; oppTh: number | null }) {
   if (diff === null || oppTh === null) {
-    return <span className="hidden text-micro text-umbra-muted/50 sm:inline">—</span>;
+    return <span className="hidden text-micro text-umbra-muted/40 sm:inline">—</span>;
   }
   if (diff === 0) {
     return (
       <span
-        className="hidden items-center gap-0.5 text-micro text-umbra-muted sm:inline-flex"
-        title={`Even matchup — both TH${ownTh}`}
+        className="hidden items-center text-micro text-umbra-muted/60 sm:inline-flex"
+        title={`Even — both TH${ownTh}`}
       >
-        = TH{ownTh}
+        =
       </span>
     );
   }
   const advantage = diff > 0;
   return (
     <span
-      className={`hidden items-center gap-0.5 text-micro font-semibold sm:inline-flex ${
+      className={`hidden items-center gap-0.5 rounded px-1 text-micro font-semibold sm:inline-flex ${
         advantage ? "text-emerald-400" : "text-red-400"
       }`}
       title={`${advantage ? "Advantage" : "Disadvantage"}: TH${ownTh} vs TH${oppTh} (±${Math.abs(diff)})`}
     >
-      {advantage ? (
-        <IconArrowUp className="h-3 w-3" aria-hidden />
-      ) : (
-        <IconArrowDown className="h-3 w-3" aria-hidden />
-      )}
+      {advantage ? <IconArrowUp className="h-3 w-3" aria-hidden /> : <IconArrowDown className="h-3 w-3" aria-hidden />}
       {Math.abs(diff)}
     </span>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Right-column renderers
-// ---------------------------------------------------------------------------
-
-/**
- * Base state (defense) — the worst attack against this base. 3★ 100% =
- * destroyed (amber). Muted dash when untouched / during preparation.
- */
 function BaseState({
   stars,
   destruction,
@@ -367,27 +301,15 @@ function BaseState({
   const destroyed = stars >= 3;
   return (
     <span
-      className={`flex items-center justify-end gap-1.5 justify-self-end font-mono text-2xs ${
-        destroyed ? "text-amber-400" : "text-umbra-muted"
-      }`}
+      className={`flex items-center justify-end gap-1 justify-self-end font-mono text-2xs ${destroyed ? "text-amber-400" : "text-umbra-muted"}`}
       title={`Base attacked ${defendedAgainst}× · worst result ${stars}★ ${destruction}%`}
     >
-      <span className={destroyed ? "text-amber-400" : "text-umbra-muted/70"}>
-        <Stars value={stars} />
-      </span>
-      <span className={destroyed ? "text-amber-400" : "text-umbra-muted"}>
-        {destruction}%
-      </span>
+      <Stars value={stars} />
+      <span>{destruction}%</span>
     </span>
   );
 }
 
-/**
- * Attacks state (offense) — attacks used/allowed, best stars/destruction, and
- * a prominent no-attack / attacks-left state (concept/07 §"Roster and attack
- * status" #3–5). During battle, members with 0 attacks get a red "no-attack"
- * badge; members with attacks remaining get amber "N left"; done = emerald.
- */
 function AttacksState({
   attacksUsed,
   attacksAllowed,
@@ -404,24 +326,18 @@ function AttacksState({
   const noAttack = attacksUsed === 0;
   return (
     <span className="flex items-center justify-end gap-1.5 justify-self-end">
-      {/* Best attack stars/destruction (offense) — hidden when no attacks */}
       {bestStars != null && (
-        <span
-          className="font-mono text-2xs text-umbra-muted"
-          title={`Best attack: ${bestStars}★ ${bestDestruction ?? 0}%`}
-        >
+        <span className="font-mono text-2xs text-umbra-muted" title={`Best attack: ${bestStars}★ ${bestDestruction ?? 0}%`}>
           <Stars value={bestStars} />
-          <span className="ml-1">{bestDestruction ?? 0}%</span>
         </span>
       )}
-      {/* Urgency badge */}
       {noAttack ? (
         <span
-          className="inline-flex items-center gap-1 rounded-full border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-red-400"
+          className="inline-flex items-center gap-0.5 rounded-full border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-red-400"
           title="No attacks used yet"
         >
-          <IconShieldOff className="h-3 w-3" aria-hidden />
-          0/{attacksAllowed}
+          <IconShieldOff className="h-2.5 w-2.5" aria-hidden />
+          {attacksUsed}/{attacksAllowed}
         </span>
       ) : attacksRemaining > 0 ? (
         <span
@@ -432,10 +348,11 @@ function AttacksState({
         </span>
       ) : (
         <span
-          className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-emerald-400"
+          className="inline-flex items-center gap-0.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-emerald-400"
           title="All attacks used"
         >
-          ✓ {attacksUsed}/{attacksAllowed}
+          <IconCheck className="h-2.5 w-2.5" aria-hidden />
+          {attacksUsed}/{attacksAllowed}
         </span>
       )}
     </span>
