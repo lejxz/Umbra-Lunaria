@@ -11,15 +11,18 @@
  * Run with: `bun run db:migrate` (or `db:push`, which is aliased to the same
  * script so the sandbox dev-tooling's `bun run db:push` step succeeds).
  */
-import { drizzle } from "drizzle-orm/postgres-js";
-import { migrate } from "drizzle-orm/postgres-js/migrator";
-import postgres from "postgres";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { Pool } from "pg";
 import { resolveDatabaseUrl } from "../lib/env";
 
 async function main() {
   const url = resolveDatabaseUrl();
-  const sql = postgres(url, { prepare: false });
-  const db = drizzle(sql);
+  const pool = new Pool({
+    connectionString: url,
+    ssl: { rejectUnauthorized: false },
+  });
+  const db = drizzle(pool);
 
   console.log("→ applying migrations from ./drizzle …");
   await migrate(db, { migrationsFolder: "./drizzle" });
