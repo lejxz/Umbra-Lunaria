@@ -44,7 +44,9 @@ export interface RawMember {
   townhallLevel?: number;
   mapPosition?: number;
   attacks?: RawAttack[];
-  opponentAttacks?: RawAttack[];
+  // NOTE: the CoC API returns `opponentAttacks` as a COUNT (number), not an
+  // array of attack objects. We do NOT read it — defense data is derived from
+  // the global attack list grouped by defenderTag in parseWarSnapshot.
 }
 
 export interface RawClanSide {
@@ -151,18 +153,34 @@ export function parseWarSnapshot(row: WarRow): {
     }
   }
 
-  const clanSide = buildClanSide(snap.clan, true, teamSize, attacksPerMember);
+  // Collect ALL attacks from both clans. The CoC API returns attacks only on
+  // the attacker's member object (the `attacks` array). There is no
+  // `opponentAttacks` array — the API returns a count (number), not attack
+  // objects. To compute defense data (which attacks hit each base), we scan
+  // all attacks and group by `defenderTag`.
+  const allAttacks: RawAttack[] = [
+    ...(snap.clan.members ?? []).flatMap((m) => m.attacks ?? []),
+    ...(snap.opponent.members ?? []).flatMap((m) => m.attacks ?? []),
+  ];
+
+  // Build a defenderTag → attacks[] lookup for base-defense computation.
+  const defenseByTag = new Map<string, RawAttack[]>();
+  for (const a of allAttacks) {
+    if (!a.defenderTag) continue;
+    const arr = defenseByTag.get(a.defenderTag) ?? [];
+    arr.push(a);
+    defenseByTag.set(a.defenderTag, arr);
+  }
+
+  const clanSide = buildClanSide(snap.clan, true, teamSize, attacksPerMember, defenseByTag);
   const opponentSide = buildClanSide(
     snap.opponent,
     false,
     teamSize,
     attacksPerMember,
+    defenseByTag,
   );
 
-  const allAttacks: RawAttack[] = [
-    ...(snap.clan.members ?? []).flatMap((m) => m.attacks ?? []),
-    ...(snap.opponent.members ?? []).flatMap((m) => m.attacks ?? []),
-  ];
   const attackLog: WarAttackLogEntry[] = allAttacks
     .filter((a) => a.attackerTag && a.defenderTag && typeof a.order === "number")
     .map((a) => {
@@ -209,6 +227,7 @@ function buildClanSide(
   isOwnClan: boolean,
   teamSize: number | null,
   attacksPerMember: number,
+  defenseByTag: Map<string, RawAttack[]>,
 ): WarClanSide {
   const totalAllowed = teamSize != null ? teamSize * attacksPerMember : null;
   const attacks = side.attacks ?? 0;
@@ -224,7 +243,7 @@ function buildClanSide(
     members: (side.members ?? [])
       .slice()
       .sort((a, b) => (a.mapPosition ?? 0) - (b.mapPosition ?? 0))
-      .map((m) => buildRosterMember(m, isOwnClan, attacksPerMember)),
+      .map((m) => buildRosterMember(m, isOwnClan, attacksPerMember, defenseByTag)),
   };
 }
 
@@ -232,9 +251,14 @@ function buildRosterMember(
   m: RawMember,
   isOwnClan: boolean,
   attacksAllowed: number,
+  defenseByTag: Map<string, RawAttack[]>,
 ): WarRosterMember {
   const ownAttacks = m.attacks ?? [];
-  const defenseAttacks = m.opponentAttacks ?? [];
+  // Defense data: derived from ALL attacks across both clans where this
+  // member's tag is the defenderTag. The CoC API does NOT provide an
+  // `opponentAttacks` array on member objects (it returns a count, not attack
+  // objects), so we build it from the global attack list.
+  const defenseAttacks = m.tag ? (defenseByTag.get(m.tag) ?? []) : [];
   const attacksUsed = ownAttacks.length;
   const bestStars = ownAttacks.length
     ? Math.max(...ownAttacks.map((a) => a.stars ?? 0))

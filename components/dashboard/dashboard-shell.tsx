@@ -63,7 +63,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
           <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Stars per war
           </h3>
-          <div className="mt-3 h-48">
+          <div className="mt-3 h-64 flex-1">
             <WarPerformanceChart trend={data.warPerformanceTrend} />
           </div>
         </section>

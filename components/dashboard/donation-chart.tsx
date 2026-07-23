@@ -1,9 +1,8 @@
 "use client";
 
 import {
-  ComposedChart,
+  BarChart,
   Bar,
-  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -13,27 +12,27 @@ import {
 import type { DonationBucket } from "@/lib/view-models/dashboard";
 
 /**
- * Donation chart — bars for given + received, with a ratio line overlay
- * (given / received). The ratio line surfaces imbalances that the two-bar
- * view alone doesn't make obvious: a ratio above 1 means the clan gives more
- * than it receives; below 1 means it's a net receiver.
+ * Donation bar chart. Uses Recharts with the dark observatory theme.
+ * Shows given + received per bucket (hourly for 24h, daily for 7d/30d).
  *
- * Uses Recharts ComposedChart (Bar + Line) with the dark observatory theme.
+ * Note: in CoC, every donation is simultaneously a "give" (donor) and a
+ * "receive" (recipient), so the clan-wide given total always equals received.
+ * The two bars are still useful per-member and per-bucket (they show WHO is
+ * donating vs WHO is receiving), but a ratio line would always be ~1.0 and
+ * adds no signal — it was removed.
+ *
+ * The chart fills its parent container height — the parent controls the size.
  */
 export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
-  const data = buckets.map((b) => {
-    const ratio = b.received > 0 ? b.given / b.received : null;
-    return {
-      label: b.label,
-      given: b.given,
-      received: b.received,
-      ratio: ratio !== null ? Math.round(ratio * 100) / 100 : null,
-    };
-  });
+  const data = buckets.map((b) => ({
+    label: b.label,
+    given: b.given,
+    received: b.received,
+  }));
 
   return (
     <ResponsiveContainer width="100%" height="100%">
-      <ComposedChart
+      <BarChart
         data={data}
         margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
         barCategoryGap="20%"
@@ -51,21 +50,11 @@ export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
           height={40}
         />
         <YAxis
-          yAxisId="bars"
           tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
           tickLine={false}
           axisLine={false}
           width={32}
           allowDecimals={false}
-        />
-        <YAxis
-          yAxisId="ratio"
-          orientation="right"
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
-          tickLine={false}
-          axisLine={false}
-          width={32}
-          allowDecimals={true}
         />
         <Tooltip
           cursor={{ fill: "rgba(182, 120, 255, 0.08)" }}
@@ -78,26 +67,14 @@ export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
           }}
           labelStyle={{ color: "#9287AD" }}
           itemStyle={{ color: "#EEE5FF" }}
-          formatter={(value, name) => {
-            if (name === "ratio") {
-              return [value != null ? `${value}×` : "—", "Ratio"];
-            }
-            return [String(value ?? 0), name === "given" ? "Given" : "Received"];
-          }}
+          formatter={(value, name) => [
+            String(value ?? 0),
+            name === "given" ? "Given" : "Received",
+          ]}
         />
-        <Bar yAxisId="bars" dataKey="given" fill="#B678FF" radius={[3, 3, 0, 0]} name="given" />
-        <Bar yAxisId="bars" dataKey="received" fill="#7552DF" radius={[3, 3, 0, 0]} name="received" />
-        <Line
-          yAxisId="ratio"
-          type="monotone"
-          dataKey="ratio"
-          stroke="#34D399"
-          strokeWidth={1.5}
-          dot={false}
-          name="ratio"
-          connectNulls
-        />
-      </ComposedChart>
+        <Bar dataKey="given" fill="#B678FF" radius={[3, 3, 0, 0]} name="given" />
+        <Bar dataKey="received" fill="#7552DF" radius={[3, 3, 0, 0]} name="received" />
+      </BarChart>
     </ResponsiveContainer>
   );
 }

@@ -116,9 +116,10 @@ describe("parseWarSnapshot — battle day with attacks", () => {
             attacks: [
               { attackerTag: "#P1", defenderTag: "#E1", stars: 3, destructionPercentage: 100, order: 2 },
             ],
-            opponentAttacks: [
-              { attackerTag: "#E2", defenderTag: "#P1", stars: 1, destructionPercentage: 45, order: 1 },
-            ],
+            // NOTE: opponentAttacks is NOT an array in the CoC API — it's a
+            // count (number). Defense data is derived from the global attack
+            // list by matching defenderTag. Eva's attack (order 1) targets
+            // #P1, so Alice's base defense will be derived from it.
           },
         ],
       },
@@ -134,9 +135,8 @@ describe("parseWarSnapshot — battle day with attacks", () => {
             name: "Eve",
             townhallLevel: 17,
             mapPosition: 1,
-            opponentAttacks: [
-              { attackerTag: "#P1", defenderTag: "#E1", stars: 3, destructionPercentage: 100, order: 2 },
-            ],
+            // Eve's base was attacked by Alice (order 2, defenderTag=#E1).
+            // Defense data is derived from the global attack list.
           },
           {
             tag: "#E2",
