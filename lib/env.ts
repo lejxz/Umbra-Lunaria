@@ -56,18 +56,40 @@ function parseEnvFile(filePath: string): Record<string, string> {
  * Resolve the database URL to use. Prefers a real process.env postgres URL;
  * falls back to the `.env` value when the env value is missing or is the
  * sandbox's SQLite `file:` default. Throws if no usable URL can be found.
+ *
+ * Also strips `sslmode` and Supabase-specific `supa` query params from the
+ * returned URL so that pg-connection-string never applies strict
+ * sslmode=require/verify-full semantics. Callers that need SSL pass
+ * `ssl: { rejectUnauthorized: false }` explicitly in their pool config.
  */
 export function resolveDatabaseUrl(): string {
   const env = process.env.DATABASE_URL;
   if (env && !isSandboxSqliteDefault(env)) {
-    return env;
+    return sanitizeDbUrl(env);
   }
   const fromFile = parseEnvFile(resolve(process.cwd(), ".env"))["DATABASE_URL"];
   if (fromFile && !isSandboxSqliteDefault(fromFile)) {
-    return fromFile;
+    return sanitizeDbUrl(fromFile);
   }
-  if (env) return env; // last resort — let the caller surface the bad URL
+  if (env) return sanitizeDbUrl(env); // last resort — let the caller surface the bad URL
   throw new Error(
     "DATABASE_URL is not set. See .env.example and concept/11-config-specification.md.",
   );
+}
+
+/**
+ * Strip SSL-mode and Supabase-specific query params from a postgres URL so
+ * that pg-connection-string doesn't apply strict sslmode=require/verify-full
+ * semantics. SSL is handled explicitly by each caller's pool config.
+ */
+function sanitizeDbUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.delete("sslmode");
+    u.searchParams.delete("supa");
+    return u.toString();
+  } catch {
+    // Not a parseable URL (e.g. sandbox SQLite path) — return as-is.
+    return url;
+  }
 }
