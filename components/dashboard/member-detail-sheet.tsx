@@ -54,7 +54,7 @@ export function MemberDetailSheet({
       open={playerTag !== null}
       onClose={onClose}
       aria-labelledby="member-detail-title"
-      maxWidth="max-w-3xl"
+      maxWidth="max-w-4xl"
     >
       {loading && (
         <div className="flex flex-col items-center justify-center gap-3 py-16">

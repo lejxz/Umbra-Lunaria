@@ -130,10 +130,10 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <span className="block truncate text-xs font-medium text-umbra-lilac" title={w.opponentName ?? ""}>
+          <span className="block truncate text-sm font-medium text-umbra-lilac" title={w.opponentName ?? ""}>
             vs {w.opponentName ?? "Unknown opponent"}
           </span>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-micro text-umbra-muted">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-2xs text-umbra-muted">
             <span className="rounded bg-white/5 px-1 text-umbra-purple/80">{w.warType === "cwl" ? "CWL" : "REG"}</span>
             {w.teamSize != null && <span>{w.teamSize}v{w.teamSize}</span>}
             {w.endTime ? <TimeAgo date={w.endTime} /> : <span className="text-amber-400">ongoing</span>}
@@ -149,7 +149,7 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
       </div>
 
       {/* Destruction (hidden on narrow) */}
-      <div className="hidden shrink-0 text-right font-mono text-micro text-umbra-muted sm:block">
+      <div className="hidden shrink-0 text-right font-mono text-2xs text-umbra-muted sm:block">
         {w.ownDestructionPercentage != null && w.opponentDestructionPercentage != null ? (
           <span>
             <span className="text-umbra-lilac">{w.ownDestructionPercentage}</span>

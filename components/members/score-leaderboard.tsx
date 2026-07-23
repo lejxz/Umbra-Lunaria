@@ -172,7 +172,7 @@ function TruePodiumCard({
           />
         )}
         <div className="w-full px-1">
-          <span className="block truncate text-center text-[13px] font-bold text-umbra-lilac w-full">
+          <span className="block truncate text-center text-xs font-bold text-umbra-lilac w-full">
             {entry.name}
           </span>
           <span className="block truncate text-center text-micro text-umbra-muted">
@@ -182,7 +182,7 @@ function TruePodiumCard({
       </div>
       
       <div className="text-center w-full mt-1 pt-1.5 border-t border-white/5">
-        <span className="block font-mono text-[14px] font-semibold text-emerald-400">
+        <span className="block font-mono text-sm font-semibold text-emerald-400">
           {entry.totalScore.toFixed(1)}
         </span>
         <div className="mt-1 flex justify-center gap-1">
@@ -233,7 +233,7 @@ function LeaderboardRow({
       className={`flex w-full items-center justify-between rounded-xl px-4 py-3 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle}`}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <span className={`font-mono text-[15px] font-bold w-6 text-center ${rankColor}`}>
+        <span className={`font-mono text-sm font-bold w-6 text-center ${rankColor}`}>
           #{entry.rank}
         </span>
         {entry.leagueTier?.iconUrls?.small && (
@@ -247,7 +247,7 @@ function LeaderboardRow({
           />
         )}
         <div className="min-w-0 text-left">
-          <span className="block truncate text-[14px] font-medium text-umbra-lilac">
+          <span className="block truncate text-sm font-medium text-umbra-lilac">
             {entry.name}
           </span>
           <span className="block truncate text-2xs text-umbra-muted">
@@ -257,7 +257,7 @@ function LeaderboardRow({
         </div>
       </div>
       <div className="shrink-0 text-right">
-        <span className="font-mono text-[15px] font-semibold text-emerald-400">
+        <span className="font-mono text-sm font-semibold text-emerald-400">
           {entry.totalScore.toFixed(1)}
         </span>
         <div className="mt-1 flex justify-end gap-1">

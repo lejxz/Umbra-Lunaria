@@ -83,7 +83,7 @@ export function CurrentWarCard({
                   />
                 </div>
               )}
-              <p className="font-display text-[15px] font-medium text-umbra-lilac leading-tight line-clamp-2">
+              <p className="font-display text-sm font-medium text-umbra-lilac leading-tight line-clamp-2">
                 {clanName ?? "Our Clan"}
               </p>
               
@@ -147,7 +147,7 @@ export function CurrentWarCard({
                   />
                 </div>
               )}
-              <p className="font-display text-[15px] font-medium text-red-300/90 leading-tight line-clamp-2">
+              <p className="font-display text-sm font-medium text-red-300/90 leading-tight line-clamp-2">
                 {warSummary.opponentName ?? "Enemy"}
               </p>
               

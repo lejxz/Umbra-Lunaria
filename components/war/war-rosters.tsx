@@ -92,7 +92,7 @@ export function WarRosters({
       </div>
 
       {/* Legend */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-micro text-umbra-muted">
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-2xs text-umbra-muted">
         <span className="flex items-center gap-1">
           <IconArrowUp className="h-3 w-3 text-emerald-400" /> TH advantage
         </span>
@@ -213,16 +213,16 @@ function RosterRow({
   return (
     <div className="grid w-full grid-cols-[1.75rem_1fr_auto] items-center gap-2 px-3 py-2 sm:grid-cols-[1.75rem_1fr_auto_auto]">
       {/* # — map position */}
-      <span className="flex h-5 w-5 items-center justify-center rounded bg-umbra-purple/15 font-mono text-micro font-semibold text-umbra-purple">
+      <span className="flex h-5 w-5 items-center justify-center rounded bg-umbra-purple/15 font-mono text-2xs font-semibold text-umbra-purple">
         {m.mapPosition}
       </span>
 
       {/* Name + TH (combined to save horizontal space) */}
       <div className="min-w-0">
-        <span className="block truncate text-xs text-umbra-lilac" title={m.name}>
+        <span className="block truncate text-sm text-umbra-lilac" title={m.name}>
           {m.name}
         </span>
-        <span className="font-mono text-micro text-umbra-muted">TH{m.townhallLevel}</span>
+        <span className="font-mono text-2xs text-umbra-muted">TH{m.townhallLevel}</span>
       </div>
 
       {/* TH advantage / disadvantage */}
@@ -251,12 +251,12 @@ function RosterRow({
 
 function ThAdvantage({ diff, ownTh, oppTh }: { diff: number | null; ownTh: number; oppTh: number | null }) {
   if (diff === null || oppTh === null) {
-    return <span className="hidden text-micro text-umbra-muted/40 sm:inline">—</span>;
+    return <span className="hidden text-2xs text-umbra-muted/40 sm:inline">—</span>;
   }
   if (diff === 0) {
     return (
       <span
-        className="hidden items-center text-micro text-umbra-muted/60 sm:inline-flex"
+        className="hidden items-center text-2xs text-umbra-muted/60 sm:inline-flex"
         title={`Even — both TH${ownTh}`}
       >
         =
@@ -266,7 +266,7 @@ function ThAdvantage({ diff, ownTh, oppTh }: { diff: number | null; ownTh: numbe
   const advantage = diff > 0;
   return (
     <span
-      className={`hidden items-center gap-0.5 rounded px-1 text-micro font-semibold sm:inline-flex ${
+      className={`hidden items-center gap-0.5 rounded px-1 text-2xs font-semibold sm:inline-flex ${
         advantage ? "text-emerald-400" : "text-red-400"
       }`}
       title={`${advantage ? "Advantage" : "Disadvantage"}: TH${ownTh} vs TH${oppTh} (±${Math.abs(diff)})`}
@@ -333,7 +333,7 @@ function AttacksState({
       )}
       {noAttack ? (
         <span
-          className="inline-flex items-center gap-0.5 rounded-full border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-red-400"
+          className="inline-flex items-center gap-0.5 rounded-full border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 text-2xs font-semibold uppercase text-red-400"
           title="No attacks used yet"
         >
           <IconShieldOff className="h-2.5 w-2.5" aria-hidden />
@@ -341,14 +341,14 @@ function AttacksState({
         </span>
       ) : attacksRemaining > 0 ? (
         <span
-          className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-amber-400"
+          className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-2xs font-semibold uppercase text-amber-400"
           title={`${attacksRemaining} attack${attacksRemaining === 1 ? "" : "s"} left`}
         >
           {attacksUsed}/{attacksAllowed}
         </span>
       ) : (
         <span
-          className="inline-flex items-center gap-0.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-emerald-400"
+          className="inline-flex items-center gap-0.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 text-2xs font-semibold uppercase text-emerald-400"
           title="All attacks used"
         >
           <IconCheck className="h-2.5 w-2.5" aria-hidden />

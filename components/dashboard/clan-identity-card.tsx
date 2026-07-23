@@ -63,7 +63,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
               >
                 {clan.name}
               </h2>
-              <p className="mt-1 font-mono text-[13px] text-umbra-muted">{clan.tag}</p>
+              <p className="mt-1 font-mono text-xs text-umbra-muted">{clan.tag}</p>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ function StatRow({
       <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="text-right text-[13px] font-semibold text-white">
+      <span className="text-right text-xs font-semibold text-white">
         {value ?? <UnavailableValue />}
       </span>
     </div>

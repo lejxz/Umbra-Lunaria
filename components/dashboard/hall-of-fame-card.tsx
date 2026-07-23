@@ -143,7 +143,7 @@ export function HallOfFameCard({
               <div className="flex items-center gap-3">
                 <div className={activeMeta.color}>{activeMeta.icon}</div>
                 <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[.16em] text-umbra-muted/80">
+                  <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-muted/80">
                     {activeMeta.subtitle}
                   </p>
                   <h3 className={`font-display text-lg font-semibold ${activeMeta.color}`}>
@@ -218,7 +218,7 @@ function RankRow({
       {/* Name and Value Stack */}
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center justify-between gap-1">
-          <span className="truncate font-semibold text-[13px] text-white/90">
+          <span className="truncate font-semibold text-xs text-white/90">
             {entry.name}
           </span>
           <span className={`shrink-0 font-mono text-xs font-bold ${entry.rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>

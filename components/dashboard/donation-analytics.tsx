@@ -131,7 +131,7 @@ export function DonationAnalytics({
                     className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
-                      <span className={`font-mono text-[13px] font-bold ${rankColor}`}>
+                      <span className={`font-mono text-xs font-bold ${rankColor}`}>
                         #{donor.rank}
                       </span>
                       {donor.leagueTier?.iconUrls?.small && (
@@ -144,11 +144,11 @@ export function DonationAnalytics({
                           unoptimized
                         />
                       )}
-                      <span className="truncate text-[13px] font-medium text-umbra-lilac">
+                      <span className="truncate text-xs font-medium text-umbra-lilac">
                         {donor.name}
                       </span>
                     </div>
-                    <span className="shrink-0 font-mono text-[13px] font-semibold text-emerald-400">
+                    <span className="shrink-0 font-mono text-xs font-semibold text-emerald-400">
                       {donor.total}
                     </span>
                   </button>
@@ -156,7 +156,7 @@ export function DonationAnalytics({
               })}
             </div>
           ) : (
-            <p className="text-[13px] text-umbra-muted">No donations tracked yet</p>
+            <p className="text-xs text-umbra-muted">No donations tracked yet</p>
           )}
         </div>
       </div>

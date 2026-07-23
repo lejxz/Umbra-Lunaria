@@ -48,7 +48,7 @@ export function WarAttackLog({
       <div className="mt-4 max-h-[28rem] overflow-y-auto rounded-xl border border-umbra-line/60">
         <table className="w-full border-collapse">
           <thead className="sticky top-0 z-10 bg-umbra-surface/95 backdrop-blur">
-            <tr className="text-left text-micro uppercase tracking-wider text-umbra-muted">
+            <tr className="text-left text-2xs uppercase tracking-wider text-umbra-muted">
               <th className="px-2.5 py-2 font-semibold">#</th>
               <th className="px-2.5 py-2 font-semibold">Attacker</th>
               <th className="px-2.5 py-2 text-center font-semibold">→</th>
@@ -59,8 +59,8 @@ export function WarAttackLog({
           </thead>
           <tbody className="divide-y divide-umbra-line/40">
             {attackLog.map((a) => (
-              <tr key={a.order} className="text-xs transition hover:bg-white/[.03]">
-                <td className="px-2.5 py-1.5 font-mono text-micro text-umbra-muted/70">{a.order}</td>
+              <tr key={a.order} className="text-sm transition hover:bg-white/[.03]">
+                <td className="px-2.5 py-1.5 font-mono text-2xs text-umbra-muted/70">{a.order}</td>
                 <td className="px-2.5 py-1.5">
                   <AttackParticipant
                     tag={a.attackerTag}
@@ -117,12 +117,12 @@ function AttackParticipant({
   const inner = (
     <span className="flex items-center gap-1.5">
       {mapPosition != null && (
-        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-umbra-purple/15 font-mono text-micro font-semibold text-umbra-purple">
+        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-umbra-purple/15 font-mono text-2xs font-semibold text-umbra-purple">
           {mapPosition}
         </span>
       )}
       <span className={`truncate ${isOwnClan ? "text-umbra-lilac" : "text-red-300/80"}`}>{name}</span>
-      {townhall != null && <span className="shrink-0 text-micro text-umbra-muted/60">TH{townhall}</span>}
+      {townhall != null && <span className="shrink-0 text-2xs text-umbra-muted/60">TH{townhall}</span>}
     </span>
   );
   if (isOwnClan && tag) {

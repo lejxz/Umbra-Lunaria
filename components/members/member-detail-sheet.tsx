@@ -30,7 +30,7 @@ export function MemberDetailSheet({
   onClose: () => void;
 }) {
   return (
-    <Modal open onClose={onClose} aria-labelledby="member-detail-title" maxWidth="max-w-3xl">
+    <Modal open onClose={onClose} aria-labelledby="member-detail-title" maxWidth="max-w-4xl">
       <MemberDetailContent detail={detail} />
     </Modal>
   );
