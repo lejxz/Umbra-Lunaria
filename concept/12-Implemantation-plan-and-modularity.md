@@ -42,7 +42,9 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Modal and sheet surfaces render through a viewport-level portal.
 - [x] Database migrations, type checking, and deployed ingestion were previously verified; rerun these checks when affected code changes.
 
-## Phase 1 — Read-only clan observatory
+## Phase 1 — Read-only clan observatory ✅ COMPLETE
+
+All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase-1.6-release-gate.md`.
 
 ### Step 1.0 — Harden the shared foundation
 
