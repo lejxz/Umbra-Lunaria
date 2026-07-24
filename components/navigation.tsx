@@ -40,9 +40,9 @@ export function Navigation() {
 
   return (
     <aside
-      className={`fixed inset-x-0 bottom-0 z-20 border-t border-umbra-line bg-umbra-ink/95 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-r lg:border-t-0 transition-[width] duration-300 ease-in-out ${
-        isCollapsed ? "lg:w-20" : "lg:w-60"
-      }`}
+      className={`fixed inset-x-0 bottom-0 z-20 border-t border-umbra-line bg-umbra-ink/95 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-r lg:border-t-0 ${
+        mounted ? "transition-[width] duration-300 ease-in-out" : ""
+      } ${isCollapsed ? "lg:w-20" : "lg:w-60"}`}
     >
       {/* Collapse Toggle Button - sits perfectly on the border */}
       {mounted && (
@@ -59,7 +59,7 @@ export function Navigation() {
         </button>
       )}
 
-      <div className={`hidden border-b border-umbra-line lg:flex items-center transition-all duration-300 overflow-hidden ${isCollapsed ? "p-4 justify-center" : "p-6"}`}>
+      <div className={`hidden border-b border-umbra-line lg:flex items-center overflow-hidden ${mounted ? "transition-all duration-300" : ""} ${isCollapsed ? "p-4 justify-center" : "p-6"}`}>
         <Link href="/" className="flex items-center gap-3">
           <img
             src="/assets/Logo.png"
@@ -67,7 +67,7 @@ export function Navigation() {
             className="h-10 w-10 shrink-0 rounded-full object-cover shadow-glow"
           />
           <span
-            className={`font-display text-sm font-semibold tracking-[0.08em] text-umbra-lilac transition-all duration-300 whitespace-nowrap ${
+            className={`font-display text-sm font-semibold tracking-[0.08em] text-umbra-lilac whitespace-nowrap ${mounted ? "transition-all duration-300" : ""} ${
               isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100 block"
             }`}
           >
@@ -90,7 +90,7 @@ export function Navigation() {
               href={href}
               aria-current={active ? "page" : undefined}
               title={isCollapsed ? label : undefined}
-              className={`focus-ring flex flex-col items-center gap-1 rounded-[10px] border px-3 py-2 text-label transition-all duration-300 lg:flex-row lg:gap-3 lg:py-3 lg:text-sm ${
+              className={`focus-ring flex flex-col items-center gap-1 rounded-[10px] border px-3 py-2 text-label lg:flex-row lg:gap-3 lg:py-3 lg:text-sm ${mounted ? "transition-all duration-300" : ""} ${
                 active
                   ? "border-umbra-line bg-umbra-purple/10 text-umbra-lilac"
                   : "border-transparent text-umbra-muted hover:bg-white/5 hover:text-umbra-lilac"
@@ -100,7 +100,7 @@ export function Navigation() {
                 {icon}
               </span>
               <span
-                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                className={`whitespace-nowrap overflow-hidden ${mounted ? "transition-all duration-300" : ""} ${
                   isCollapsed ? "lg:w-0 lg:opacity-0 lg:hidden" : "lg:w-auto lg:opacity-100 lg:block"
                 }`}
               >
@@ -112,7 +112,7 @@ export function Navigation() {
       </nav>
 
       <div
-        className={`absolute bottom-5 hidden border-t border-umbra-line px-6 pt-5 text-xs leading-5 text-umbra-muted transition-opacity duration-300 whitespace-nowrap lg:block ${
+        className={`absolute bottom-5 hidden border-t border-umbra-line px-6 pt-5 text-xs leading-5 text-umbra-muted whitespace-nowrap lg:block ${mounted ? "transition-opacity duration-300" : ""} ${
           isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
