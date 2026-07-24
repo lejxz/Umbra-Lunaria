@@ -27,6 +27,7 @@ import {
   ArrowUp,
   ArrowDown,
   ChevronRight,
+  ChevronLeft,
   Check,
   Building2,
   LayoutGrid,
@@ -90,6 +91,7 @@ export const NavIconPlanning = (props: LucideProps) => <ClipboardList {...props}
 export const IconArrowUp = (props: LucideProps) => <ArrowUp {...props} />;
 export const IconArrowDown = (props: LucideProps) => <ArrowDown {...props} />;
 export const IconChevronRight = (props: LucideProps) => <ChevronRight {...props} />;
+export const IconChevronLeft = (props: LucideProps) => <ChevronLeft {...props} />;
 export const IconCheck = (props: LucideProps) => <Check {...props} />;
 
 // ---------------------------------------------------------------------------
