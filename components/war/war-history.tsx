@@ -79,16 +79,34 @@ export function WarHistory({
         </p>
       )}
 
-      <div className="mt-4 max-h-[32rem] space-y-2 overflow-y-auto pr-1">
-        {history.length === 0 ? (
-          <EmptyState
-            title="No war history yet"
-            description="Completed wars appear here once the tracker observes them, or after the public war log is backfilled."
-            icon={<IconWarEmpty className="h-10 w-10" />}
-          />
-        ) : (
-          history.map((w) => <WarHistoryRow key={w.warId} w={w} onViewDetail={onViewDetail} />)
-        )}
+      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-xl border border-umbra-line bg-white/[.02] shadow-inner shadow-black/20">
+        <table className="w-full text-left text-sm">
+          <thead className="sticky top-0 z-10 border-b border-umbra-line bg-[#0E0C13]/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur">
+            <tr>
+              <th className="w-10 px-3 py-2 font-medium">Result</th>
+              <th className="px-3 py-2 font-medium">Opponent</th>
+              <th className="px-3 py-2 font-medium">Type</th>
+              <th className="px-3 py-2 text-center font-medium">Score</th>
+              <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Destruction</th>
+              <th className="px-3 py-2 text-right font-medium">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {history.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-3 py-8">
+                  <EmptyState
+                    title="No war history yet"
+                    description="Completed wars appear here once the tracker observes them, or after the public war log is backfilled."
+                    icon={<IconWarEmpty className="h-10 w-10" />}
+                  />
+                </td>
+              </tr>
+            ) : (
+              history.map((w) => <WarHistoryRow key={w.warId} w={w} onViewDetail={onViewDetail} />)
+            )}
+          </tbody>
+        </table>
       </div>
     </section>
   );
@@ -110,49 +128,60 @@ function RecordChip({ label, value, tone }: { label: string; value: number; tone
 
 function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: (warId: number) => void }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-umbra-line bg-white/[.02] px-3 py-2.5 transition hover:border-umbra-purple/30 hover:bg-white/[.04]">
-      <ResultPill result={w.result} />
+    <tr className="group transition hover:bg-white/[.04]">
+      {/* Result */}
+      <td className="px-3 py-2 align-middle">
+        <ResultPill result={w.result} />
+      </td>
 
-      {/* Opponent badge + name + meta */}
-      <div className="flex min-w-0 flex-1 items-center gap-2.5">
-        {w.opponentBadgeUrls?.small ? (
-          <div className="relative h-8 w-8 shrink-0">
-            <Image
-              src={w.opponentBadgeUrls.small}
-              alt={`${w.opponentName ?? "Opponent"} badge`}
-              fill
-              className="object-contain grayscale"
-            />
-          </div>
-        ) : (
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-umbra-purple/10 text-umbra-purple/50">
-            <IconWarEmpty className="h-4 w-4" />
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-medium text-umbra-lilac" title={w.opponentName ?? ""}>
-            vs {w.opponentName ?? "Unknown opponent"}
+      {/* Opponent badge + name */}
+      <td className="px-3 py-2 align-middle">
+        <div className="flex items-center gap-2.5">
+          {w.opponentBadgeUrls?.small ? (
+            <div className="relative h-6 w-6 shrink-0">
+              <Image
+                src={w.opponentBadgeUrls.small}
+                alt={`${w.opponentName ?? "Opponent"} badge`}
+                fill
+                className="object-contain grayscale"
+              />
+            </div>
+          ) : (
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-umbra-purple/10 text-umbra-purple/50">
+              <IconWarEmpty className="h-3 w-3" />
+            </div>
+          )}
+          <span className="truncate font-medium text-umbra-lilac" title={w.opponentName ?? ""}>
+            {w.opponentName ?? "Unknown opponent"}
           </span>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-2xs text-umbra-muted">
-            <span className="rounded bg-white/5 px-1 text-umbra-purple/80">{w.warType === "cwl" ? "CWL" : "REG"}</span>
-            {w.teamSize != null && <span>{w.teamSize}v{w.teamSize}</span>}
-            {w.endTime ? <TimeAgo date={w.endTime} /> : <span className="text-amber-400">ongoing</span>}
-          </div>
         </div>
-      </div>
+      </td>
+
+      {/* Type / Meta */}
+      <td className="px-3 py-2 align-middle">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-mono text-2xs text-umbra-muted">
+            <span className="rounded bg-white/5 px-1 text-umbra-purple/80">{w.warType === "cwl" ? "CWL" : "REG"}</span>
+            {w.teamSize != null && <span className="ml-1.5">{w.teamSize}v{w.teamSize}</span>}
+          </span>
+          <span className="text-2xs text-umbra-muted/70">
+            {w.endTime ? <TimeAgo date={w.endTime} /> : <span className="text-amber-400">ongoing</span>}
+          </span>
+        </div>
+      </td>
 
       {/* Score line */}
-      <div className="flex shrink-0 items-center gap-1 font-display text-sm font-bold">
+      <td className="px-3 py-2 text-center align-middle font-display text-sm font-bold">
         <span className="text-amber-400">{w.ownStars ?? "—"}</span>
-        <span className="text-2xs text-umbra-muted/50">–</span>
+        <span className="mx-1 text-2xs text-umbra-muted/50">–</span>
         <span className="text-umbra-muted">{w.opponentStars ?? "—"}</span>
-      </div>
+      </td>
 
-      {/* Destruction (hidden on narrow) */}
-      <div className="hidden shrink-0 text-right font-mono text-2xs text-umbra-muted sm:block">
+      {/* Destruction */}
+      <td className="hidden px-3 py-2 text-right align-middle font-mono text-2xs text-umbra-muted sm:table-cell">
         {w.ownDestructionPercentage != null && w.opponentDestructionPercentage != null ? (
           <span>
-            <span className="text-umbra-lilac">{w.ownDestructionPercentage}</span>
+            <span className={w.ownDestructionPercentage === 100 ? "text-amber-400" : "text-umbra-lilac"}>{w.ownDestructionPercentage}</span>
             <span className="text-umbra-muted/40">/</span>
             <span>{w.opponentDestructionPercentage}</span>
             <span className="text-umbra-muted/50">%</span>
@@ -160,10 +189,10 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
         ) : (
           <span>—</span>
         )}
-      </div>
+      </td>
 
-      {/* Details button / no-detail tag */}
-      <div className="shrink-0">
+      {/* Details button */}
+      <td className="px-3 py-2 text-right align-middle">
         {w.hasDetail ? (
           <button
             type="button"
@@ -182,8 +211,8 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
             —
           </span>
         )}
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
 

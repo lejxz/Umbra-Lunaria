@@ -144,7 +144,7 @@ function AttackParticipant({
   );
   if (isOwnClan && tag) {
     return (
-      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring rounded text-left transition hover:bg-umbra-purple/10">
+      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring -m-1 rounded-md p-1 text-left transition hover:bg-umbra-purple/10">
         {inner}
       </button>
     );
