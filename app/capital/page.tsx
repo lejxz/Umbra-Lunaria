@@ -21,10 +21,8 @@ export default async function CapitalPage() {
     const message = err instanceof Error ? err.message : "Unknown error";
     return (
       <PageScaffold
-        section="Clan capital"
-        title="Capital"
-        description="Track district growth and raid-weekend contribution over time."
-        eyebrow="district observatory"
+        section="Capital"
+        title="Clan capital"
       >
         <ErrorState message="The capital page couldn&apos;t load." />
         <p className="mt-4 text-sm text-umbra-muted">{message}</p>
@@ -34,10 +32,8 @@ export default async function CapitalPage() {
 
   return (
     <PageScaffold
-      section="Clan capital"
-      title="Capital"
-      description="Track district growth and raid-weekend contribution over time."
-      eyebrow="district observatory"
+      section="Capital"
+      title="Clan capital"
     >
       <CapitalShell data={data} />
     </PageScaffold>

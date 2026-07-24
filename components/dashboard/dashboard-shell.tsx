@@ -32,16 +32,15 @@ export function DashboardShell({ data }: { data: DashboardData }) {
   return (
     <div className="mx-auto max-w-[1380px] p-5 sm:p-8 lg:p-10">
       {/* Header */}
-      <header className="mb-8">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          Command center / overview
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
-          The clan observatory
-        </h1>
-        <p className="mt-2 text-sm text-umbra-muted">
-          Identity first. Donations and member contribution at the center.
-        </p>
+      <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+        <div>
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Dashboard
+          </p>
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
+            The clan observatory
+          </h1>
+        </div>
       </header>
 
       {/* Row 1: Identity card — full width */}

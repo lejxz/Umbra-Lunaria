@@ -20,10 +20,8 @@ export default async function WarPage() {
     const message = err instanceof Error ? err.message : "Unknown error";
     return (
       <PageScaffold
-        section="War center"
+        section="War"
         title="Clan war"
-        description="See the current battle clearly, without unnecessary noise."
-        eyebrow="live readiness"
       >
         <ErrorState message="The war center couldn&apos;t load." />
         <p className="mt-4 text-sm text-umbra-muted">{message}</p>
@@ -35,10 +33,8 @@ export default async function WarPage() {
 
   return (
     <PageScaffold
-      section="War center"
+      section="War"
       title="Clan war"
-      description="See the current battle clearly, without unnecessary noise."
-      eyebrow="live readiness"
     >
       <WarShell
         data={data}

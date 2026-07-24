@@ -23,10 +23,8 @@ export default async function MembersPage() {
     const message = err instanceof Error ? err.message : "Unknown error";
     return (
       <PageScaffold
-        section="Roster"
+        section="Members"
         title="Members"
-        description="A clear read on activity, contribution, and war readiness."
-        eyebrow="member browser"
       >
         <ErrorState message="The roster couldn&apos;t load." />
         <p className="mt-4 text-sm text-umbra-muted">{message}</p>
@@ -52,10 +50,8 @@ export default async function MembersPage() {
 
   return (
     <PageScaffold
-      section="Roster"
+      section="Members"
       title="Members"
-      description="A clear read on activity, contribution, and war readiness."
-      eyebrow="member browser"
     >
       <MembersShell
         roster={roster}

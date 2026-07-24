@@ -32,7 +32,7 @@ export default async function DashboardPage() {
       <div className="mx-auto max-w-[1380px] p-5 sm:p-8 lg:p-10">
         <header className="mb-8">
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Command center / overview
+            Dashboard
           </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
             The clan observatory

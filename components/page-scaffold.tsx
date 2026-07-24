@@ -9,8 +9,8 @@ export function PageScaffold({
 }: {
   section: string;
   title: string;
-  description: string;
-  eyebrow: string;
+  description?: string;
+  eyebrow?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -18,12 +18,14 @@ export function PageScaffold({
       <header className="mb-8 flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            {section} / {eyebrow}
+            {section}{eyebrow ? ` / ${eyebrow}` : ""}
           </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
             {title}
           </h1>
-          <p className="mt-2 text-sm text-umbra-muted">{description}</p>
+          {description && (
+            <p className="mt-2 text-sm text-umbra-muted">{description}</p>
+          )}
         </div>
         <Link
           href="/"
