@@ -28,21 +28,16 @@ export function CapitalShell({ data }: { data: CapitalPageData }) {
     <div className="space-y-5">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <CapitalOverviewCard overview={data.overview} />
-        <RaidPendingCard available={data.raidHistoryAvailable} />
+        <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2">
-          <UpgradeTimeline
-            history={data.upgradeHistory}
-            filter={filter}
-            onFilterChange={setFilter}
-          />
-        </div>
-        <div className="lg:col-span-1">
-          <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
-        </div>
-      </div>
+      <RaidPendingCard available={data.raidHistoryAvailable} />
+
+      <UpgradeTimeline
+        history={data.upgradeHistory}
+        filter={filter}
+        onFilterChange={setFilter}
+      />
     </div>
   );
 }

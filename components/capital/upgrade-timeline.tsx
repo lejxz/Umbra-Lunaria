@@ -105,12 +105,6 @@ export function UpgradeTimeline({
         )}
       </div>
 
-      {history.trackingStart && !history.isColdStart && (
-        <p className="mt-3 text-2xs text-umbra-muted/60">
-          Tracking began {formatRelative(history.trackingStart)}. Upgrades before
-          this date are not recorded.
-        </p>
-      )}
     </section>
   );
 }

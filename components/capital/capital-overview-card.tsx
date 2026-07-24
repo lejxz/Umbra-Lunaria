@@ -51,10 +51,6 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
         </div>
       </div>
 
-      {/* Unavailable: live upgrade cost/progress (concept/08 §"Explicitly unavailable") */}
-      <p className="mt-2 text-center text-2xs text-umbra-muted/50">
-        Live upgrade cost &amp; progress are not provided by the API.
-      </p>
     </section>
   );
 }

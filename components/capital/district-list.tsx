@@ -64,10 +64,6 @@ export function DistrictList({
         </ul>
       )}
 
-      <p className="mt-3 text-2xs text-umbra-muted/50">
-        District levels update infrequently — a level-up is a multi-day Capital
-        Gold effort. See the upgrade timeline above for observed changes.
-      </p>
     </section>
   );
 }
