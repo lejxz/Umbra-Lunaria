@@ -159,8 +159,9 @@ export async function getCapitalNavSummary(): Promise<CapitalNavSummary> {
 
 export async function getDonationTotals(
   windowKind: DonationWindow,
+  now: Date = new Date(),
 ): Promise<DonationTotals> {
-  const win = computeWindow(windowKind);
+  const win = computeWindow(windowKind, now);
   const trackingStart = await getTrackingStart();
 
   const retainedMembers = await getRetainedMembers();
@@ -235,8 +236,9 @@ export async function getDonationTotals(
 export async function getDonationLeaderboard(
   windowKind: DonationWindow,
   limit = 10,
+  now: Date = new Date(),
 ): Promise<DonationLeaderboard> {
-  const win = computeWindow(windowKind);
+  const win = computeWindow(windowKind, now);
   const retainedMembers = await getRetainedMembers();
 
   if (retainedMembers.length === 0) {
@@ -330,8 +332,9 @@ export async function getDonationLeaderboard(
 
 export async function getDonationTimeline(
   windowKind: DonationWindow,
+  now: Date = new Date(),
 ): Promise<DonationTimeline> {
-  const win = computeWindow(windowKind);
+  const win = computeWindow(windowKind, now);
   const buckets = generateBuckets(win);
   const trackingStart = await getTrackingStart();
 
@@ -445,8 +448,9 @@ export async function getDonationTimeline(
 
 export async function getActivityTimeline(
   windowKind: DonationWindow,
+  now: Date = new Date(),
 ): Promise<ActivityTimeline> {
-  const win = computeWindow(windowKind);
+  const win = computeWindow(windowKind, now);
   const buckets = generateBuckets(win);
   const trackingStart = await getTrackingStart();
 
@@ -518,8 +522,9 @@ export async function getActivityTimeline(
 
 export async function getMemberActivityScore(
   windowKind: ScoreWindow = "30d",
+  now: Date = new Date(),
 ): Promise<ActivityScoreLeaderboard> {
-  const win = computeWindow(windowKind);
+  const win = computeWindow(windowKind, now);
   const trackingStart = await getTrackingStart();
   const minWars = clanConfig.minWarsForConfidentRanking;
 
@@ -1000,8 +1005,10 @@ export async function getDashboard(): Promise<DashboardData> {
   // Fetch all 3 windows of donation + activity data in parallel, plus the
   // single-window data (clan, capital, activity score, needs attention, etc.).
   // The 24h/7d/30d tabs switch client-side with no API calls.
+  const clan = await getDashboardClan();
+  const lastPolledAt = clan?.lastPolledAt ? new Date(clan.lastPolledAt) : new Date();
+
   const [
-    clan,
     capital,
     donations24h,
     donationTimeline24h,
@@ -1028,23 +1035,22 @@ export async function getDashboard(): Promise<DashboardData> {
     rosterSizeTrend,
     warAttackDistribution,
   ] = await Promise.all([
-    getDashboardClan(),
     getCapitalSummary(),
-    getDonationTotals("24h"),
-    getDonationTimeline("24h"),
-    getDonationLeaderboard("24h"),
-    getDonationTotals("7d"),
-    getDonationTimeline("7d"),
-    getDonationLeaderboard("7d"),
-    getDonationTotals("30d"),
-    getDonationTimeline("30d"),
-    getDonationLeaderboard("30d"),
-    getActivityTimeline("24h"),
-    getActivityTimeline("7d"),
-    getActivityTimeline("30d"),
-    getMemberActivityScore("24h"),
-    getMemberActivityScore("7d"),
-    getMemberActivityScore("30d"),
+    getDonationTotals("24h", lastPolledAt),
+    getDonationTimeline("24h", lastPolledAt),
+    getDonationLeaderboard("24h", 10, lastPolledAt),
+    getDonationTotals("7d", lastPolledAt),
+    getDonationTimeline("7d", lastPolledAt),
+    getDonationLeaderboard("7d", 10, lastPolledAt),
+    getDonationTotals("30d", lastPolledAt),
+    getDonationTimeline("30d", lastPolledAt),
+    getDonationLeaderboard("30d", 10, lastPolledAt),
+    getActivityTimeline("24h", lastPolledAt),
+    getActivityTimeline("7d", lastPolledAt),
+    getActivityTimeline("30d", lastPolledAt),
+    getMemberActivityScore("24h", lastPolledAt),
+    getMemberActivityScore("7d", lastPolledAt),
+    getMemberActivityScore("30d", lastPolledAt),
     getNeedsAttention(),
     getClanLog(),
     getDashboardWarSummary(),

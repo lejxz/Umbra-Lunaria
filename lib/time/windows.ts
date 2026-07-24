@@ -33,7 +33,6 @@ export function computeWindow(kind: WindowKind, now: Date = new Date()): TimeWin
   switch (kind) {
     case "24h":
       from.setUTCHours(from.getUTCHours() - 23);
-      from.setUTCMinutes(0, 0, 0); // Align with light cron snapshots at the top of the hour
       break;
     case "7d":
       from.setUTCDate(from.getUTCDate() - 7);
