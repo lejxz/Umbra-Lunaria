@@ -115,7 +115,7 @@ function WarDetailContent({
             {w.warType === "cwl" ? "Clan War League" : "Regular war"} · {stateLabel(w.state)}
           </p>
           <h2 id="war-detail-title" className="mt-1 font-display text-xl text-umbra-lilac">
-            vs {w.opponent.name}
+            War details
           </h2>
           {w.endTime && (
             <p className="mt-1 text-2xs text-umbra-muted">
