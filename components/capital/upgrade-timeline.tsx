@@ -32,24 +32,24 @@ export function UpgradeTimeline({
   }, [history.events, filter]);
 
   return (
-    <section className="glass flex flex-col overflow-hidden rounded-2xl p-6 sm:p-8" aria-labelledby="upgrade-timeline-title">
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="upgrade-timeline-title">
       <div className="flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Upgrade history · tracked
         </p>
         {history.events.length > 0 && (
-          <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-3 py-1 font-mono text-label text-umbra-lilac shadow-[0_0_10px_rgba(152,107,255,0.2)]">
+          <span className="rounded-full border border-umbra-purple/30 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold text-umbra-purple">
             {history.events.length} {history.events.length === 1 ? "upgrade" : "upgrades"}
           </span>
         )}
       </div>
-      <h3 id="upgrade-timeline-title" className="mt-1 font-display text-2xl font-medium tracking-wide text-umbra-lilac sm:text-3xl">
+      <h3 id="upgrade-timeline-title" className="mt-1 font-display text-lg text-umbra-lilac">
         District upgrade timeline
       </h3>
 
       {/* District filter */}
       {history.districtNames.length > 0 && (
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           <FilterChip active={filter === "all"} onClick={() => onFilterChange("all")} label="All" />
           {history.districtNames.map((name) => (
             <FilterChip
@@ -80,24 +80,22 @@ export function UpgradeTimeline({
             icon={<IconCapital className="h-10 w-10" />}
           />
         ) : (
-          <ol className="relative ml-2 space-y-4 border-l-2 border-umbra-line/40 pl-6 pb-2">
+          <ol className="relative space-y-2 border-l border-umbra-line pl-4">
             {filteredEvents.map((e, i) => (
-              <li key={`${e.districtName}-${e.observedAt.getTime()}-${i}`} className="group relative">
-                {/* Glowing Dot */}
-                <span className="absolute -left-[1.82rem] top-3 h-3 w-3 rounded-full border-2 border-umbra-ink bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)] ring-2 ring-emerald-500/30 transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_16px_rgba(16,185,129,1)]" />
-                
-                <div className="rounded-xl border border-umbra-line/40 bg-white/[.01] px-5 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-umbra-purple/40 hover:bg-white/[.03] hover:shadow-glow">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4">
-                    <span className="truncate text-base font-medium tracking-wide text-umbra-lilac">
+              <li key={`${e.districtName}-${e.observedAt.getTime()}-${i}`} className="relative">
+                <span className="absolute -left-[1.4rem] top-2 flex h-2.5 w-2.5 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/20" />
+                <div className="rounded-lg border border-umbra-line/60 bg-white/[.02] px-3 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs font-medium text-umbra-lilac">
                       {e.districtName}
                     </span>
-                    <span className="flex shrink-0 items-center gap-2 font-mono text-xs">
-                      <span className="text-umbra-muted transition-colors group-hover:text-umbra-muted/80">Lv {e.fromLevel}</span>
-                      <IconChevronRight className="h-3.5 w-3.5 text-umbra-purple/70 transition-transform group-hover:translate-x-0.5" aria-hidden />
-                      <span className="font-bold text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]">Lv {e.toLevel}</span>
+                    <span className="flex shrink-0 items-center gap-1 font-mono text-2xs">
+                      <span className="text-umbra-muted">Lv {e.fromLevel}</span>
+                      <IconChevronRight className="h-3 w-3 text-umbra-muted/60" aria-hidden />
+                      <span className="text-emerald-400">Lv {e.toLevel}</span>
                     </span>
                   </div>
-                  <p className="mt-1 font-mono text-label text-umbra-muted/70">
+                  <p className="mt-0.5 text-micro text-umbra-muted/70">
                     <TimeAgo date={e.observedAt} />
                   </p>
                 </div>
@@ -108,7 +106,7 @@ export function UpgradeTimeline({
       </div>
 
       {history.trackingStart && !history.isColdStart && (
-        <p className="mt-5 text-center text-label text-umbra-muted/60">
+        <p className="mt-3 text-2xs text-umbra-muted/60">
           Tracking began {formatRelative(history.trackingStart)}. Upgrades before
           this date are not recorded.
         </p>
@@ -122,16 +120,13 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
     <button
       type="button"
       onClick={onClick}
-      className={`focus-ring relative overflow-hidden rounded-full border px-4 py-1.5 font-mono text-label uppercase tracking-wider transition-all duration-300 ${
+      className={`focus-ring rounded-full border px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider transition ${
         active
-          ? "border-umbra-purple/60 text-white shadow-[0_0_12px_rgba(152,107,255,0.4)]"
-          : "border-umbra-line/60 bg-white/[.02] text-umbra-muted hover:border-umbra-purple/40 hover:bg-white/[.05] hover:text-umbra-lilac"
+          ? "border-umbra-purple/50 bg-umbra-purple/15 text-umbra-lilac"
+          : "border-umbra-line bg-white/[.02] text-umbra-muted hover:border-umbra-purple/30 hover:text-umbra-lilac"
       }`}
     >
-      {active && (
-        <div className="absolute inset-0 bg-gradient-to-r from-umbra-purple/40 to-umbra-purple/10" />
-      )}
-      <span className="relative z-10">{label}</span>
+      {label}
     </button>
   );
 }
