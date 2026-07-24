@@ -7,6 +7,7 @@ import type { WarDetailView } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { IconSwords, IconLoader, IconAlert, IconWarEmpty } from "@/components/ui/icons";
+import { WarClanColumn, StateBadge } from "./war-hero";
 
 /**
  * War detail sheet — opened from the history "View details" button. Fetches
@@ -121,34 +122,99 @@ function WarDetailContent({
             </p>
           )}
         </div>
-        <ResultPill result={w.state === "warEnded" ? resultFromStars(w) : null} />
       </div>
 
-      {/* ---- Score line ---- */}
-      <div className="mt-4 flex items-center justify-center gap-4 rounded-xl bg-white/[.03] px-4 py-3">
-        <ClanSide
-          name={clanName ?? "Our Clan"}
+      {/* ---- Score line (VS Arena Layout) ---- */}
+      <div className="relative mt-8 flex items-stretch justify-center gap-2 sm:gap-6">
+        {/* Glowing auras based on result */}
+        <div className="pointer-events-none absolute inset-0 flex overflow-hidden rounded-2xl">
+          {w.state === "warEnded" && resultFromStars(w) === "win" && (
+            <div className="absolute left-[-20%] top-[-20%] h-[140%] w-[70%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/15 via-emerald-500/5 to-transparent" />
+          )}
+          {w.state === "warEnded" && resultFromStars(w) === "loss" && (
+            <div className="absolute right-[-20%] top-[-20%] h-[140%] w-[70%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-500/15 via-red-500/5 to-transparent" />
+          )}
+        </div>
+
+        <WarClanColumn
           badgeUrls={clanBadgeUrls ?? null}
+          name={clanName ?? "Our Clan"}
+          clanLevel={w.clan.clanLevel}
           stars={w.clan.stars}
           destruction={w.clan.destructionPercentage}
           attacks={w.clan.attacks}
+          attacksRemaining={0} // Past wars have 0 attacks remaining typically
           tone="own"
         />
-        <div className="flex flex-col items-center px-2">
-          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">score</span>
-          <span className="mt-1 font-display text-2xl font-bold text-umbra-lilac">
-            {w.clan.stars} – {w.opponent.stars}
-          </span>
+
+        {/* Center column: VS + Result Badge */}
+        <div className="z-10 flex shrink-0 flex-col items-center justify-center gap-3 px-2 sm:px-4">
+          <StateBadge label={stateLabel(w.state)} tone={w.state === "warEnded" ? "muted" : "amber"} />
+
+          {w.teamSize != null && (
+            <span className="rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
+              {w.teamSize}v{w.teamSize}
+              {w.attacksPerMember != null && ` · ${w.attacksPerMember} atk`}
+            </span>
+          )}
+
+          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/30 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+            <IconSwords className="h-5 w-5" />
+          </div>
+
+          {w.state === "warEnded" && resultFromStars(w) !== null && (
+            <div
+              className={`mt-1 flex items-center justify-center rounded-full border px-3 py-1 backdrop-blur-md ${
+                resultFromStars(w) === "win"
+                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
+                  : resultFromStars(w) === "loss"
+                    ? "border-red-400/30 bg-red-400/10 text-red-400"
+                    : "border-amber-400/30 bg-amber-400/10 text-amber-400"
+              }`}
+            >
+              <p className="whitespace-nowrap text-center font-display text-2xs font-bold uppercase leading-tight tracking-wide">
+                {resultFromStars(w) === "win"
+                  ? "Victory"
+                  : resultFromStars(w) === "loss"
+                    ? "Defeat"
+                    : "Tie"}
+              </p>
+            </div>
+          )}
         </div>
-        <ClanSide
-          name={w.opponent.name}
+
+        <WarClanColumn
           badgeUrls={w.opponent.badgeUrls}
+          name={w.opponent.name}
+          clanLevel={w.opponent.clanLevel}
           stars={w.opponent.stars}
           destruction={w.opponent.destructionPercentage}
           attacks={w.opponent.attacks}
+          attacksRemaining={0}
           tone="opponent"
         />
       </div>
+
+      {/* Star progress bar */}
+      {w.teamSize != null && w.teamSize > 0 && (
+        <div className="mt-8 px-4 sm:px-8">
+          <div className="mb-2 flex items-center justify-between font-mono text-xs font-semibold text-umbra-muted">
+            <span className="drop-shadow-sm text-amber-400/90">★ {w.clan.stars}</span>
+            <span className="text-2xs uppercase tracking-widest text-umbra-muted/50">{w.teamSize * 3} Max</span>
+            <span className="drop-shadow-sm text-red-400/90">{w.opponent.stars} ★</span>
+          </div>
+          <div className="relative flex h-3 overflow-hidden rounded-full border border-white/5 bg-black/40 shadow-inner shadow-black/50">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/5" />
+            <div className="flex w-1/2 justify-end">
+              <div className="bg-gradient-to-l from-amber-400 to-amber-600 transition-all duration-1000 ease-out" style={{ width: `${(w.clan.stars / (w.teamSize * 3)) * 100}%` }} />
+            </div>
+            <div className="z-10 h-full w-px bg-white/20" />
+            <div className="flex w-1/2 justify-start">
+              <div className="bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000 ease-out" style={{ width: `${(w.opponent.stars / (w.teamSize * 3)) * 100}%` }} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ---- Analysis panel ---- */}
       <div className="mt-5">
@@ -314,74 +380,7 @@ function resultFromStars(w: WarDetailView["detail"]): "win" | "loss" | "tie" | n
   return "tie";
 }
 
-function ResultPill({ result }: { result: "win" | "loss" | "tie" | null }) {
-  if (result === "win")
-    return (
-      <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-400">
-        Victory
-      </span>
-    );
-  if (result === "loss")
-    return (
-      <span className="rounded-full border border-red-400/30 bg-red-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-red-400">
-        Defeat
-      </span>
-    );
-  if (result === "tie")
-    return (
-      <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-400">
-        Draw
-      </span>
-    );
-  return (
-    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-umbra-muted">
-      Ongoing
-    </span>
-  );
-}
 
-function ClanSide({
-  name,
-  badgeUrls,
-  stars,
-  destruction,
-  attacks,
-  tone,
-}: {
-  name: string;
-  badgeUrls: ClanBadgeUrls | null;
-  stars: number;
-  destruction: number;
-  attacks: number;
-  tone: "own" | "opponent";
-}) {
-  return (
-    <div className="flex flex-1 flex-col items-center text-center">
-      {badgeUrls?.small ? (
-        <div className="relative mb-1 h-9 w-9">
-          <Image
-            src={badgeUrls.small}
-            alt={`${name} badge`}
-            fill
-            className={`object-contain ${tone === "opponent" ? "grayscale" : ""}`}
-          />
-        </div>
-      ) : (
-        <IconWarEmpty className="mb-1 h-8 w-8 text-umbra-purple/40" />
-      )}
-      <p
-        className={`max-w-[8rem] truncate text-2xs font-medium ${
-          tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"
-        }`}
-      >
-        {name}
-      </p>
-      <p className="mt-0.5 font-mono text-micro text-umbra-muted">
-        {stars}★ · {destruction}% · {attacks} atk
-      </p>
-    </div>
-  );
-}
 
 function StatCard({
   label,

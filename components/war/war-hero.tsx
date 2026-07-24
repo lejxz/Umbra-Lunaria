@@ -262,7 +262,7 @@ export function WarHero({
   );
 }
 
-function StateBadge({
+export function StateBadge({
   label,
   tone,
 }: {
@@ -283,7 +283,7 @@ function StateBadge({
   );
 }
 
-function WarClanColumn({
+export function WarClanColumn({
   badgeUrls,
   name,
   clanLevel,
