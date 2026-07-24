@@ -64,6 +64,26 @@ body > * {
   .select-input option {
     @apply bg-[#090811] text-umbra-lilac py-2;
   }
+  /* Town Hall level pill — used by the war planner to communicate TH weight
+     at a glance. Color ramp goes cool→warm so higher THs read "heavier". */
+  .th-badge {
+    @apply inline-flex h-6 min-w-[2.75rem] items-center justify-center rounded-md px-1.5 font-mono text-[0.65rem] font-semibold uppercase tracking-wider;
+  }
+  .th-high {
+    @apply bg-rose-500/20 text-rose-200 ring-1 ring-rose-400/30;
+  }
+  .th-mid {
+    @apply bg-amber-400/20 text-amber-200 ring-1 ring-amber-300/30;
+  }
+  .th-low {
+    @apply bg-sky-400/15 text-sky-200 ring-1 ring-sky-300/25;
+  }
+  .th-base {
+    @apply bg-umbra-line/30 text-umbra-muted ring-1 ring-umbra-line/40;
+  }
+  .th-unknown {
+    @apply bg-umbra-line/20 text-umbra-muted;
+  }
 }
 
 /* Custom scrollbar — thin, dark, purple-tinted to match the observatory theme.

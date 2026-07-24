@@ -262,14 +262,14 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 
 **Goal:** Replace `/planning` placeholder with an administrator-controlled manual planner.
 
-- [ ] Build available-member and selected-lineup panels.
-- [ ] Add Town Hall, war preference, activity, war summary, and limited-data cues to each available member.
-- [ ] Implement desktop drag-and-drop using `@dnd-kit`.
-- [ ] Implement mobile tap-to-add, tap-to-remove, and map-position reordering.
-- [ ] Support 10v10, 15v15, 20v20, 25v25, 30v30, 40v40, and 50v50.
-- [ ] Warn before truncating selected members on a smaller war size.
-- [ ] Open the shared member detail sheet from both panels without losing draft state.
-- [ ] Render preparation-day opponent context when available without automatically assigning targets.
+- [x] Build available-member and selected-lineup panels. _(Two-panel layout in components/planning/planner-shell.tsx — left = available roster, right = ordered lineup slots.)_
+- [x] Add Town Hall, war preference, activity, war summary, and limited-data cues to each available member. _(Each member card shows TH badge (color-ramped by tier), role, last-active cue, wars tracked, and a "Limited data" label when warsTracked < minWarsForConfidentRanking. Opted-out members are visually deprioritized.)_
+- [x] Implement desktop drag-and-drop using `@dnd-kit`. _(DndContext with PointerSensor + KeyboardSensor; pool→slot, slot→pool, slot↔slot swap all handled in onDragEnd. DragOverlay shows a compact preview.)_
+- [x] Implement mobile tap-to-add, tap-to-remove, and map-position reordering. _(Each available member has an "Add" button (adds to first free slot); each slot has × (remove), ↑ (move up), ↓ (move down). Activation distance 6px so taps aren't hijacked by drag.)_
+- [x] Support 10v10, 15v15, 20v20, 25v25, 30v30, 40v40, and 50v50. _(WAR_SIZES constant in lib/planning/types.ts; the size selector defaults to the prep war's teamSize when one is active.)_
+- [x] Warn before truncating selected members on a smaller war size. _(applySizeChange checks `filled > next` and opens a confirm Modal showing how many members will be dropped; "Shrink & drop tail" truncates the highest positions.)_
+- [x] Open the shared member detail sheet from both panels without losing draft state. _(Reuses the dashboard MemberDetailSheet (lazy fetch by playerTag) as a modal overlay; draft state lives in the shell and is never unmounted on sheet open/close.)_
+- [x] Render preparation-day opponent context when available without automatically assigning targets. _(PrepContext panel renders the opponent roster (map position + TH + name), a TH-mix summary, and an explicit "never auto-assigns targets" notice. Collapsible.)_
 
 ### Step 2.2 — Roster persistence
 

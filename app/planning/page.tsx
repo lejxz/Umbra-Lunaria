@@ -1,5 +1,33 @@
-import { ComingSoon, PageScaffold } from "@/components/page-scaffold";
+import { PageScaffold } from "@/components/page-scaffold";
+import { ErrorState } from "@/components/ui/state-primitives";
+import { PlannerShell } from "@/components/planning/planner-shell";
+import { getPlanningContext } from "@/lib/planning/planning-context";
 
-export default function PlanningPage() {
-  return <PageScaffold section="Planning" title="War planning"><ComingSoon label="Planning signal" description="The planner will use the shared member sheet, war-preference-aware roster slots, and touch-friendly interactions described in the concept folder." /></PageScaffold>;
+/**
+ * War planning — administrator-controlled manual roster builder.
+ *
+ * Server component: fetches the planning context (available members + any
+ * active preparation-day war for opponent scouting) and passes it to the
+ * client shell, which owns draft state locally. Persistence (save/finalize)
+ * lands in Step 2.2; the planner is fully usable for staging a roster today.
+ *
+ * See concept/09-war-planning-and-auto-select.md and concept/12 Step 2.1.
+ */
+export const revalidate = 300; // 5-min ISR — matches dashboard/members/capital.
+
+export default async function PlanningPage() {
+  let context;
+  try {
+    context = await getPlanningContext();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return (
+      <PageScaffold section="Planning" title="War planning">
+        <ErrorState message="The planner couldn&apos;t load." />
+        <p className="mt-4 text-sm text-umbra-muted">{message}</p>
+      </PageScaffold>
+    );
+  }
+
+  return <PlannerShell context={context} />;
 }

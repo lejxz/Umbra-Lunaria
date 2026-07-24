@@ -43,6 +43,12 @@ import {
   Zap,
   HeartHandshake,
   Crown,
+  GripVertical,
+  Plus,
+  Trash2,
+  Save,
+  Filter,
+  Search,
   type LucideProps,
 } from "lucide-react";
 
@@ -125,3 +131,14 @@ export const IconCrown = (props: LucideProps) => <Crown {...props} />;
 // ---------------------------------------------------------------------------
 
 export const IconTrendingUp = (props: LucideProps) => <TrendingUp {...props} />;
+
+// ---------------------------------------------------------------------------
+// Planning — roster builder interactions
+// ---------------------------------------------------------------------------
+
+export const IconGrip = (props: LucideProps) => <GripVertical {...props} />;
+export const IconPlus = (props: LucideProps) => <Plus {...props} />;
+export const IconTrash = (props: LucideProps) => <Trash2 {...props} />;
+export const IconSave = (props: LucideProps) => <Save {...props} />;
+export const IconFilter = (props: LucideProps) => <Filter {...props} />;
+export const IconSearch = (props: LucideProps) => <Search {...props} />;
