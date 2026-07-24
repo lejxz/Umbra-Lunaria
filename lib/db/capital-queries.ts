@@ -16,6 +16,8 @@ import { asc, desc, eq, sql, and, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clans, capitalDistrictSnapshots, capitalRaidSeasons, capitalContributions, members } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
+import { cocClient } from "@/lib/coc-client/client";
+import { parseCoCTime } from "@/lib/ingest/war-sync";
 import type {
   CapitalPageData,
   CapitalOverview,
@@ -26,6 +28,7 @@ import type {
   RaidContributionEntry,
   RaidZeroAttackEntry,
   RaidParticipationSummary,
+  RaidTimer,
 } from "@/lib/view-models/capital";
 import {
   diffDistrictSnapshots,
@@ -37,10 +40,11 @@ import {
 // ---------------------------------------------------------------------------
 
 export async function getCapitalPage(): Promise<CapitalPageData> {
-  const [overview, upgradeHistory, raidHistory] = await Promise.all([
+  const [overview, upgradeHistory, raidHistory, raidTimer] = await Promise.all([
     getCapitalOverview(),
     getDistrictUpgradeHistory(),
     getRaidHistory(),
+    getRaidTimer(),
   ]);
 
   return {
@@ -48,6 +52,7 @@ export async function getCapitalPage(): Promise<CapitalPageData> {
     upgradeHistory,
     raidHistoryAvailable: raidHistory !== null && raidHistory.seasons.length > 0,
     raidHistory,
+    raidTimer,
   };
 }
 
@@ -293,6 +298,39 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
     zeroAttackList,
     participation,
   };
+}
+
+// ---------------------------------------------------------------------------
+// getRaidTimer — live fetch of the current in-progress raid weekend.
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the current raid-weekend status from the CoC API. Returns a timer
+ * when a raid weekend is in progress (state = "inProgress"), null otherwise.
+ *
+ * This is a live API call (cached by the page's ISR — 5 min). It's wrapped
+ * in try/catch so a failed fetch never breaks the capital page; the timer is
+ * a bonus surface, not a dependency. The rest of the page renders from DB
+ * data regardless.
+ *
+ * The `capitalraidseasons` endpoint returns seasons newest-first; the first
+ * item is the current (or most recent) season. We only surface a timer when
+ * it's actually in progress — completed seasons are handled by getRaidHistory.
+ */
+export async function getRaidTimer(): Promise<RaidTimer | null> {
+  try {
+    const res = await cocClient.getCapitalRaidSeasons(clanConfig.clanTag);
+    const latest = res.items?.[0];
+    if (!latest || latest.state !== "inProgress") return null;
+    const start = parseCoCTime(latest.startTime);
+    const end = parseCoCTime(latest.endTime);
+    if (!start || !end) return null;
+    return { startTime: start, endTime: end };
+  } catch {
+    // API failure — degrade gracefully. The capital page still renders from
+    // DB data; the timer is just absent.
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------

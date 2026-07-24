@@ -117,11 +117,16 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
 
       {/* Builder Base (if present) */}
       {(p.builderHallLevel || p.builderBaseTrophies) && (
-        <div className="mt-3 flex items-center gap-4 rounded-lg bg-white/[.02] px-4 py-2">
+        <div className="mt-3 flex flex-wrap items-center gap-4 rounded-lg bg-white/[.02] px-4 py-2">
           <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">Builder Base</p>
           <div className="h-4 w-px bg-umbra-line/30" />
           <p className="font-mono text-xs text-white">BH {p.builderHallLevel ?? "—"}</p>
           <p className="font-mono text-xs text-white">🏆 {p.builderBaseTrophies ?? "—"} <span className="text-umbra-muted text-label">(Best: {p.bestBuilderBaseTrophies ?? "—"})</span></p>
+          {p.builderBaseLeague && (
+            <span className="rounded-full border border-umbra-line/40 bg-umbra-surface/40 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-umbra-lilac">
+              {p.builderBaseLeague.name}
+            </span>
+          )}
         </div>
       )}
     </div>

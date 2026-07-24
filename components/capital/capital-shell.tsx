@@ -5,6 +5,7 @@ import type { CapitalPageData } from "@/lib/view-models/capital";
 import { CapitalOverviewCard } from "./capital-overview-card";
 import { RaidPendingCard } from "./raid-pending-card";
 import { RaidHistory } from "./raid-history";
+import { RaidTimerBanner } from "./raid-timer-banner";
 import { UpgradeTimeline } from "./upgrade-timeline";
 import { DistrictList } from "./district-list";
 
@@ -12,16 +13,13 @@ import { DistrictList } from "./district-list";
  * Capital page shell — client-side composition root. Holds the district-filter
  * state for the upgrade timeline.
  *
- * Layout order (revised 2026-07-23 per user request):
+ * Layout order:
  *   1. Overview — current Capital facts (Hall, points, league, districts).
- *   2. Raid-weekend history — the high-value seasonal content. Renders the
- *      full history view when raid seasons are available (Step 3.1), or a
- *      truthful "pending" placeholder until the first completed season lands.
- *   3. Upgrade timeline — tracked district-level changes over time.
- *   4. District list — the full current-level reference, last because district
- *      levels change infrequently (a level-up is a multi-day event).
- *
- * Every section renders its own empty/unavailable/cold-start state.
+ *   2. Raid-weekend timer — a live countdown when a raid is in progress.
+ *   3. Raid-weekend history — the full history view when seasons are available,
+ *      or a truthful "pending" placeholder until the first completed season.
+ *   4. Upgrade timeline — tracked district-level changes over time.
+ *   5. District list — the full current-level reference.
  */
 export function CapitalShell({ data }: { data: CapitalPageData }) {
   const [filter, setFilter] = useState<string>("all");
@@ -32,6 +30,8 @@ export function CapitalShell({ data }: { data: CapitalPageData }) {
         <CapitalOverviewCard overview={data.overview} />
         <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
       </div>
+
+      {data.raidTimer && <RaidTimerBanner endTime={data.raidTimer.endTime} />}
 
       {data.raidHistoryAvailable && data.raidHistory ? (
         <RaidHistory history={data.raidHistory} />

@@ -52,7 +52,7 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
 
       {/* ── Headline tiles (latest season) ────────────────────────────────── */}
       {latest && (
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
           <HeadlineTile
             icon={<IconCoins className="h-3.5 w-3.5" />}
             label="Total loot"
@@ -73,6 +73,18 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
             icon={<IconUsers className="h-3.5 w-3.5" />}
             label="Attackers"
             value={latest.participantCount}
+          />
+          <HeadlineTile
+            icon={<IconCoins className="h-3.5 w-3.5" />}
+            label="Off medals"
+            value={latest.offensiveReward}
+            format={(n) => n.toLocaleString()}
+          />
+          <HeadlineTile
+            icon={<IconCoins className="h-3.5 w-3.5" />}
+            label="Def medals"
+            value={latest.defensiveReward}
+            format={(n) => n.toLocaleString()}
           />
         </div>
       )}
@@ -143,7 +155,10 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
                 <span className="text-xs text-umbra-muted">
                   {m.totalCapitalResourcesLooted.toLocaleString()} gold
                 </span>
-                <span className="text-xs text-umbra-muted/70">
+                <span className="text-xs text-amber-300/80">
+                  🏅 {m.totalRaidWeekendMedals.toLocaleString()}
+                </span>
+                <span className="hidden text-xs text-umbra-muted/70 sm:inline">
                   {m.totalAttacks} atk · {m.seasonsParticipated} seasons
                 </span>
               </li>
@@ -233,7 +248,7 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
     year: "numeric",
   });
   return (
-    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/40 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-5">
+    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/40 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
       <span className="font-mono text-umbra-lilac">{dateLabel}</span>
       <span className="text-umbra-muted">
         {(season.capitalTotalLoot ?? 0).toLocaleString()} gold
@@ -246,6 +261,9 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
       </span>
       <span className="text-umbra-muted">
         {season.participantCount} members
+      </span>
+      <span className="text-amber-300/80">
+        {(season.offensiveReward ?? 0).toLocaleString()}🏅
       </span>
     </li>
   );

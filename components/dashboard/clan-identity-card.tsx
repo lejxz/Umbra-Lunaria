@@ -80,6 +80,8 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
         {/* ===== RIGHT COLUMN: Stats List ===== */}
         <div className="flex w-full shrink-0 flex-col rounded-xl border border-white/5 bg-umbra-ink/40 p-5 backdrop-blur-md md:max-w-[340px] lg:max-w-[400px]">
           <StatRow label="Members" value={clan.memberCount ? `${clan.memberCount}/50` : <UnavailableValue />} />
+          <StatRow label="Clan Level" value={clan.clanLevel ?? <UnavailableValue />} />
+          <StatRow label="Clan Points" value={clan.clanPoints != null ? clan.clanPoints.toLocaleString() : <UnavailableValue />} />
           <StatRow label="Clan War League" value={clan.warLeague?.name ?? <UnavailableValue />} />
           <StatRow label="Clan Location" value={clan.location?.name ?? <UnavailableValue />} />
           <StatRow label="Chat Language" value={clan.chatLanguage?.name ?? <UnavailableValue />} />

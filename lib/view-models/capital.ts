@@ -108,6 +108,26 @@ export interface RaidHistoryView {
 }
 
 // ---------------------------------------------------------------------------
+// Capital raid-weekend live timer (in-progress season)
+// ---------------------------------------------------------------------------
+
+/**
+ * The current raid-weekend status, if one is in progress.
+ *
+ * Fetched live from the CoC API (the `capitalraidseasons` endpoint returns
+ * the current season as the first item with `state: "inProgress"`). When
+ * present, the capital page shows a live countdown to `endTime`.
+ *
+ * Null when no raid weekend is in progress, or when the live fetch failed
+ * (the capital page degrades gracefully — the timer is a bonus, not a
+ * dependency).
+ */
+export interface RaidTimer {
+  startTime: Date;
+  endTime: Date;
+}
+
+// ---------------------------------------------------------------------------
 // Aggregate returned by getCapitalPage()
 // ---------------------------------------------------------------------------
 
@@ -119,6 +139,9 @@ export interface CapitalPageData {
   // season is ingested. (concept/08 §"Raid-weekend history")
   raidHistoryAvailable: boolean;
   raidHistory: RaidHistoryView | null;
+  // Live raid-weekend timer — null when no raid is in progress or the live
+  // fetch failed. (concept/08 §"Raid-weekend history")
+  raidTimer: RaidTimer | null;
 }
 
 // Re-export for convenience so the page imports from one place.
