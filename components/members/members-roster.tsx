@@ -309,7 +309,8 @@ export function MembersRoster({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-medium text-umbra-lilac">{m.name}</p>
-                    <ActivityDot isActive={m.isActive} />
+                    {/* Activity dot for compact view */}
+                    <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
                   </div>
                   <p className="font-mono text-label text-umbra-muted">
                     TH{m.townHallLevel} · <span className="capitalize">{m.role}</span>
@@ -364,15 +365,16 @@ function ActivityIndicator({
   isActive: boolean;
   lastActive: Date | null;
 }) {
+  const isRecent = lastActive && Date.now() - lastActive.getTime() < 24 * 60 * 60 * 1000;
+  const colorClass = isActive
+    ? isRecent
+      ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
+      : "bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.5)]"
+    : "bg-umbra-muted/40";
+
   return (
     <div className="flex items-center gap-2">
-      <span
-        className={`h-2 w-2 rounded-full ${
-          isActive
-            ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
-            : "bg-umbra-muted/40"
-        }`}
-      />
+      <span className={`h-2 w-2 rounded-full ${colorClass}`} />
       <span className="font-mono text-label text-umbra-muted">
         {lastActive
           ? lastActive.toLocaleDateString("en-US", {
@@ -386,14 +388,21 @@ function ActivityIndicator({
   );
 }
 
-function ActivityDot({ isActive }: { isActive: boolean }) {
+function ActivityDot({
+  isActive,
+  lastActive,
+}: {
+  isActive: boolean;
+  lastActive: Date | null;
+}) {
+  const isRecent = lastActive && Date.now() - lastActive.getTime() < 24 * 60 * 60 * 1000;
+  const colorClass = isActive
+    ? isRecent
+      ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
+      : "bg-orange-400 shadow-[0_0_6px_rgba(251,146,60,0.5)]"
+    : "bg-umbra-muted/40";
+
   return (
-    <span
-      className={`h-2 w-2 shrink-0 rounded-full ${
-        isActive
-          ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
-          : "bg-umbra-muted/40"
-      }`}
-    />
+    <span className={`h-2 w-2 shrink-0 rounded-full ${colorClass}`} />
   );
 }
