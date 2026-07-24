@@ -161,7 +161,7 @@ export function MembersRoster({
             { value: "townHallLevel", label: "Town Hall" },
             { value: "trophies", label: "Trophies" },
             { value: "donations", label: "Donations" },
-            { value: "activity", label: "Activity" },
+            { value: "activity", label: "Last Seen" },
             { value: "warsMissed", label: "Wars Missed" },
           ]}
         />
@@ -198,7 +198,7 @@ export function MembersRoster({
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">TH</th>
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Trophies</th>
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Donations</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Activity</th>
+                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Last Seen</th>
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Wars</th>
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">War</th>
                 </tr>
