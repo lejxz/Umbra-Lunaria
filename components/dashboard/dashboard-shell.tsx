@@ -256,8 +256,23 @@ function FreshnessFooter({
   const msUntilNext = nextPollDate ? nextPollDate.getTime() - now : null;
   const isOverdue = msUntilNext !== null && msUntilNext < 0;
 
+  // Auto-refresh the page 5 seconds after becoming overdue
+  const [reloading, setReloading] = useState(false);
+  useEffect(() => {
+    if (msUntilNext !== null && msUntilNext < -5000 && !reloading) {
+      // Prevent infinite reload loops if the cron is genuinely broken
+      const attemptKey = `reloaded_${lastPoll}`;
+      if (sessionStorage.getItem(attemptKey)) return;
+
+      setReloading(true);
+      sessionStorage.setItem(attemptKey, "true");
+      window.location.reload();
+    }
+  }, [msUntilNext, reloading, lastPoll]);
+
   // Format countdown
   const countdownText = (() => {
+    if (reloading) return "refreshing...";
     if (msUntilNext === null) return "—";
     if (isOverdue) return "overdue";
     const totalSeconds = Math.floor(msUntilNext / 1000);
