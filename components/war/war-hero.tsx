@@ -147,9 +147,9 @@ export function WarHero({
       {/* VS matchup */}
       <div className="relative mt-8 flex items-stretch justify-center gap-2 sm:gap-6">
         {/* Glowing auras */}
-        <div className="pointer-events-none absolute inset-0 flex justify-between overflow-hidden rounded-2xl">
-           {leadAnalysis?.leader === "own" && <div className="h-full w-1/2 rounded-full bg-emerald-500/10 blur-3xl" />}
-           {leadAnalysis?.leader === "opponent" && <div className="ml-auto h-full w-1/2 rounded-full bg-red-500/10 blur-3xl" />}
+        <div className="pointer-events-none absolute inset-0 flex overflow-hidden rounded-2xl">
+           {leadAnalysis?.leader === "own" && <div className="absolute left-[-20%] top-[-20%] h-[140%] w-[70%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/15 via-emerald-500/5 to-transparent" />}
+           {leadAnalysis?.leader === "opponent" && <div className="absolute right-[-20%] top-[-20%] h-[140%] w-[70%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-500/15 via-red-500/5 to-transparent" />}
         </div>
 
         <WarClanColumn
@@ -164,7 +164,7 @@ export function WarHero({
         />
 
         {/* Center column: Countdown + VS + Lead */}
-        <div className="z-10 flex w-32 shrink-0 flex-col items-center justify-center gap-3">
+        <div className="z-10 flex shrink-0 flex-col items-center justify-center gap-3 px-2 sm:px-4">
           <StateBadge label={stateMeta.label} tone={stateMeta.tone} />
 
           {countdownTarget && isWarActive ? (
@@ -203,7 +203,7 @@ export function WarHero({
                     : "border-amber-400/30 bg-amber-400/10 text-amber-400"
               }`}
             >
-              <p className="text-center font-display text-2xs font-bold uppercase leading-tight tracking-wide">
+              <p className="whitespace-nowrap text-center font-display text-2xs font-bold uppercase leading-tight tracking-wide">
                 {leadAnalysis.summary}
               </p>
             </div>
