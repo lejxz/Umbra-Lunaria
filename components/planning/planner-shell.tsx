@@ -51,6 +51,7 @@ import {
 } from "@/components/ui/icons";
 import { WAR_SIZES, type WarSize, type LineupSlot, type PlanningContext } from "@/lib/planning/types";
 import { PrepContext } from "@/components/planning/prep-context";
+import { AutoSelectPanel } from "@/components/planning/auto-select-panel";
 
 // Parsed drag ids — "pool:<tag>" or "slot:<pos>".
 function parseDragId(id: string): { kind: "pool" | "slot"; value: string } | null {
@@ -166,6 +167,38 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
     });
     setDirty(true);
   }, []);
+
+  // ── Auto-select fill (Step 3.2) ──────────────────────────────────────────
+  // Fill empty slots with the top-N recommended members by war-select score.
+  // Skips members already in the lineup and opted-out members. Leaves existing
+  // selections in place; only fills empty slots.
+  const fillTopN = useCallback(
+    (n: number) => {
+      const eligible = members
+        .filter(
+          (m) =>
+            m.autoSelectScore !== null &&
+            !m.autoSelectScore.optedOut &&
+            !slots.some((s) => s.playerTag === m.playerTag),
+        )
+        .sort((a, b) => b.autoSelectScore!.total - a.autoSelectScore!.total)
+        .slice(0, n);
+      if (eligible.length === 0) return;
+      setSlots((prev) => {
+        const next = prev.slice();
+        let added = 0;
+        for (const m of eligible) {
+          const freeIdx = next.findIndex((s) => s.playerTag === null);
+          if (freeIdx === -1) break;
+          next[freeIdx] = { ...next[freeIdx]!, playerTag: m.playerTag };
+          added++;
+        }
+        if (added > 0) setDirty(true);
+        return next;
+      });
+    },
+    [members, slots],
+  );
 
   // ── War size change with truncation warning ──────────────────────────────
   const applySizeChange = useCallback(
@@ -512,6 +545,16 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
             onMemberClick={setSelectedMember}
           />
         </div>
+
+        {/* ── Auto-select recommendation (Step 3.2) ──────────────────────────── */}
+        <AutoSelectPanel
+          members={members}
+          warSize={warSize}
+          selectedTags={selectedTags}
+          onAdd={addMemberToFirstFreeSlot}
+          onFillTopN={fillTopN}
+          minWarsForConfidentRanking={minWarsForConfidentRanking}
+        />
 
         <DragOverlay>
           {activeMember ? (

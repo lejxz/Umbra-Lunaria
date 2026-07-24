@@ -5,7 +5,7 @@ import { getCapitalPage } from "@/lib/db/capital-queries";
 
 /**
  * Clan Capital page — current overview, district list, district upgrade
- * timeline, and a truthful raid-weekend pending state. See concept/08.
+ * timeline, and raid-weekend history (Step 3.1). See concept/08.
  *
  * ISR caching: revalidates every 300s (5 min). Capital data changes slowly
  * (district levels take days to upgrade), so a 5-min cache is well within
@@ -20,10 +20,7 @@ export default async function CapitalPage() {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return (
-      <PageScaffold
-        section="Capital"
-        title="Clan capital"
-      >
+      <PageScaffold section="Capital" title="Clan capital">
         <ErrorState message="The capital page couldn&apos;t load." />
         <p className="mt-4 text-sm text-umbra-muted">{message}</p>
       </PageScaffold>
@@ -31,10 +28,7 @@ export default async function CapitalPage() {
   }
 
   return (
-    <PageScaffold
-      section="Capital"
-      title="Clan capital"
-    >
+    <PageScaffold section="Capital" title="Clan capital">
       <CapitalShell data={data} />
     </PageScaffold>
   );

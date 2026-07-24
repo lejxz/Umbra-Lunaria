@@ -14,12 +14,14 @@
 
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import type { WarRosterMember } from "@/lib/view-models/war";
+import type { WarSelectScore } from "@/lib/scoring/war-select-score";
 
 /**
  * A single available member shown in the planner's left panel.
  *
  * Mirrors `MemberRosterEntry` but trims to the fields the planner actually
- * uses, and adds the derived `limitedData` flag.
+ * uses, and adds the derived `limitedData` flag + the auto-select score
+ * (Step 3.2).
  */
 export interface PlanningMember {
   playerTag: string;
@@ -36,6 +38,11 @@ export interface PlanningMember {
   attacksAllowed: number;
   // Derived: true when warsTracked < minWarsForConfidentRanking.
   limitedData: boolean;
+  // Step 3.2 — auto-select recommendation score. null when not computable
+  // (e.g. all components unavailable). Members with warPreference="out" carry
+  // a score but are flagged `optedOut` — they're excluded from auto-suggestion
+  // but remain manually selectable.
+  autoSelectScore: WarSelectScore | null;
 }
 
 /**

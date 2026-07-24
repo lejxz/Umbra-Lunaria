@@ -52,16 +52,73 @@ export interface DistrictUpgradeHistory {
 }
 
 // ---------------------------------------------------------------------------
+// Completed Capital raid-weekend history (concept/08 §"Raid-weekend history")
+// ---------------------------------------------------------------------------
+
+/** One completed raid season row, summarized for the history list. */
+export interface RaidSeasonSummary {
+  seasonId: number;
+  startTime: Date;
+  endTime: Date | null;
+  capitalTotalLoot: number | null;
+  raidsCompleted: number | null;
+  totalAttacks: number | null;
+  offensiveReward: number | null;
+  defensiveReward: number | null;
+  // Derived: per-member contribution count for this season (for the summary).
+  participantCount: number;
+}
+
+/** A single member's contribution row within one or all seasons. */
+export interface RaidContributionEntry {
+  playerTag: string;
+  name: string;
+  // Totals across the seasons the member participated in.
+  totalAttacks: number;
+  totalCapitalResourcesLooted: number;
+  totalRaidWeekendMedals: number;
+  seasonsParticipated: number;
+}
+
+/** Members who recorded zero attacks in the most recent completed season. */
+export interface RaidZeroAttackEntry {
+  playerTag: string;
+  name: string;
+  seasonStartTime: Date;
+  attackLimit: number | null;
+}
+
+/** Participation rate across tracked seasons. */
+export interface RaidParticipationSummary {
+  // Members who attacked in the most recent season vs. total retained members.
+  latestSeasonParticipants: number;
+  latestSeasonRetainedMembers: number;
+  participationRate: number | null; // null when retained = 0
+  // Average participants per season across all tracked seasons.
+  averageParticipants: number;
+  totalSeasons: number;
+}
+
+/** The full raid-history view model — summary + leaderboard + participation. */
+export interface RaidHistoryView {
+  seasons: RaidSeasonSummary[];
+  contributionLeaderboard: RaidContributionEntry[];
+  zeroAttackList: RaidZeroAttackEntry[];
+  participation: RaidParticipationSummary;
+}
+
+// ---------------------------------------------------------------------------
 // Aggregate returned by getCapitalPage()
 // ---------------------------------------------------------------------------
 
 export interface CapitalPageData {
   overview: CapitalOverview;
   upgradeHistory: DistrictUpgradeHistory;
-  // Raid-weekend status — Phase 3.1 adds completed-season ingestion. Until
-  // then the UI shows a truthful "raid history pending" state rather than a
-  // fake leaderboard. (concept/08 §"Raid-weekend history")
+  // Raid-weekend status — Step 3.1 adds completed-season ingestion. The UI
+  // shows a truthful "raid history pending" state until the first completed
+  // season is ingested. (concept/08 §"Raid-weekend history")
   raidHistoryAvailable: boolean;
+  raidHistory: RaidHistoryView | null;
 }
 
 // Re-export for convenience so the page imports from one place.

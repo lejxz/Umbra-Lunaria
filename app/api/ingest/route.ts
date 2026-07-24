@@ -274,6 +274,19 @@ async function runDailyBatch(): Promise<string[]> {
     errors.push(`war log backfill failed: ${msg}`);
   }
 
+  // ---- Capital raid-season ingestion (Step 3.1) ----
+  // Idempotent: completed seasons already in the DB are skipped. Per-member
+  // contributions for departed/purged tags are filtered (FK safety). See
+  // concept/08 + concept/12 Step 3.1.
+  try {
+    const { syncCapitalRaidSeasons } = await import("@/lib/ingest/capital-sync");
+    const raidResult = await syncCapitalRaidSeasons(clanTag);
+    errors.push(...raidResult.errors);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`capital raid season sync failed: ${msg}`);
+  }
+
   // ---- Full player profile per retained member ----
   const retained = await db
     .select({ playerTag: members.playerTag })

@@ -12,15 +12,20 @@
  * from a client component.
  */
 
-import { asc, eq, sql } from "drizzle-orm";
+import { asc, desc, eq, sql, and, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { clans, capitalDistrictSnapshots } from "@/lib/db/schema";
+import { clans, capitalDistrictSnapshots, capitalRaidSeasons, capitalContributions, members } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
 import type {
   CapitalPageData,
   CapitalOverview,
   CapitalDistrict,
   DistrictUpgradeHistory,
+  RaidHistoryView,
+  RaidSeasonSummary,
+  RaidContributionEntry,
+  RaidZeroAttackEntry,
+  RaidParticipationSummary,
 } from "@/lib/view-models/capital";
 import {
   diffDistrictSnapshots,
@@ -32,16 +37,17 @@ import {
 // ---------------------------------------------------------------------------
 
 export async function getCapitalPage(): Promise<CapitalPageData> {
-  const [overview, upgradeHistory] = await Promise.all([
+  const [overview, upgradeHistory, raidHistory] = await Promise.all([
     getCapitalOverview(),
     getDistrictUpgradeHistory(),
+    getRaidHistory(),
   ]);
 
   return {
     overview,
     upgradeHistory,
-    // Phase 3.1 adds raid-season ingestion. Until then, no raid history.
-    raidHistoryAvailable: false,
+    raidHistoryAvailable: raidHistory !== null && raidHistory.seasons.length > 0,
+    raidHistory,
   };
 }
 
@@ -146,6 +152,146 @@ export async function getDistrictUpgradeHistory(): Promise<DistrictUpgradeHistor
     districtNames,
     trackingStart,
     isColdStart,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// getRaidHistory — completed raid-weekend history (Step 3.1).
+// ---------------------------------------------------------------------------
+
+const RAID_HISTORY_LIMIT = 12; // ~3 months of weekly raid weekends.
+
+/**
+ * Build the raid-history view model from capital_raid_seasons +
+ * capital_contributions. Returns null when no completed seasons have been
+ * ingested yet (the UI shows a truthful "pending" state in that case).
+ *
+ * Four sections (concept/08 §"Raid-weekend history"):
+ *   - seasons: the most recent N completed seasons (newest first).
+ *   - contributionLeaderboard: all-time totals per member, sorted by looted.
+ *   - zeroAttackList: members who recorded 0 attacks in the latest season.
+ *   - participation: latest + average participation rates.
+ */
+export async function getRaidHistory(): Promise<RaidHistoryView | null> {
+  const seasons = await db
+    .select()
+    .from(capitalRaidSeasons)
+    .orderBy(desc(capitalRaidSeasons.startTime))
+    .limit(RAID_HISTORY_LIMIT);
+
+  if (seasons.length === 0) return null;
+
+  const seasonIds = seasons.map((s) => s.id);
+
+  // Per-season participant counts (for the season summary + participation).
+  const participantCounts = await db
+    .select({
+      raidSeasonId: capitalContributions.raidSeasonId,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(capitalContributions)
+    .where(sql`${capitalContributions.raidSeasonId} = ANY(${seasonIds})`)
+    .groupBy(capitalContributions.raidSeasonId);
+  const countBySeason = new Map(
+    participantCounts.map((r) => [r.raidSeasonId, r.count]),
+  );
+
+  const seasonSummaries: RaidSeasonSummary[] = seasons.map((s) => ({
+    seasonId: s.id,
+    startTime: s.startTime,
+    endTime: s.endTime,
+    capitalTotalLoot: s.capitalTotalLoot ?? null,
+    raidsCompleted: s.raidsCompleted ?? null,
+    totalAttacks: s.totalAttacks ?? null,
+    offensiveReward: s.offensiveReward ?? null,
+    defensiveReward: s.defensiveReward ?? null,
+    participantCount: countBySeason.get(s.id) ?? 0,
+  }));
+
+  // Contribution leaderboard — all-time totals per member across these seasons.
+  const leaderboard = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      totalAttacks: sql<number>`coalesce(sum(${capitalContributions.attacksUsed}), 0)::int`,
+      totalCapitalResourcesLooted: sql<number>`coalesce(sum(${capitalContributions.capitalResourcesLooted}), 0)::int`,
+      totalRaidWeekendMedals: sql<number>`coalesce(sum(coalesce(${capitalContributions.raidWeekendMedals}, 0)), 0)::int`,
+      seasonsParticipated: sql<number>`count(distinct ${capitalContributions.raidSeasonId})::int`,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .where(sql`${capitalContributions.raidSeasonId} = ANY(${seasonIds})`)
+    .groupBy(capitalContributions.playerTag, members.name)
+    .orderBy(desc(sql`sum(${capitalContributions.capitalResourcesLooted})`))
+    .limit(20);
+
+  const contributionLeaderboard: RaidContributionEntry[] = leaderboard.map((r) => ({
+    playerTag: r.playerTag,
+    name: r.name,
+    totalAttacks: r.totalAttacks,
+    totalCapitalResourcesLooted: r.totalCapitalResourcesLooted,
+    totalRaidWeekendMedals: r.totalRaidWeekendMedals,
+    seasonsParticipated: r.seasonsParticipated,
+  }));
+
+  // Zero-attack list for the most recent season.
+  const latestSeason = seasons[0]!;
+  const zeroAttackRows = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      attackLimit: capitalContributions.attackLimit,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .where(
+      and(
+        eq(capitalContributions.raidSeasonId, latestSeason.id),
+        eq(capitalContributions.attacksUsed, 0),
+      ),
+    )
+    .orderBy(asc(members.name));
+
+  const zeroAttackList: RaidZeroAttackEntry[] = zeroAttackRows.map((r) => ({
+    playerTag: r.playerTag,
+    name: r.name,
+    seasonStartTime: latestSeason.startTime,
+    attackLimit: r.attackLimit,
+  }));
+
+  // Participation summary — latest season + average across tracked seasons.
+  const latestParticipants = countBySeason.get(latestSeason.id) ?? 0;
+  const retainedCount = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(members)
+    .where(isNull(members.leftAt));
+  const retained = retainedCount[0]?.count ?? 0;
+  const allParticipantCounts = await db
+    .select({
+      count: sql<number>`count(*)::int`,
+    })
+    .from(capitalContributions)
+    .where(sql`${capitalContributions.raidSeasonId} = ANY(${seasonIds})`)
+    .groupBy(capitalContributions.raidSeasonId);
+  const averageParticipants =
+    allParticipantCounts.length > 0
+      ? allParticipantCounts.reduce((a, r) => a + r.count, 0) /
+        allParticipantCounts.length
+      : 0;
+
+  const participation: RaidParticipationSummary = {
+    latestSeasonParticipants: latestParticipants,
+    latestSeasonRetainedMembers: retained,
+    participationRate: retained > 0 ? latestParticipants / retained : null,
+    averageParticipants,
+    totalSeasons: seasons.length,
+  };
+
+  return {
+    seasons: seasonSummaries,
+    contributionLeaderboard,
+    zeroAttackList,
+    participation,
   };
 }
 

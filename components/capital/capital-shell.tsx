@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { CapitalPageData } from "@/lib/view-models/capital";
 import { CapitalOverviewCard } from "./capital-overview-card";
 import { RaidPendingCard } from "./raid-pending-card";
+import { RaidHistory } from "./raid-history";
 import { UpgradeTimeline } from "./upgrade-timeline";
 import { DistrictList } from "./district-list";
 
@@ -13,8 +14,9 @@ import { DistrictList } from "./district-list";
  *
  * Layout order (revised 2026-07-23 per user request):
  *   1. Overview — current Capital facts (Hall, points, league, districts).
- *   2. Raid-weekend history — the high-value seasonal content (pending until
- *      Phase 3.1 ingestion, but positioned where users expect it).
+ *   2. Raid-weekend history — the high-value seasonal content. Renders the
+ *      full history view when raid seasons are available (Step 3.1), or a
+ *      truthful "pending" placeholder until the first completed season lands.
  *   3. Upgrade timeline — tracked district-level changes over time.
  *   4. District list — the full current-level reference, last because district
  *      levels change infrequently (a level-up is a multi-day event).
@@ -31,7 +33,11 @@ export function CapitalShell({ data }: { data: CapitalPageData }) {
         <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
       </div>
 
-      <RaidPendingCard available={data.raidHistoryAvailable} />
+      {data.raidHistoryAvailable && data.raidHistory ? (
+        <RaidHistory history={data.raidHistory} />
+      ) : (
+        <RaidPendingCard available={false} />
+      )}
 
       <UpgradeTimeline
         history={data.upgradeHistory}

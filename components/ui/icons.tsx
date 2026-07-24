@@ -142,3 +142,4 @@ export const IconTrash = (props: LucideProps) => <Trash2 {...props} />;
 export const IconSave = (props: LucideProps) => <Save {...props} />;
 export const IconFilter = (props: LucideProps) => <Filter {...props} />;
 export const IconSearch = (props: LucideProps) => <Search {...props} />;
+export const IconUsers = (props: LucideProps) => <Users {...props} />;
