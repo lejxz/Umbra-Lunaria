@@ -96,10 +96,9 @@ export function WarHero({
   const ownStars = currentWar.clan.stars;
   const oppStars = currentWar.opponent.stars;
   const maxPossibleStars =
-    currentWar.teamSize != null && currentWar.attacksPerMember != null
-      ? currentWar.teamSize * currentWar.attacksPerMember
+    currentWar.teamSize != null && currentWar.teamSize > 0
+      ? currentWar.teamSize * 3
       : null;
-  const totalStarsEarned = ownStars + oppStars;
   const ownPct =
     maxPossibleStars && maxPossibleStars > 0
       ? (ownStars / maxPossibleStars) * 100
@@ -116,7 +115,7 @@ export function WarHero({
   }[currentWar.state];
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-6" aria-labelledby="war-hero-title">
+    <section className="glass flex flex-col rounded-2xl p-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]" aria-labelledby="war-hero-title">
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -145,58 +144,14 @@ export function WarHero({
         </p>
       )}
 
-      {/* State banner + countdown */}
-      <div className="mt-4 flex flex-col items-center gap-3 rounded-xl bg-white/[.035] px-4 py-4">
-        <StateBadge label={stateMeta.label} tone={stateMeta.tone} />
-        {countdownTarget && isWarActive ? (
-          <div className="flex flex-col items-center">
-            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-              {currentWar.state === "preparation" ? "Battle starts in" : "Battle ends in"}
-            </p>
-            <p className="mt-0.5 font-mono text-2xl font-medium tracking-wider text-umbra-lilac">
-              <LiveCountdown targetDate={countdownTarget} />
-            </p>
-          </div>
-        ) : currentWar.state === "warEnded" && currentWar.endTime ? (
-          <p className="font-mono text-sm text-umbra-muted">
-            Ended <TimeAgo date={currentWar.endTime} />
-          </p>
-        ) : null}
-        {currentWar.teamSize != null && (
-          <span className="rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
-            {currentWar.teamSize}v{currentWar.teamSize}
-            {currentWar.attacksPerMember != null && ` · ${currentWar.attacksPerMember} atk`}
-          </span>
-        )}
-      </div>
-
-      {/* Lead analysis — "who's winning" highlight */}
-      {leadAnalysis && leadAnalysis.leader !== "unknown" && (
-        <div
-          className={`mt-3 flex items-center justify-center rounded-xl border px-4 py-2 ${
-            leadAnalysis.leader === "own"
-              ? "border-emerald-400/30 bg-emerald-400/5"
-              : leadAnalysis.leader === "opponent"
-                ? "border-red-400/30 bg-red-400/5"
-                : "border-amber-400/30 bg-amber-400/5"
-          }`}
-        >
-          <p
-            className={`font-display text-sm font-semibold ${
-              leadAnalysis.leader === "own"
-                ? "text-emerald-400"
-                : leadAnalysis.leader === "opponent"
-                  ? "text-red-400"
-                  : "text-amber-400"
-            }`}
-          >
-            {leadAnalysis.summary}
-          </p>
-        </div>
-      )}
-
       {/* VS matchup */}
-      <div className="mt-4 flex items-stretch gap-3">
+      <div className="relative mt-8 flex items-stretch justify-center gap-2 sm:gap-6">
+        {/* Glowing auras */}
+        <div className="pointer-events-none absolute inset-0 flex justify-between overflow-hidden rounded-2xl">
+           {leadAnalysis?.leader === "own" && <div className="h-full w-1/2 rounded-full bg-emerald-500/10 blur-3xl" />}
+           {leadAnalysis?.leader === "opponent" && <div className="ml-auto h-full w-1/2 rounded-full bg-red-500/10 blur-3xl" />}
+        </div>
+
         <WarClanColumn
           badgeUrls={clanBadgeUrls ?? null}
           name={clanName ?? "Our Clan"}
@@ -208,12 +163,51 @@ export function WarHero({
           tone="own"
         />
 
-        {/* Center: swords + star progress bar */}
-        <div className="flex w-16 shrink-0 flex-col items-center justify-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20 text-umbra-purple/80">
+        {/* Center column: Countdown + VS + Lead */}
+        <div className="z-10 flex w-32 shrink-0 flex-col items-center justify-center gap-3">
+          <StateBadge label={stateMeta.label} tone={stateMeta.tone} />
+
+          {countdownTarget && isWarActive ? (
+            <div className="flex flex-col items-center text-center">
+              <p className="font-mono text-2xs uppercase tracking-[.16em] text-umbra-purple/70">
+                {currentWar.state === "preparation" ? "Starts in" : "Ends in"}
+              </p>
+              <p className="mt-0.5 font-mono text-xl font-bold tracking-tight text-white drop-shadow-md">
+                <LiveCountdown targetDate={countdownTarget} />
+              </p>
+            </div>
+          ) : currentWar.state === "warEnded" && currentWar.endTime ? (
+            <p className="text-center font-mono text-xs text-umbra-muted">
+              Ended <br /><TimeAgo date={currentWar.endTime} />
+            </p>
+          ) : null}
+
+          {currentWar.teamSize != null && (
+            <span className="rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
+              {currentWar.teamSize}v{currentWar.teamSize}
+              {currentWar.attacksPerMember != null && ` · ${currentWar.attacksPerMember} atk`}
+            </span>
+          )}
+
+          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/30 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
             <IconSwords className="h-5 w-5" />
           </div>
-          <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">VS</span>
+
+          {leadAnalysis && leadAnalysis.leader !== "unknown" && (
+            <div
+              className={`mt-1 flex items-center justify-center rounded-full border px-3 py-1 backdrop-blur-md ${
+                leadAnalysis.leader === "own"
+                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
+                  : leadAnalysis.leader === "opponent"
+                    ? "border-red-400/30 bg-red-400/10 text-red-400"
+                    : "border-amber-400/30 bg-amber-400/10 text-amber-400"
+              }`}
+            >
+              <p className="text-center font-display text-2xs font-bold uppercase leading-tight tracking-wide">
+                {leadAnalysis.summary}
+              </p>
+            </div>
+          )}
         </div>
 
         <WarClanColumn
@@ -229,23 +223,25 @@ export function WarHero({
       </div>
 
       {/* Star progress bar (only meaningful once stars exist) */}
-      {totalStarsEarned > 0 && maxPossibleStars != null && maxPossibleStars > 0 && (
-        <div className="mt-4">
-          <div className="mb-1 flex items-center justify-between font-mono text-micro text-umbra-muted">
-            <span className="text-amber-400">★ {ownStars}</span>
-            <span>of {maxPossibleStars} max</span>
-            <span className="text-red-300/80">{oppStars} ★</span>
+      {maxPossibleStars != null && maxPossibleStars > 0 && (
+        <div className="mt-8 px-4 sm:px-8">
+          <div className="mb-2 flex items-center justify-between font-mono text-xs font-semibold text-umbra-muted">
+            <span className="drop-shadow-sm text-amber-400/90">★ {ownStars}</span>
+            <span className="text-2xs uppercase tracking-widest text-umbra-muted/50">{maxPossibleStars} Max</span>
+            <span className="drop-shadow-sm text-red-400/90">{oppStars} ★</span>
           </div>
-          <div className="flex h-2 overflow-hidden rounded-full bg-umbra-ink/60">
-            <div
-              className="bg-gradient-to-r from-amber-500 to-amber-400 transition-all"
-              style={{ width: `${ownPct}%` }}
-            />
-            <div className="w-px bg-umbra-line" />
-            <div
-              className="bg-gradient-to-l from-red-500/70 to-red-400/60 transition-all"
-              style={{ width: `${oppPct}%` }}
-            />
+          <div className="relative flex h-3 overflow-hidden rounded-full border border-white/5 bg-black/40 shadow-inner shadow-black/50">
+            <div className="absolute inset-x-0 top-0 h-px bg-white/5" />
+            {/* Left side (Us) */}
+            <div className="flex w-1/2 justify-end">
+              <div className="bg-gradient-to-l from-amber-400 to-amber-600 transition-all duration-1000 ease-out" style={{ width: `${ownPct}%` }} />
+            </div>
+            {/* Center divider */}
+            <div className="z-10 h-full w-px bg-white/20" />
+            {/* Right side (Them) */}
+            <div className="flex w-1/2 justify-start">
+              <div className="bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000 ease-out" style={{ width: `${oppPct}%` }} />
+            </div>
           </div>
         </div>
       )}
