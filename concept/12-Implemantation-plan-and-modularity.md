@@ -250,13 +250,13 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 
 **Goal:** Protect write actions without requiring a player account system.
 
-- [ ] Implement server-side administrator login/session using the `ADMIN_PASSWORD_HASH` and `ADMIN_SESSION_SECRET` contract in `11-config-specification.md`.
-- [ ] Store session data only in secure, HTTP-only cookies.
-- [ ] Add logout, expired-session, unauthorized-route, and rate-limit behavior.
-- [ ] Add protected `/api/settings` read/write routes with validation and audit events.
-- [ ] Implement runtime settings for inactivity threshold, dashboard-score weights, auto-select weights, confidence threshold, alert timing, and feature visibility.
-- [ ] Validate non-negative weights and total weight rules before saving.
-- [ ] Test public reads, unauthorized writes, authorized writes, cookie expiration, and settings validation.
+- [x] Implement server-side administrator login/session using the `ADMIN_PASSWORD_HASH` and `ADMIN_SESSION_SECRET` contract in `11-config-specification.md`. _(lib/auth/session.ts — scrypt password verify, HMAC-signed session tokens.)_
+- [x] Store session data only in secure, HTTP-only cookies. _(Secure, HttpOnly, SameSite=Strict, root path; `secure` enabled in production.)_
+- [x] Add logout, expired-session, unauthorized-route, and rate-limit behavior. _(POST /api/auth/logout clears the cookie idempotently; expired tokens are rejected by verifySessionToken; unauthorized writes return 401; login rate-limited at 10 attempts / 10 min per IP via lib/auth/rate-limit.ts.)_
+- [x] Add protected `/api/settings` read/write routes with validation and audit events. _(GET public, POST requires admin session; audit lines logged via console.info/warn with actor/time/result.)_
+- [x] Implement runtime settings for inactivity threshold, dashboard-score weights, auto-select weights, confidence threshold, alert timing, and feature visibility. _(lib/settings/defaults.ts — RuntimeSettings type + DEFAULT_SETTINGS covering all 7 groups from concept/11.)_
+- [x] Validate non-negative weights and total weight rules before saving. _(validateSettings — non-negative checks, sum-to-1.0 with 1e-4 tolerance, integer bounds, boolean toggle checks.)_
+- [x] Test public reads, unauthorized writes, authorized writes, cookie expiration, and settings validation. _(29 tests across tests/auth/session.test.ts, tests/auth/rate-limit.test.ts, tests/settings/validate-settings.test.ts — covers password verify, token round-trip/expire/tamper, rate-limit windows, and all validation branches.)_
 
 ### Step 2.1 — Manual war roster planner
 
