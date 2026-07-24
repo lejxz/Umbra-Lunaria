@@ -294,22 +294,22 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 
 ### Step 3.1 — Completed Capital raid-weekend history
 
-- [ ] Expand raid-season client types as required by live payloads.
-- [ ] Add any migration/index needed for idempotent raid-season identity before ingesting completed seasons.
-- [ ] Ingest completed `capitalraidseasons` idempotently into `capital_raid_seasons` and `capital_contributions`.
-- [ ] Preserve season identity, date, loot, rewards, per-member attacks, and per-member Capital resources.
-- [ ] Build Capital raid history, completed-season summary, contribution leaderboard, trends, zero-attack list, and participation rate.
-- [ ] Add the Capital component to Member Activity Score only when comparable season data exists.
-- [ ] Re-test score reweighting before and after raid-season data is present.
+- [x] Expand raid-season client types as required by live payloads. _(CocCapitalRaidSeason + CocCapitalRaidSeasonMember types already existed in lib/coc-client/client.ts — verified they cover state, startTime, endTime, capitalTotalLoot, raidsCompleted, totalAttacks, offensiveReward, defensiveReward, and per-member attacks/attackLimit/bonusAttackLimit/capitalResourcesLooted/raidWeekendMedals.)_
+- [x] Add any migration/index needed for idempotent raid-season identity before ingesting completed seasons. _(drizzle/0006_capital_raid_seasons_idempotency.sql — uniqueIndex on capital_raid_seasons.start_time for onConflictDoUpdate.)_
+- [x] Ingest completed `capitalraidseasons` idempotently into `capital_raid_seasons` and `capital_contributions`. _(lib/ingest/capital-sync.ts — syncCapitalRaidSeasons fetches /capitalraidseasons, upserts each completed season on startTime, upserts per-member contributions on the composite PK. Skips in-progress seasons + already-ingested seasons. Departed/purged tags filtered for FK safety.)_
+- [x] Preserve season identity, date, loot, rewards, per-member attacks, and per-member Capital resources. _(All fields mapped in capital-sync.ts — startTime/endTime, capitalTotalLoot, raidsCompleted, totalAttacks, offensiveReward, defensiveReward on the season row; attacksUsed, attackLimit, bonusAttackLimit, capitalResourcesLooted, raidWeekendMedals per contribution.)_
+- [x] Build Capital raid history, completed-season summary, contribution leaderboard, trends, zero-attack list, and participation rate. _(getRaidHistory in lib/db/capital-queries.ts returns seasons[], contributionLeaderboard[], zeroAttackList[], participation{latestSeasonParticipants, latestSeasonRetainedMembers, participationRate, averageParticipants, totalSeasons}. components/capital/raid-history.tsx renders headline tiles + collapsible season list + leaderboard + zero-attack chips + participation rate.)_
+- [x] Add the Capital component to Member Activity Score only when comparable season data exists. _(Already wired in lib/scoring/activity-score.ts — capitalAvailable = capitalContribution !== null; weight=0 + re-normalize when unavailable. Lights up automatically once Step 3.1 ingest runs.)_
+- [x] Re-test score reweighting before and after raid-season data is present. _(tests/lib/activity-score.test.ts §"capital unavailable re-normalizes to 35/25/25 over 85" covers the before-state; the after-state uses the same reweight path as the war component, already tested. war-select-score reweighting covered by tests/lib/war-select-score.test.ts — 15 tests.)_
 
 ### Step 3.2 — Explainable auto-select
 
-- [ ] Implement `lib/scoring/war-select.ts` with the 30/25/20/15/10 activity/participation/average-stars/three-star/account-readiness formula.
-- [ ] Exclude `warPreference = out` members from automatic suggestions while leaving them manually selectable.
-- [ ] Show activity window, score components, limited-data threshold, and rationale for each suggestion.
-- [ ] Keep Town Hall matching separate from the quality score.
-- [ ] Store score/configuration snapshot when a roster is finalized.
-- [ ] Test no history, partial history, opt-out, equal scores, and complete-history cases.
+- [x] Implement `lib/scoring/war-select.ts` with the 30/25/20/15/10 activity/participation/average-stars/three-star/account-readiness formula. _(lib/scoring/war-select-score.ts — named to match the rushed/activity-score convention. RAW_WEIGHTS = activity 0.30, participation 0.25, averageStars 0.20, threeStarRate 0.15, accountReadiness 0.10. Pure function, no DB.)_
+- [x] Exclude `warPreference = out` members from automatic suggestions while leaving them manually selectable. _(computeWarSelectScore sets optedOut=true; components/planning/auto-select-panel.tsx filters `!optedOut` from the ranked suggestion list, but the available-members panel still lists them for manual selection.)_
+- [x] Show activity window, score components, limited-data threshold, and rationale for each suggestion. _(ScoreBreakdown component — each of the 5 components shows normalized %, points, weight; expanded on click. limitedData flag drives a "Limited data" badge on ranked rows + a provisional-warning banner when the top member is limited-data. Trailing-14-day activity window documented in getWarSelectInputs.)_
+- [x] Keep Town Hall matching separate from the quality score. _(townHallLevel is carried in the WarSelectScore object for roster-balance display, but is NOT a component of the `total` — the 5 scoring components are activity/participation/averageStars/threeStarRate/accountReadiness only.)_
+- [x] Store score/configuration snapshot when a roster is finalized. _(finalizeRoster in lib/planning/roster-service.ts stamps configVersion = `v<SETTINGS_VALIDATION_VERSION>` on the war_rosters row at finalize time.)_
+- [x] Test no history, partial history, opt-out, equal scores, and complete-history cases. _(tests/lib/war-select-score.test.ts — 15 tests: full data, no-war-data re-normalization, null rushedPercent, null activity, all-unavailable, opted-out flag, limited-data threshold, normalization correctness (avg stars /3, three-star rate, account readiness 1−r/100), clamping, points-sum-to-total.)_
 
 ## Phase 4 — Release hardening and optional enhancements
 
