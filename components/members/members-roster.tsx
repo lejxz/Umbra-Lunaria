@@ -365,7 +365,13 @@ function ActivityIndicator({
   isActive: boolean;
   lastActive: Date | null;
 }) {
-  const isRecent = lastActive && Date.now() - lastActive.getTime() < 24 * 60 * 60 * 1000;
+  const isRecent = (() => {
+    if (!lastActive) return false;
+    const todayStr = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
+    const lastActiveStr = lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
+    return todayStr === lastActiveStr;
+  })();
+  
   const colorClass = isActive
     ? isRecent
       ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
@@ -395,7 +401,13 @@ function ActivityDot({
   isActive: boolean;
   lastActive: Date | null;
 }) {
-  const isRecent = lastActive && Date.now() - lastActive.getTime() < 24 * 60 * 60 * 1000;
+  const isRecent = (() => {
+    if (!lastActive) return false;
+    const todayStr = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
+    const lastActiveStr = lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
+    return todayStr === lastActiveStr;
+  })();
+
   const colorClass = isActive
     ? isRecent
       ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
