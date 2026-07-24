@@ -71,7 +71,7 @@ export function WarDetailSheet({
       open={warId !== null}
       onClose={onClose}
       aria-labelledby="war-detail-title"
-      maxWidth="max-w-4xl"
+      maxWidth="max-w-6xl"
     >
       {loading && (
         <div className="flex items-center justify-center gap-3 py-16">
