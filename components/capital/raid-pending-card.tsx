@@ -57,7 +57,7 @@ export function RaidPendingCard({ available }: { available: boolean }) {
         </div>
 
         <p className="mt-4 text-center text-label text-umbra-muted/50">
-          The player profile's <code className="rounded bg-white/5 px-1 py-0.5 text-umbra-lilac">clanCapitalContributions</code> is a lifetime total, not a season leaderboard.
+          The player profile&apos;s <code className="rounded bg-white/5 px-1 py-0.5 text-umbra-lilac">clanCapitalContributions</code> is a lifetime total, not a season leaderboard.
         </p>
       </div>
     </section>
