@@ -244,7 +244,7 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 - [x] Verify no read-only UI route exposes a secret or requires browser-side CoC calls. _(No secrets in client code. No fetch to clashofclans.com/cocproxy in client components. No client component imports lib/db. All CoC API calls server-side only.)_
 - [x] Update the concept docs/API reference if the real schema or API behavior differs from the final concept. _(Concept docs updated throughout: Supabase migration, ISR caching, pruning, CWL league view, lead analysis, checkpoint columns, cron architecture, 15-min cadence.)_
 
-## Phase 2 — Protected administration and roster planning
+## Phase 2 — Protected administration and roster planning ✅ COMPLETE
 
 ### Step 2.0 — Administrator session and runtime settings
 
@@ -280,7 +280,12 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 - [x] Show draft, saved, finalized, conflict, and unauthorized states in the planner. _(PlannerShell SaveStatus union: idle/saving/saved/finalized/error. Control bar shows status banners: "Saved · draft #N", "Unsaved changes", "Finalized · draft #N", error messages from 401/409/validation. Save button label cycles: Save draft → Saved → Save changes. Finalize disabled until saved + full.)_
 - [x] Test API authorization, invalid payloads, draft round trips, and finalize immutability. _(17 tests in tests/planning/roster-service.test.ts cover validation (count, unique, positions, sizes, shapes) + error classes. curl-verified: 401 unauth, 400 invalid payload with per-field errors, 409 conflict path.)_
 
-## Phase 3 — Deep analytics, Capital raid history, and auto-select
+## Phase 3 — Deep analytics, Capital raid history, and auto-select ✅ COMPLETE
+
+_Step 3.0 has two SUSPENDED items (maxed-for-current-TH indicators + roster
+rushed sort/filter) — explicitly future enhancements, not blocking. All core
+Step 3.0 rushed-analysis items, Step 3.1 raid history, and Step 3.2 auto-select
+are verified and checked off._
 
 ### Step 3.0 — Rushed-account analysis
 
