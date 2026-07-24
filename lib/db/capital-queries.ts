@@ -12,7 +12,7 @@
  * from a client component.
  */
 
-import { asc, desc, eq, sql, and, isNull } from "drizzle-orm";
+import { asc, desc, eq, sql, and, isNull, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { clans, capitalDistrictSnapshots, capitalRaidSeasons, capitalContributions, members } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
@@ -195,7 +195,7 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
       count: sql<number>`count(*)::int`,
     })
     .from(capitalContributions)
-    .where(sql`${capitalContributions.raidSeasonId} = ANY(${seasonIds})`)
+    .where(inArray(capitalContributions.raidSeasonId, seasonIds))
     .groupBy(capitalContributions.raidSeasonId);
   const countBySeason = new Map(
     participantCounts.map((r) => [r.raidSeasonId, r.count]),
@@ -225,7 +225,7 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
     })
     .from(capitalContributions)
     .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
-    .where(sql`${capitalContributions.raidSeasonId} = ANY(${seasonIds})`)
+    .where(inArray(capitalContributions.raidSeasonId, seasonIds))
     .groupBy(capitalContributions.playerTag, members.name)
     .orderBy(desc(sql`sum(${capitalContributions.capitalResourcesLooted})`))
     .limit(20);
@@ -276,7 +276,7 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
       count: sql<number>`count(*)::int`,
     })
     .from(capitalContributions)
-    .where(sql`${capitalContributions.raidSeasonId} = ANY(${seasonIds})`)
+    .where(inArray(capitalContributions.raidSeasonId, seasonIds))
     .groupBy(capitalContributions.raidSeasonId);
   const averageParticipants =
     allParticipantCounts.length > 0
