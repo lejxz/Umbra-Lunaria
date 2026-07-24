@@ -89,6 +89,7 @@ export const NavIconMembers = (props: LucideProps) => <Users {...props} />;
 export const NavIconWar = (props: LucideProps) => <Swords {...props} />;
 export const NavIconCapital = (props: LucideProps) => <Building2 {...props} />;
 export const NavIconPlanning = (props: LucideProps) => <ClipboardList {...props} />;
+export const NavIconHallOfFame = (props: LucideProps) => <Trophy {...props} />;
 
 // ---------------------------------------------------------------------------
 // War roster — TH advantage / disadvantage cues

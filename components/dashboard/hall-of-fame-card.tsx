@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 import type { HallOfFame, HallOfFameAwardKey, HallOfFameLeaderboard } from "@/lib/view-models/dashboard";
 import { Modal } from "@/components/ui/modal";
-import { IconX, IconGift, IconSwords, IconFlame, IconCoins, IconEye } from "@/components/ui/icons";
+import { IconX, IconGift, IconSwords, IconFlame, IconCoins, IconEye, IconChevronRight } from "@/components/ui/icons";
 
 const AWARD_META: Record<
   HallOfFameAwardKey,
@@ -129,6 +130,17 @@ export function HallOfFameCard({
             </div>
           );
         })}
+      </div>
+
+      {/* View full Hall of Fame page link */}
+      <div className="flex justify-center pt-2">
+        <Link
+          href="/hall-of-fame"
+          className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/60 hover:bg-umbra-purple/20"
+        >
+          View full Hall of Fame
+          <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
       </div>
 
       {activeBoard && activeMeta && (
