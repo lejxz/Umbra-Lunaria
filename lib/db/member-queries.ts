@@ -190,26 +190,30 @@ async function getLatestActivity(tags: string[]) {
     { lastActiveAt: Date; isActive: boolean }
   >();
 
-  // Get the most recent snapshot per member
-  const snapshots = await db
-    .select({
-      playerTag: memberSnapshots.playerTag,
-      capturedAt: memberSnapshots.capturedAt,
-      activityFlag: memberSnapshots.activityFlag,
-    })
-    .from(memberSnapshots)
-    .where(inArray(memberSnapshots.playerTag, tags))
-    .orderBy(desc(memberSnapshots.capturedAt));
-
   // The threshold for "active" is the last 7 days
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  // Get the most recent ACTIVE snapshot per member
+  const snapshots = await db
+    .select({
+      playerTag: memberSnapshots.playerTag,
+      capturedAt: memberSnapshots.capturedAt,
+    })
+    .from(memberSnapshots)
+    .where(
+      and(
+        inArray(memberSnapshots.playerTag, tags),
+        eq(memberSnapshots.activityFlag, true)
+      )
+    )
+    .orderBy(desc(memberSnapshots.capturedAt));
+
   for (const s of snapshots) {
-    if (map.has(s.playerTag)) continue; // Already have the latest
+    if (map.has(s.playerTag)) continue; // Already have the latest active snapshot
     map.set(s.playerTag, {
       lastActiveAt: s.capturedAt,
-      isActive: s.activityFlag && s.capturedAt >= sevenDaysAgo,
+      isActive: s.capturedAt >= sevenDaysAgo,
     });
   }
 
