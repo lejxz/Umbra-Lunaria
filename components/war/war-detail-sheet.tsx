@@ -8,6 +8,8 @@ import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { IconSwords, IconLoader, IconAlert, IconWarEmpty } from "@/components/ui/icons";
 import { WarClanColumn, StateBadge } from "./war-hero";
+import { WarRosters } from "./war-rosters";
+import { WarAttackLog } from "./war-attack-log";
 
 /**
  * War detail sheet — opened from the history "View details" button. Fetches
@@ -288,74 +290,22 @@ function WarDetailContent({
         </div>
       </div>
 
-      {/* ---- Roster (compact) ---- */}
+      {/* ---- Roster ---- */}
       <div className="mt-5">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          Roster · base state
-        </p>
-        <h3 className="mt-1 font-display text-base text-umbra-lilac">Participant roster</h3>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <RosterMini title="Our clan" members={w.clan.members} tone="own" />
-          <RosterMini title="Opponent" members={w.opponent.members} tone="opponent" />
-        </div>
+        <WarRosters
+          currentWar={w}
+          onMemberClick={() => {}} // Disabled in detail view as per original concept
+        />
       </div>
 
       {/* ---- Attack log ---- */}
-      {attackLog.length > 0 && (
-        <div className="mt-5">
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Attack log · {attackLog.length} attacks
-          </p>
-          <h3 className="mt-1 font-display text-base text-umbra-lilac">Every attack</h3>
-          <div className="mt-3 max-h-72 overflow-y-auto rounded-xl border border-umbra-line">
-            <table className="w-full border-collapse">
-              <thead className="sticky top-0 z-10 bg-umbra-surface/95 backdrop-blur">
-                <tr className="text-left text-2xs uppercase tracking-wider text-umbra-muted">
-                  <th className="px-2 py-2 font-semibold">#</th>
-                  <th className="px-2 py-2 font-semibold">Attacker</th>
-                  <th className="px-2 py-2 text-center font-semibold">→</th>
-                  <th className="px-2 py-2 font-semibold">Defender</th>
-                  <th className="px-2 py-2 text-center font-semibold">★</th>
-                  <th className="px-2 py-2 text-right font-semibold">%</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-umbra-line/60">
-                {attackLog.map((a) => (
-                  <tr key={a.order} className="text-xs">
-                    <td className="px-2 py-1.5 font-mono text-2xs text-umbra-muted">{a.order}</td>
-                    <td className="px-2 py-1.5">
-                      <span className={a.attackerIsOwnClan ? "text-umbra-lilac" : "text-red-300/80"}>
-                        {a.attackerName}
-                      </span>
-                      {a.attackerTownhallLevel != null && (
-                        <span className="ml-1 text-micro text-umbra-muted">TH{a.attackerTownhallLevel}</span>
-                      )}
-                    </td>
-                    <td className="px-2 py-1.5 text-center text-umbra-purple/50">
-                      <IconSwords className="mx-auto h-3 w-3" aria-hidden />
-                    </td>
-                    <td className="px-2 py-1.5">
-                      <span className={a.defenderIsOwnClan ? "text-umbra-lilac" : "text-red-300/80"}>
-                        {a.defenderName}
-                      </span>
-                      {a.defenderTownhallLevel != null && (
-                        <span className="ml-1 text-micro text-umbra-muted">TH{a.defenderTownhallLevel}</span>
-                      )}
-                    </td>
-                    <td className="px-2 py-1.5 text-center">
-                      <span className="text-amber-400">{"★".repeat(a.stars)}</span>
-                      <span className="text-umbra-muted/30">{"★".repeat(3 - a.stars)}</span>
-                    </td>
-                    <td className="px-2 py-1.5 text-right font-mono text-2xs text-umbra-muted">
-                      {a.destructionPercentage}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      <div className="mt-5">
+        <WarAttackLog
+          attackLog={attackLog}
+          warState={w.state}
+          onMemberClick={() => {}} // Disabled in detail view
+        />
+      </div>
     </div>
   );
 }
@@ -404,18 +354,36 @@ function StatCard({
     if (format === "fraction") return total != null ? `${v}/${total}` : `${v}`;
     return `${v}`;
   };
+
+  // Determine winner for subtle highlighting
+  let ownWins = false;
+  let oppWins = false;
+  if (own !== null && opp !== null) {
+    if (own > opp) {
+      if (label === "No-attack") oppWins = true; else ownWins = true;
+    } else if (opp > own) {
+      if (label === "No-attack") ownWins = true; else oppWins = true;
+    }
+  }
+
   return (
-    <div className="rounded-xl border border-umbra-line bg-white/[.02] px-3 py-2.5">
-      <p className="text-micro font-semibold uppercase tracking-wider text-umbra-muted">{label}</p>
-      <div className="mt-1.5 flex items-baseline justify-between gap-2">
-        <span className="font-display text-base font-bold text-umbra-lilac">
+    <div className="glass relative overflow-hidden rounded-xl p-3 sm:p-4 border border-umbra-line/50 transition-all duration-300 hover:border-umbra-purple/30 hover:bg-white/[.04]">
+      {/* Subtle win glow */}
+      {ownWins && <div className="pointer-events-none absolute left-0 top-0 h-full w-[2px] bg-emerald-400/50 shadow-[0_0_10px_rgba(52,211,153,0.3)]" />}
+      {oppWins && <div className="pointer-events-none absolute right-0 top-0 h-full w-[2px] bg-red-400/50 shadow-[0_0_10px_rgba(248,113,113,0.3)]" />}
+      
+      <p className="text-micro font-semibold uppercase tracking-wider text-umbra-muted/80">{label}</p>
+      
+      <div className="mt-2 flex items-baseline justify-between gap-2">
+        <span className={`font-display text-lg sm:text-xl font-bold ${ownWins ? "text-emerald-300 drop-shadow-[0_0_8px_rgba(110,231,183,0.3)]" : "text-umbra-lilac"}`}>
           {fmt(own, ownTotal)}
         </span>
-        <span className="font-display text-base font-bold text-red-300/80">
+        <span className={`font-display text-lg sm:text-xl font-bold ${oppWins ? "text-red-300 drop-shadow-[0_0_8px_rgba(252,165,165,0.3)]" : "text-red-300/80"}`}>
           {fmt(opp, oppTotal)}
         </span>
       </div>
-      <div className="mt-0.5 flex justify-between text-micro text-umbra-muted/60">
+      
+      <div className="mt-1 flex justify-between text-[0.6rem] uppercase tracking-widest text-umbra-muted/40">
         <span>us</span>
         <span>them</span>
       </div>
@@ -425,71 +393,9 @@ function StatCard({
 
 function Highlight({ children }: { children: React.ReactNode }) {
   return (
-    <p className="rounded-lg border border-umbra-line bg-white/[.02] px-3 py-1.5 text-2xs leading-5 text-umbra-muted">
+    <div className="relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/5 bg-gradient-to-r from-white/[0.03] to-transparent p-3 text-xs leading-6 text-white/70">
+      <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-umbra-purple" />
       {children}
-    </p>
-  );
-}
-
-function RosterMini({
-  title,
-  members,
-  tone,
-}: {
-  title: string;
-  members: WarDetailView["detail"]["clan"]["members"];
-  tone: "own" | "opponent";
-}) {
-  return (
-    <div className="rounded-xl border border-umbra-line bg-white/[.02]">
-      <div className="flex items-center justify-between border-b border-umbra-line px-3 py-1.5">
-        <span
-          className={`text-2xs font-semibold uppercase tracking-wider ${
-            tone === "opponent" ? "text-red-300/80" : "text-umbra-lilac"
-          }`}
-        >
-          {title}
-        </span>
-        <span className="font-mono text-micro text-umbra-muted">{members.length}</span>
-      </div>
-      <ul className="max-h-48 divide-y divide-umbra-line/60 overflow-y-auto">
-        {members.map((m) => (
-          <li
-            key={`${m.tag}-${m.mapPosition}`}
-            className="grid grid-cols-[1.25rem_1fr_auto] items-center gap-2 px-3 py-1.5"
-          >
-            <span className="font-mono text-micro text-umbra-purple/80">{m.mapPosition}</span>
-            <span className="truncate text-2xs text-umbra-lilac" title={m.name}>
-              {m.name} <span className="text-umbra-muted">· TH{m.townhallLevel}</span>
-            </span>
-            <BaseStateMini
-              stars={m.worstDefenseStars}
-              destruction={m.worstDefenseDestruction}
-            />
-          </li>
-        ))}
-      </ul>
     </div>
-  );
-}
-
-function BaseStateMini({
-  stars,
-  destruction,
-}: {
-  stars: number | null;
-  destruction: number | null;
-}) {
-  if (stars === null || destruction === null) {
-    return <span className="font-mono text-micro text-umbra-muted/40">—</span>;
-  }
-  const destroyed = stars >= 3;
-  return (
-    <span
-      className={`font-mono text-micro ${destroyed ? "text-amber-400" : "text-umbra-muted"}`}
-      title={`Base worst: ${stars}★ ${destruction}%`}
-    >
-      {stars}★ {destruction}%
-    </span>
   );
 }
