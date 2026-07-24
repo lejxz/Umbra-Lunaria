@@ -8,7 +8,6 @@ import {
   NavIconMembers,
   NavIconWar,
   NavIconCapital,
-  NavIconPlanning,
   IconChevronLeft,
   IconChevronRight,
 } from "@/components/ui/icons";
@@ -18,7 +17,6 @@ const links = [
   [<NavIconMembers key="members" />, "Members", "/members"],
   [<NavIconWar key="war" />, "War center", "/war"],
   [<NavIconCapital key="cap" />, "Capital", "/capital"],
-  [<NavIconPlanning key="plan" />, "Planning", "/planning"],
 ] as const;
 
 export function Navigation() {

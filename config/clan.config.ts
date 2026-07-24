@@ -7,7 +7,6 @@ export interface ClanConfig {
   features: {
     clanCapital: boolean;
     builderBaseSummary: boolean;
-    warPlanningAutoSelect: boolean;
   };
 }
 
@@ -31,9 +30,8 @@ export const clanConfig = {
   // changing this value alone does not change anything at runtime.
   pollIntervalMinutes: 5,
 
-  // Minimum observed wars before a member's auto-select ranking is shown
+  // Minimum observed wars before a member's activity score is shown
   // with full confidence rather than a "limited data" flag.
-  // See concept/09-war-planning-and-auto-select.md.
   minWarsForConfidentRanking: 3,
 
   // Feature toggles — lets a clan turn off a section it doesn't use
@@ -41,6 +39,5 @@ export const clanConfig = {
   features: {
     clanCapital: true,
     builderBaseSummary: true,
-    warPlanningAutoSelect: true,
   },
 } satisfies ClanConfig;

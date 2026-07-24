@@ -1,5 +1,17 @@
 # 09 — Final War Planning & Auto-Select Concept
 
+> **STATUS: DROPPED (2026-07-24).** The war planning + auto-select feature has
+> been removed from the product. There was not enough practical use to justify
+> the admin session, roster persistence, and auto-select scoring surface. The
+> entire implementation (`lib/auth/`, `lib/settings/`, `lib/planning/`,
+> `lib/scoring/war-select-score.ts`, `components/planning/`, `app/api/auth/`,
+> `app/api/settings/`, `app/api/rosters/`, the `/planning` route, and all
+> associated tests) has been deleted. The database tables `war_rosters`,
+> `war_roster_slots`, and `runtime_settings` remain in the schema as vestigial
+> (empty, unused) — dropping them would require a destructive migration with no
+> benefit. This document is retained for historical context only; it no longer
+> describes a shipped feature.
+
 ## Purpose
 
 War Planning is an administrator-controlled workspace for assembling the next roster. It makes the underlying data visible and provides a recommendation, but leadership always decides the final lineup.

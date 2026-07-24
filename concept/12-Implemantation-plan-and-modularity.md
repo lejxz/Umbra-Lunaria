@@ -21,10 +21,19 @@ verified foundation
   → members
   → war center
   → Capital overview
-  → protected settings and planning
-  → rushed analysis, raid history, and auto-select
+  → rushed analysis + raid history
   → mobile/release hardening
 ```
+
+> **DROPPED (2026-07-24):** Phase 2 (protected administration + roster planning)
+> and Step 3.2 (auto-select) have been removed from the product — there was
+> not enough practical use to justify the admin session, roster persistence,
+> and auto-select scoring surface. The `lib/auth/`, `lib/settings/`,
+> `lib/planning/`, `lib/scoring/war-select-score.ts`, `components/planning/`,
+> `app/api/auth/`, `app/api/settings/`, `app/api/rosters/`, the `/planning`
+> route, and all associated tests are deleted. The `war_rosters`,
+> `war_roster_slots`, and `runtime_settings` tables remain in the schema as
+> vestigial (empty, unused). See concept/09 for the historical design.
 
 ## Verified foundation — complete
 
@@ -244,48 +253,57 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 - [x] Verify no read-only UI route exposes a secret or requires browser-side CoC calls. _(No secrets in client code. No fetch to clashofclans.com/cocproxy in client components. No client component imports lib/db. All CoC API calls server-side only.)_
 - [x] Update the concept docs/API reference if the real schema or API behavior differs from the final concept. _(Concept docs updated throughout: Supabase migration, ISR caching, pruning, CWL league view, lead analysis, checkpoint columns, cron architecture, 15-min cadence.)_
 
-## Phase 2 — Protected administration and roster planning ✅ COMPLETE
+## Phase 2 — Protected administration and roster planning — DROPPED
+
+> **DROPPED (2026-07-24).** The war planning feature (Steps 2.0 admin session,
+> 2.1 manual roster planner, 2.2 roster persistence) and Step 3.2 (auto-select)
+> have been removed from the product. There was not enough practical use to
+> justify the admin session, roster persistence, and auto-select scoring
+> surface. All implementation code and tests are deleted; the
+> `war_rosters` / `war_roster_slots` / `runtime_settings` tables remain in the
+> schema as vestigial (empty, unused). See concept/09 for the historical
+> design. The checkboxes below are preserved as a record of what was built and
+> then removed.
 
 ### Step 2.0 — Administrator session and runtime settings
 
 **Goal:** Protect write actions without requiring a player account system.
 
-- [x] Implement server-side administrator login/session using the `ADMIN_PASSWORD_HASH` and `ADMIN_SESSION_SECRET` contract in `11-config-specification.md`. _(lib/auth/session.ts — scrypt password verify, HMAC-signed session tokens.)_
-- [x] Store session data only in secure, HTTP-only cookies. _(Secure, HttpOnly, SameSite=Strict, root path; `secure` enabled in production.)_
-- [x] Add logout, expired-session, unauthorized-route, and rate-limit behavior. _(POST /api/auth/logout clears the cookie idempotently; expired tokens are rejected by verifySessionToken; unauthorized writes return 401; login rate-limited at 10 attempts / 10 min per IP via lib/auth/rate-limit.ts.)_
-- [x] Add protected `/api/settings` read/write routes with validation and audit events. _(GET public, POST requires admin session; audit lines logged via console.info/warn with actor/time/result.)_
-- [x] Implement runtime settings for inactivity threshold, dashboard-score weights, auto-select weights, confidence threshold, alert timing, and feature visibility. _(lib/settings/defaults.ts — RuntimeSettings type + DEFAULT_SETTINGS covering all 7 groups from concept/11.)_
-- [x] Validate non-negative weights and total weight rules before saving. _(validateSettings — non-negative checks, sum-to-1.0 with 1e-4 tolerance, integer bounds, boolean toggle checks.)_
-- [x] Test public reads, unauthorized writes, authorized writes, cookie expiration, and settings validation. _(29 tests across tests/auth/session.test.ts, tests/auth/rate-limit.test.ts, tests/settings/validate-settings.test.ts — covers password verify, token round-trip/expire/tamper, rate-limit windows, and all validation branches.)_
+- [x] ~Implement server-side administrator login/session using the `ADMIN_PASSWORD_HASH` and `ADMIN_SESSION_SECRET` contract in `11-config-specification.md`.~ **DROPPED** — lib/auth/ deleted.
+- [x] ~Store session data only in secure, HTTP-only cookies.~ **DROPPED** — lib/auth/ deleted.
+- [x] ~Add logout, expired-session, unauthorized-route, and rate-limit behavior.~ **DROPPED** — app/api/auth/ deleted.
+- [x] ~Add protected `/api/settings` read/write routes with validation and audit events.~ **DROPPED** — app/api/settings/ deleted.
+- [x] ~Implement runtime settings for inactivity threshold, dashboard-score weights, auto-select weights, confidence threshold, alert timing, and feature visibility.~ **DROPPED** — lib/settings/ deleted.
+- [x] ~Validate non-negative weights and total weight rules before saving.~ **DROPPED** — lib/settings/ deleted.
+- [x] ~Test public reads, unauthorized writes, authorized writes, cookie expiration, and settings validation.~ **DROPPED** — tests/auth/ + tests/settings/ deleted.
 
 ### Step 2.1 — Manual war roster planner
 
 **Goal:** Replace `/planning` placeholder with an administrator-controlled manual planner.
 
-- [x] Build available-member and selected-lineup panels. _(Two-panel layout in components/planning/planner-shell.tsx — left = available roster, right = ordered lineup slots.)_
-- [x] Add Town Hall, war preference, activity, war summary, and limited-data cues to each available member. _(Each member card shows TH badge (color-ramped by tier), role, last-active cue, wars tracked, and a "Limited data" label when warsTracked < minWarsForConfidentRanking. Opted-out members are visually deprioritized.)_
-- [x] Implement desktop drag-and-drop using `@dnd-kit`. _(DndContext with PointerSensor + KeyboardSensor; pool→slot, slot→pool, slot↔slot swap all handled in onDragEnd. DragOverlay shows a compact preview.)_
-- [x] Implement mobile tap-to-add, tap-to-remove, and map-position reordering. _(Each available member has an "Add" button (adds to first free slot); each slot has × (remove), ↑ (move up), ↓ (move down). Activation distance 6px so taps aren't hijacked by drag.)_
-- [x] Support 10v10, 15v15, 20v20, 25v25, 30v30, 40v40, and 50v50. _(WAR_SIZES constant in lib/planning/types.ts; the size selector defaults to the prep war's teamSize when one is active.)_
-- [x] Warn before truncating selected members on a smaller war size. _(applySizeChange checks `filled > next` and opens a confirm Modal showing how many members will be dropped; "Shrink & drop tail" truncates the highest positions.)_
-- [x] Open the shared member detail sheet from both panels without losing draft state. _(Reuses the dashboard MemberDetailSheet (lazy fetch by playerTag) as a modal overlay; draft state lives in the shell and is never unmounted on sheet open/close.)_
-- [x] Render preparation-day opponent context when available without automatically assigning targets. _(PrepContext panel renders the opponent roster (map position + TH + name), a TH-mix summary, and an explicit "never auto-assigns targets" notice. Collapsible.)_
+- [x] ~Build available-member and selected-lineup panels.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Add Town Hall, war preference, activity, war summary, and limited-data cues to each available member.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Implement desktop drag-and-drop using `@dnd-kit`.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Implement mobile tap-to-add, tap-to-remove, and map-position reordering.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Support 10v10, 15v15, 20v20, 25v25, 30v30, 40v40, and 50v50.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Warn before truncating selected members on a smaller war size.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Open the shared member detail sheet from both panels without losing draft state.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Render preparation-day opponent context when available without automatically assigning targets.~ **DROPPED** — components/planning/ deleted.
 
 ### Step 2.2 — Roster persistence
 
-- [x] Implement protected `POST`/`PATCH /api/rosters` for draft create/update. _(app/api/rosters/route.ts — POST creates, PATCH updates by id. Both gated by getAdminSession() from Step 2.0.)_
-- [x] Implement protected `POST /api/rosters/[id]/finalize`. _(app/api/rosters/[id]/finalize/route.ts — re-validates the persisted roster with requireFull=true, then stamps status + finalizedAt + configVersion.)_
-- [x] Add creator, update time, and configuration-version fields if the schema does not already support auditability. _(Schema already had created_by, created_at, updated_at, finalized_at, config_version — no migration needed. config_version is stamped as `v<SETTINGS_VALIDATION_VERSION>` on finalize.)_
-- [x] Validate selected member count, unique members, map positions, and allowed war sizes server-side. _(lib/planning/roster-service.ts validateRoster — pure function, 17 unit tests covering all branches.)_
-- [x] Show draft, saved, finalized, conflict, and unauthorized states in the planner. _(PlannerShell SaveStatus union: idle/saving/saved/finalized/error. Control bar shows status banners: "Saved · draft #N", "Unsaved changes", "Finalized · draft #N", error messages from 401/409/validation. Save button label cycles: Save draft → Saved → Save changes. Finalize disabled until saved + full.)_
-- [x] Test API authorization, invalid payloads, draft round trips, and finalize immutability. _(17 tests in tests/planning/roster-service.test.ts cover validation (count, unique, positions, sizes, shapes) + error classes. curl-verified: 401 unauth, 400 invalid payload with per-field errors, 409 conflict path.)_
+- [x] ~Implement protected `POST`/`PATCH /api/rosters` for draft create/update.~ **DROPPED** — app/api/rosters/ deleted.
+- [x] ~Implement protected `POST /api/rosters/[id]/finalize`.~ **DROPPED** — app/api/rosters/ deleted.
+- [x] ~Add creator, update time, and configuration-version fields if the schema does not already support auditability.~ **DROPPED** — the war_rosters table columns remain but are unused.
+- [x] ~Validate selected member count, unique members, map positions, and allowed war sizes server-side.~ **DROPPED** — lib/planning/roster-service.ts deleted.
+- [x] ~Show draft, saved, finalized, conflict, and unauthorized states in the planner.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Test API authorization, invalid payloads, draft round trips, and finalize immutability.~ **DROPPED** — tests/planning/ deleted.
 
-## Phase 3 — Deep analytics, Capital raid history, and auto-select ✅ COMPLETE
+## Phase 3 — Deep analytics, Capital raid history, and auto-select
 
 _Step 3.0 has two SUSPENDED items (maxed-for-current-TH indicators + roster
-rushed sort/filter) — explicitly future enhancements, not blocking. All core
-Step 3.0 rushed-analysis items, Step 3.1 raid history, and Step 3.2 auto-select
-are verified and checked off._
+rushed sort/filter) — explicitly future enhancements, not blocking. Step 3.1
+(raid history) is complete. Step 3.2 (auto-select) is DROPPED — see below._
 
 ### Step 3.0 — Rushed-account analysis
 
@@ -305,16 +323,22 @@ are verified and checked off._
 - [x] Preserve season identity, date, loot, rewards, per-member attacks, and per-member Capital resources. _(All fields mapped in capital-sync.ts — startTime/endTime, capitalTotalLoot, raidsCompleted, totalAttacks, offensiveReward, defensiveReward on the season row; attacksUsed, attackLimit, bonusAttackLimit, capitalResourcesLooted, raidWeekendMedals per contribution.)_
 - [x] Build Capital raid history, completed-season summary, contribution leaderboard, trends, zero-attack list, and participation rate. _(getRaidHistory in lib/db/capital-queries.ts returns seasons[], contributionLeaderboard[], zeroAttackList[], participation{latestSeasonParticipants, latestSeasonRetainedMembers, participationRate, averageParticipants, totalSeasons}. components/capital/raid-history.tsx renders headline tiles + collapsible season list + leaderboard + zero-attack chips + participation rate.)_
 - [x] Add the Capital component to Member Activity Score only when comparable season data exists. _(Already wired in lib/scoring/activity-score.ts — capitalAvailable = capitalContribution !== null; weight=0 + re-normalize when unavailable. Lights up automatically once Step 3.1 ingest runs.)_
-- [x] Re-test score reweighting before and after raid-season data is present. _(tests/lib/activity-score.test.ts §"capital unavailable re-normalizes to 35/25/25 over 85" covers the before-state; the after-state uses the same reweight path as the war component, already tested. war-select-score reweighting covered by tests/lib/war-select-score.test.ts — 15 tests.)_
+- [x] Re-test score reweighting before and after raid-season data is present. _(tests/lib/activity-score.test.ts §"capital unavailable re-normalizes to 35/25/25 over 85" covers the before-state; the after-state uses the same reweight path as the war component, already tested.)_
 
-### Step 3.2 — Explainable auto-select
+### Step 3.2 — Explainable auto-select — DROPPED
 
-- [x] Implement `lib/scoring/war-select.ts` with the 30/25/20/15/10 activity/participation/average-stars/three-star/account-readiness formula. _(lib/scoring/war-select-score.ts — named to match the rushed/activity-score convention. RAW_WEIGHTS = activity 0.30, participation 0.25, averageStars 0.20, threeStarRate 0.15, accountReadiness 0.10. Pure function, no DB.)_
-- [x] Exclude `warPreference = out` members from automatic suggestions while leaving them manually selectable. _(computeWarSelectScore sets optedOut=true; components/planning/auto-select-panel.tsx filters `!optedOut` from the ranked suggestion list, but the available-members panel still lists them for manual selection.)_
-- [x] Show activity window, score components, limited-data threshold, and rationale for each suggestion. _(ScoreBreakdown component — each of the 5 components shows normalized %, points, weight; expanded on click. limitedData flag drives a "Limited data" badge on ranked rows + a provisional-warning banner when the top member is limited-data. Trailing-14-day activity window documented in getWarSelectInputs.)_
-- [x] Keep Town Hall matching separate from the quality score. _(townHallLevel is carried in the WarSelectScore object for roster-balance display, but is NOT a component of the `total` — the 5 scoring components are activity/participation/averageStars/threeStarRate/accountReadiness only.)_
-- [x] Store score/configuration snapshot when a roster is finalized. _(finalizeRoster in lib/planning/roster-service.ts stamps configVersion = `v<SETTINGS_VALIDATION_VERSION>` on the war_rosters row at finalize time.)_
-- [x] Test no history, partial history, opt-out, equal scores, and complete-history cases. _(tests/lib/war-select-score.test.ts — 15 tests: full data, no-war-data re-normalization, null rushedPercent, null activity, all-unavailable, opted-out flag, limited-data threshold, normalization correctness (avg stars /3, three-star rate, account readiness 1−r/100), clamping, points-sum-to-total.)_
+> **DROPPED (2026-07-24)** — the auto-select feature was part of the war
+> planning surface and has been removed with it. `lib/scoring/war-select-score.ts`,
+> `lib/planning/war-select-inputs.ts`, `components/planning/auto-select-panel.tsx`,
+> and `tests/lib/war-select-score.test.ts` are deleted. The checkboxes below
+> are preserved as a record of what was built and then removed.
+
+- [x] ~Implement `lib/scoring/war-select.ts` with the 30/25/20/15/10 activity/participation/average-stars/three-star/account-readiness formula.~ **DROPPED** — lib/scoring/war-select-score.ts deleted.
+- [x] ~Exclude `warPreference = out` members from automatic suggestions while leaving them manually selectable.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Show activity window, score components, limited-data threshold, and rationale for each suggestion.~ **DROPPED** — components/planning/ deleted.
+- [x] ~Keep Town Hall matching separate from the quality score.~ **DROPPED** — lib/scoring/war-select-score.ts deleted.
+- [x] ~Store score/configuration snapshot when a roster is finalized.~ **DROPPED** — lib/planning/roster-service.ts deleted.
+- [x] ~Test no history, partial history, opt-out, equal scores, and complete-history cases.~ **DROPPED** — tests/lib/war-select-score.test.ts deleted.
 
 ## Phase 4 — Release hardening and optional enhancements
 

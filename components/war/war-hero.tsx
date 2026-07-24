@@ -1,10 +1,9 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { CurrentWarDetail, WarHistoryEntry, WarLeadAnalysis } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { LiveCountdown } from "@/components/ui/live-countdown";
 import { TimeAgo } from "@/components/ui/time-ago";
-import { IconSwords, IconWarEmpty, IconChevronRight } from "@/components/ui/icons";
+import { IconSwords, IconWarEmpty } from "@/components/ui/icons";
 import { WarRefreshButton } from "./war-refresh-button";
 
 /**
@@ -243,19 +242,6 @@ export function WarHero({
               <div className="bg-gradient-to-r from-red-500 to-red-700 transition-all duration-1000 ease-out" style={{ width: `${oppPct}%` }} />
             </div>
           </div>
-        </div>
-      )}
-
-      {/* Plan lineup link during preparation */}
-      {currentWar.state === "preparation" && (
-        <div className="mt-4 flex justify-center">
-          <Link
-            href="/planning"
-            className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/60 hover:bg-umbra-purple/20"
-          >
-            Plan lineup
-            <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
-          </Link>
         </div>
       )}
     </section>
