@@ -29,53 +29,52 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
       </h3>
 
       {/* Hero: Capital Hall level centerpiece + side stats */}
-      <div className="mt-4 grid grid-cols-[auto_1fr] gap-4 sm:grid-cols-[auto_1fr_auto]">
-        {/* Hall level — the centerpiece */}
-        <div className="flex flex-col items-center justify-center rounded-xl border border-umbra-purple/20 bg-umbra-purple/5 px-5 py-3">
-          <IconCapital className="h-7 w-7 text-umbra-purple/70" aria-hidden />
-          <p className="mt-1 font-mono text-micro uppercase tracking-wider text-umbra-muted">
-            Hall
-          </p>
-          <p className="font-display text-3xl font-bold leading-none text-umbra-lilac">
-            {overview.capitalHallLevel ?? <UnavailableValue />}
-          </p>
-        </div>
-
-        {/* Points + districts stacked */}
-        <div className="flex flex-col justify-center gap-2">
-          <div className="flex items-baseline justify-between rounded-lg bg-white/[.035] px-3 py-1.5">
-            <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
-              Capital points
-            </span>
-            <span className="font-display text-lg font-bold text-white">
-              {overview.capitalPoints ?? <UnavailableValue />}
-            </span>
+      <div className="mt-4 flex flex-col items-center justify-center gap-5 py-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20">
+            <IconCapital className="h-7 w-7 text-umbra-purple/80" aria-hidden />
           </div>
-          <div className="flex items-baseline justify-between rounded-lg bg-white/[.035] px-3 py-1.5">
-            <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
-              Districts
-            </span>
-            <span className="font-display text-lg font-bold text-white">
-              {overview.districtCount ?? <UnavailableValue />}
-            </span>
+          <div>
+            <h4 className="font-display text-2xl font-semibold text-umbra-lilac">
+              Capital Peak Level {overview.capitalHallLevel ?? <UnavailableValue />}
+            </h4>
+            <p className="mt-1 font-mono text-xs uppercase tracking-wider text-umbra-muted">
+              {overview.capitalLeague?.name ?? "Unranked"} League
+            </p>
           </div>
         </div>
 
-        {/* League badge — right column on sm+ */}
-        <div className="col-span-2 flex items-center justify-center rounded-xl bg-white/[.035] px-4 py-2 sm:col-span-1 sm:flex-col">
-          <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
-            League
-          </p>
-          <p className="sm:mt-1 ml-2 sm:ml-0 font-display text-base font-bold text-umbra-lilac">
-            {overview.capitalLeague?.name ?? <UnavailableValue />}
-          </p>
+        <div className="flex items-center rounded-xl bg-white/5 p-1">
+          <TotalChip label="Capital Points" value={overview.capitalPoints} />
+          <div className="h-4 w-px bg-white/10 mx-1" />
+          <TotalChip label="Districts" value={overview.districtCount} />
         </div>
       </div>
 
       {/* Unavailable: live upgrade cost/progress (concept/08 §"Explicitly unavailable") */}
-      <p className="mt-3 text-center text-2xs text-umbra-muted/50">
+      <p className="mt-2 text-center text-2xs text-umbra-muted/50">
         Live upgrade cost &amp; progress are not provided by the API.
       </p>
     </section>
+  );
+}
+
+/** Compact inline total — label + value on one line, small */
+function TotalChip({
+  label,
+  value,
+}: {
+  label: string;
+  value: number | string | null;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-2">
+      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
+        {label}
+      </span>
+      <span className="font-display text-xs font-bold text-white">
+        {value ?? <UnavailableValue />}
+      </span>
+    </div>
   );
 }

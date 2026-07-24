@@ -1,3 +1,4 @@
+import { EmptyState } from "@/components/ui/empty-state";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
@@ -33,16 +34,12 @@ export function RaidPendingCard({ available }: { available: boolean }) {
         Raid-weekend history
       </h3>
 
-      <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-umbra-line bg-white/[.02] px-4 py-8 text-center">
-        <div className="mb-3 flex justify-center text-umbra-purple/40">
-          <IconCapital className="h-12 w-12" aria-hidden />
-        </div>
-        <p className="font-display text-base text-umbra-lilac">Coming soon</p>
-        <p className="mt-1.5 max-w-md text-2xs leading-5 text-umbra-muted">
-          Completed raid-weekend results, the per-member contribution leaderboard,
-          and participation rates will appear here once raid-season ingestion is
-          active. This page does not fabricate a leaderboard from lifetime totals.
-        </p>
+      <div className="mt-4 flex flex-1 items-center justify-center py-6">
+        <EmptyState
+          icon={<IconCapital className="h-10 w-10 text-umbra-purple/40" />}
+          title="Coming soon"
+          description="Completed raid-weekend results, the per-member contribution leaderboard, and participation rates will appear here once raid-season ingestion is active."
+        />
       </div>
 
       <p className="mt-3 text-2xs text-umbra-muted/60">
