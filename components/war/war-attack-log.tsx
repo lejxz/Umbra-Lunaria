@@ -45,23 +45,24 @@ export function WarAttackLog({
       </div>
       <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
 
-      <div className="mt-4 max-h-[28rem] overflow-y-auto rounded-xl border border-umbra-line/60">
-        <table className="w-full border-collapse">
-          <thead className="sticky top-0 z-10 bg-umbra-surface/95 backdrop-blur">
-            <tr className="text-left text-2xs uppercase tracking-wider text-umbra-muted">
-              <th className="px-2.5 py-2 font-semibold">#</th>
-              <th className="px-2.5 py-2 font-semibold">Attacker</th>
-              <th className="px-2.5 py-2 text-center font-semibold">→</th>
-              <th className="px-2.5 py-2 font-semibold">Defender</th>
-              <th className="px-2.5 py-2 text-center font-semibold">★</th>
-              <th className="hidden px-2.5 py-2 text-right font-semibold sm:table-cell">Destr.</th>
+      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-xl border border-umbra-line bg-white/[.02]">
+        <table className="w-full text-left">
+          <thead className="sticky top-0 z-10 border-b border-umbra-line bg-umbra-ink/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur supports-[backdrop-filter]:bg-umbra-ink/80">
+            <tr>
+              <th className="w-8 px-3 py-2 text-center font-medium">#</th>
+              <th className="px-3 py-2 font-medium">Attacker</th>
+              <th className="px-3 py-2 text-center font-medium"></th>
+              <th className="px-3 py-2 font-medium">Defender</th>
+              <th className="px-3 py-2 text-center font-medium">★</th>
+              <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Destr.</th>
+              <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Dur.</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-umbra-line/40">
+          <tbody className="divide-y divide-umbra-line/60">
             {attackLog.map((a) => (
-              <tr key={a.order} className="text-sm transition hover:bg-white/[.03]">
-                <td className="px-2.5 py-1.5 font-mono text-2xs text-umbra-muted/70">{a.order}</td>
-                <td className="px-2.5 py-1.5">
+              <tr key={a.order} className="text-sm transition hover:bg-umbra-purple/10">
+                <td className="px-3 py-2 text-center align-middle font-mono text-2xs text-umbra-muted/70">{a.order}</td>
+                <td className="px-3 py-2 align-middle">
                   <AttackParticipant
                     tag={a.attackerTag}
                     name={a.attackerName}
@@ -71,10 +72,13 @@ export function WarAttackLog({
                     onMemberClick={onMemberClick}
                   />
                 </td>
-                <td className="px-2.5 py-1.5 text-center text-umbra-purple/40">
-                  <IconSwords className="mx-auto h-3 w-3" aria-hidden />
+                <td className="px-3 py-2 text-center align-middle">
+                  <IconSwords 
+                    className={`mx-auto h-3 w-3 ${a.attackerIsOwnClan ? "text-umbra-purple/60" : "text-red-400/60"}`} 
+                    aria-hidden 
+                  />
                 </td>
-                <td className="px-2.5 py-1.5">
+                <td className="px-3 py-2 align-middle">
                   <AttackParticipant
                     tag={a.defenderTag}
                     name={a.defenderName}
@@ -84,11 +88,16 @@ export function WarAttackLog({
                     onMemberClick={onMemberClick}
                   />
                 </td>
-                <td className="px-2.5 py-1.5 text-center">
-                  <StarPill value={a.stars} />
+                <td className="px-3 py-2 text-center align-middle">
+                  <span className={a.stars >= 3 ? "text-amber-400" : "text-umbra-muted/70"}>
+                    <Stars value={a.stars} />
+                  </span>
                 </td>
-                <td className="hidden px-2.5 py-1.5 text-right font-mono text-micro text-umbra-muted sm:table-cell">
+                <td className={`hidden px-3 py-2 text-right align-middle font-mono text-2xs sm:table-cell ${a.destructionPercentage === 100 ? "text-amber-400" : "text-umbra-muted"}`}>
                   {a.destructionPercentage}%
+                </td>
+                <td className="hidden px-3 py-2 text-right align-middle font-mono text-2xs text-umbra-muted/50 sm:table-cell">
+                  {a.duration}s
                 </td>
               </tr>
             ))}
@@ -114,20 +123,28 @@ function AttackParticipant({
   isOwnClan: boolean;
   onMemberClick: (playerTag: string) => void;
 }) {
+  const isOpponent = !isOwnClan;
+  const badgeColor = isOwnClan
+    ? "bg-umbra-purple/15 text-umbra-purple"
+    : "bg-red-400/10 text-red-400/90";
+  const nameColor = isOwnClan ? "text-umbra-lilac" : "text-red-300/80";
+
   const inner = (
-    <span className="flex items-center gap-1.5">
+    <span className="flex items-center gap-2">
       {mapPosition != null && (
-        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-umbra-purple/15 font-mono text-2xs font-semibold text-umbra-purple">
+        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-2xs font-semibold ${badgeColor}`}>
           {mapPosition}
         </span>
       )}
-      <span className={`truncate ${isOwnClan ? "text-umbra-lilac" : "text-red-300/80"}`}>{name}</span>
-      {townhall != null && <span className="shrink-0 text-2xs text-umbra-muted/60">TH{townhall}</span>}
+      <div className="flex min-w-0 flex-col justify-center">
+        <span className={`truncate text-xs ${nameColor}`}>{name}</span>
+        {townhall != null && <span className="font-mono text-2xs text-umbra-muted/60">TH{townhall}</span>}
+      </div>
     </span>
   );
   if (isOwnClan && tag) {
     return (
-      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring rounded text-left transition hover:underline">
+      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring rounded text-left transition hover:bg-umbra-purple/10">
         {inner}
       </button>
     );
@@ -135,19 +152,14 @@ function AttackParticipant({
   return inner;
 }
 
-/** A compact colored star pill: 0★ = muted, 1★ = red, 2★ = amber, 3★ = emerald. */
-function StarPill({ value }: { value: number }) {
-  const tone =
-    value >= 3
-      ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
-      : value === 2
-        ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
-        : value === 1
-          ? "border-red-400/30 bg-red-400/10 text-red-400"
-          : "border-white/10 bg-white/5 text-umbra-muted/50";
+function Stars({ value }: { value: number }) {
   return (
-    <span className={`inline-flex items-center gap-px rounded border px-1.5 py-0.5 text-micro font-bold ${tone}`} aria-label={`${value} stars`}>
-      {value}<span className="opacity-70">★</span>
+    <span className="inline-flex gap-px tracking-tight" aria-label={`${value} of 3 stars`}>
+      {[0, 1, 2].map((i) => (
+        <span key={i} className={i < value ? "opacity-100" : "opacity-25"}>
+          ★
+        </span>
+      ))}
     </span>
   );
 }
