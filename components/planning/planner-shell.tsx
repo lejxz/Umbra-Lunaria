@@ -6,19 +6,19 @@
  * Two-panel layout (concept/09 §"Manual roster builder"):
  *   - Left: available members (searchable, filterable, draggable).
  *   - Right: selected lineup (ordered map-position slots, draggable, reorderable).
- *   - Top: war-size selector + draft summary + finalize (Phase 2.2 wiring).
+ *   - Top: war-size selector + draft summary + Save / Finalize (Step 2.2).
  *
  * Interactions:
  *   - Desktop: @dnd-kit drag-and-drop. Pool→slot, slot→pool, slot↔slot swap.
  *   - Mobile: tap "+" on a member to add to the next free slot; tap "×" on a
  *     slot to remove; up/down arrows to reorder.
  *
- * Draft state is local (client) for Phase 2.1. Step 2.2 will persist drafts
- * via /api/rosters. Opening the shared MemberDetailSheet is a modal overlay,
- * so draft state is never lost.
+ * Persistence (Step 2.2): Save Draft creates/updates a war_rosters row;
+ * Finalize locks it as immutable. Draft state stays client-side between saves
+ * so the UI is never blocked on the network. See lib/planning/roster-service.ts.
  */
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -47,6 +47,7 @@ import {
   IconAlert,
   IconSave,
   IconCheck,
+  IconLoader,
 } from "@/components/ui/icons";
 import { WAR_SIZES, type WarSize, type LineupSlot, type PlanningContext } from "@/lib/planning/types";
 import { PrepContext } from "@/components/planning/prep-context";
@@ -58,15 +59,32 @@ function parseDragId(id: string): { kind: "pool" | "slot"; value: string } | nul
   return null;
 }
 
+/** Persistence status surfaced in the control bar. */
+type SaveStatus =
+  | { kind: "idle" }
+  | { kind: "saving" }
+  | { kind: "saved"; at: number }
+  | { kind: "finalized"; at: number }
+  | { kind: "error"; message: string };
+
+/** Shape of a roster returned by /api/rosters. */
+interface SavedRoster {
+  id: number;
+  title: string | null;
+  warSize: number;
+  status: "draft" | "finalized";
+  slots: { playerTag: string; mapPosition: number }[];
+}
+
 export function PlannerShell({ context }: { context: PlanningContext }) {
   const { members, prepWar, minWarsForConfidentRanking } = context;
 
-  // Default war size: the prep war's team size if present, else 10 (smallest).
-  const initialSize: WarSize = (WAR_SIZES as readonly number[]).includes(
-    prepWar?.teamSize ?? 10,
-  )
-    ? (prepWar!.teamSize as WarSize)
-    : 10;
+  // Default war size: the prep war's team size if present and allowed, else 10.
+  const prepTeamSize = prepWar?.teamSize ?? null;
+  const initialSize: WarSize =
+    prepTeamSize !== null && (WAR_SIZES as readonly number[]).includes(prepTeamSize)
+      ? (prepTeamSize as WarSize)
+      : 10;
 
   const [warSize, setWarSize] = useState<WarSize>(initialSize);
   const [slots, setSlots] = useState<LineupSlot[]>(() =>
@@ -76,7 +94,14 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
   const [search, setSearch] = useState("");
   const [warPrefFilter, setWarPrefFilter] = useState<"all" | "in" | "out">("all");
   const [pendingSize, setPendingSize] = useState<WarSize | null>(null);
-  const [savedToast, setSavedToast] = useState(false);
+
+  // ── Persistence state (Step 2.2) ────────────────────────────────────────
+  // draftId is null until the first successful save; after that, Save becomes
+  // an update (PATCH). A "dirty" flag tracks unsaved edits so the UI can warn.
+  const [draftId, setDraftId] = useState<number | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>({ kind: "idle" });
+  const [dirty, setDirty] = useState(false);
+  const saveInFlight = useRef(false);
 
   const memberByTag = useMemo(() => {
     const map = new Map<string, (typeof members)[number]>();
@@ -115,6 +140,7 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
         next[freeIdx] = { ...next[freeIdx]!, playerTag: tag };
         return next;
       });
+      setDirty(true);
     },
     [],
   );
@@ -123,6 +149,7 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
     setSlots((prev) =>
       prev.map((s) => (s.position === position ? { ...s, playerTag: null } : s)),
     );
+    setDirty(true);
   }, []);
 
   const swapSlots = useCallback((posA: number, posB: number) => {
@@ -137,6 +164,7 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
         return s;
       });
     });
+    setDirty(true);
   }, []);
 
   // ── War size change with truncation warning ──────────────────────────────
@@ -155,6 +183,7 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
           playerTag: slots[i]?.playerTag ?? null,
         })),
       );
+      setDirty(true);
     },
     [warSize, slots],
   );
@@ -170,6 +199,7 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
       })),
     );
     setPendingSize(null);
+    setDirty(true);
   }, [pendingSize, slots]);
 
   // ── DnD sensors ──────────────────────────────────────────────────────────
@@ -237,13 +267,119 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
     }
   }, [swapSlots]);
 
-  // ── "Save draft" — Phase 2.1 stub (no persistence yet) ────────────────────
-  const saveDraft = useCallback(() => {
-    // Phase 2.2 will POST to /api/rosters here. For now, surface a local
-    // confirmation so the button isn't a dead control.
-    setSavedToast(true);
-    window.setTimeout(() => setSavedToast(false), 2500);
-  }, []);
+  // ── Persistence (Step 2.2) ───────────────────────────────────────────────
+  // Build the API payload from the current slots. Only filled slots are sent;
+  // empty positions are omitted (a draft can be partial). Finalize requires
+  // a full lineup — the button is disabled until `fillCount === warSize`.
+  const buildPayload = useCallback(() => {
+    const payloadSlots = slots
+      .filter((s): s is LineupSlot & { playerTag: string } => s.playerTag !== null)
+      .map((s) => ({ playerTag: s.playerTag, mapPosition: s.position }));
+    return { warSize, slots: payloadSlots };
+  }, [slots, warSize]);
+
+  const saveDraft = useCallback(async () => {
+    if (saveInFlight.current) return;
+    if (saveStatus.kind === "finalized") return; // immutable after finalize
+    saveInFlight.current = true;
+    setSaveStatus({ kind: "saving" });
+
+    const payload = buildPayload();
+    try {
+      const res = draftId === null
+        ? await fetch("/api/rosters", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          })
+        : await fetch("/api/rosters", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: draftId, ...payload }),
+          });
+
+      if (res.status === 401) {
+        setSaveStatus({
+          kind: "error",
+          message: "Admin session expired — log in again.",
+        });
+        return;
+      }
+      if (res.status === 409) {
+        const data = await res.json().catch(() => ({}));
+        setSaveStatus({
+          kind: "error",
+          message: data.error ?? "Roster is finalized and cannot be edited.",
+        });
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.errors
+          ? data.errors.map((e: { message: string }) => e.message).join("; ")
+          : data.error ?? `HTTP ${res.status}`;
+        setSaveStatus({ kind: "error", message: msg });
+        return;
+      }
+      const data = (await res.json()) as { roster: SavedRoster };
+      setDraftId(data.roster.id);
+      setSaveStatus({ kind: "saved", at: Date.now() });
+      setDirty(false);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Network error";
+      setSaveStatus({ kind: "error", message: msg });
+    } finally {
+      saveInFlight.current = false;
+    }
+  }, [buildPayload, draftId, saveStatus.kind]);
+
+  const finalizeDraft = useCallback(async () => {
+    if (saveInFlight.current) return;
+    if (draftId === null) return; // must save before finalize
+    if (fillCount !== warSize) return; // must be complete
+    saveInFlight.current = true;
+    setSaveStatus({ kind: "saving" });
+    try {
+      const res = await fetch(`/api/rosters/${draftId}/finalize`, {
+        method: "POST",
+      });
+      if (res.status === 401) {
+        setSaveStatus({
+          kind: "error",
+          message: "Admin session expired — log in again.",
+        });
+        return;
+      }
+      if (res.status === 409) {
+        const data = await res.json().catch(() => ({}));
+        setSaveStatus({
+          kind: "error",
+          message: data.error ?? "Roster is already finalized.",
+        });
+        return;
+      }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        const msg = data.errors
+          ? data.errors.map((e: { message: string }) => e.message).join("; ")
+          : data.error ?? `HTTP ${res.status}`;
+        setSaveStatus({ kind: "error", message: msg });
+        return;
+      }
+      setSaveStatus({ kind: "finalized", at: Date.now() });
+      setDirty(false);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Network error";
+      setSaveStatus({ kind: "error", message: msg });
+    } finally {
+      saveInFlight.current = false;
+    }
+  }, [draftId, fillCount, warSize]);
+
+  const canFinalize =
+    draftId !== null && fillCount === warSize && saveStatus.kind !== "finalized";
+  const isFinalized = saveStatus.kind === "finalized";
+  const isSaving = saveStatus.kind === "saving";
 
   const activeMember = activeTag ? memberByTag.get(activeTag) ?? null : null;
 
@@ -272,7 +408,8 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
               id="war-size"
               value={warSize}
               onChange={(e) => applySizeChange(Number(e.target.value) as WarSize)}
-              className="select-input min-w-[5.5rem]"
+              disabled={isFinalized}
+              className="select-input min-w-[5.5rem] disabled:opacity-50"
             >
               {WAR_SIZES.map((s) => (
                 <option key={s} value={s}>
@@ -287,15 +424,66 @@ export function PlannerShell({ context }: { context: PlanningContext }) {
               {fillCount}/{warSize} filled
             </span>
           </div>
-          <div className="ml-auto flex items-center gap-2">
+
+          {/* ── Status + action buttons ──────────────────────────────────── */}
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            {saveStatus.kind === "error" && (
+              <span className="flex items-center gap-1.5 rounded-full border border-rose-400/30 bg-rose-400/10 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-wider text-rose-300">
+                <IconAlert className="h-3 w-3" />
+                {saveStatus.message}
+              </span>
+            )}
+            {saveStatus.kind === "saved" && (
+              <span className="flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-wider text-emerald-300">
+                <IconCheck className="h-3 w-3" />
+                {dirty ? "Unsaved changes" : `Saved · draft #${draftId}`}
+              </span>
+            )}
+            {isFinalized && (
+              <span className="flex items-center gap-1.5 rounded-full border border-umbra-purple/40 bg-umbra-purple/15 px-3 py-1.5 font-mono text-[0.65rem] uppercase tracking-wider text-umbra-lilac">
+                <IconCheck className="h-3 w-3" />
+                Finalized · draft #{draftId}
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={finalizeDraft}
+              disabled={!canFinalize || isSaving}
+              className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-400/10 px-4 py-2 font-mono text-label uppercase tracking-wider text-amber-300 transition hover:border-amber-400/60 hover:bg-amber-400/20 disabled:cursor-not-allowed disabled:opacity-40"
+              title={
+                draftId === null
+                  ? "Save the draft first"
+                  : fillCount !== warSize
+                    ? `Fill all ${warSize} slots to finalize`
+                    : "Lock this roster as finalized"
+              }
+            >
+              {isSaving ? <IconLoader className="h-3.5 w-3.5 animate-spin" /> : <IconCheck className="h-3.5 w-3.5" />}
+              Finalize
+            </button>
             <button
               type="button"
               onClick={saveDraft}
-              disabled={fillCount === 0}
+              disabled={fillCount === 0 || isSaving || isFinalized}
               className="focus-ring inline-flex items-center gap-1.5 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/60 hover:bg-umbra-purple/20 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {savedToast ? <IconCheck className="h-3.5 w-3.5" /> : <IconSave className="h-3.5 w-3.5" />}
-              {savedToast ? "Saved locally" : "Save draft"}
+              {isSaving ? (
+                <IconLoader className="h-3.5 w-3.5 animate-spin" />
+              ) : saveStatus.kind === "saved" && !dirty ? (
+                <IconCheck className="h-3.5 w-3.5" />
+              ) : (
+                <IconSave className="h-3.5 w-3.5" />
+              )}
+              {isSaving
+                ? "Saving…"
+                : draftId === null
+                  ? "Save draft"
+                  : saveStatus.kind === "saved" && dirty
+                    ? "Save changes"
+                    : draftId !== null
+                      ? "Saved"
+                      : "Save draft"}
             </button>
           </div>
         </section>

@@ -9,9 +9,9 @@ import { getPlanningContext } from "@/lib/planning/planning-context";
  * Server component: fetches the planning context (available members + any
  * active preparation-day war for opponent scouting) and passes it to the
  * client shell, which owns draft state locally. Persistence (save/finalize)
- * lands in Step 2.2; the planner is fully usable for staging a roster today.
+ * is wired to /api/rosters (Step 2.2).
  *
- * See concept/09-war-planning-and-auto-select.md and concept/12 Step 2.1.
+ * See concept/09-war-planning-and-auto-select.md and concept/12 Steps 2.1–2.2.
  */
 export const revalidate = 300; // 5-min ISR — matches dashboard/members/capital.
 

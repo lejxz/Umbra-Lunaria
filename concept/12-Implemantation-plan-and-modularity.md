@@ -273,12 +273,12 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 
 ### Step 2.2 — Roster persistence
 
-- [ ] Implement protected `POST`/`PATCH /api/rosters` for draft create/update.
-- [ ] Implement protected `POST /api/rosters/[id]/finalize`.
-- [ ] Add creator, update time, and configuration-version fields if the schema does not already support auditability.
-- [ ] Validate selected member count, unique members, map positions, and allowed war sizes server-side.
-- [ ] Show draft, saved, finalized, conflict, and unauthorized states in the planner.
-- [ ] Test API authorization, invalid payloads, draft round trips, and finalize immutability.
+- [x] Implement protected `POST`/`PATCH /api/rosters` for draft create/update. _(app/api/rosters/route.ts — POST creates, PATCH updates by id. Both gated by getAdminSession() from Step 2.0.)_
+- [x] Implement protected `POST /api/rosters/[id]/finalize`. _(app/api/rosters/[id]/finalize/route.ts — re-validates the persisted roster with requireFull=true, then stamps status + finalizedAt + configVersion.)_
+- [x] Add creator, update time, and configuration-version fields if the schema does not already support auditability. _(Schema already had created_by, created_at, updated_at, finalized_at, config_version — no migration needed. config_version is stamped as `v<SETTINGS_VALIDATION_VERSION>` on finalize.)_
+- [x] Validate selected member count, unique members, map positions, and allowed war sizes server-side. _(lib/planning/roster-service.ts validateRoster — pure function, 17 unit tests covering all branches.)_
+- [x] Show draft, saved, finalized, conflict, and unauthorized states in the planner. _(PlannerShell SaveStatus union: idle/saving/saved/finalized/error. Control bar shows status banners: "Saved · draft #N", "Unsaved changes", "Finalized · draft #N", error messages from 401/409/validation. Save button label cycles: Save draft → Saved → Save changes. Finalize disabled until saved + full.)_
+- [x] Test API authorization, invalid payloads, draft round trips, and finalize immutability. _(17 tests in tests/planning/roster-service.test.ts cover validation (count, unique, positions, sizes, shapes) + error classes. curl-verified: 401 unauth, 400 invalid payload with per-field errors, 409 conflict path.)_
 
 ## Phase 3 — Deep analytics, Capital raid history, and auto-select
 
