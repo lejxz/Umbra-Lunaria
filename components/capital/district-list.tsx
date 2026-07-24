@@ -25,16 +25,18 @@ export function DistrictList({
   );
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="district-list-title">
+    <section className="glass flex flex-col overflow-hidden rounded-2xl p-6 sm:p-8" aria-labelledby="district-list-title">
       <div className="flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Districts · reference
         </p>
         {hasDistricts && (
-          <span className="text-2xs text-umbra-muted">{districts.length} districts</span>
+          <span className="rounded-full border border-umbra-line/40 bg-white/[.02] px-3 py-1 font-mono text-label text-umbra-muted">
+            {districts.length} districts
+          </span>
         )}
       </div>
-      <h3 id="district-list-title" className="mt-1 font-display text-lg text-umbra-lilac">
+      <h3 id="district-list-title" className="mt-1 font-display text-2xl font-medium tracking-wide text-umbra-lilac sm:text-3xl">
         District list
       </h3>
 
@@ -47,24 +49,25 @@ export function DistrictList({
           />
         </div>
       ) : (
-        <ul className="mt-4 grid gap-1.5 sm:grid-cols-2">
+        <ul className="mt-6 grid gap-3 sm:grid-cols-2">
           {sorted.map((d) => (
             <li
               key={d.name}
-              className="flex items-center justify-between rounded-lg border border-umbra-line/60 bg-white/[.02] px-3 py-1.5"
+              className="group flex items-center justify-between rounded-xl border border-umbra-line/40 bg-white/[.015] px-4 py-3 transition-all duration-300 hover:-translate-y-0.5 hover:border-umbra-purple/40 hover:bg-white/[.03] hover:shadow-glow"
             >
-              <span className="truncate text-xs text-umbra-lilac" title={d.name}>
+              <span className="truncate text-sm font-medium tracking-wide text-umbra-lilac transition-colors group-hover:text-white" title={d.name}>
                 {d.name}
               </span>
-              <span className="shrink-0 font-mono text-2xs font-semibold text-umbra-purple">
-                Lv {d.districtHallLevel}
+              <span className="shrink-0 font-mono text-xs uppercase tracking-widest text-umbra-purple">
+                <span className="text-umbra-muted transition-colors group-hover:text-umbra-purple/70">Lv</span>{" "}
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-br from-indigo-300 to-purple-400 drop-shadow-sm transition-all duration-300 group-hover:text-white">{d.districtHallLevel}</span>
               </span>
             </li>
           ))}
         </ul>
       )}
 
-      <p className="mt-3 text-2xs text-umbra-muted/50">
+      <p className="mt-5 text-center text-label text-umbra-muted/50">
         District levels update infrequently — a level-up is a multi-day Capital
         Gold effort. See the upgrade timeline above for observed changes.
       </p>

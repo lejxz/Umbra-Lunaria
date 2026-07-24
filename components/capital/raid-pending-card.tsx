@@ -20,36 +20,46 @@ export function RaidPendingCard({ available }: { available: boolean }) {
   }
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="raid-history-title">
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          Raid weekends
-        </p>
-        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-micro font-semibold uppercase tracking-wider text-amber-400">
-          Pending
-        </span>
-      </div>
-      <h3 id="raid-history-title" className="mt-1 font-display text-lg text-umbra-lilac">
-        Raid-weekend history
-      </h3>
-
-      <div className="mt-4 flex flex-col items-center justify-center rounded-xl border border-dashed border-umbra-line bg-white/[.02] px-4 py-8 text-center">
-        <div className="mb-3 flex justify-center text-umbra-purple/40">
-          <IconCapital className="h-12 w-12" aria-hidden />
+    <section className="glass relative flex flex-col overflow-hidden rounded-2xl p-6 sm:p-8" aria-labelledby="raid-history-title">
+      {/* Background glow for the pending state */}
+      <div className="pointer-events-none absolute -left-10 top-0 h-48 w-48 rounded-full bg-amber-500/10 blur-[80px]" />
+      
+      <div className="relative z-10">
+        <div className="flex items-center justify-between">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Raid weekends
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500"></span>
+            </span>
+            <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-micro font-semibold uppercase tracking-wider text-amber-400">
+              Pending Sync
+            </span>
+          </div>
         </div>
-        <p className="font-display text-base text-umbra-lilac">Coming soon</p>
-        <p className="mt-1.5 max-w-md text-2xs leading-5 text-umbra-muted">
-          Completed raid-weekend results, the per-member contribution leaderboard,
-          and participation rates will appear here once raid-season ingestion is
-          active. This page does not fabricate a leaderboard from lifetime totals.
+        <h3 id="raid-history-title" className="mt-1 font-display text-2xl font-medium tracking-wide text-umbra-lilac sm:text-3xl">
+          Raid-weekend history
+        </h3>
+
+        <div className="mt-6 flex flex-col items-center justify-center rounded-2xl border border-dashed border-amber-500/30 bg-gradient-to-b from-amber-500/5 to-transparent px-6 py-12 text-center transition-colors hover:border-amber-500/50 hover:from-amber-500/10">
+          <div className="mb-4 flex justify-center text-amber-500/40 drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+            <IconCapital className="h-14 w-14" aria-hidden />
+          </div>
+          <p className="font-display text-xl font-medium tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
+            Awaiting Deployment
+          </p>
+          <p className="mt-2.5 max-w-md text-sm leading-relaxed text-umbra-muted">
+            Completed raid-weekend results, the per-member contribution leaderboard,
+            and participation rates will appear here once raid-season ingestion is active.
+          </p>
+        </div>
+
+        <p className="mt-4 text-center text-label text-umbra-muted/50">
+          The player profile's <code className="rounded bg-white/5 px-1 py-0.5 text-umbra-lilac">clanCapitalContributions</code> is a lifetime total, not a season leaderboard.
         </p>
       </div>
-
-      <p className="mt-3 text-2xs text-umbra-muted/60">
-        The player profile&apos;s{" "}
-        <code className="text-umbra-lilac">clanCapitalContributions</code> is a
-        lifetime total — shown in member detail, but not a season leaderboard.
-      </p>
     </section>
   );
 }
