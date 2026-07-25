@@ -305,17 +305,18 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
 // ---------------------------------------------------------------------------
 
 /**
- * Fetch the current raid-weekend status from the CoC API. Returns a timer
- * when a raid weekend is in progress (state = "inProgress"), null otherwise.
+ * Fetch the current raid-weekend status from the CoC API.
  *
- * This is a live API call (cached by the page's ISR — 5 min). It's wrapped
- * in try/catch so a failed fetch never breaks the capital page; the timer is
- * a bonus surface, not a dependency. The rest of the page renders from DB
- * data regardless.
+ * Returns a timer in two cases:
+ *   1. A raid is in progress (state = "inProgress") → countdown to endTime.
+ *   2. No raid is in progress (state = "ended" or other) → countdown to the
+ *      estimated next raid start (last season's startTime + 7 days). Capital
+ *      raid weekends are weekly, so this is a reliable estimate.
  *
- * The `capitalraidseasons` endpoint returns seasons newest-first; the first
- * item is the current (or most recent) season. We only surface a timer when
- * it's actually in progress — completed seasons are handled by getRaidHistory.
+ * This is a live API call (cached via next: { revalidate: 300 } — 5 min ISR).
+ * Wrapped in try/catch so a failed fetch never breaks the capital page; the
+ * timer is a bonus surface, not a dependency. The rest of the page renders
+ * from DB data regardless.
  */
 export async function getRaidTimer(): Promise<RaidTimer | null> {
   try {
@@ -326,11 +327,29 @@ export async function getRaidTimer(): Promise<RaidTimer | null> {
     // to 5 min, which is fine for a countdown display.
     const res = await cocClient.getCapitalRaidSeasons(clanConfig.clanTag, 300);
     const latest = res.items?.[0];
-    if (!latest || latest.state !== "inProgress") return null;
+    if (!latest) return null;
+
     const start = parseCoCTime(latest.startTime);
     const end = parseCoCTime(latest.endTime);
     if (!start || !end) return null;
-    return { startTime: start, endTime: end };
+
+    if (latest.state === "inProgress") {
+      return { state: "inProgress", startTime: start, endTime: end };
+    }
+
+    // No raid in progress — estimate the next raid weekend.
+    // Capital raid weekends are weekly: the next one starts ~7 days after
+    // the last season's startTime. The duration is typically ~3 days
+    // (Friday → Monday), so endTime = nextStart + 3 days.
+    const nextStart = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const nextEnd = new Date(nextStart.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+    // Don't show "next raid" if it's more than 7 days away (the estimate
+    // breaks down if the API returns stale data or the clan is new).
+    const now = Date.now();
+    if (nextStart.getTime() - now > 7 * 24 * 60 * 60 * 1000) return null;
+
+    return { state: "next", startTime: nextStart, endTime: nextEnd };
   } catch {
     // API failure — degrade gracefully. The capital page still renders from
     // DB data; the timer is just absent.

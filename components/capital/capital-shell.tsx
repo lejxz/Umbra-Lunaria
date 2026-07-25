@@ -39,7 +39,7 @@ export function CapitalShell({
       </div>
 
       {data.raidTimer && (
-        <RaidTimerBanner endTime={data.raidTimer.endTime} serverNow={serverNow} />
+        <RaidTimerBanner timer={data.raidTimer} serverNow={serverNow} />
       )}
 
       {data.raidHistoryAvailable && data.raidHistory ? (

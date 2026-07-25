@@ -108,21 +108,22 @@ export interface RaidHistoryView {
 }
 
 // ---------------------------------------------------------------------------
-// Capital raid-weekend live timer (in-progress season)
+// Capital raid-weekend live timer (in-progress or next-raid countdown)
 // ---------------------------------------------------------------------------
 
 /**
- * The current raid-weekend status, if one is in progress.
+ * The current raid-weekend status.
  *
- * Fetched live from the CoC API (the `capitalraidseasons` endpoint returns
- * the current season as the first item with `state: "inProgress"`). When
- * present, the capital page shows a live countdown to `endTime`.
+ * - `state: "inProgress"` — a raid is active; the banner shows "Ends in"
+ *   counting down to `endTime`.
+ * - `state: "next"` — no raid is active; the banner shows "Starts in"
+ *   counting down to `startTime` (estimated from the last season + 7 days).
  *
- * Null when no raid weekend is in progress, or when the live fetch failed
- * (the capital page degrades gracefully — the timer is a bonus, not a
- * dependency).
+ * Null when the API fetch failed (the capital page degrades gracefully —
+ * the timer is a bonus, not a dependency).
  */
 export interface RaidTimer {
+  state: "inProgress" | "next";
   startTime: Date;
   endTime: Date;
 }
