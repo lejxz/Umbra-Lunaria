@@ -47,9 +47,10 @@ import { computeRushed } from "@/lib/scoring/rushed";
  */
 
 // Vercel Hobby tier caps function duration at 10s by default. The daily
-// batch (full player-detail fetches for 40+ members) can take 20-30s, so
-// raise the limit. The light poll finishes in <5s regardless.
-export const maxDuration = 30;
+// batch (full player-detail fetches for 40+ members + capital raid-season
+// sync + rushed computation + HoF records) can take 30-50s, so raise the
+// limit. The light poll finishes in <5s regardless.
+export const maxDuration = 60;
 
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");

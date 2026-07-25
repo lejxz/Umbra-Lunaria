@@ -277,9 +277,9 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       )}
 
       {/* ── Section 2: War Hall of Fame ───────────────────────────────── */}
-      {warCards.length > 0 && (
-        <section className="mb-10">
-          <SectionHeader title="War Hall of Fame" />
+      <section className="mb-10">
+        <SectionHeader title="War Hall of Fame" />
+        {warCards.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {warCards.map((card, i) => (
               <RecordCard
@@ -290,13 +290,20 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
               />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="glass rounded-2xl p-6">
+            <p className="text-sm text-umbra-muted">
+              War records will appear here once the tracker has accumulated
+              enough war attack data.
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* ── Section 3: Capital Hall of Fame ────────────────────────────── */}
-      {capitalCards.length > 0 && (
-        <section className="mb-10">
-          <SectionHeader title="Capital Hall of Fame" />
+      <section className="mb-10">
+        <SectionHeader title="Capital Hall of Fame" />
+        {capitalCards.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {capitalCards.map((card, i) => (
               <RecordCard
@@ -307,8 +314,16 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
               />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="glass rounded-2xl p-6">
+            <p className="text-sm text-umbra-muted">
+              Capital records will appear here once the daily batch ingests
+              completed raid-weekend data. This runs automatically — check
+              back after the next daily batch (06:00 AM PHT).
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* ── Section 4: Tenure ─────────────────────────────────────────── */}
       {tenureCards.length > 0 && (
