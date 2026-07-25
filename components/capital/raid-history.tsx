@@ -4,6 +4,7 @@ import { useState } from "react";
 import type {
   RaidHistoryView,
   RaidSeasonSummary,
+  RaidContributionHistoryEntry,
 } from "@/lib/view-models/capital";
 import {
   IconCapital,
@@ -191,6 +192,14 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
           </ul>
         </div>
       )}
+
+      {/* ── Contribution history table ──────────────────────────────────── */}
+      {history.contributionHistory.length > 0 && (
+        <ContributionHistoryTable
+          entries={history.contributionHistory}
+          seasons={history.seasons}
+        />
+      )}
     </section>
   );
 }
@@ -266,5 +275,124 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
         {(season.offensiveReward ?? 0).toLocaleString()}🏅
       </span>
     </li>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Contribution history table — per-member per-season breakdown
+// ---------------------------------------------------------------------------
+
+function ContributionHistoryTable({
+  entries,
+  seasons,
+}: {
+  entries: RaidContributionHistoryEntry[];
+  seasons: RaidSeasonSummary[];
+}) {
+  const [open, setOpen] = useState(false);
+
+  // Group entries by member, then by season.
+  const byMember = new Map<string, { name: string; bySeason: Map<number, RaidContributionHistoryEntry> }>();
+  for (const e of entries) {
+    if (!byMember.has(e.playerTag)) {
+      byMember.set(e.playerTag, { name: e.name, bySeason: new Map() });
+    }
+    byMember.get(e.playerTag)!.bySeason.set(e.seasonId, e);
+  }
+
+  // Sort members by total gold looted (descending).
+  const memberRows = Array.from(byMember.entries())
+    .map(([tag, { name, bySeason }]) => {
+      const totalGold = entries
+        .filter((e) => e.playerTag === tag)
+        .reduce((sum, e) => sum + e.capitalResourcesLooted, 0);
+      return { tag, name, bySeason, totalGold };
+    })
+    .sort((a, b) => b.totalGold - a.totalGold);
+
+  // Show only top 15 members when collapsed, all when expanded.
+  const visibleMembers = open ? memberRows : memberRows.slice(0, 15);
+
+  return (
+    <div className="mt-5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-surface/50"
+        aria-expanded={open}
+      >
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+          Contribution history ({memberRows.length} members × {seasons.length} seasons)
+        </span>
+        {open ? (
+          <IconChevronUp className="h-4 w-4 text-umbra-muted" />
+        ) : (
+          <IconChevronDown className="h-4 w-4 text-umbra-muted" />
+        )}
+      </button>
+
+      {open && (
+        <div className="mt-2 overflow-x-auto rounded-lg border border-umbra-line/40">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-umbra-line bg-umbra-surface/40">
+                <th className="sticky left-0 z-10 bg-umbra-surface/95 px-3 py-2 text-left font-mono uppercase tracking-wider text-umbra-muted">
+                  Member
+                </th>
+                {seasons.map((s) => (
+                  <th
+                    key={s.seasonId}
+                    className="px-3 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted whitespace-nowrap"
+                  >
+                    {s.startTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </th>
+                ))}
+                <th className="px-3 py-2 text-right font-mono uppercase tracking-wider text-umbra-purple">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {visibleMembers.map((m) => (
+                <tr key={m.tag} className="border-b border-umbra-line/20 hover:bg-white/[.02]">
+                  <td className="sticky left-0 z-10 bg-umbra-ink/95 px-3 py-2 font-medium text-umbra-lilac whitespace-nowrap">
+                    {m.name}
+                  </td>
+                  {seasons.map((s) => {
+                    const entry = m.bySeason.get(s.seasonId);
+                    return (
+                      <td
+                        key={s.seasonId}
+                        className="px-3 py-2 text-center text-umbra-muted"
+                        title={entry ? `${entry.attacksUsed}/${entry.attackLimit ?? "—"} attacks, ${entry.capitalResourcesLooted.toLocaleString()} gold${entry.raidWeekendMedals ? `, ${entry.raidWeekendMedals}🏅` : ""}` : "Did not participate"}
+                      >
+                        {entry ? (
+                          <span className={entry.capitalResourcesLooted > 0 ? "text-umbra-lilac" : "text-umbra-muted/50"}>
+                            {entry.capitalResourcesLooted > 0
+                              ? entry.capitalResourcesLooted.toLocaleString()
+                              : "—"}
+                          </span>
+                        ) : (
+                          <span className="text-umbra-muted/30">·</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="px-3 py-2 text-right font-semibold text-umbra-purple">
+                    {m.totalGold.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {!open && memberRows.length > 15 && (
+        <p className="mt-1 text-center text-xs text-umbra-muted">
+          Showing top 15 of {memberRows.length} — click to expand all
+        </p>
+      )}
+    </div>
   );
 }

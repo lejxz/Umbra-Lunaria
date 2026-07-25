@@ -99,12 +99,27 @@ export interface RaidParticipationSummary {
   totalSeasons: number;
 }
 
-/** The full raid-history view model — summary + leaderboard + participation. */
+/** A single member's contribution in a single raid season (for the history table). */
+export interface RaidContributionHistoryEntry {
+  playerTag: string;
+  name: string;
+  seasonId: number;
+  seasonStartTime: Date;
+  attacksUsed: number;
+  attackLimit: number | null;
+  bonusAttackLimit: number | null;
+  capitalResourcesLooted: number;
+  raidWeekendMedals: number | null;
+}
+
+/** The full raid-history view model — summary + leaderboard + participation + history. */
 export interface RaidHistoryView {
   seasons: RaidSeasonSummary[];
   contributionLeaderboard: RaidContributionEntry[];
   zeroAttackList: RaidZeroAttackEntry[];
   participation: RaidParticipationSummary;
+  /** Per-member per-season contribution rows for the history table. */
+  contributionHistory: RaidContributionHistoryEntry[];
 }
 
 // ---------------------------------------------------------------------------

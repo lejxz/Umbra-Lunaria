@@ -26,6 +26,7 @@ import type {
   RaidHistoryView,
   RaidSeasonSummary,
   RaidContributionEntry,
+  RaidContributionHistoryEntry,
   RaidZeroAttackEntry,
   RaidParticipationSummary,
   RaidTimer,
@@ -292,11 +293,45 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
     totalSeasons: seasons.length,
   };
 
+  // ── Contribution history (per-member per-season rows) ──────────────────
+  // A flat list of every member's contribution in every tracked season.
+  // Used for the contribution history table on the capital page.
+  const historyRows = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      seasonId: capitalContributions.raidSeasonId,
+      seasonStartTime: capitalRaidSeasons.startTime,
+      attacksUsed: capitalContributions.attacksUsed,
+      attackLimit: capitalContributions.attackLimit,
+      bonusAttackLimit: capitalContributions.bonusAttackLimit,
+      capitalResourcesLooted: capitalContributions.capitalResourcesLooted,
+      raidWeekendMedals: capitalContributions.raidWeekendMedals,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .innerJoin(capitalRaidSeasons, eq(capitalRaidSeasons.id, capitalContributions.raidSeasonId))
+    .where(inArray(capitalContributions.raidSeasonId, seasonIds))
+    .orderBy(desc(capitalRaidSeasons.startTime), desc(capitalContributions.capitalResourcesLooted));
+
+  const contributionHistory: RaidContributionHistoryEntry[] = historyRows.map((r) => ({
+    playerTag: r.playerTag,
+    name: r.name,
+    seasonId: r.seasonId,
+    seasonStartTime: r.seasonStartTime,
+    attacksUsed: r.attacksUsed,
+    attackLimit: r.attackLimit,
+    bonusAttackLimit: r.bonusAttackLimit,
+    capitalResourcesLooted: r.capitalResourcesLooted,
+    raidWeekendMedals: r.raidWeekendMedals,
+  }));
+
   return {
     seasons: seasonSummaries,
     contributionLeaderboard,
     zeroAttackList,
     participation,
+    contributionHistory,
   };
 }
 
