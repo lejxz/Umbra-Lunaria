@@ -29,6 +29,7 @@ import {
   reconcileMembership,
   computeActivityFlags,
 } from "@/lib/ingest/membership";
+import { computeRushed } from "@/lib/scoring/rushed";
 
 /**
  * POST /api/ingest
@@ -138,6 +139,7 @@ async function runLightPoll(): Promise<IngestResult> {
       playerTag: members.playerTag,
       name: members.name,
       leftAt: members.leftAt,
+      townHallLevel: members.townHallLevel,
     })
     .from(members);
 
@@ -206,6 +208,32 @@ async function runLightPoll(): Promise<IngestResult> {
   for (const liveMember of liveMembers) {
     const known = knownMembers.find((k) => k.playerTag === liveMember.tag);
     if (known && !known.leftAt) {
+      // Detect TH upgrade
+      if (
+        known.townHallLevel !== null &&
+        liveMember.townHallLevel > known.townHallLevel
+      ) {
+        await db.insert(membershipEvents).values({
+          playerTag: liveMember.tag,
+          nameAtEvent: liveMember.name,
+          eventType: "thUpgrade",
+          eventTime: capturedAt,
+          metadata: {
+            oldTH: known.townHallLevel,
+            newTH: liveMember.townHallLevel,
+          },
+        });
+      }
+      // Detect rename
+      if (known.name !== liveMember.name) {
+        await db.insert(membershipEvents).values({
+          playerTag: liveMember.tag,
+          nameAtEvent: liveMember.name,
+          eventType: "rename",
+          eventTime: capturedAt,
+          metadata: { oldName: known.name, newName: liveMember.name },
+        });
+      }
       await db
         .update(members)
         .set(memberRefreshFields(liveMember))
@@ -378,6 +406,54 @@ async function runDailyBatch(): Promise<string[]> {
           builderBase: builderBasePayload,
         },
       });
+
+    // Compute rushed percent and store on the members row.
+    const rushedResult = computeRushed([
+      {
+        category: "Troops",
+        items: homeTroops.map((t) => ({
+          name: t.name,
+          level: t.level,
+          maxLevel: t.maxLevel ?? null,
+        })),
+      },
+      {
+        category: "Heroes",
+        items: homeHeroes.map((h) => ({
+          name: h.name,
+          level: h.level,
+          maxLevel: h.maxLevel ?? null,
+        })),
+      },
+      {
+        category: "Equipment",
+        items: (player.heroEquipment ?? []).map((e) => ({
+          name: e.name,
+          level: e.level,
+          maxLevel: e.maxLevel ?? null,
+        })),
+      },
+      {
+        category: "Spells",
+        items: player.spells.map((s) => ({
+          name: s.name,
+          level: s.level,
+          maxLevel: s.maxLevel ?? null,
+        })),
+      },
+      {
+        category: "Pets",
+        items: pets.map((p) => ({
+          name: p.name,
+          level: p.level,
+          maxLevel: p.maxLevel ?? null,
+        })),
+      },
+    ]);
+    await db
+      .update(members)
+      .set({ rushedPercent: rushedResult.overallPercent })
+      .where(eq(members.playerTag, playerTag));
   }
 
   // ---- Checkpoint computation (before HoF + before purge) ----

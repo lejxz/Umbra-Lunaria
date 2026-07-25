@@ -189,6 +189,7 @@ export interface NeedsAttention {
   inactive: NeedsAttentionMember[]; // inactive beyond threshold
   attacksRemaining: NeedsAttentionMember[]; // in active war with attacks left
   warPreferenceOut: NeedsAttentionMember[]; // opted out of war
+  rushed: NeedsAttentionMember[]; // rushed account (>60% rushed)
   inactivityThresholdDays: number;
 }
 
@@ -200,11 +201,18 @@ export interface ClanLogEntry {
   id: number;
   playerTag: string;
   name: string;
-  eventType: "join" | "leave" | "rejoin";
+  eventType: "join" | "leave" | "rejoin" | "thUpgrade" | "rename";
   eventTime: Date;
   // Whether the member profile has been purged under the retention policy.
   // When true, the member detail sheet shows "left on [date]; data removed".
   isPurged: boolean;
+  metadata?: {
+    oldTH?: number;
+    newTH?: number;
+    oldName?: string;
+    newName?: string;
+    rushedPercent?: number | null;
+  } | null;
 }
 
 export interface ClanLog {

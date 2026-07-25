@@ -479,7 +479,13 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
               <h4 className="mb-1.5 font-mono text-label uppercase tracking-wider text-umbra-muted">{group.title}</h4>
               <div className="grid grid-cols-8 gap-2 sm:grid-cols-10 md:grid-cols-12">
                 {group.items.map((item) => (
-                  <ProgressionCard key={item.name} name={item.name} level={item.level} maxLevel={item.maxLevel} />
+                  <ProgressionCard
+                    key={item.name}
+                    name={item.name}
+                    level={item.level}
+                    maxLevel={item.maxLevel}
+                    thMaxLevel={detail.thMaxLevels?.[item.name]}
+                  />
                 ))}
               </div>
             </div>
@@ -490,15 +496,52 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   );
 }
 
-function ProgressionCard({ name, level, maxLevel }: { name: string; level: number; maxLevel: number | null }) {
+function ProgressionCard({
+  name,
+  level,
+  maxLevel,
+  thMaxLevel,
+}: {
+  name: string;
+  level: number;
+  maxLevel: number | null;
+  /** Max level of this unit among all clan members at the same TH. */
+  thMaxLevel?: number;
+}) {
   const icon = getUnitIcon(name);
   const isMaxed = maxLevel !== null && level >= maxLevel;
+  // "Maxed for TH" = at the highest level seen at this TH in the clan,
+  // but NOT globally maxed (that's gold). Only show blue when there's a
+  // meaningful thMaxLevel to compare against (> 0 and the member matches it).
+  const isThMaxed =
+    !isMaxed &&
+    thMaxLevel !== undefined &&
+    thMaxLevel > 0 &&
+    level >= thMaxLevel;
+
+  const borderClass = isMaxed
+    ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]"
+    : isThMaxed
+      ? "border-sky-400/50 bg-sky-400/5 shadow-[0_0_8px_rgba(56,189,248,0.15)]"
+      : "border-umbra-line bg-umbra-ink/60";
+
+  const badgeClass = isMaxed
+    ? "bg-amber-400 text-umbra-ink"
+    : isThMaxed
+      ? "bg-sky-400 text-umbra-ink"
+      : "bg-umbra-ink/95 text-umbra-lilac";
+
+  const badgeText = isMaxed ? "MAX" : isThMaxed ? "TH" : level;
+  const titleText = `${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${
+    isMaxed ? " (MAX)" : isThMaxed ? ` (maxed for TH @${thMaxLevel})` : ""
+  }`;
+
   return (
-    <div className="group relative" title={`${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`}>
-      <div className={`relative aspect-square w-full overflow-hidden rounded-md border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
+    <div className="group relative" title={titleText}>
+      <div className={`relative aspect-square w-full overflow-hidden rounded-md border ${borderClass}`}>
         <Image src={icon} alt={name} fill className="object-contain p-1" unoptimized />
-        <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
-          {isMaxed ? "MAX" : level}
+        <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${badgeClass}`}>
+          {badgeText}
         </div>
       </div>
     </div>

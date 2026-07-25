@@ -822,10 +822,37 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
     }
   }
 
+  // Rushed members (>60% rushed). Queried directly against the members table
+  // (rushedPercent is computed during the daily batch and stored as a column)
+  // so this stays cheap even for large rosters.
+  const rushedMembers = await db
+    .select({
+      playerTag: members.playerTag,
+      name: members.name,
+      role: members.role,
+      townHallLevel: members.townHallLevel,
+      rushedPercent: members.rushedPercent,
+    })
+    .from(members)
+    .where(and(
+      isNull(members.leftAt),
+      sql`${members.rushedPercent} > 60`,
+    ));
+
+  const rushed: NeedsAttentionMember[] = rushedMembers.map((m) => ({
+    playerTag: m.playerTag,
+    name: m.name,
+    role: m.role,
+    townHallLevel: m.townHallLevel,
+    reason: "Rushed account",
+    detail: `${Math.round(m.rushedPercent ?? 0)}% rushed`,
+  }));
+
   return {
     inactive,
     attacksRemaining,
     warPreferenceOut,
+    rushed,
     inactivityThresholdDays: thresholdDays,
   };
 }
@@ -835,7 +862,7 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
 // ---------------------------------------------------------------------------
 
 export async function getClanLog(
-  limit = 20,
+  limit = 50,
   windowDays = 30,
 ): Promise<ClanLog> {
   const windowStart = new Date();
@@ -848,6 +875,7 @@ export async function getClanLog(
       nameAtEvent: membershipEvents.nameAtEvent,
       eventType: membershipEvents.eventType,
       eventTime: membershipEvents.eventTime,
+      metadata: membershipEvents.metadata,
     })
     .from(membershipEvents)
     .where(gte(membershipEvents.eventTime, windowStart))
@@ -869,10 +897,40 @@ export async function getClanLog(
     id: e.id,
     playerTag: e.playerTag,
     name: e.nameAtEvent,
-    eventType: e.eventType as "join" | "leave" | "rejoin",
+    eventType: e.eventType as ClanLogEntry["eventType"],
     eventTime: e.eventTime,
     isPurged: !retainedTags.has(e.playerTag),
+    metadata: e.metadata as ClanLogEntry["metadata"],
   }));
+
+  // Fetch rushedPercent for thUpgrade event members
+  const thUpgradeTags = entries
+    .filter((e) => e.eventType === "thUpgrade")
+    .map((e) => e.playerTag);
+  const rushedMap = new Map<string, number | null>();
+  if (thUpgradeTags.length > 0) {
+    const rushedRows = await db
+      .select({
+        playerTag: members.playerTag,
+        rushedPercent: members.rushedPercent,
+      })
+      .from(members)
+      .where(inArray(members.playerTag, thUpgradeTags));
+    for (const r of rushedRows) {
+      rushedMap.set(r.playerTag, r.rushedPercent);
+    }
+  }
+
+  // Augment thUpgrade entries with the current rushedPercent so the UI can
+  // color-code the badge without a second round-trip.
+  for (const entry of entries) {
+    if (entry.eventType === "thUpgrade") {
+      entry.metadata = {
+        ...(entry.metadata ?? {}),
+        rushedPercent: rushedMap.get(entry.playerTag) ?? null,
+      };
+    }
+  }
 
   return { entries, limit };
 }

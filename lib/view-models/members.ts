@@ -204,6 +204,13 @@ export interface MemberDetailView {
     builderBaseHeroes: Array<{ name: string; level: number; maxLevel: number | null }>;
   };
 
+  // Max level per unit name among all clan members at the SAME town hall
+  // level. Used for the "maxed for your TH" blue indicator (vs gold for
+  // global max). Heuristic: the highest level seen at this TH in the clan
+  // is a good approximation when the clan has enough members at each TH.
+  // See concept/06 §7 for the rationale.
+  thMaxLevels: Record<string, number>;
+
   // Rushed analysis — derived (null when cap data unavailable)
   rushed: {
     overallPercent: number | null;

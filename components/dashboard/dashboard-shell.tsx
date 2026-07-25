@@ -169,7 +169,13 @@ export function DashboardShell({
               tone: "danger",
               icon: "clock",
               members: data.needsAttention.inactive,
-            }
+            },
+            {
+              label: "Rushed (>60%)",
+              tone: "danger",
+              icon: "shield",
+              members: data.needsAttention.rushed,
+            },
           ]}
           onMemberClick={setSelectedMember}
         />

@@ -104,13 +104,14 @@ export async function getMemberDetail(
   if (!member) return null;
 
   // Fetch all the data in parallel
-  const [activityData, donationData, warData, progressionData, hofRecords] =
+  const [activityData, donationData, warData, progressionData, hofRecords, thMaxLevels] =
     await Promise.all([
       getActivityDetail(member.playerTag),
       getDonationDetail(member.playerTag),
       getWarDetail(member.playerTag),
       getProgressionDetail(member.playerTag),
-      db.select().from(hallOfFameRecords).where(eq(hallOfFameRecords.holderTag, member.playerTag))
+      db.select().from(hallOfFameRecords).where(eq(hallOfFameRecords.holderTag, member.playerTag)),
+      getThMaxLevels(member.townHallLevel),
     ]);
 
   const hofMap = hofRecords.reduce((acc, r) => {
@@ -169,6 +170,7 @@ export async function getMemberDetail(
         })),
     },
     progression: progressionData,
+    thMaxLevels,
     rushed: computeRushedFromProgression(progressionData),
     hallOfFame: {
       philanthropist: hofMap.philanthropist ?? null,
@@ -595,4 +597,60 @@ function computeRushedFromProgression(p: {
       percent: c.percent,
     })),
   };
+}
+
+/**
+ * Compute the max level per unit name across all clan members at the given
+ * town hall level. Used for the "maxed for your TH" blue indicator on
+ * progression cards — if a member's unit level equals the highest level
+ * seen at their TH in the clan, it's likely maxed for that TH.
+ *
+ * This is a heuristic (not a true per-TH cap table), but it's the best
+ * approach without maintaining an external reference table that changes on
+ * every game update. For a clan with enough members at each TH level, the
+ * highest-seen level is a reliable proxy for the true TH max.
+ *
+ * Returns a map of unitName → max level. Only includes home-village units
+ * (troops, heroes, equipment, spells, pets) — Builder Base units are excluded
+ * since they use a separate progression track.
+ */
+async function getThMaxLevels(
+  townHallLevel: number | null,
+): Promise<Record<string, number>> {
+  if (!townHallLevel) return {};
+
+  // Find all retained members at this TH level.
+  const sameThMembers = await db
+    .select({ playerTag: members.playerTag })
+    .from(members)
+    .where(and(eq(members.townHallLevel, townHallLevel), isNull(members.leftAt)));
+
+  const tags = sameThMembers.map((m) => m.playerTag);
+  if (tags.length === 0) return {};
+
+  // Fetch their unit_levels rows.
+  const rows = await db
+    .select()
+    .from(unitLevels)
+    .where(inArray(unitLevels.playerTag, tags));
+
+  // Build a map: unitName → max level seen across all same-TH members.
+  const maxMap: Record<string, number> = {};
+  for (const row of rows) {
+    const allUnitArrays = [
+      (row.troops as Array<{ name?: string; level?: number }>) ?? [],
+      (row.heroes as Array<{ name?: string; level?: number }>) ?? [],
+      (row.heroEquipment as Array<{ name?: string; level?: number }>) ?? [],
+      (row.spells as Array<{ name?: string; level?: number }>) ?? [],
+      (row.pets as Array<{ name?: string; level?: number }>) ?? [],
+    ];
+    for (const units of allUnitArrays) {
+      for (const u of units) {
+        if (u && typeof u.name === "string" && typeof u.level === "number") {
+          maxMap[u.name] = Math.max(maxMap[u.name] ?? 0, u.level);
+        }
+      }
+    }
+  }
+  return maxMap;
 }

@@ -5,6 +5,7 @@ import {
   boolean,
   timestamp,
   jsonb,
+  real,
   primaryKey,
   index,
   uniqueIndex,
@@ -118,6 +119,10 @@ export const members = pgTable("members", {
   cumulativeDonationsGiven: integer("cumulative_donations_given").default(0),
   cumulativeDonationsReceived: integer("cumulative_donations_received").default(0),
   cumulativeLoginDays: integer("cumulative_login_days").default(0),
+  // Rushed percent (0..100) computed from unit_levels during the daily batch.
+  // Null when no unit cap data is available. Having it as a column avoids
+  // recomputing it in every query (attention queue, clan log, roster).
+  rushedPercent: real("rushed_percent"),
 });
 
 // ---------------------------------------------------------------------------
@@ -164,8 +169,11 @@ export const membershipEvents = pgTable(
     // Display name at the time of the event — preserved even after the
     // member profile is purged, so the clan log remains readable.
     nameAtEvent: text("name_at_event").notNull(),
-    eventType: text("event_type").notNull(), // "join" | "leave" | "rejoin"
+    eventType: text("event_type").notNull(), // "join" | "leave" | "rejoin" | "thUpgrade" | "rename"
     eventTime: timestamp("event_time", { withTimezone: true }).notNull(),
+    // Event-specific metadata. TH upgrade: {oldTH, newTH}. Rename:
+    // {oldName, newName}. Null for join/leave/rejoin.
+    metadata: jsonb("metadata"),
   },
   (table) => [
     index("membership_events_player_tag_idx").on(table.playerTag),
