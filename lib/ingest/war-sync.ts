@@ -19,7 +19,7 @@
  * Server-only: imports @/lib/db. Never call from a client component.
  */
 
-import { and, eq } from "drizzle-orm";
+import { and, eq, gte, lte, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { wars, warParticipants, warAttacks, clans, cwlSeasons } from "@/lib/db/schema";
 import {
@@ -278,6 +278,9 @@ export async function backfillWarLog(
     const oppName = entry.opponent.name;
 
     // Dedupe on (opponent_tag, end_time); fall back to (opponent_name, end_time).
+    // If both miss, try a time-proximity match on (opponent_tag, war_type='regular')
+    // within ±30 min — this catches live-tracked rows where /currentwar's scheduled
+    // endTime differs from /warlog's actual endTime (they're never exactly equal).
     let existing: typeof wars.$inferSelect | undefined;
     [existing] = await db
       .select()
@@ -301,6 +304,29 @@ export async function backfillWarLog(
             eq(wars.warType, "regular"),
           ),
         )
+        .limit(1);
+    }
+    // Fuzzy fallback: same opponent + regular war, endTime within ±30 min.
+    // /currentwar returns the scheduled endTime; /warlog returns the actual
+    // endTime. They differ by seconds-to-minutes, so an exact match misses
+    // live-tracked rows. The ±30 min window is tight enough to never match a
+    // different war (wars against the same clan are ≥1 day apart).
+    if (!existing) {
+      const window = 30 * 60 * 1000; // 30 min in ms
+      const from = new Date(endTime.getTime() - window);
+      const to = new Date(endTime.getTime() + window);
+      [existing] = await db
+        .select()
+        .from(wars)
+        .where(
+          and(
+            eq(wars.opponentTag, oppTag),
+            eq(wars.warType, "regular"),
+            gte(wars.endTime, from),
+            lte(wars.endTime, to),
+          ),
+        )
+        .orderBy(desc(wars.endTime))
         .limit(1);
     }
 
