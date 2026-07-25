@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { MemberDetailSheet } from "@/components/members/member-detail-sheet";
 import { IconClock, IconSwords, IconShieldOff } from "@/components/ui/icons";
-import { Eyebrow } from "@/components/ui/eyebrow";
 
 export function AttentionPanel({
   title,
@@ -32,12 +31,14 @@ export function AttentionPanel({
 
   return (
     <section
-      className="panel border-t-2 border-t-rose-400/30 transition hover:border-umbra-line/40 flex flex-col p-5 h-[350px]"
+      className="glass flex flex-col rounded-2xl p-5 h-[350px]"
       aria-labelledby={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Eyebrow accent="rose">{subtitle}</Eyebrow>
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+          {subtitle}
+        </p>
         <Badge tone={totalSignals > 0 ? (groups.some(g => g.tone === "danger" || g.tone === "warning") ? "warning" : "muted") : "muted"}>
           {totalSignals} {totalSignals === 1 ? "signal" : "signals"}
         </Badge>
@@ -111,7 +112,7 @@ function AttentionGroup({
           <button
             key={m.playerTag}
             onClick={() => onMemberClick?.(m.playerTag)}
-            className="flex w-full items-center justify-between gap-2.5 tile px-3 py-2 text-left hover-subtle focus-ring"
+            className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition hover:bg-white/[.06] focus-ring"
           >
             <div className="flex min-w-0 items-center gap-2.5">
               <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20 ${color}`}>

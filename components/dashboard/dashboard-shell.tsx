@@ -17,7 +17,6 @@ import { WarPerformanceChart } from "./war-performance-chart";
 import { WarAttackDistributionChart } from "./war-attack-distribution";
 import { RosterSizeChart } from "./roster-size-chart";
 import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
-import { Eyebrow } from "@/components/ui/eyebrow";
 import { useServerClock } from "@/lib/time/use-server-clock";
 
 /**
@@ -45,7 +44,9 @@ export function DashboardShell({
       {/* Header */}
       <header className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <Eyebrow>Dashboard</Eyebrow>
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Dashboard
+          </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
             The clan observatory
           </h1>
@@ -64,8 +65,10 @@ export function DashboardShell({
 
       {/* Row 2b: War analytics — performance trend (2/3) + attack distribution donut (1/3) */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <section className="panel border-t-2 border-t-amber-400/30 transition hover:border-umbra-line/40 flex flex-col p-5 lg:col-span-2" aria-labelledby="war-trend-title">
-          <Eyebrow accent="amber">War performance · last 20</Eyebrow>
+        <section className="glass flex flex-col rounded-2xl p-5 lg:col-span-2" aria-labelledby="war-trend-title">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            War performance · last 20
+          </p>
           <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Stars per war
           </h3>
@@ -73,8 +76,10 @@ export function DashboardShell({
             <WarPerformanceChart trend={data.warPerformanceTrend} />
           </div>
         </section>
-        <section className="panel border-t-2 border-t-amber-400/30 transition hover:border-umbra-line/40 flex flex-col p-5" aria-labelledby="attack-dist-title">
-          <Eyebrow accent="amber">Attack quality</Eyebrow>
+        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="attack-dist-title">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Attack quality
+          </p>
           <h3 id="attack-dist-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Star distribution
           </h3>
@@ -127,9 +132,11 @@ export function DashboardShell({
 
       {/* Row 4b: Roster size trend — full width */}
       <div className="mt-5">
-        <section className="panel border-t-2 border-t-umbra-purple/30 transition hover:border-umbra-line/40 flex flex-col p-5" aria-labelledby="roster-trend-title">
+        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="roster-trend-title">
           <div className="flex items-center justify-between">
-            <Eyebrow>Roster size · 30 days</Eyebrow>
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+              Roster size · 30 days
+            </p>
             <span className="text-2xs text-umbra-muted">
               {data.rosterSizeTrend.points.length > 0
                 ? `${data.rosterSizeTrend.points[data.rosterSizeTrend.points.length - 1]?.count ?? 0} current`
@@ -362,14 +369,16 @@ function HallOfFameLink() {
   return (
     <Link
       href="/hall-of-fame"
-      className="panel focus-ring flex items-center justify-between gap-4 rounded-2xl p-5 transition hover:border-umbra-purple/40"
+      className="glass focus-ring flex items-center justify-between gap-4 rounded-2xl p-5 transition hover:border-umbra-purple/40"
     >
       <div className="flex items-center gap-4">
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-umbra-purple/15 text-umbra-purple">
           <IconTrophy className="h-5 w-5" />
         </span>
         <div>
-          <Eyebrow>All-time clan records</Eyebrow>
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            All-time clan records
+          </p>
           <h3 className="font-display text-lg text-umbra-lilac">Hall of Fame</h3>
         </div>
       </div>

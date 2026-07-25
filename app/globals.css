@@ -48,25 +48,6 @@ body > * {
 }
 
 @layer components {
-  /* Level 1 — panel (card surface). The new unified card wrapper.
-     Replaces .glass for new components. .glass is kept as an alias. */
-  .panel {
-    @apply rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md;
-  }
-
-  /* Level 2 — inner tile (stat box inside a panel). */
-  .tile {
-    @apply rounded-lg border border-white/[.04] bg-white/[.025] p-3;
-  }
-
-  /* Hover scale — only 2 values in the entire app. */
-  .hover-subtle {
-    @apply transition hover:bg-white/[.04];
-  }
-  .hover-emphasis {
-    @apply transition hover:bg-white/[.08];
-  }
-
   .glass {
     @apply border border-umbra-line bg-umbra-surface/40 shadow-2xl backdrop-blur-md;
   }

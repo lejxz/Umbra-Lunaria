@@ -7,7 +7,6 @@ import {
   IconUserCheck,
   IconArrowUp,
 } from "@/components/ui/icons";
-import { Eyebrow } from "@/components/ui/eyebrow";
 
 /**
  * Clan activity log. Renders a most-recent-first feed of joins, departures,
@@ -23,12 +22,14 @@ export function ClanLogPanel({
 }) {
   return (
     <section
-      className="panel border-t-2 border-t-umbra-purple/30 transition hover:border-umbra-line/40 flex flex-col p-5 h-[450px]"
+      className="glass flex flex-col rounded-2xl p-5 h-[450px]"
       aria-labelledby="clan-log-title"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Eyebrow accent="purple">Roster history</Eyebrow>
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+          Roster history
+        </p>
         <Badge tone="muted">{log.entries.length} recent</Badge>
       </div>
       <h3
@@ -58,10 +59,10 @@ export function ClanLogPanel({
                   !entry.isPurged && onMemberClick?.(entry.playerTag)
                 }
                 disabled={entry.isPurged}
-                className={`flex w-full items-center justify-between gap-2.5 tile px-3 py-2 text-left even:bg-white/[.015] ${
+                className={`flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition ${
                   entry.isPurged
                     ? "cursor-default opacity-60"
-                    : "hover-subtle focus-ring"
+                    : "hover:bg-white/[.06] focus-ring"
                 }`}
               >
                 <div className="flex min-w-0 items-center gap-2.5">

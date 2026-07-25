@@ -3,7 +3,6 @@ import type { WarSummaryView, ClanBadgeUrls } from "@/lib/view-models/dashboard"
 import { UnavailableValue } from "@/components/ui/state-primitives";
 import { LiveCountdown } from "@/components/ui/live-countdown";
 import { IconSwords, IconWarEmpty } from "@/components/ui/icons";
-import { Eyebrow } from "@/components/ui/eyebrow";
 
 /**
  * Current war card — compact Our-clan vs Enemy-clan layout.
@@ -28,12 +27,14 @@ export function CurrentWarCard({
 
   return (
     <section
-      className="panel border-t-2 border-t-amber-400/30 transition hover:border-umbra-line/40 flex flex-col p-5"
+      className="glass flex flex-col rounded-2xl p-5"
       aria-labelledby="current-war-title"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <Eyebrow accent="amber">Live status</Eyebrow>
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Live status
+          </p>
           <h3
             id="current-war-title"
             className="mt-1 font-display text-lg text-umbra-lilac"
@@ -43,9 +44,9 @@ export function CurrentWarCard({
         </div>
         {countdownTarget && isWarActive && (
           <div className="flex flex-col items-end text-right">
-            <Eyebrow accent="amber">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
               {warSummary.state === "preparation" ? "Starts in" : "Ends in"}
-            </Eyebrow>
+            </p>
             <p className="mt-1 font-mono text-lg text-umbra-lilac font-medium tracking-wider">
               <LiveCountdown targetDate={countdownTarget} />
             </p>
@@ -87,7 +88,7 @@ export function CurrentWarCard({
               </p>
               
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 tile px-4 py-2">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-white/[.035] px-4 py-2">
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.ownStars ?? <UnavailableValue />}
                   </span>
@@ -151,7 +152,7 @@ export function CurrentWarCard({
               </p>
               
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 tile px-4 py-2">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-white/[.035] px-4 py-2">
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.opponentStars ?? <UnavailableValue />}
                   </span>
