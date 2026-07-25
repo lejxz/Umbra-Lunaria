@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { WarSummaryView, CapitalNavSummary } from "@/lib/view-models/dashboard";
 import { Badge, UnavailableValue } from "@/components/ui";
+import { Panel } from "@/components/ui/panel";
+import { Eyebrow } from "@/components/ui/eyebrow";
 
 /**
  * Navigation summaries — two strips at the bottom of the dashboard:
@@ -16,13 +18,11 @@ export function NavSummaries({
   capitalNav: CapitalNavSummary;
 }) {
   return (
-    <section className="glass rounded-2xl p-5">
+    <Panel className="p-5">
       {/* Current war strip */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Navigation summary
-          </p>
+          <Eyebrow>Navigation summary</Eyebrow>
           <h3 className="mt-1 font-display text-lg text-umbra-lilac">
             Current war
           </h3>
@@ -69,7 +69,7 @@ export function NavSummaries({
         </div>
         <Link
           href="/war"
-          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="shrink-0 rounded-full inline-flex items-center justify-center gap-1.5 border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/30 hover:bg-white/[.04] hover:text-umbra-lilac focus-ring"
         >
           Open War Center →
         </Link>
@@ -101,11 +101,11 @@ export function NavSummaries({
         </div>
         <Link
           href="/capital"
-          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="shrink-0 rounded-full inline-flex items-center justify-center gap-1.5 border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/30 hover:bg-white/[.04] hover:text-umbra-lilac focus-ring"
         >
           Open Capital →
         </Link>
       </div>
-    </section>
+    </Panel>
   );
 }

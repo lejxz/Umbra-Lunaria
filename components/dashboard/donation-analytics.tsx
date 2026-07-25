@@ -10,6 +10,7 @@ import type {
 } from "@/lib/view-models/dashboard";
 import { Tabs, UnavailableValue, EmptyState } from "@/components/ui";
 import { IconDonationEmpty } from "@/components/ui/icons";
+import { Eyebrow } from "@/components/ui/eyebrow";
 import { DonationChart } from "./donation-chart";
 
 /**
@@ -37,16 +38,14 @@ export function DonationAnalytics({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="panel border-t-2 border-t-emerald-400/30 transition hover:border-umbra-line/40 flex flex-col p-5"
       aria-labelledby="donation-title"
       style={{ minHeight: "380px" }}
     >
       {/* Header + Stats + Tabs */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Contribution pulse
-          </p>
+          <Eyebrow accent="emerald">Contribution pulse</Eyebrow>
           <h3
             id="donation-title"
             className="mt-1 font-display text-lg text-umbra-lilac"
@@ -128,7 +127,7 @@ export function DonationAnalytics({
                   <button
                     key={donor.playerTag}
                     onClick={() => onMemberClick?.(donor.playerTag)}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle}`}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 hover-subtle focus-ring ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-xs font-bold ${rankColor}`}>

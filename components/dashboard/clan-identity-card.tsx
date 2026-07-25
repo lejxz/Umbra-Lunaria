@@ -9,11 +9,15 @@ import { UnavailableValue } from "@/components/ui/state-primitives";
  *   - Left side: Badge, Name, Tag, Description, and Labels
  *   - Right side: List of stats (Key-Value pairs)
  * See docs/concept/05-dashboard.md §1.
+ *
+ * Uses the `.panel` surface + purple accent border directly (rather than
+ * the `<Panel>` component) so the existing `aria-labelledby` association is
+ * preserved on the outer `<section>`. (See Phase C task rule 5.)
  */
 export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-umbra-line shadow-2xl"
+      className="panel border-t-2 border-t-umbra-purple/30 transition hover:border-umbra-line/40 relative overflow-hidden"
       aria-labelledby="clan-identity-title"
     >
       {/* Background image */}

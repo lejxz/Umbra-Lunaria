@@ -19,6 +19,7 @@ import {
   Cell,
 } from "recharts";
 import { IconActivityEmpty } from "@/components/ui/icons";
+import { Eyebrow } from "@/components/ui/eyebrow";
 
 /**
  * Activity Analytics — unified panel for activity timeline + member score.
@@ -41,16 +42,14 @@ export function ActivityAnalytics({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="panel border-t-2 border-t-emerald-400/30 transition hover:border-umbra-line/40 flex flex-col p-5"
       aria-labelledby="activity-title"
       style={{ minHeight: "380px" }}
     >
       {/* Header + Stats + Tabs */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Roster signal & support
-          </p>
+          <Eyebrow accent="emerald">Roster signal & support</Eyebrow>
           <h3 id="activity-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Activity Analytics
           </h3>
@@ -129,7 +128,7 @@ export function ActivityAnalytics({
                   <button
                     key={entry.playerTag}
                     onClick={() => onMemberClick?.(entry.playerTag)}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] ${badgeStyle}`}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 hover-subtle ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-xs font-bold ${rankColor}`}>

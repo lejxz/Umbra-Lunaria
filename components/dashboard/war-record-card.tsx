@@ -1,5 +1,6 @@
 import type { WarRecordView } from "@/lib/view-models/dashboard";
 import { UnavailableValue } from "@/components/ui/state-primitives";
+import { Eyebrow } from "@/components/ui/eyebrow";
 
 /**
  * All-time war record card. Shows API-provided wins, ties, losses, current
@@ -12,13 +13,11 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="panel border-t-2 border-t-amber-400/30 transition hover:border-umbra-line/40 flex flex-col p-5"
       aria-labelledby="war-record-title"
     >
       <div className="flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          All-time record
-        </p>
+        <Eyebrow accent="amber">All-time record</Eyebrow>
       </div>
       <h3
         id="war-record-title"
@@ -36,7 +35,7 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
       </div>
 
       {/* Win rate — centered, prominent */}
-      <div className="mt-3 flex flex-1 items-center justify-center rounded-xl bg-white/[.035] p-3">
+      <div className="mt-3 flex flex-1 items-center justify-center tile p-3">
         <div className="text-center">
           <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
             Win rate
@@ -74,7 +73,7 @@ function Stat({
           : "text-umbra-muted";
 
   return (
-    <div className="rounded-lg bg-white/[.035] p-2.5 text-center">
+    <div className="tile p-2.5 text-center">
       <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </p>
