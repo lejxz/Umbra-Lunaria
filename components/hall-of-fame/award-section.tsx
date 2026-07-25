@@ -3,13 +3,18 @@
 /**
  * AwardSection — one of the 5 cached all-time award leaderboards.
  *
- * Renders a glass card with a colored header (icon + title + subtitle) and the
- * full ranked list (not just top 5 — the dashboard card truncates, this page
- * shows everyone with a recorded rank). Each row is clickable → opens the
- * shared MemberDetailSheet.
+ * Renders a glass card with a header (icon + title + subtitle) and the full
+ * ranked list (not just top 5 — the dashboard card truncates, this page shows
+ * everyone with a recorded rank). Each row is clickable → opens the shared
+ * MemberDetailSheet.
  *
- * The award metadata (title, subtitle, icon, color) mirrors the dashboard's
- * HallOfFameCard so the two surfaces feel consistent.
+ * The award metadata (title, subtitle, icon) mirrors the dashboard's
+ * HallOfFameCard so the two surfaces feel consistent. The card shell is
+ * intentionally neutral (glass + umbra-line border) so the All-Time Legends
+ * grid reads as a unified set — only the icon carries the per-award color.
+ *
+ * Card structure matches LiveRecordSection exactly so the two grids have the
+ * same visual rhythm.
  */
 
 import type { HallOfFameLeaderboard, HallOfFameAwardKey } from "@/lib/view-models/hall-of-fame";
@@ -24,42 +29,37 @@ import {
 
 const AWARD_META: Record<
   HallOfFameAwardKey,
-  { title: string; subtitle: string; icon: React.ReactNode; color: string; accent: string }
+  { title: string; subtitle: string; icon: React.ReactNode; color: string }
 > = {
   philanthropist: {
     title: "The Philanthropist",
     subtitle: "Highest all-time donations",
     icon: <IconGift className="h-5 w-5" />,
     color: "text-emerald-400",
-    accent: "border-emerald-400/40 bg-emerald-400/5",
   },
   vanguard: {
     title: "The Vanguard",
     subtitle: "Most 3-star war attacks",
     icon: <IconSwords className="h-5 w-5" />,
     color: "text-amber-400",
-    accent: "border-amber-400/40 bg-amber-400/5",
   },
   dedicated: {
     title: "The Dedicated",
     subtitle: "Longest login streak",
     icon: <IconFlame className="h-5 w-5" />,
     color: "text-orange-400",
-    accent: "border-orange-400/40 bg-orange-400/5",
   },
   capitalist: {
     title: "The Capitalist",
     subtitle: "Best single raid weekend",
     icon: <IconCoins className="h-5 w-5" />,
     color: "text-yellow-400",
-    accent: "border-yellow-400/40 bg-yellow-400/5",
   },
   unsleeping: {
     title: "The Unsleeping",
     subtitle: "Highest all-time raw activity",
     icon: <IconEye className="h-5 w-5" />,
     color: "text-umbra-purple",
-    accent: "border-umbra-purple/40 bg-umbra-purple/5",
   },
 };
 
@@ -74,7 +74,7 @@ export function AwardSection({
   if (!meta || board.entries.length === 0) return null;
 
   return (
-    <section className={`glass flex flex-col rounded-2xl border ${meta.accent}`}>
+    <section className="glass flex flex-col rounded-2xl border border-umbra-line">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-umbra-line/50 p-4">
         <span className={`shrink-0 ${meta.color}`}>{meta.icon}</span>

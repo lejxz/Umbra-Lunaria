@@ -19,6 +19,7 @@ import {
   warAttacks,
   warParticipants,
   capitalContributions,
+  capitalRaidSeasons,
   members,
   membershipEvents,
 } from "@/lib/db/schema";
@@ -107,6 +108,9 @@ async function getLastComputedAt(): Promise<Date | null> {
  * Categories:
  *   - Most raid gold all-time (capital_contributions)
  *   - Most raid medals all-time (capital_contributions)
+ *   - Highest single-raid-weekend score (capital_contributions max per season)
+ *   - Most bonus attacks used (capital_contributions.bonusAttackLimit)
+ *   - Raid MVP per season (top looter each season — only the latest N seasons)
  *   - Most war attacks used (war_participants)
  *   - Perfect-attendance wars (war_participants where used === allowed)
  *   - Fastest 3-star attack (war_attacks where stars=3, min duration)
@@ -116,6 +120,9 @@ async function getLiveRecords(): Promise<LiveRecordCategory[]> {
   const [
     raidGold,
     raidMedals,
+    highestRaidScore,
+    mostBonusAttacks,
+    raidMvp,
     warAttacksUsed,
     perfectAttendance,
     fastestThreeStar,
@@ -123,14 +130,26 @@ async function getLiveRecords(): Promise<LiveRecordCategory[]> {
   ] = await Promise.all([
     safe("most raid gold", computeMostRaidGold()),
     safe("most raid medals", computeMostRaidMedals()),
+    safe("highest raid score", computeHighestRaidScore()),
+    safe("most bonus attacks", computeMostBonusAttacks()),
+    safe("raid MVP", computeRaidMvp()),
     safe("most war attacks", computeMostWarAttacks()),
     safe("perfect attendance", computePerfectAttendance()),
     safe("fastest 3-star", computeFastestThreeStar()),
     safe("longest tenure", computeLongestTenure()),
   ]);
 
-  return [raidGold, raidMedals, warAttacksUsed, perfectAttendance, fastestThreeStar, longestTenure]
-    .filter((c): c is LiveRecordCategory => c !== null);
+  return [
+    raidGold,
+    raidMedals,
+    highestRaidScore,
+    mostBonusAttacks,
+    raidMvp,
+    warAttacksUsed,
+    perfectAttendance,
+    fastestThreeStar,
+    longestTenure,
+  ].filter((c): c is LiveRecordCategory => c !== null);
 }
 
 /** Wrap a category computation so a DB error returns null instead of throwing. */
@@ -202,6 +221,122 @@ async function computeMostRaidMedals(): Promise<LiveRecordCategory | null> {
   };
 }
 
+// ── Highest single-raid-weekend score ──────────────────────────────────
+// The best gold-looted total a single player achieved in ONE raid weekend
+// (not all-time — that's "Most Raid Gold" above). This is the "single best
+// performance" record — who had the biggest weekend ever.
+async function computeHighestRaidScore(): Promise<LiveRecordCategory | null> {
+  const rows = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      best: sql<number>`max(${capitalContributions.capitalResourcesLooted})::int`,
+      seasonStart: capitalRaidSeasons.startTime,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .innerJoin(capitalRaidSeasons, eq(capitalRaidSeasons.id, capitalContributions.raidSeasonId))
+    .groupBy(capitalContributions.playerTag, members.name, capitalRaidSeasons.startTime)
+    .orderBy(desc(sql`max(${capitalContributions.capitalResourcesLooted})`))
+    .limit(10);
+
+  if (rows.length === 0) return null;
+  return {
+    key: "highest-raid-score",
+    title: "Highest Raid Score",
+    description: "Most gold looted by one player in a single raid weekend.",
+    icon: "coins",
+    entries: rows.map((r) => ({
+      playerTag: r.playerTag,
+      name: r.name,
+      value: r.best,
+      valueLabel: `${r.best.toLocaleString()} gold`,
+      metaLabel: r.seasonStart
+        ? `weekend of ${r.seasonStart.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
+        : null,
+    })),
+  };
+}
+
+// ── Most bonus attacks used ─────────────────────────────────────────────
+// Sum of bonusAttackLimit across all seasons — the players who consistently
+// earned + used bonus raid attacks (the most dedicated raiders).
+async function computeMostBonusAttacks(): Promise<LiveRecordCategory | null> {
+  const rows = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      total: sql<number>`coalesce(sum(coalesce(${capitalContributions.bonusAttackLimit}, 0)), 0)::int`,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .groupBy(capitalContributions.playerTag, members.name)
+    .having(sql`coalesce(sum(coalesce(${capitalContributions.bonusAttackLimit}, 0)), 0) > 0`)
+    .orderBy(desc(sql`sum(coalesce(${capitalContributions.bonusAttackLimit}, 0))`))
+    .limit(10);
+
+  if (rows.length === 0) return null;
+  return {
+    key: "most-bonus-attacks",
+    title: "Most Bonus Attacks",
+    description: "Total bonus raid attacks earned across all weekends.",
+    icon: "zap",
+    entries: rows.map((r) => ({
+      playerTag: r.playerTag,
+      name: r.name,
+      value: r.total,
+      valueLabel: `${r.total} bonus attacks`,
+    })),
+  };
+}
+
+// ── Raid MVP per season ────────────────────────────────────────────────
+// The top gold-looter from the most recent completed season. Only the latest
+// season's MVP is shown — this is the "current defending champion" record.
+async function computeRaidMvp(): Promise<LiveRecordCategory | null> {
+  // Find the most recent completed season.
+  const [latestSeason] = await db
+    .select()
+    .from(capitalRaidSeasons)
+    .orderBy(desc(capitalRaidSeasons.startTime))
+    .limit(1);
+
+  if (!latestSeason) return null;
+
+  const rows = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      gold: capitalContributions.capitalResourcesLooted,
+      attacks: capitalContributions.attacksUsed,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .where(eq(capitalContributions.raidSeasonId, latestSeason.id))
+    .orderBy(desc(capitalContributions.capitalResourcesLooted))
+    .limit(10);
+
+  if (rows.length === 0) return null;
+  const seasonLabel = latestSeason.startTime.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return {
+    key: "raid-mvp",
+    title: "Raid MVP",
+    description: `Top looter from the latest raid weekend (${seasonLabel}).`,
+    icon: "crown",
+    entries: rows.map((r) => ({
+      playerTag: r.playerTag,
+      name: r.name,
+      value: r.gold,
+      valueLabel: `${r.gold.toLocaleString()} gold`,
+      metaLabel: `${r.attacks} attacks`,
+    })),
+  };
+}
+
 // ── Most war attacks used ────────────────────────────────────────────────
 async function computeMostWarAttacks(): Promise<LiveRecordCategory | null> {
   const rows = await db
@@ -253,7 +388,7 @@ async function computePerfectAttendance(): Promise<LiveRecordCategory | null> {
   return {
     key: "perfect-attendance",
     title: "Perfect Attendance",
-    description: "Wars where the member used every attack allowed — no misses.",
+    description: "Wars where every attack was used — no misses.",
     icon: "crown",
     entries: rows.map((r) => ({
       playerTag: r.playerTag,
@@ -286,7 +421,7 @@ async function computeFastestThreeStar(): Promise<LiveRecordCategory | null> {
   return {
     key: "fastest-3-star",
     title: "Fastest 3-Star",
-    description: "Quickest 3-star attacks by duration (seconds on the attack clock).",
+    description: "Quickest 3-star attacks by duration.",
     icon: "zap",
     entries: rows.map((r) => ({
       playerTag: r.attackerTag,

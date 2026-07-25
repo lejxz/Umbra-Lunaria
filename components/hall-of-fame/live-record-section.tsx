@@ -8,7 +8,10 @@
  * clickable → opens the shared MemberDetailSheet.
  *
  * The icon is mapped from the string key in the view model to a Lucide icon
- * so the view model stays serialization-safe (no JSX in the data layer).
+ * so the view model stays serialization-safe (no JSX in the data layer). The
+ * icon carries a per-category color so the grid is still visually varied,
+ * but the card shell is neutral (glass + umbra-line border) to match the
+ * All-Time Legends grid above.
  */
 
 import type { LiveRecordCategory } from "@/lib/view-models/hall-of-fame";
@@ -23,44 +26,37 @@ import {
   IconZap,
 } from "@/components/ui/icons";
 
-const ICON_MAP: Record<LiveRecordCategory["icon"], React.ReactNode> = {
-  coins: <IconCoins className="h-5 w-5" />,
-  swords: <IconSwords className="h-5 w-5" />,
-  flame: <IconFlame className="h-5 w-5" />,
-  gift: <IconGift className="h-5 w-5" />,
-  crown: <IconCrown className="h-5 w-5" />,
-  clock: <IconClock className="h-5 w-5" />,
-  trophy: <IconTrophy className="h-5 w-5" />,
-  zap: <IconZap className="h-5 w-5" />,
+const ICON_MAP: Record<
+  LiveRecordCategory["icon"],
+  { node: React.ReactNode; color: string }
+> = {
+  coins: { node: <IconCoins className="h-5 w-5" />, color: "text-yellow-400" },
+  swords: { node: <IconSwords className="h-5 w-5" />, color: "text-amber-400" },
+  flame: { node: <IconFlame className="h-5 w-5" />, color: "text-orange-400" },
+  gift: { node: <IconGift className="h-5 w-5" />, color: "text-emerald-400" },
+  crown: { node: <IconCrown className="h-5 w-5" />, color: "text-amber-300" },
+  clock: { node: <IconClock className="h-5 w-5" />, color: "text-sky-300" },
+  trophy: { node: <IconTrophy className="h-5 w-5" />, color: "text-umbra-purple" },
+  zap: { node: <IconZap className="h-5 w-5" />, color: "text-teal-300" },
 };
-
-// Accent colors cycle through the palette so adjacent cards differ.
-const ACCENTS = [
-  "border-sky-400/30 bg-sky-400/5 text-sky-300",
-  "border-emerald-400/30 bg-emerald-400/5 text-emerald-300",
-  "border-amber-400/30 bg-amber-400/5 text-amber-300",
-  "border-rose-400/30 bg-rose-400/5 text-rose-300",
-  "border-umbra-purple/30 bg-umbra-purple/5 text-umbra-purple",
-  "border-teal-400/30 bg-teal-400/5 text-teal-300",
-];
 
 export function LiveRecordSection({
   category,
-  index,
   onMemberClick,
 }: {
   category: LiveRecordCategory;
-  index: number;
   onMemberClick: (tag: string) => void;
 }) {
-  const accent = ACCENTS[index % ACCENTS.length] ?? ACCENTS[0]!;
-  const icon = ICON_MAP[category.icon] ?? <IconTrophy className="h-5 w-5" />;
+  const iconMeta = ICON_MAP[category.icon] ?? {
+    node: <IconTrophy className="h-5 w-5" />,
+    color: "text-umbra-purple",
+  };
 
   return (
-    <section className={`glass flex flex-col rounded-2xl border ${accent}`}>
+    <section className="glass flex flex-col rounded-2xl border border-umbra-line">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-umbra-line/50 p-4">
-        <span className="shrink-0">{icon}</span>
+        <span className={`shrink-0 ${iconMeta.color}`}>{iconMeta.node}</span>
         <div className="min-w-0">
           <h3 className="font-display text-base text-umbra-lilac">{category.title}</h3>
           <p className="text-xs text-umbra-muted">{category.description}</p>

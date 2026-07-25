@@ -7,12 +7,13 @@
  *   1. All-Time Legends — the 5 cached award leaderboards from
  *      hall_of_fame_records (computed by the daily batch). Each renders the
  *      FULL leaderboard (not just top 5 like the dashboard card).
- *   2. Live Records — record categories computed on-demand from raw tables
- *      (raid gold, raid medals, war attacks, perfect attendance, fastest
- *      3-star, longest tenure).
+ *   2. Live Records — record categories computed on-demand from raw tables.
  *
  * Each ranked row is clickable → opens the shared MemberDetailSheet (lazy
  * fetch by playerTag), mirroring the dashboard + war + members pattern.
+ *
+ * Design: both sections use the same card grid (3-col on xl), consistent
+ * header heights, and a shared section-header style for visual rhythm.
  *
  * See concept/05-dashboard.md §"Hall of Fame" + concept/12.
  */
@@ -34,14 +35,10 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
   const hasLive = liveRecords.length > 0;
 
   return (
-    <PageScaffold
-      section="Hall of Fame"
-      title="Hall of Fame"
-      description="All-time clan records — donations, war heroics, raid-weekend dominance, and tenure. Records are recomputed daily from tracked data."
-    >
+    <PageScaffold section="Hall of Fame" title="Hall of Fame">
       {/* ── Last-computed freshness stamp ──────────────────────────────── */}
       {lastComputedAt && (
-        <p className="mb-5 font-mono text-xs text-umbra-muted">
+        <p className="mb-6 font-mono text-xs text-umbra-muted">
           Cached awards last recomputed{" "}
           <span className="text-umbra-lilac">
             {lastComputedAt.toLocaleString("en-US", {
@@ -58,10 +55,8 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
 
       {/* ── Section 1: All-Time Legends (cached awards) ─────────────────── */}
       {hasCached ? (
-        <section className="mb-8">
-          <h2 className="mb-4 font-display text-xl text-umbra-lilac">
-            All-Time Legends
-          </h2>
+        <section className="mb-10">
+          <SectionHeader title="All-Time Legends" />
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
             {cachedAwards.map((board) => (
               <AwardSection
@@ -73,11 +68,11 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
           </div>
         </section>
       ) : (
-        <section className="glass mb-8 rounded-2xl p-8">
+        <section className="glass mb-10 rounded-2xl p-8">
           <EmptyState
             icon={<IconTrophy className="h-10 w-10 text-umbra-purple/40" />}
             title="No all-time records yet"
-            description="The daily batch computes the 5 all-time awards (Philanthropist, Vanguard, Dedicated, Capitalist, Unsleeping). They'll appear here once the batch has run with enough tracked data."
+            description="The daily batch computes the 5 all-time awards. They'll appear here once the batch has run with enough tracked data."
           />
         </section>
       )}
@@ -85,19 +80,12 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       {/* ── Section 2: Live Records ────────────────────────────────────── */}
       {hasLive ? (
         <section>
-          <h2 className="mb-4 font-display text-xl text-umbra-lilac">
-            Live Records
-          </h2>
-          <p className="mb-4 text-sm text-umbra-muted">
-            Computed on-demand from raw tracked data — war attacks, raid
-            contributions, war participation, and membership history.
-          </p>
+          <SectionHeader title="Live Records" />
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            {liveRecords.map((cat, i) => (
+            {liveRecords.map((cat) => (
               <LiveRecordSection
                 key={cat.key}
                 category={cat}
-                index={i}
                 onMemberClick={setSelectedMember}
               />
             ))}
@@ -108,7 +96,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
           <EmptyState
             icon={<IconTrophy className="h-10 w-10 text-umbra-purple/40" />}
             title="No live records yet"
-            description="Live records (raid gold, war attacks, perfect attendance, fastest 3-star, tenure) appear once the tracker has accumulated war + raid + membership data."
+            description="Live records appear once the tracker has accumulated war + raid + membership data."
           />
         </section>
       )}
@@ -119,5 +107,18 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
         onClose={() => setSelectedMember(null)}
       />
     </PageScaffold>
+  );
+}
+
+/**
+ * Section header — a consistent eyebrow + title used by both sections so the
+ * "All-Time Legends" and "Live Records" headers have the same visual weight.
+ */
+function SectionHeader({ title }: { title: string }) {
+  return (
+    <div className="mb-4 flex items-center gap-3">
+      <span className="h-5 w-1 rounded-full bg-umbra-purple" aria-hidden />
+      <h2 className="font-display text-xl text-umbra-lilac">{title}</h2>
+    </div>
   );
 }
