@@ -2,8 +2,8 @@
  * Shape of the result returned by the ingestion route and propagated back to
  * the GitHub Actions workflow that triggers polls.
  *
- * See concept/04-activity-tracking-and-polling.md (failed-poll safety,
- * membership-event detection) and concept/03-data-model-and-database.md
+ * See docs/concept/04-activity-tracking-and-polling.md (failed-poll safety,
+ * membership-event detection) and docs/concept/03-data-model-and-database.md
  * (retention, membership_events table).
  *
  * `ok` is `false` when a critical failure (typically the clan fetch) prevents

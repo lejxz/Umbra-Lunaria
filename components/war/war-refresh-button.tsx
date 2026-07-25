@@ -6,7 +6,7 @@ import { IconSync, IconLoader, IconAlert } from "@/components/ui/icons";
 
 /**
  * War refresh control — POSTs /api/war/refresh, which fetches the current war
- * server-side behind a shared TTL (concept/07 §"Refresh behavior"). The
+ * server-side behind a shared TTL (docs/concept/07 §"Refresh behavior"). The
  * browser never calls Supercell directly. Shows loading, success, cached
  * (rate-limited), and error states, and triggers a client-side router refresh
  * on success so the new capture time + state render without a hard reload.

@@ -1,6 +1,6 @@
 /**
  * Membership reconciliation — pure logic extracted from the ingest route so it
- * can be unit-tested without a database (concept/12 Step 1.0.D / the
+ * can be unit-tested without a database (docs/concept/12 Step 1.0.D / the
  * "mocked query boundary" test strategy — see tests/README.md).
  *
  * `reconcileMembership` takes the live roster + the known member rows and
@@ -40,7 +40,7 @@ export interface ReconciliationResult {
  * Decide what to do with each member tag given the live roster vs the known
  * (retained + departed) member rows.
  *
- * Rules (concept/03 "Retention and privacy contract" + concept/04
+ * Rules (docs/concept/03 "Retention and privacy contract" + docs/concept/04
  * "Light-poll sequence"):
  *   - Live tag not in known        → join (new member)
  *   - Live tag in known, leftAt set → rejoin (clear departure)
@@ -51,7 +51,7 @@ export interface ReconciliationResult {
  * `capturedAt` is the poll timestamp; `retentionDays` is from clanConfig.
  * The purge deadline is `capturedAt + retentionDays`.
  *
- * Failed-poll safety (concept/04 #3): this function is NOT called when the
+ * Failed-poll safety (docs/concept/04 #3): this function is NOT called when the
  * clan fetch fails — the ingest route returns early before reconciliation, so
  * a failed poll never produces spurious leaves. That control-flow guarantee
  * is verified by inspection of `runLightPoll`; the pure function itself
@@ -128,7 +128,7 @@ export interface ActivityFlags {
 
 /**
  * Derive the reset-aware activity + estimated-login flags for a member this
- * poll (concept/04 "Activity and estimated login evidence").
+ * poll (docs/concept/04 "Activity and estimated login evidence").
  *
  *   activityFlag  = donations given ↑ OR received ↑ OR trophies changed OR
  *                   Builder Base trophies changed.

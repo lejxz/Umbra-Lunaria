@@ -239,7 +239,7 @@ export function DashboardShell({
 /**
  * Freshness footer with live countdown to the next expected poll.
  * The poll interval is 5 minutes (third-party cron-job service, every-5-min
- * schedule — see concept/04). The countdown shows how long until the next
+ * schedule — see docs/concept/04). The countdown shows how long until the next
  * poll should fire.
  *
  * Clock-drift tolerant: uses the server's current time (passed as `serverNow`)

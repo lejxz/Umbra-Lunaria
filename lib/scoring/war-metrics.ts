@@ -2,7 +2,7 @@
  * War participation metrics.
  *
  * Pure functions used by the dashboard and the member detail sheet's
- * "War participation — tracked history" section (concept/06-members.md §4):
+ * "War participation — tracked history" section (docs/concept/06-members.md §4):
  *
  *   - participationRate: attacksUsed / attacksAllowed  (null when allowed = 0)
  *   - warsMissedRate:    warsMissed / warsTracked      (null when warsTracked = 0)
@@ -10,7 +10,7 @@
  *   - threeStarRate:     threeStarAttacks / totalAttacksUsed (null when used = 0)
  *
  * Also exports `computeWinRate` for the clan all-time war record
- * (concept/05-dashboard.md §2): wins / (wins + ties + losses), or null when
+ * (docs/concept/05-dashboard.md §2): wins / (wins + ties + losses), or null when
  * any value is null or the denominator is 0.
  *
  * All functions are pure: no DB access, no React. They take numbers and
@@ -38,7 +38,7 @@ export interface WarParticipationMetrics {
 /**
  * Derive war-participation metrics from raw tracked totals.
  *
- * The "never fake a zero" rule (concept/00-overview.md "Product contract")
+ * The "never fake a zero" rule (docs/concept/00-overview.md "Product contract")
  * is enforced: any rate whose denominator is 0 is reported as `null`, not 0,
  * so the UI can render an explicit `Unavailable` state rather than a
  * misleading "0%". This matters for opted-out members (allowed = 0) and for
@@ -80,7 +80,7 @@ export function computeWarMetrics(
  * Returns `null` when any of the three inputs is `null` (the API did not
  * report a value — common when the war log is private) or when the
  * denominator is 0 (no wars recorded yet). The caller renders an explicit
- * `Unavailable` state in both cases per concept/05-dashboard.md §2.
+ * `Unavailable` state in both cases per docs/concept/05-dashboard.md §2.
  */
 export function computeWinRate(
   wins: number | null,

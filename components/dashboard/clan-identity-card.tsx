@@ -8,7 +8,7 @@ import { UnavailableValue } from "@/components/ui/state-primitives";
  * for readability. Layout echoes the in-game Clash of Clans clan profile:
  *   - Left side: Badge, Name, Tag, Description, and Labels
  *   - Right side: List of stats (Key-Value pairs)
- * See concept/05-dashboard.md §1.
+ * See docs/concept/05-dashboard.md §1.
  */
 export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
   return (

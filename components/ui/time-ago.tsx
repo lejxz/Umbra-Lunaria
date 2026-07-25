@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 /**
  * Renders a relative time like "3m ago" and refreshes every 30s while mounted.
- * Falls back to an exact timestamp string. See concept/05-dashboard.md.
+ * Falls back to an exact timestamp string. See docs/concept/05-dashboard.md.
  */
 export function TimeAgo({ date }: { date: Date | string }) {
   const iso = new Date(date).toISOString();

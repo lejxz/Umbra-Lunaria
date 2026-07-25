@@ -1,6 +1,6 @@
 /**
  * Capital raid-season ingestion — shared by the ingest route's daily batch.
- * See concept/08-clan-capital.md and concept/12 Step 3.1.
+ * See docs/concept/08-clan-capital.md and docs/concept/12 Step 3.1.
  *
  * Responsibilities:
  *   - parseRaidSeasonTime: pure helper (CoC timestamps reuse the war-sync

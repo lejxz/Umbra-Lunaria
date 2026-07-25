@@ -9,14 +9,14 @@ import {
 } from "@/components/ui/icons";
 
 /**
- * Side-by-side own/opponent roster for the current war (concept/07 §"Roster
+ * Side-by-side own/opponent roster for the current war (docs/concept/07 §"Roster
  * and attack status" + §"Preparation-day scouting").
  *
  * Compact row layout:
  *
  *   | # | Name | TH | TH adv/disadv |          [right column] |
  *
- * The RIGHT COLUMN adapts to the war state — this is the toggle (concept/07
+ * The RIGHT COLUMN adapts to the war state — this is the toggle (docs/concept/07
  * wants BOTH offense "attacks used vs allowed + best stars" AND the defensive
  * "base state"; we can't fit both compactly, so the state picks the default
  * and the user can flip):
@@ -403,7 +403,7 @@ function BaseState({
 
 /**
  * Attacks state (offense) — attacks used/allowed, best stars/destruction, and
- * a prominent no-attack / attacks-left state (concept/07 §"Roster and attack
+ * a prominent no-attack / attacks-left state (docs/concept/07 §"Roster and attack
  * status" #3–5). During battle, members with 0 attacks get a red "no-attack"
  * badge; members with attacks remaining get amber "N left"; done = emerald.
  */

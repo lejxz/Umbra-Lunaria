@@ -1,6 +1,6 @@
 # Test Strategy
 
-This project uses a **mocked query boundary** approach (concept/12 Step 1.0.A
+This project uses a **mocked query boundary** approach (docs/concept/12 Step 1.0.A
 "DB-test strategy" — the "Option 1" pure-logic extraction approach) rather
 than an isolated test database. The rationale: Neon's free tier limits compute
 to 100 CU-hours, and a separate test branch consuming compute on every test
@@ -81,7 +81,7 @@ bun run test:watch    # watch mode
 Tests run in Node (no browser, no DB). They're fast (<1s total) because
 they're pure-logic. No environment variables beyond what Vitest needs.
 
-## Failed-poll safety (concept/04 #3)
+## Failed-poll safety (docs/concept/04 #3)
 
 The rule "a failed clan fetch must not mark members as left/inactive" is
 enforced at the **route level** (`runLightPoll` returns early before

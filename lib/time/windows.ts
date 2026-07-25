@@ -1,7 +1,7 @@
 /**
  * Timezone-aware window calculations for dashboard analytics.
  *
- * See concept/04-activity-tracking-and-polling.md:
+ * See docs/concept/04-activity-tracking-and-polling.md:
  *   "Time-window boundaries are calculated in the clan timezone, then queried
  *    as UTC timestamps."
  *

@@ -27,7 +27,7 @@ Fixed the dashboard to make full use of the image URLs returned by the Clash of 
 
 - **`next/image` with `unoptimized` flag**: Used `unoptimized` on all API-sourced images to avoid Next.js image optimization overhead for external URLs. The images are already small PNGs from Supercell's CDN — optimization would add latency without meaningful size reduction.
 - **League icon in leaderboard (20×20)**: Small enough to fit inline with the rank number and name, large enough to be recognizable. The league tier icon is not shown in the leaderboard (too dense) but is shown in the member detail sheet.
-- **Player tags in mono font**: Used JetBrains Mono at 10px for player tags throughout. This visually distinguishes the permanent identity (tag) from the mutable display name, matching the concept/02 rule "player tags are the permanent identity key."
+- **Player tags in mono font**: Used JetBrains Mono at 10px for player tags throughout. This visually distinguishes the permanent identity (tag) from the mutable display name, matching the docs/concept/02 rule "player tags are the permanent identity key."
 
 ## Next Action
 

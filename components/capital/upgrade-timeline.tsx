@@ -8,7 +8,7 @@ import { IconCapital, IconChevronRight } from "@/components/ui/icons";
 
 /**
  * District upgrade timeline — chronological events diffed from daily
- * district-snapshot captures (concept/08 §"District upgrade history"). Each
+ * district-snapshot captures (docs/concept/08 §"District upgrade history"). Each
  * event is a completed level increase: "Barbarian Camp reached level 4".
  *
  * A district filter narrows the timeline. States:

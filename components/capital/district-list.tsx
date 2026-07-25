@@ -3,7 +3,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
- * District list — the full current district reference (concept/08 §"Current
+ * District list — the full current district reference (docs/concept/08 §"Current
  * Capital overview" #4). Positioned last on the page because district levels
  * change infrequently (a level-up is a multi-day event), so this is the
  * least-urgent section.

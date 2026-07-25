@@ -1,9 +1,9 @@
 /**
- * Server-side query layer for the Clan Capital page (concept/08-clan-capital.md).
+ * Server-side query layer for the Clan Capital page (docs/concept/08-clan-capital.md).
  *
  * Owns application reads only. Page components receive the `CapitalPageData`
  * view model (defined in @/lib/view-models/capital) and never depend on raw
- * Drizzle rows. See concept/12 Step 1.5.
+ * Drizzle rows. See docs/concept/12 Step 1.5.
  *
  * The pure district-diff logic lives in `lib/capital/district-diff.ts` so it
  * can be unit-tested without a database.
@@ -172,7 +172,7 @@ const RAID_HISTORY_LIMIT = 12; // ~3 months of weekly raid weekends.
  * capital_contributions. Returns null when no completed seasons have been
  * ingested yet (the UI shows a truthful "pending" state in that case).
  *
- * Four sections (concept/08 §"Raid-weekend history"):
+ * Four sections (docs/concept/08 §"Raid-weekend history"):
  *   - seasons: the most recent N completed seasons (newest first).
  *   - contributionLeaderboard: all-time totals per member, sorted by looted.
  *   - zeroAttackList: members who recorded 0 attacks in the latest season.

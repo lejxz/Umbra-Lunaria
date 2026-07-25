@@ -1,9 +1,9 @@
 /**
  * Test fixtures built from the live API reference in
- * concept/13-live-api-reference.md. No secrets — these are public clan
+ * docs/concept/13-live-api-reference.md. No secrets — these are public clan
  * response shapes used to test ingestion and query logic.
  *
- * See concept/12-Implemantation-plan-and-modularity.md Step 1.0.A.
+ * See docs/concept/12-Implemantation-plan-and-modularity.md Step 1.0.A.
  */
 import type {
   CocClan,

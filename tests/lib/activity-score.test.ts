@@ -12,8 +12,8 @@ import {
 import type { MemberActivityScore } from "@/lib/view-models/dashboard";
 
 /**
- * Tests for the Member Activity Score (concept/05-dashboard.md §5) and the
- * war participation metrics (concept/06-members.md §4).
+ * Tests for the Member Activity Score (docs/concept/05-dashboard.md §5) and the
+ * war participation metrics (docs/concept/06-members.md §4).
  *
  * The activity score is a pure function: inputs in, score out. These tests
  * pin the weighting, re-normalization, and availability rules so downstream
@@ -214,7 +214,7 @@ describe("computeActivityScore — warPreference 'out' excludes the war componen
     expect(capital?.weight).toBeCloseTo(15 / 75, 5);
 
     // A member at the max on every available component still scores 100 —
-    // the opt-out is informational, not a penalty (concept/05 §5 rule 4).
+    // the opt-out is informational, not a penalty (docs/concept/05 §5 rule 4).
     expect(result.totalScore).toBeCloseTo(100, 5);
   });
 

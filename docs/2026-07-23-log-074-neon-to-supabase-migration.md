@@ -47,19 +47,19 @@ The purge route used `prunedSnaps.rowCount` which was correct for the old `neon-
 
 > **Action required:** Update cron-job.org light-poll job from every 15 min to every 5 min. The config file is informational — only the external scheduler determines actual cadence.
 
-### Step 7 — Documentation (concept/ + docs/ + README)
+### Step 7 — Documentation (docs/concept/ + docs/ + README)
 
 All docs updated in a single commit. Files changed:
 
 | File | What changed |
 |---|---|
-| `concept/neon-to-supabase-migration-plan.md` | Status updated to **completed — 2026-07-23** with deviation notes; moved to `docs/2026-07-23-log-074-neon-to-supabase-migration.md` |
-| `concept/01-tech-stack.md` | Database row: Neon → Supabase |
-| `concept/03-data-model-and-database.md` | Neon → Supabase; storage numbers 512 MB/100 CU-hr → 500 MB/unlimited compute; migration rollback section; cron table 15 min → 5 min |
-| `concept/04-activity-tracking-and-polling.md` | Poll schedule 15 → 5 min; ISR table 900s → 300s; removed "0 Neon CU" language; updated Supabase storage rationale |
-| `concept/11-config-specification.md` | Cron table 15 → 5 min; `pollIntervalMinutes` default 15 → 5 |
-| `concept/12-Implemantation-plan-and-modularity.md` | 15 → 5 min in phase 0 checklist |
-| `concept/final-feature-list.md` | 15 → 5 min in polling feature list |
+| `docs/concept/neon-to-supabase-migration-plan.md` | Status updated to **completed — 2026-07-23** with deviation notes; moved to `docs/2026-07-23-log-074-neon-to-supabase-migration.md` |
+| `docs/concept/01-tech-stack.md` | Database row: Neon → Supabase |
+| `docs/concept/03-data-model-and-database.md` | Neon → Supabase; storage numbers 512 MB/100 CU-hr → 500 MB/unlimited compute; migration rollback section; cron table 15 min → 5 min |
+| `docs/concept/04-activity-tracking-and-polling.md` | Poll schedule 15 → 5 min; ISR table 900s → 300s; removed "0 Neon CU" language; updated Supabase storage rationale |
+| `docs/concept/11-config-specification.md` | Cron table 15 → 5 min; `pollIntervalMinutes` default 15 → 5 |
+| `docs/concept/12-Implemantation-plan-and-modularity.md` | 15 → 5 min in phase 0 checklist |
+| `docs/concept/final-feature-list.md` | 15 → 5 min in polling feature list |
 | `README.md` | Neon → Supabase in setup steps and cron table; 15 → 5 min throughout |
 
 ## Decisions Made

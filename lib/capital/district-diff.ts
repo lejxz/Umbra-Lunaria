@@ -8,7 +8,7 @@
  * observed level increase. A level decrease (data correction / API quirk) is
  * NOT treated as an upgrade and is skipped.
  *
- * Rules (concept/08 §"District upgrade history"):
+ * Rules (docs/concept/08 §"District upgrade history"):
  *   - With zero snapshots → no events (cold start).
  *   - With one snapshot → no events (nothing to diff against; the page shows
  *     "upgrade history will begin after the next observed change").

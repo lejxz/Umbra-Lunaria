@@ -19,7 +19,7 @@ import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
  *   - detailWarId  → opens the war detail sheet (history "View details"
  *     clicks), which fetches /api/war/[id] and renders the full analysis.
  *
- * Layout (concept/07):
+ * Layout (docs/concept/07):
  *   1. CWL league view (if in CWL season — shows standings + day tabs).
  *   2. War hero (current war summary + lead analysis + refresh).
  *   3. Roster + attack log for the current war.

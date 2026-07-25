@@ -20,7 +20,7 @@ import {
  * RaidHistory — the completed Capital raid-weekend history view.
  *
  * Replaces the RaidPendingCard placeholder once raid-season ingestion (Step 3.1)
- * has landed at least one completed season. Four sections (concept/08 §"Raid-
+ * has landed at least one completed season. Four sections (docs/concept/08 §"Raid-
  * weekend history"):
  *   1. Season summary tiles (loot, raids, attacks, rewards) — newest first.
  *   2. Contribution leaderboard (all-time totals per member, sorted by looted).

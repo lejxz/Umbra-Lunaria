@@ -35,7 +35,7 @@ import { computeRushed } from "@/lib/scoring/rushed";
  * POST /api/ingest
  *
  * Called by the third-party cron-job service (cron-job.org) every 5 min for
- * the light poll, and once daily for the batch. See concept/04.
+ * the light poll, and once daily for the batch. See docs/concept/04.
  *
  * Auth: `Authorization: Bearer <INGEST_SECRET>`.
  * Body: `{ batch?: boolean }` — `true` on the daily-batch cron trigger.
@@ -43,7 +43,7 @@ import { computeRushed } from "@/lib/scoring/rushed";
  * Failed-poll safety: if the clan fetch fails, the route returns an error
  * response but NEVER marks members as departed. Sub-calls (war sync, daily
  * batch) are best-effort: each is wrapped in try/catch and the rest of the
- * poll continues. See concept/04 "Cold starts, partial data, and failures".
+ * poll continues. See docs/concept/04 "Cold starts, partial data, and failures".
  */
 
 // Vercel Hobby tier caps function duration at 10s by default. The daily
@@ -115,7 +115,7 @@ async function runLightPoll(): Promise<IngestResult> {
     const msg = err instanceof Error ? err.message : String(err);
     errors.push(`clan fetch failed: ${msg}`);
     // CRITICAL: do not mark members as left/inactive when the clan fetch
-    // fails. See concept/04 "Cold starts, partial data, and failures" #3.
+    // fails. See docs/concept/04 "Cold starts, partial data, and failures" #3.
     return {
       ok: false,
       batch: false,
@@ -309,7 +309,7 @@ async function runDailyBatch(): Promise<string[]> {
 
   // ---- War-log backfill (only while isWarLogPublic) ----
   // Populates the War Center history list with past wars the tracker didn't
-  // observe live. Idempotent — safe to run every daily batch. See concept/07.
+  // observe live. Idempotent — safe to run every daily batch. See docs/concept/07.
   try {
     await backfillWarLog(clanTag);
   } catch (err) {
@@ -320,7 +320,7 @@ async function runDailyBatch(): Promise<string[]> {
   // ---- Capital raid-season ingestion (Step 3.1) ----
   // Idempotent: completed seasons already in the DB are skipped. Per-member
   // contributions for departed/purged tags are filtered (FK safety). See
-  // concept/08 + concept/12 Step 3.1.
+  // docs/concept/08 + docs/concept/12 Step 3.1.
   try {
     const { syncCapitalRaidSeasons } = await import("@/lib/ingest/capital-sync");
     const raidResult = await syncCapitalRaidSeasons(clanTag);
@@ -510,7 +510,7 @@ function memberRefreshFields(m: CocClanMember) {
 /**
  * Insert a member_snapshots row with reset-aware activity flags.
  *
- * Activity evidence (per concept/04): a member is active for this interval
+ * Activity evidence (per docs/concept/04): a member is active for this interval
  * if donations given/received increased OR trophies/Builder Base trophies
  * changed. Estimated login evidence requires a donation-counter increase;
  * a weekly counter reset alone never counts as a login.
@@ -612,7 +612,7 @@ async function upsertClan(
  * Known pet names — the CoC API ships pets inside the `troops` array with no
  * `type` discriminator, so we filter by name. The list is sourced from the
  * in-game Pet House. New pets added by Supercell will land in `troops` until
- * this list is updated; this is the documented behavior in concept/03
+ * this list is updated; this is the documented behavior in docs/concept/03
  * ("The captured API currently represents pets among troop-like progression
  * entries").
  */
@@ -633,7 +633,7 @@ const PET_NAMES = new Set<string>([
  * Split a `troops` payload (which from the API contains troops + siege
  * machines + pets) into a `troops` array (everything that isn't a pet) and
  * a `pets` array. The original API category mapping is preserved per
- * concept/03 ("the persistence layer may expose a normalized `pets`
+ * docs/concept/03 ("the persistence layer may expose a normalized `pets`
  * presentation field, but it must preserve the original API category
  * mapping for refreshes and audits").
  */

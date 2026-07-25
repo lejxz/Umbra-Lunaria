@@ -4,7 +4,7 @@
  * awards and 30d-window donation queries can use them as baselines instead
  * of reading pruned snapshots.
  *
- * See concept/03 §"Retention and pruning".
+ * See docs/concept/03 §"Retention and pruning".
  *
  * Server-only: imports @/lib/db.
  */

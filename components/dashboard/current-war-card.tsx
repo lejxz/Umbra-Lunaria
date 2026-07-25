@@ -8,7 +8,7 @@ import { IconSwords, IconWarEmpty } from "@/components/ui/icons";
  * Current war card — compact Our-clan vs Enemy-clan layout.
  * Shows stars and destruction percentage side by side with a VS icon
  * in the middle. Links to /war.
- * See concept/05-dashboard.md § 9 and concept/07.
+ * See docs/concept/05-dashboard.md § 9 and docs/concept/07.
  */
 export function CurrentWarCard({
   warSummary,

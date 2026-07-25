@@ -9,7 +9,7 @@ Implemented both Phase 3 steps: **Step 3.1** (completed Capital raid-weekend
 history — idempotent ingest + history/leaderboard/participation UI) and
 **Step 3.2** (explainable war auto-select — composite scoring + planner panel
 with per-member breakdowns). All 13 Phase 3 checkboxes are verified and marked
-complete in `concept/12`. The two Step 3.0 SUSPENDED items (maxed-for-current-TH
+complete in `docs/concept/12`. The two Step 3.0 SUSPENDED items (maxed-for-current-TH
 indicators + roster rushed sort/filter) remain intentionally unchecked — they're
 documented as future enhancements.
 
@@ -73,7 +73,7 @@ documented as future enhancements.
   members in one click (skips already-added + opted-out).
 - Provisional-warning banner when the top member is limited-data.
 - Explicit "Auto-select proposes an eligible roster; it never finalizes one"
-  notice per concept/09.
+  notice per docs/concept/09.
 - Opted-out members excluded from suggestions but remain manually selectable
   in the available-members panel.
 
@@ -124,7 +124,7 @@ fixtures removed after verification, production code is clean):
   `tests/lib/windows.test.ts` 24h-window timezone edge case (present before
   Phase 3, unrelated).
 - **Browser**: both new UI surfaces render with no console errors.
-- **concept/12**: all 13 Phase 3 checkboxes (7 in Step 3.1 + 6 in Step 3.2)
+- **docs/concept/12**: all 13 Phase 3 checkboxes (7 in Step 3.1 + 6 in Step 3.2)
   marked `[x]` with implementation references.
 
 ## Decisions Made
@@ -143,7 +143,7 @@ fixtures removed after verification, production code is clean):
   `computeRushed` — no duplication of the rushed formula.
 - **Auto-select panel is a separate section, not a tab**: it sits below the
   two-panel layout so leadership sees the recommendation alongside the manual
-  builder. Per concept/09, it never auto-finalizes — the "Fill top N" button
+  builder. Per docs/concept/09, it never auto-finalizes — the "Fill top N" button
   only populates slots; leadership still reviews and saves.
 
 ## Next Action

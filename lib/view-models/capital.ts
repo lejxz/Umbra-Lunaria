@@ -1,10 +1,10 @@
 /**
- * Typed view models for the Clan Capital page (concept/08-clan-capital.md).
+ * Typed view models for the Clan Capital page (docs/concept/08-clan-capital.md).
  *
  * Page components receive these shapes — never raw Drizzle rows or raw CoC API
  * payloads. Every value is explicitly typed so the UI can render loading,
  * empty, unavailable, and raid-pending states without guessing. See
- * concept/00 "Product contract".
+ * docs/concept/00 "Product contract".
  */
 
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
@@ -52,7 +52,7 @@ export interface DistrictUpgradeHistory {
 }
 
 // ---------------------------------------------------------------------------
-// Completed Capital raid-weekend history (concept/08 §"Raid-weekend history")
+// Completed Capital raid-weekend history (docs/concept/08 §"Raid-weekend history")
 // ---------------------------------------------------------------------------
 
 /** One completed raid season row, summarized for the history list. */
@@ -152,11 +152,11 @@ export interface CapitalPageData {
   upgradeHistory: DistrictUpgradeHistory;
   // Raid-weekend status — Step 3.1 adds completed-season ingestion. The UI
   // shows a truthful "raid history pending" state until the first completed
-  // season is ingested. (concept/08 §"Raid-weekend history")
+  // season is ingested. (docs/concept/08 §"Raid-weekend history")
   raidHistoryAvailable: boolean;
   raidHistory: RaidHistoryView | null;
   // Live raid-weekend timer — null when no raid is in progress or the live
-  // fetch failed. (concept/08 §"Raid-weekend history")
+  // fetch failed. (docs/concept/08 §"Raid-weekend history")
   raidTimer: RaidTimer | null;
 }
 

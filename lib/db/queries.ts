@@ -3,7 +3,7 @@
  *
  * This module owns application reads. Page components receive display-ready
  * view models (defined in @/lib/view-models/dashboard) and never depend on
- * raw Drizzle schema shape. See concept/12 Step 1.1.A.
+ * raw Drizzle schema shape. See docs/concept/12 Step 1.1.A.
  *
  * All functions are server-only — they import @/lib/db which requires a
  * DATABASE_URL. Never call these from a client component.
@@ -366,7 +366,7 @@ export async function getDonationTimeline(
   // For each bucket, compute the reset-aware donation DELTA (not the raw
   // cumulative counter). The delta is the sum of per-pair differences for
   // snapshots that fall within that bucket, using the last pre-bucket
-  // snapshot as the baseline. See concept/04-activity-tracking-and-polling.md
+  // snapshot as the baseline. See docs/concept/04-activity-tracking-and-polling.md
   // "Reset-aware donation accounting".
   const donationBuckets: DonationBucket[] = buckets.map((b, i) => {
     const bucketStart = b.timestamp;

@@ -4,7 +4,7 @@
 **Scope:** Phase 1 (read-only observatory) — dashboard, members, war center, capital. Configured clan: `#2JPCYP98L` (5 members at time of writing).
 
 This analysis uses live database measurements (taken 2026-07-22) and the
-project's polling architecture (concept/04) to project free-tier consumption
+project's polling architecture (docs/concept/04) to project free-tier consumption
 and identify the first constraint that will be hit. It is a planning aid, not
 a SLA — re-measure after schema or traffic changes.
 
@@ -198,7 +198,7 @@ generally tolerant of low-frequency polling. The 45-second shared TTL on
 
 **Risk**: if the proxy IP is shared with other RoyaleAPI users, a rate-limit
 hit could cause a failed poll. The ingest route handles this gracefully
-(failed-poll safety — concept/04 #3: never mark members inactive on a failed
+(failed-poll safety — docs/concept/04 #3: never mark members inactive on a failed
 fetch).
 
 ---
@@ -237,7 +237,7 @@ the mitigations are:
 At 30-min cadence the API budget is ~199 calls/day — well within Supercell's
 tolerance. If RoyaleAPI's proxy IP is shared with many other consumers, a
 rate-limit hit could cause intermittent failed polls, handled gracefully by
-failed-poll safety (concept/04 #3).
+failed-poll safety (docs/concept/04 #3).
 
 ---
 

@@ -1,7 +1,7 @@
 /**
  * War snapshot parsing + analysis — pure logic extracted from
  * `lib/db/war-queries.ts` so it can be unit-tested without a database
- * (concept/12 Step 1.1.C / the "mocked query boundary" test strategy — see
+ * (docs/concept/12 Step 1.1.C / the "mocked query boundary" test strategy — see
  * tests/README.md).
  *
  * `parseWarSnapshot` takes a war row (with the JSONB `warSnapshot` payload)

@@ -6,7 +6,7 @@ import {
 
 /**
  * Realistic seeded-snapshot tests for reset-aware donation accounting
- * (concept/12 Step 1.2.C — "Confirm donation reset calculations against
+ * (docs/concept/12 Step 1.2.C — "Confirm donation reset calculations against
  * seeded snapshot data"). The basic reset logic is tested in
  * donation-delta.test.ts; these tests simulate realistic multi-day snapshot
  * sequences as they'd actually appear in `member_snapshots`, including weekly

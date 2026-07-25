@@ -22,7 +22,7 @@ Rewrote the merged Activity Analytics card to exactly match the Donation Analyti
 
 - **Same minHeight as Donations**: Both are "primary analytical panels" — they should be the same height for visual consistency. `minHeight: 380px` lets them grow if needed but ensures they match.
 - **Explicit chart height**: `h-[220px]` instead of `flex-1` — Recharts `ResponsiveContainer` needs an explicit height to render. This is the same approach that works in Donations.
-- **Leaderboard always 30d**: The Activity Score is a 30-day rolling measure (per concept/05 §5). The 24h/7d/30d tabs control the timeline chart only, not the leaderboard. Labeled "Activity Score · 30d" to make this clear.
+- **Leaderboard always 30d**: The Activity Score is a 30-day rolling measure (per docs/concept/05 §5). The 24h/7d/30d tabs control the timeline chart only, not the leaderboard. Labeled "Activity Score · 30d" to make this clear.
 
 ## Next Action
 

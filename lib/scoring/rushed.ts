@@ -2,7 +2,7 @@
  * Rushed-account analysis.
  *
  * Compares each unit's current level against its API-reported global maximum
- * (`maxLevel`). The formula from concept/06-members.md §7:
+ * (`maxLevel`). The formula from docs/concept/06-members.md §7:
  *
  * ```text
  * rushed_percent =
@@ -18,7 +18,7 @@
  * Units without a `maxLevel` (null) are excluded from the calculation.
  * If no units have `maxLevel`, the result is null ("not available").
  *
- * See concept/06-members.md §7 and concept/03-data-model-and-database.md.
+ * See docs/concept/06-members.md §7 and docs/concept/03-data-model-and-database.md.
  */
 
 export interface UnitLevelEntry {

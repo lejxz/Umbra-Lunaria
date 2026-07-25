@@ -4,7 +4,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
- * Capital overview card — the current API facts (concept/08 §"Current Capital
+ * Capital overview card — the current API facts (docs/concept/08 §"Current Capital
  * overview"). Hero-style layout: the Capital Hall level is the centerpiece
  * (it's the single most-asked question about a clan's Capital), flanked by
  * points + district count, with the league as a badge and the freshness line.

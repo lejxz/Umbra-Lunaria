@@ -4,7 +4,7 @@
  * `getWarRecord` takes a (possibly null) `DashboardClan` and returns the
  * `WarRecordView` shape that the dashboard renders. The only non-trivial
  * logic is the win-rate computation, which is delegated to `computeWinRate`
- * so the "never fake a zero" rule (concept/00-overview.md "Product contract")
+ * so the "never fake a zero" rule (docs/concept/00-overview.md "Product contract")
  * is enforced — `winRate` is `null` when any of wins/ties/losses is `null`
  * (private war log / missing API field) or when the denominator is 0 (no
  * wars recorded yet).

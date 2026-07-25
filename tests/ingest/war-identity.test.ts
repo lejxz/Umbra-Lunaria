@@ -6,7 +6,7 @@ import {
 
 /**
  * Tests for the pure war-identity-matching logic extracted from
- * `syncCurrentWar` (concept/12 Step 1.0.D — "duplicate-attack protection" and
+ * `syncCurrentWar` (docs/concept/12 Step 1.0.D — "duplicate-attack protection" and
  * "war lifecycle" idempotency). See tests/README.md for the test strategy.
  *
  * The identity rule makes war sync idempotent across preparation → inWar →

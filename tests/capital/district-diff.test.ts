@@ -5,7 +5,7 @@ import {
 } from "@/lib/capital/district-diff";
 
 /**
- * Tests for the pure district-upgrade diff logic (concept/12 Step 1.5 —
+ * Tests for the pure district-upgrade diff logic (docs/concept/12 Step 1.5 —
  * "Test no snapshot, one snapshot, and level-increase timeline states").
  * See tests/README.md for the test strategy.
  */

@@ -2,7 +2,7 @@
  * Member Activity Score.
  *
  * Pure scoring function for the Member Activity Score leaderboard described
- * in concept/05-dashboard.md §5. The score is a transparent, rolling
+ * in docs/concept/05-dashboard.md §5. The score is a transparent, rolling
  * (24h / 7d / 30d) measure of observed clan support — not a claim about
  * player skill or worth.
  *
@@ -15,7 +15,7 @@
  *   | War commitment        |     25 | Attacks used ÷ attacks allowed in tracked wars|
  *   | Capital contribution  |     15 | Completed raid-season contribution             |
  *
- * Rules (concept/05-dashboard.md §5):
+ * Rules (docs/concept/05-dashboard.md §5):
  *
  *   1. Donations received are shown as a separate leaderboard metric; they
  *      do NOT earn contribution points.
@@ -60,7 +60,7 @@ export interface ClanMaxValues {
   maxCapitalContribution: number; // max capitalContribution across the clan
 }
 
-// Initial weights per concept/05-dashboard.md §5. These are the "raw" weights
+// Initial weights per docs/concept/05-dashboard.md §5. These are the "raw" weights
 // before re-normalization. Donations and activity are always available (their
 // source values are non-null numbers), so the re-normalization base is
 // always at least 60.
@@ -74,7 +74,7 @@ const RAW_WEIGHTS = {
 /**
  * Compute the Member Activity Score for a single member.
  *
- * Normalization (per concept/05-dashboard.md §5 and the task brief):
+ * Normalization (per docs/concept/05-dashboard.md §5 and the task brief):
  *
  *   - donations: normalized = maxDonations > 0 ? donationsGiven / maxDonations : 0
  *   - activity:  normalized = observedActivityRate (already 0..1)

@@ -2,7 +2,7 @@
  * Typed view models for the Members page and member detail sheet.
  *
  * These are the shapes that page components receive — never raw Drizzle rows.
- * See concept/06-members.md for the full specification.
+ * See docs/concept/06-members.md for the full specification.
  */
 
 import type { ClanBadgeUrls } from "./dashboard";

@@ -21,9 +21,9 @@ Added `export const revalidate = 900` (15 min) to three read-only pages:
 Changed from 15 min to 30 min across:
 - `config/clan.config.ts` — `pollIntervalMinutes: 30`
 - `components/dashboard/dashboard-shell.tsx` — `POLL_INTERVAL_MINUTES = 30` + comment
-- `concept/04` — polling schedule table + cron-job description
-- `concept/11` — `pollIntervalMinutes` default + cron-job configuration table
-- `concept/final-feature-list.md` — "approximately every 30 minutes"
+- `docs/concept/04` — polling schedule table + cron-job description
+- `docs/concept/11` — `pollIntervalMinutes` default + cron-job configuration table
+- `docs/concept/final-feature-list.md` — "approximately every 30 minutes"
 - `README.md` — 3 references
 - `app/api/ingest/route.ts` — comment
 - `docs/2026-07-22-neon-vercel-free-tier-load-analysis.md` — recomputed all figures: 48 polls/day (was 96), ~42 CU/month (was ~84), ~58% headroom (was ~16%)

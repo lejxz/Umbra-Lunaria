@@ -9,7 +9,7 @@ import {
 
 /**
  * Tests for the pure membership-reconciliation logic extracted from the ingest
- * route (concept/12 Step 1.0.D — "Add unit tests for member rejoin, departure,
+ * route (docs/concept/12 Step 1.0.D — "Add unit tests for member rejoin, departure,
  * retention, failed-poll safety, war lifecycle, and duplicate-attack
  * protection"). See tests/README.md for the test strategy.
  */
@@ -155,7 +155,7 @@ describe("reconcileMembership — mixed scenarios", () => {
 
   it("all retained members leave when live is empty (failed-poll caveat)", () => {
     // This is the CORRECT behavior when the poll genuinely returned an empty
-    // roster. Failed-poll safety (concept/04 #3) is enforced at the route
+    // roster. Failed-poll safety (docs/concept/04 #3) is enforced at the route
     // level — the route never calls reconcileMembership when the clan fetch
     // fails. This test confirms the pure function faithfully reports leaves
     // for every retained member when live is empty.
@@ -221,7 +221,7 @@ describe("computeActivityFlags — donation increases", () => {
 
   it("does NOT flag login on a counter reset alone (donations dropped)", () => {
     // Weekly reset: donations went 100 → 4. This is NOT a login — the reset
-    // itself doesn't prove activity. concept/04: "A weekly counter reset
+    // itself doesn't prove activity. docs/concept/04: "A weekly counter reset
     // alone does not count as a login."
     const flags = computeActivityFlags(
       { donations: 4, donationsReceived: 50, trophies: 3000, builderBaseTrophies: 2000 },

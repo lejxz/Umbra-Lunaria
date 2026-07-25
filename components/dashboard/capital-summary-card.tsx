@@ -4,7 +4,7 @@ import { UnavailableValue } from "@/components/ui/state-primitives";
 /**
  * Clan Capital summary card — compact version.
  * Shows Hall level, Capital points, district count, and Capital league.
- * See concept/05-dashboard.md §3.
+ * See docs/concept/05-dashboard.md §3.
  */
 export function CapitalSummaryCard({
   capital,

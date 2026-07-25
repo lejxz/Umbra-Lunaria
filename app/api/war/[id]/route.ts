@@ -11,7 +11,7 @@ import { getWarDetail } from "@/lib/db/war-queries";
  * from the public war log have no roster/attack detail and are not
  * detail-able — the UI disables the button for those rows).
  *
- * Public read-only (concept/01 "Read and write policy") — war data is public
+ * Public read-only (docs/concept/01 "Read and write policy") — war data is public
  * to anyone with the URL.
  */
 export async function GET(

@@ -16,7 +16,7 @@ import { DonationChart } from "./donation-chart";
  * Donation analytics — the largest primary panel on the dashboard.
  * Layout: compact totals row at top, then a 2-column grid with the chart
  * on the left (fills remaining height) and top donors on the right.
- * See concept/05-dashboard.md §4.
+ * See docs/concept/05-dashboard.md §4.
  */
 export function DonationAnalytics({
   dataByWindow,

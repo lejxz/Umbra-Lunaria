@@ -12,7 +12,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 
-// See concept/03-data-model-and-database.md for the full design rationale
+// See docs/concept/03-data-model-and-database.md for the full design rationale
 // behind every table and column here. Column type conventions (tags are
 // text, timestamps are timestamptz, etc.) are documented there and not
 // re-explained per-column here.
@@ -53,7 +53,7 @@ export const clans = pgTable("clans", {
   // Capital facts
   capitalHallLevel: integer("capital_hall_level"),
   // Latest districts payload — diffed against capital_district_snapshots
-  // to produce upgrade events. See concept/08-clan-capital.md.
+  // to produce upgrade events. See docs/concept/08-clan-capital.md.
   districtsPayload: jsonb("districts_payload"),
 
   // Freshness
@@ -89,7 +89,7 @@ export const members = pgTable("members", {
   builderBaseLeague: jsonb("builder_base_league"), // { id, name }
 
   // Career totals (lifetime Supercell values — labeled separately from
-  // Umbra Lunaria tracked data in the UI). See concept/06-members.md.
+  // Umbra Lunaria tracked data in the UI). See docs/concept/06-members.md.
   warStars: integer("war_stars"),
   attackWins: integer("attack_wins"),
   defenseWins: integer("defense_wins"),
@@ -101,7 +101,7 @@ export const members = pgTable("members", {
   currentDonationsReceived: integer("current_donations_received"),
 
   // Lifecycle observations. joined_at = "first observed by this tracker",
-  // not the player's true historic clan-join date. See concept/03.
+  // not the player's true historic clan-join date. See docs/concept/03.
   joinedAt: timestamp("joined_at", { withTimezone: true }).notNull(),
   leftAt: timestamp("left_at", { withTimezone: true }),
   purgeAt: timestamp("purge_at", { withTimezone: true }),
@@ -114,7 +114,7 @@ export const members = pgTable("members", {
   // ── Checkpoint columns for safe snapshot pruning ──
   // Computed from ALL member_snapshots during the daily batch (before pruning).
   // After pruning, HoF awards and 30d-window donation queries use these as
-  // baselines instead of reading pruned snapshots. See concept/03 §"Retention
+  // baselines instead of reading pruned snapshots. See docs/concept/03 §"Retention
   // and pruning".
   cumulativeDonationsGiven: integer("cumulative_donations_given").default(0),
   cumulativeDonationsReceived: integer("cumulative_donations_received").default(0),
@@ -142,7 +142,7 @@ export const memberSnapshots = pgTable(
     trophies: integer("trophies").notNull(),
     builderBaseTrophies: integer("builder_base_trophies"),
     activityFlag: boolean("activity_flag").notNull().default(false),
-    // Login-activity graph derivation — see concept/04-activity-tracking-and-polling.md
+    // Login-activity graph derivation — see docs/concept/04-activity-tracking-and-polling.md
     loginDayFlag: boolean("login_day_flag").notNull().default(false),
   },
   (table) => [
@@ -158,7 +158,7 @@ export const memberSnapshots = pgTable(
 // membership_events — immutable record of observed joins, departures, and
 // rejoins. Survives profile purge so the clan log can still render
 // "left on [date]; data removed" for departed members.
-// See concept/03-data-model-and-database.md + concept/05-dashboard.md.
+// See docs/concept/03-data-model-and-database.md + docs/concept/05-dashboard.md.
 // ---------------------------------------------------------------------------
 
 export const membershipEvents = pgTable(
@@ -208,7 +208,7 @@ export const wars = pgTable(
     id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     // Stable identity: for regular wars, opponent_tag + start_time identifies
     // a unique war across preparation → in-war → ended transitions. For CWL,
-    // war_tag is the stable identity. See concept/03 + concept/12 Step 1.0.C.
+    // war_tag is the stable identity. See docs/concept/03 + docs/concept/12 Step 1.0.C.
     warTag: text("war_tag"), // CWL war tag (#...) — null for regular wars
     opponentTag: text("opponent_tag"),
     opponentName: text("opponent_name"),
@@ -236,7 +236,7 @@ export const wars = pgTable(
     // — opponent members are NOT in `members` (war_participants has a FK to it),
     // so the snapshot is the only place their identity is preserved for the UI.
     // Null for war-log backfill rows that predate tracking (no roster detail).
-    // See concept/07-clan-war.md + concept/12 Step 1.4.A.
+    // See docs/concept/07-clan-war.md + docs/concept/12 Step 1.4.A.
     warSnapshot: jsonb("war_snapshot"),
   },
   (table) => [
@@ -272,7 +272,7 @@ export const warAttacks = pgTable(
   },
   (table) => [
     // Idempotency: the same attack (same war, attacker, order) must not be
-    // inserted twice. See concept/12 Step 1.0.C/D.
+    // inserted twice. See docs/concept/12 Step 1.0.C/D.
     uniqueIndex("war_attacks_war_attacker_order_idx").on(
       table.warId,
       table.attackerTag,
@@ -394,7 +394,7 @@ export const hallOfFameRecords = pgTable(
 // ---------------------------------------------------------------------------
 // cwl_seasons — one row per CWL season. Stores the full league-group response
 // (8 clans, 7 rounds, season name, state) so the War Center can render league
-// standings + day-by-day round tabs. See concept/07 §"Clan War League".
+// standings + day-by-day round tabs. See docs/concept/07 §"Clan War League".
 // ---------------------------------------------------------------------------
 
 export const cwlSeasons = pgTable("cwl_seasons", {
@@ -407,7 +407,7 @@ export const cwlSeasons = pgTable("cwl_seasons", {
 
 // ---------------------------------------------------------------------------
 // runtime_settings — administrator-editable DB values. Phase 2 writes; the
-// schema is ready now per concept/12 Step 1.0.C.
+// schema is ready now per docs/concept/12 Step 1.0.C.
 // ---------------------------------------------------------------------------
 
 export const runtimeSettings = pgTable("runtime_settings", {

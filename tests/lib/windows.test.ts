@@ -9,7 +9,7 @@ import {
 
 /**
  * Tests for the timezone-aware window functions in lib/time/windows.ts
- * (concept/04-activity-tracking-and-polling.md):
+ * (docs/concept/04-activity-tracking-and-polling.md):
  *
  *   - computeWindow: subtracts 24h / 7d / 30d from `now` to build a TimeWindow.
  *   - generateBuckets: 24 hourly buckets for "24h", N daily buckets for "7d"/"30d".

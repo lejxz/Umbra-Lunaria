@@ -8,7 +8,7 @@ import { TimeAgo } from "@/components/ui/time-ago";
 import { IconWarEmpty, IconChevronRight } from "@/components/ui/icons";
 
 /**
- * War history list — regular + CWL wars, most-recent first (concept/07 §"War
+ * War history list — regular + CWL wars, most-recent first (docs/concept/07 §"War
  * history").
  *
  * Improved layout:

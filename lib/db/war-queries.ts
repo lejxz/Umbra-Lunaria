@@ -1,9 +1,9 @@
 /**
- * Server-side query layer for the War Center (concept/07-clan-war.md).
+ * Server-side query layer for the War Center (docs/concept/07-clan-war.md).
  *
  * Owns application reads only. Page components receive the `WarCenterData`
  * view model (defined in @/lib/view-models/war) and never depend on raw
- * Drizzle rows or raw CoC API payloads. See concept/12 Step 1.4.B.
+ * Drizzle rows or raw CoC API payloads. See docs/concept/12 Step 1.4.B.
  *
  * The pure parsing/analysis logic (`parseWarSnapshot`, `buildAnalysis`,
  * `toHistoryEntry`) lives in `lib/war/war-snapshot.ts` so it can be unit-tested

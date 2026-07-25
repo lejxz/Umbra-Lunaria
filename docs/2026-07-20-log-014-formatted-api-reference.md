@@ -5,10 +5,10 @@
 
 ## Summary of Session
 
-Added a readable, formatted API reference under `concept/` while preserving the complete raw API capture separately for audit and future implementation work.
+Added a readable, formatted API reference under `docs/concept/` while preserving the complete raw API capture separately for audit and future implementation work.
 
 ## Work Completed
-- Added `concept/13-live-api-reference.md`.
+- Added `docs/concept/13-live-api-reference.md`.
 - Included formatted clan data, all current member rows, leader progression fields, and clan capital districts.
 - Limited the readable leader achievement examples to Gold Grab and War Hero.
 - Linked the complete raw clan, leader, and war-log responses for detailed implementation reference.

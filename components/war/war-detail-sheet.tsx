@@ -24,7 +24,7 @@ import { WarAttackLog } from "./war-attack-log";
  *   3. Roster scouting (compact) — both clans by map position with base state.
  *   4. Attack log — every attack ordered, attacker → defender, stars/destruction.
  *
- * The sheet is read-only and public (concept/01). Own-clan members are not
+ * The sheet is read-only and public (docs/concept/01). Own-clan members are not
  * clickable here (the sheet is already a modal over the war page); the shared
  * member sheet can be opened from the main roster instead.
  */

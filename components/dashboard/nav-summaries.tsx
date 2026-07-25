@@ -6,7 +6,7 @@ import { Badge, UnavailableValue } from "@/components/ui";
  * Navigation summaries — two strips at the bottom of the dashboard:
  * 1. Current war — state, countdown, stars, attacks, link to /war
  * 2. Capital raid weekend — status, link to /capital
- * See concept/05-dashboard.md §9.
+ * See docs/concept/05-dashboard.md §9.
  */
 export function NavSummaries({
   warSummary,

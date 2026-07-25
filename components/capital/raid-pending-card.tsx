@@ -2,7 +2,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
- * Raid-weekend history card (concept/08 §"Raid-weekend history"). Phase 3.1
+ * Raid-weekend history card (docs/concept/08 §"Raid-weekend history"). Phase 3.1
  * adds completed-season ingestion (`capitalraidseasons` + `capital_contributions`).
  *
  * Positioned directly after the overview because raid weekends are the

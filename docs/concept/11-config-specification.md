@@ -10,7 +10,7 @@ Configuration has three deliberately separate layers:
 
 ## Environment variables
 
-Set these in Vercel. The `INGEST_SECRET` is also configured in the third-party cron-job service that triggers `/api/ingest` (see concept/04). The `CRON_SECRET` is sent automatically by Vercel Cron when it invokes `/api/cron/purge`.
+Set these in Vercel. The `INGEST_SECRET` is also configured in the third-party cron-job service that triggers `/api/ingest` (see docs/concept/04). The `CRON_SECRET` is sent automatically by Vercel Cron when it invokes `/api/cron/purge`.
 
 ```text
 # Clash of Clans API
@@ -45,7 +45,7 @@ VERCEL_APP_URL=
 INGEST_SECRET=
 ```
 
-`.github/workflows/poll.yml` is retained as a `workflow_dispatch`-only (manual) fallback for ad-hoc ingest runs from the Actions tab. It is no longer the primary scheduler — the third-party cron service is, for schedule consistency (see concept/04). The `INGEST_SECRET` repository secret must still match the Vercel environment value when the fallback is used.
+`.github/workflows/poll.yml` is retained as a `workflow_dispatch`-only (manual) fallback for ad-hoc ingest runs from the Actions tab. It is no longer the primary scheduler — the third-party cron service is, for schedule consistency (see docs/concept/04). The `INGEST_SECRET` repository secret must still match the Vercel environment value when the fallback is used.
 
 ## Static clan configuration
 

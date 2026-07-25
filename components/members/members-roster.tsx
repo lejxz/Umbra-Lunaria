@@ -13,7 +13,7 @@ import type { MemberDetailView } from "@/lib/view-models/members";
 
 /**
  * Members roster — client component with sorting, filtering, and member
- * detail sheet. See concept/06-members.md.
+ * detail sheet. See docs/concept/06-members.md.
  *
  * Design: clean card-based layout with a filter bar, desktop table, and
  * mobile cards. Readable spacing, clear visual hierarchy.

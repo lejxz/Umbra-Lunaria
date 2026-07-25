@@ -6,7 +6,7 @@ import { getCapitalPage } from "@/lib/db/capital-queries";
 /**
  * Clan Capital page — current overview, district list, district upgrade
  * timeline, raid-weekend countdown timer, and raid-weekend history.
- * See concept/08.
+ * See docs/concept/08.
  *
  * ISR caching: revalidates every 300s (5 min). Capital data changes slowly
  * (district levels take days to upgrade), so a 5-min cache is well within

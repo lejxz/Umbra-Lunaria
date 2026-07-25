@@ -11,7 +11,7 @@
  *
  * Used by `lib/db/index.ts` (runtime queries) and `drizzle.config.ts`
  * (migrations) so both resolve to the same Neon database regardless of the
- * sandbox injection. See concept/11-config-specification.md.
+ * sandbox injection. See docs/concept/11-config-specification.md.
  */
 
 import { readFileSync } from "node:fs";
@@ -73,7 +73,7 @@ export function resolveDatabaseUrl(): string {
   }
   if (env) return sanitizeDbUrl(env); // last resort — let the caller surface the bad URL
   throw new Error(
-    "DATABASE_URL is not set. See .env.example and concept/11-config-specification.md.",
+    "DATABASE_URL is not set. See .env.example and docs/concept/11-config-specification.md.",
   );
 }
 

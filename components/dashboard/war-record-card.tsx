@@ -4,7 +4,7 @@ import { UnavailableValue } from "@/components/ui/state-primitives";
 /**
  * All-time war record card. Shows API-provided wins, ties, losses, current
  * win streak, and computed win rate. Compact layout — no empty space.
- * See concept/05-dashboard.md §2.
+ * See docs/concept/05-dashboard.md §2.
  */
 export function WarRecordCard({ record }: { record: WarRecordView }) {
   const winRatePct =

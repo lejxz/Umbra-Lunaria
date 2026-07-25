@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { fixtureClan, fixtureMembers, fixturePlayer } from "./clan";
 
 // Smoke test — verifies the fixture shapes match the CoC client types and
-// the test runner is wired up correctly. See concept/12 Step 1.0.A.
+// the test runner is wired up correctly. See docs/concept/12 Step 1.0.A.
 describe("test fixtures", () => {
   it("fixtureClan has the expected clan tag", () => {
     expect(fixtureClan.tag).toBe("#2JPCYP98L");

@@ -5,7 +5,7 @@ import { IconLoader, IconSync, IconAlert } from "@/components/ui/icons";
  * State primitives — the small display atoms used across the dashboard,
  * member detail sheet, and any surface that has to communicate a value with a
  * source, a loading indicator, an error, or an explicit "this is unavailable"
- * state. See concept/05-dashboard.md §Interaction and state rules:
+ * state. See docs/concept/05-dashboard.md §Interaction and state rules:
  *
  *   3. Missing values use an em dash or an explicit unavailable label, never a
  *      fake zero.
@@ -35,7 +35,7 @@ const sourceMeta: Record<MetricSource, { label: string; tone: string }> = {
  * anywhere the dashboard surfaces a single number that came from the CoC API
  * ("api"), was reconstructed from snapshots ("tracked"), or was computed from
  * other fields ("derived"). The source badge keeps the user honest about what
- * they are looking at — see concept/05-dashboard.md §2 (win-rate is derived).
+ * they are looking at — see docs/concept/05-dashboard.md §2 (win-rate is derived).
  */
 export function MetricState({
   label,
@@ -125,7 +125,7 @@ export function ErrorState({
 
 /**
  * UnavailableValue — the "never fake a zero" primitive from
- * concept/05-dashboard.md §3. Renders an em dash and an optional muted label
+ * docs/concept/05-dashboard.md §3. Renders an em dash and an optional muted label
  * so a missing CoC API value reads clearly as "unknown" rather than 0.
  */
 export function UnavailableValue({ label = "Unavailable" }: { label?: string }) {

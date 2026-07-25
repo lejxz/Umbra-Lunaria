@@ -3,10 +3,10 @@
  *
  * These are the shapes that page components receive — never raw Drizzle rows.
  * Every value is explicitly typed so the UI can render loading, empty, and
- * unavailable states without guessing. See concept/05-dashboard.md and
- * concept/12 Step 1.1.A.
+ * unavailable states without guessing. See docs/concept/05-dashboard.md and
+ * docs/concept/12 Step 1.1.A.
  *
- * Core principle (concept/00-overview.md "Product contract"):
+ * Core principle (docs/concept/00-overview.md "Product contract"):
  *   - API fact       → returned directly by Supercell
  *   - Tracked history → observed and stored by Umbra Lunaria
  *   - Derived metric  → calculated by the app

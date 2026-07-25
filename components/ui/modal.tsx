@@ -12,7 +12,7 @@ import { createPortal } from "react-dom";
 import { IconX } from "@/components/ui/icons";
 
 /**
- * Modal & Sheet — shared overlay primitives. See concept/10-mobile-support.md
+ * Modal & Sheet — shared overlay primitives. See docs/concept/10-mobile-support.md
  * §Accessibility (3): focus must be trapped inside an open dialog and restored
  * to the triggering control on close.
  *

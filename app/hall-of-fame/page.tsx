@@ -17,7 +17,7 @@ import { getHallOfFamePage } from "@/lib/db/hall-of-fame-queries";
  * member-detail-sheet state. ISR-cached at 5 min — matches the dashboard and
  * the other read-only pages.
  *
- * See concept/05-dashboard.md §"Hall of Fame" + concept/12.
+ * See docs/concept/05-dashboard.md §"Hall of Fame" + docs/concept/12.
  */
 export const revalidate = 300;
 

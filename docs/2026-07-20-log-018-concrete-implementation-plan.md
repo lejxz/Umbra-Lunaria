@@ -9,7 +9,7 @@ Replaced the incomplete roadmap with a full, checkbox-driven delivery plan based
 
 ## Work Completed
 
-- Rewrote `concept/12-Implemantation-plan-and-modularity.md` as the concrete implementation plan.
+- Rewrote `docs/concept/12-Implemantation-plan-and-modularity.md` as the concrete implementation plan.
 - Marked only verified existing foundation work complete and left all unfinished product work unchecked.
 - Added file-level targets, data migrations, ingestion changes, query contracts, UI behavior, test cases, mobile checks, and exit criteria for each phase.
 - Added explicit work for reset-safe donation aggregation, retention-safe clan-log events, idempotent war/raid ingestion, runtime settings, administrator writes, and asset mapping.

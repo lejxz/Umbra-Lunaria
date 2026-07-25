@@ -6,7 +6,7 @@ import {
 
 /**
  * Tests for reset-aware donation accounting. The implementation follows the
- * rule documented in concept/04-activity-tracking-and-polling.md:
+ * rule documented in docs/concept/04-activity-tracking-and-polling.md:
  *
  *   if current >= previous: contribution = current - previous
  *   else:                   contribution = current            // weekly reset
@@ -38,7 +38,7 @@ describe("calculateDonationDelta", () => {
   });
 
   it("treats a weekly reset as 'current' instead of a negative delta", () => {
-    // concept/04 reference case: 150 → 4 → 12 should give 4 + 8 = 12 (NOT 0).
+    // docs/concept/04 reference case: 150 → 4 → 12 should give 4 + 8 = 12 (NOT 0).
     // Pair (150,4): 4 < 150 → reset → 4
     // Pair (4,12):  12 >= 4  → diff  → 8
     const snapshots = [

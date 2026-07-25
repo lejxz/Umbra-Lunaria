@@ -33,7 +33,7 @@ verified foundation
 > `app/api/auth/`, `app/api/settings/`, `app/api/rosters/`, the `/planning`
 > route, and all associated tests are deleted. The `war_rosters`,
 > `war_roster_slots`, and `runtime_settings` tables remain in the schema as
-> vestigial (empty, unused). See concept/09 for the historical design.
+> vestigial (empty, unused). See docs/concept/09 for the historical design.
 
 ## Verified foundation — complete
 
@@ -45,7 +45,7 @@ These are existing, verified baseline capabilities. They are not permission to s
 - [x] Initial Drizzle schema and migration exist for clans, members, snapshots, progression, wars, Capital, and roster drafts.
 - [x] Protected `/api/ingest` runs light polls and daily batches.
 - [x] Protected `/api/cron/purge` removes expired member profile data.
-- [x] A third-party cron-job web service triggers the ingest route every 5 minutes (light poll) and once daily (batch); `.github/workflows/poll.yml` is retained as a manual `workflow_dispatch` fallback. _(See concept/04 — moved off GitHub Actions cron for schedule consistency.)_
+- [x] A third-party cron-job web service triggers the ingest route every 5 minutes (light poll) and once daily (batch); `.github/workflows/poll.yml` is retained as a manual `workflow_dispatch` fallback. _(See docs/concept/04 — moved off GitHub Actions cron for schedule consistency.)_
 - [x] Vercel Cron invokes the daily purge route.
 - [x] Shared navigation, dark design tokens, basic UI primitives, page scaffold, and placeholder routes exist.
 - [x] Modal and sheet surfaces render through a viewport-level portal.
@@ -87,7 +87,7 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 - [x] Add a stable current-war identity and unique attack identity so war state transitions and repeat polls are idempotent.
 - [x] Add the data fields needed to retain war destruction, result, completion time, and explicit current-war freshness.
 - [x] Add `runtime_settings` and administrator-session/audit schema only when Phase 2 begins; do not expose write UI before then.
-- [x] Add a migration rollback/forward verification note for every new schema migration. _(Strategy documented in concept/03 §"Migration rollback strategy": rollback = Supabase backup restore, not SQL down-migrations. Every new migration is forward-verified against a Supabase staging project before production.)_
+- [x] Add a migration rollback/forward verification note for every new schema migration. _(Strategy documented in docs/concept/03 §"Migration rollback strategy": rollback = Supabase backup restore, not SQL down-migrations. Every new migration is forward-verified against a Supabase staging project before production.)_
 
 #### 1.0.D — Ingestion reliability
 
@@ -261,7 +261,7 @@ All steps 1.0–1.6 verified and checked off. See `docs/2026-07-23-log-074-phase
 > justify the admin session, roster persistence, and auto-select scoring
 > surface. All implementation code and tests are deleted; the
 > `war_rosters` / `war_roster_slots` / `runtime_settings` tables remain in the
-> schema as vestigial (empty, unused). See concept/09 for the historical
+> schema as vestigial (empty, unused). See docs/concept/09 for the historical
 > design. The checkboxes below are preserved as a record of what was built and
 > then removed.
 
@@ -307,7 +307,7 @@ rushed sort/filter) — explicitly future enhancements, not blocking. Step 3.1
 
 ### Step 3.0 — Rushed-account analysis
 
-- [x] ~Populate Town Hall cap reference data for troops, heroes, equipment, spells, pets, and siege machines from approved public game-data sources.~ **DROPPED** — the CoC API returns `maxLevel` per unit directly, so external cap tables are redundant. concept/06 §7 was updated to reflect this. No reference-data files are maintained.
+- [x] ~Populate Town Hall cap reference data for troops, heroes, equipment, spells, pets, and siege machines from approved public game-data sources.~ **DROPPED** — the CoC API returns `maxLevel` per unit directly, so external cap tables are redundant. docs/concept/06 §7 was updated to reflect this. No reference-data files are maintained.
 - [x] ~Record source/version/update date for every reference-data file.~ **DROPPED** — same reason as above; no reference-data files exist because the API is the source of truth for max levels.
 - [x] Implement `lib/scoring/rushed.ts` using the finalized equal-weight formula. _(Implemented using API maxLevel — see lib/scoring/rushed.ts)_
 - [x] Add per-category and overall rushed results to member detail.

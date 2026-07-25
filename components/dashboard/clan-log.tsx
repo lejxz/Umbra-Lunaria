@@ -11,7 +11,7 @@ import {
 /**
  * Clan activity log. Renders a most-recent-first feed of joins, departures,
  * rejoins, TH upgrades, and renames with name, player tag, event type, and
- * timestamp. Purged members show a "data removed" state. See concept/05-dashboard.md §8.
+ * timestamp. Purged members show a "data removed" state. See docs/concept/05-dashboard.md §8.
  */
 export function ClanLogPanel({
   log,

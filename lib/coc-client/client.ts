@@ -1,6 +1,6 @@
 /**
  * Thin, typed wrapper around the Clash of Clans API via the RoyaleAPI proxy.
- * See concept/02-api-and-proxy-strategy.md for why this goes through a proxy
+ * See docs/concept/02-api-and-proxy-strategy.md for why this goes through a proxy
  * at all — server-side only, never called from the browser.
  */
 
@@ -65,8 +65,8 @@ async function cocFetch<T>(path: string, revalidate?: number): Promise<T> {
 
 // --- Response shapes are intentionally partial: only fields this project
 // actually uses. Extend as new features need more fields, matching the
-// "isolate the response shape" principle in concept/01-tech-stack.md /
-// concept/12-Implemantation-plan-and-modularity.md. ---
+// "isolate the response shape" principle in docs/concept/01-tech-stack.md /
+// docs/concept/12-Implemantation-plan-and-modularity.md. ---
 
 export interface CocIconUrls {
   small?: string;

@@ -6,7 +6,7 @@
 ## Summary of Session
 
 Completed Phase 4 Step 4.0 (full quality and operational pass) + Step 4.1
-(PWA decision). All checkboxes in concept/12 are now marked complete or
+(PWA decision). All checkboxes in docs/concept/12 are now marked complete or
 deferred. Fixed the pre-existing `windows.test.ts` failure — all 147 tests
 now pass with 0 failures for the first time.
 

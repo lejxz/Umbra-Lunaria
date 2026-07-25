@@ -9,8 +9,8 @@ import {
 /**
  * POST /api/war/refresh
  *
- * Public (no administrator secret) — per concept/07 §"Refresh behavior" and
- * concept/01 "Read and write policy", a war refresh is a public request that
+ * Public (no administrator secret) — per docs/concept/07 §"Refresh behavior" and
+ * docs/concept/01 "Read and write policy", a war refresh is a public request that
  * is server-side rate-limited and cached. The browser never calls Supercell
  * directly.
  *

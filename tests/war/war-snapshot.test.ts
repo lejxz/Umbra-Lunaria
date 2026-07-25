@@ -10,7 +10,7 @@ import {
 
 /**
  * Tests for the pure snapshot-parsing + analysis logic extracted from
- * `lib/db/war-queries.ts` (concept/12 Step 1.1.C — "Add focused tests for
+ * `lib/db/war-queries.ts` (docs/concept/12 Step 1.1.C — "Add focused tests for
  * empty database, cold start, reset week, missing API values, partial
  * history, and purged-member log records"). See tests/README.md for the
  * strategy.

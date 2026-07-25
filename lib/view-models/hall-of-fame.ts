@@ -8,7 +8,7 @@
  * records from raw tables (war_attacks, capital_contributions, members,
  * membership_events) — no schema changes needed, the data already exists.
  *
- * See concept/05-dashboard.md §"Hall of Fame" + concept/12.
+ * See docs/concept/05-dashboard.md §"Hall of Fame" + docs/concept/12.
  *
  * The dashboard keeps its compact 5-award card (HallOfFameCard); this page
  * shows the full leaderboards + the additional record categories.

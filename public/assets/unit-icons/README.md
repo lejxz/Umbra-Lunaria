@@ -67,7 +67,7 @@ behind. Therefore:
    returns `null`. Do not silently render a broken image or a generic
    placeholder icon.
 3. The text fallback is part of the accessibility contract
-   (concept/10-mobile-support.md §Accessibility): color-only state is not
+   (docs/concept/10-mobile-support.md §Accessibility): color-only state is not
    allowed, and a missing icon must remain legible to screen readers.
 
 Example consumer pattern:

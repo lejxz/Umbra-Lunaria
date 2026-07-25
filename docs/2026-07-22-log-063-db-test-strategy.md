@@ -53,4 +53,4 @@ Resolved all 4 Category B deferred items (lines 57, 90, 130, 162) via the mocked
 - `bun run lint` — 0 errors (10 pre-existing warnings, no new warnings).
 
 ## Next Action
-All deferred items in the implementation plan are now resolved or explicitly suspended/dropped. The plan is clean. Continue to Step 1.5 — Capital (concept/08).
+All deferred items in the implementation plan are now resolved or explicitly suspended/dropped. The plan is clean. Continue to Step 1.5 — Capital (docs/concept/08).

@@ -1,7 +1,7 @@
 /**
  * Server-side query layer for the Members page.
  *
- * See concept/06-members.md and concept/12 Step 1.3.A/B.
+ * See docs/concept/06-members.md and docs/concept/12 Step 1.3.A/B.
  * All functions are server-only — they import @/lib/db.
  */
 
@@ -569,7 +569,7 @@ async function getProgressionDetail(playerTag: string) {
 
 /**
  * Compute rushed analysis from progression data using the API's maxLevel.
- * See concept/06-members.md §7 and lib/scoring/rushed.ts.
+ * See docs/concept/06-members.md §7 and lib/scoring/rushed.ts.
  */
 function computeRushedFromProgression(p: {
   troops: Array<{ name: string; level: number; maxLevel: number | null }>;

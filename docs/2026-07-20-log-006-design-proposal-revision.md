@@ -5,7 +5,7 @@
 
 ## Summary of Session
 
-Reworked `concept/design_proposal.html` because the previous proposal communicated individual colors and tokens but did not convincingly demonstrate the intended application. The replacement is a dashboard-first product direction with clearer hierarchy, controlled branding, and mobile behavior.
+Reworked `docs/concept/design_proposal.html` because the previous proposal communicated individual colors and tokens but did not convincingly demonstrate the intended application. The replacement is a dashboard-first product direction with clearer hierarchy, controlled branding, and mobile behavior.
 
 ## Work Completed
 - Replaced the token-gallery presentation with a focused Umbra Lunaria dashboard composition.

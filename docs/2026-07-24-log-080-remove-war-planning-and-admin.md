@@ -43,11 +43,11 @@ vestigial (empty, unused).
 - `.env.example` — removed the admin session section + generation instructions
 
 ### Concept docs updated
-- `concept/09-war-planning-and-auto-select.md` — STATUS: DROPPED banner at top
-- `concept/11-config-specification.md` — removed ADMIN env vars from the env
+- `docs/concept/09-war-planning-and-auto-select.md` — STATUS: DROPPED banner at top
+- `docs/concept/11-config-specification.md` — removed ADMIN env vars from the env
   block, removed the "Runtime settings" + "Administrative protection" sections,
   updated `minWarsForConfidentRanking` description (no longer "auto-select")
-- `concept/12-Implemantation-plan-and-modularity.md` — replaced Phase 2 + Step
+- `docs/concept/12-Implemantation-plan-and-modularity.md` — replaced Phase 2 + Step
   3.2 with DROPPED notices (checkboxes preserved as a record of what was built
   then removed); updated the delivery sequence; added a top-of-plan DROPPED note
 
@@ -60,7 +60,7 @@ vestigial (empty, unused).
   the schema as vestigial (empty, unused). Dropping them would require a
   destructive migration with no benefit.
 - **`@dnd-kit` dependency** — left in package.json (harmless; the package is
-  installed but no longer imported anywhere). Removed from concept/01's
+  installed but no longer imported anywhere). Removed from docs/concept/01's
   description as a planning tool.
 
 ## Verification

@@ -8,7 +8,7 @@ https://umbra-lunaria.vercel.app/
 
 ## Status
 
-**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~5 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the Supabase database. Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`concept/12-Implemantation-plan-and-modularity.md`](./concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`concept/00-overview.md`](./concept/00-overview.md).
+**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~5 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the Supabase database. Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`docs/concept/12-Implemantation-plan-and-modularity.md`](./docs/concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`docs/concept/00-overview.md`](./docs/concept/00-overview.md).
 
 ## Planned features
 
@@ -24,25 +24,25 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 
 | File | Covers |
 |---|---|
-| [`00-overview.md`](./concept/00-overview.md) | Scope, and the three constraints that shape the whole project — **read first** |
-| [`01-tech-stack.md`](./concept/01-tech-stack.md) | Stack choices and reasoning |
-| [`02-api-and-proxy-strategy.md`](./concept/02-api-and-proxy-strategy.md) | Why a proxy is required and how it works |
-| [`03-data-model-and-database.md`](./concept/03-data-model-and-database.md) | Schema and the 2-week member-data retention policy |
-| [`04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md) | How "activity" is inferred and polled |
-| [`05-dashboard.md`](./concept/05-dashboard.md) | Main Dashboard |
-| [`06-members.md`](./concept/06-members.md) | Members List, login activity graph, missed-attack tracking, career stats, rushed % methodology |
-| [`07-clan-war.md`](./concept/07-clan-war.md) | Clan War Details, war-prep opponent scouting |
-| [`08-clan-capital.md`](./concept/08-clan-capital.md) | Clan Capital Details, district-level upgrade tracking |
-| [`09-war-planning-and-auto-select.md`](./concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking, war-preference filtering |
-| [`10-mobile-support.md`](./concept/10-mobile-support.md) | Mobile support planning |
-| [`11-config-specification.md`](./concept/11-config-specification.md) | Config schema — clan tag, settings, env vars |
-| [`12-roadmap-and-modularity.md`](./concept/12-roadmap-and-modularity.md) | Build order, and staying resilient to game updates |
+| [`00-overview.md`](./docs/concept/00-overview.md) | Scope, and the three constraints that shape the whole project — **read first** |
+| [`01-tech-stack.md`](./docs/concept/01-tech-stack.md) | Stack choices and reasoning |
+| [`02-api-and-proxy-strategy.md`](./docs/concept/02-api-and-proxy-strategy.md) | Why a proxy is required and how it works |
+| [`03-data-model-and-database.md`](./docs/concept/03-data-model-and-database.md) | Schema and the 2-week member-data retention policy |
+| [`04-activity-tracking-and-polling.md`](./docs/concept/04-activity-tracking-and-polling.md) | How "activity" is inferred and polled |
+| [`05-dashboard.md`](./docs/concept/05-dashboard.md) | Main Dashboard |
+| [`06-members.md`](./docs/concept/06-members.md) | Members List, login activity graph, missed-attack tracking, career stats, rushed % methodology |
+| [`07-clan-war.md`](./docs/concept/07-clan-war.md) | Clan War Details, war-prep opponent scouting |
+| [`08-clan-capital.md`](./docs/concept/08-clan-capital.md) | Clan Capital Details, district-level upgrade tracking |
+| [`09-war-planning-and-auto-select.md`](./docs/concept/09-war-planning-and-auto-select.md) | War planning + auto-select ranking, war-preference filtering |
+| [`10-mobile-support.md`](./docs/concept/10-mobile-support.md) | Mobile support planning |
+| [`11-config-specification.md`](./docs/concept/11-config-specification.md) | Config schema — clan tag, settings, env vars |
+| [`12-roadmap-and-modularity.md`](./docs/concept/12-roadmap-and-modularity.md) | Build order, and staying resilient to game updates |
 
 ## Requirements
 
 - A Clash of Clans account, with a clan to track (leadership access isn't required to *read* public clan data via the API, but is required if the clan's war log is private and you want it public — see below).
 - A Supercell ID / Clash of Clans developer account to create an API key.
-- A GitHub account (for the repo). The scheduled polling now runs on a **third-party cron-job web service** (e.g. cron-job.org) — see [`concept/04-activity-tracking-and-polling.md`](./concept/04-activity-tracking-and-polling.md).
+- A GitHub account (for the repo). The scheduled polling now runs on a **third-party cron-job web service** (e.g. cron-job.org) — see [`docs/concept/04-activity-tracking-and-polling.md`](./docs/concept/04-activity-tracking-and-polling.md).
 - A Vercel account, for hosting.
 - A Supabase account to host the Postgres database.
 
@@ -60,7 +60,7 @@ Do these in order — later steps need values from earlier ones.
 
 ## Getting a Clash of Clans API key — step by step
 
-The Clash of Clans API is free, but every key is locked to specific IP addresses, which is exactly the problem this project routes around using a proxy (full explanation in [`concept/02-api-and-proxy-strategy.md`](./concept/02-api-and-proxy-strategy.md)). Follow these steps in order:
+The Clash of Clans API is free, but every key is locked to specific IP addresses, which is exactly the problem this project routes around using a proxy (full explanation in [`docs/concept/02-api-and-proxy-strategy.md`](./docs/concept/02-api-and-proxy-strategy.md)). Follow these steps in order:
 
 1. **Go to the developer portal:** [developer.clashofclans.com](https://developer.clashofclans.com/) and sign in with a Supercell ID (the same account system used for the game — link it in-game under Settings → More Settings if you haven't already).
 2. **Create an account** on the developer portal if this is your first time (separate step from just having a Supercell ID — the portal needs its own registration).
@@ -68,12 +68,12 @@ The Clash of Clans API is free, but every key is locked to specific IP addresses
 4. Fill in the key creation form:
    - **Key Name:** anything identifiable, e.g. `Umbra Lunaria Production`.
    - **Description:** optional, e.g. `Clan dashboard hosted on Vercel`.
-   - **Allowed IP Addresses:** this is the field that matters. **Do not try to guess or enter a Vercel IP** — it changes constantly and this will not work. Enter RoyaleAPI's fixed proxy IP instead: `45.79.218.79`. (Full reasoning in [`concept/02-api-and-proxy-strategy.md`](./concept/02-api-and-proxy-strategy.md).)
+   - **Allowed IP Addresses:** this is the field that matters. **Do not try to guess or enter a Vercel IP** — it changes constantly and this will not work. Enter RoyaleAPI's fixed proxy IP instead: `45.79.218.79`. (Full reasoning in [`docs/concept/02-api-and-proxy-strategy.md`](./docs/concept/02-api-and-proxy-strategy.md).)
 5. Click **Create Key**. Copy the generated token immediately — the full token is only shown once. If you lose it, you'll need to revoke and recreate the key.
-6. **Do not commit this token to the repo.** It goes into Vercel's environment variables (`COC_API_TOKEN`) and into the third-party cron-job service's request headers, both described in [`concept/11-config-specification.md`](./concept/11-config-specification.md) — never in a checked-in file.
-7. **Find your clan's tag:** in-game, open your clan's info screen — the tag is shown under the clan name, starting with `#`. You'll need it for `config/clan.config.ts` (see [`concept/11-config-specification.md`](./concept/11-config-specification.md)).
-8. **Check whether your clan's war log is public:** Clan Settings (in-game, leader/co-leader only) → War Log visibility. If it's private, historical war results before this tool starts running won't be recoverable through the API — see the note in [`concept/07-clan-war.md`](./concept/07-clan-war.md). Setting it to public is optional but recommended if you want a head start on war history.
-9. Once your Vercel project is set up with the env vars from [`concept/11-config-specification.md`](./concept/11-config-specification.md), all Clash of Clans API calls in this project are routed through `https://cocproxy.royaleapi.dev` automatically — you should never need to touch the raw `api.clashofclans.com` URL directly in application code.
+6. **Do not commit this token to the repo.** It goes into Vercel's environment variables (`COC_API_TOKEN`) and into the third-party cron-job service's request headers, both described in [`docs/concept/11-config-specification.md`](./docs/concept/11-config-specification.md) — never in a checked-in file.
+7. **Find your clan's tag:** in-game, open your clan's info screen — the tag is shown under the clan name, starting with `#`. You'll need it for `config/clan.config.ts` (see [`docs/concept/11-config-specification.md`](./docs/concept/11-config-specification.md)).
+8. **Check whether your clan's war log is public:** Clan Settings (in-game, leader/co-leader only) → War Log visibility. If it's private, historical war results before this tool starts running won't be recoverable through the API — see the note in [`docs/concept/07-clan-war.md`](./docs/concept/07-clan-war.md). Setting it to public is optional but recommended if you want a head start on war history.
+9. Once your Vercel project is set up with the env vars from [`docs/concept/11-config-specification.md`](./docs/concept/11-config-specification.md), all Clash of Clans API calls in this project are routed through `https://cocproxy.royaleapi.dev` automatically — you should never need to touch the raw `api.clashofclans.com` URL directly in application code.
 
 **Key rotation note:** if you ever need to redeploy from a different environment or the key stops working, the fix is almost always in this same portal — either the key was revoked, or (far more commonly) something changed and requests are arriving from an IP that isn't `45.79.218.79`, which usually means a request bypassed the proxy somewhere. Check `COC_API_BASE_URL` first.
 
@@ -111,7 +111,7 @@ Then: Actions tab → "Poll Clash of Clans data" → **Run workflow**.
 
 ## Configuration
 
-Full schema, all fields explained, in [`concept/11-config-specification.md`](./concept/11-config-specification.md). Summary: a non-secret `config/clan.config.ts` file (clan tag, timezone, retention days, feature toggles) plus secret environment variables (API token, database URL, ingestion/cron secrets) that never get committed. No user authentication — the dashboard and all actions are open access.
+Full schema, all fields explained, in [`docs/concept/11-config-specification.md`](./docs/concept/11-config-specification.md). Summary: a non-secret `config/clan.config.ts` file (clan tag, timezone, retention days, feature toggles) plus secret environment variables (API token, database URL, ingestion/cron secrets) that never get committed. No user authentication — the dashboard and all actions are open access.
 
 ## Local development
 
@@ -129,7 +129,7 @@ Migrations run automatically as part of `npm run build` (and therefore on every 
 
 ## Mobile support
 
-This is planned as a single responsive web app (no separate native app or codebase), designed mobile-first, since most members will check it on a phone. Full reasoning and the specific places it affects earlier design decisions (drag-and-drop, charts, tables, modals) are in [`concept/10-mobile-support.md`](./concept/10-mobile-support.md).
+This is planned as a single responsive web app (no separate native app or codebase), designed mobile-first, since most members will check it on a phone. Full reasoning and the specific places it affects earlier design decisions (drag-and-drop, charts, tables, modals) are in [`docs/concept/10-mobile-support.md`](./docs/concept/10-mobile-support.md).
 
 ## License
 

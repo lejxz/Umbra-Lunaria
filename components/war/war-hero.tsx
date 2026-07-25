@@ -7,7 +7,7 @@ import { IconSwords, IconWarEmpty } from "@/components/ui/icons";
 import { WarRefreshButton } from "./war-refresh-button";
 
 /**
- * War hero — the top of the War Center always answers (concept/07 §"landing
+ * War hero — the top of the War Center always answers (docs/concept/07 §"landing
  * state"). Improved layout: a prominent state banner + countdown, a clean VS
  * matchup with a star-progress bar showing the lead, and compact stat chips.
  *

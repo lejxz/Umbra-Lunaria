@@ -1,7 +1,7 @@
 /**
  * War ingestion + refresh — shared by the ingest route (/api/ingest) and the
- * public refresh route (/api/war/refresh). See concept/07-clan-war.md and
- * concept/12 Step 1.4.A.
+ * public refresh route (/api/war/refresh). See docs/concept/07-clan-war.md and
+ * docs/concept/12 Step 1.4.A.
  *
  * Responsibilities:
  *   - parseCoCTime / computeWarResult: pure helpers.
@@ -242,7 +242,7 @@ export async function syncCurrentWar(
  * duplicated. Returns the number of entries processed and any error.
  *
  * No-op (returns availability reason) when the war log is private (403) or the
- * clan row says isWarLogPublic = false. See concept/07 §"War history".
+ * clan row says isWarLogPublic = false. See docs/concept/07 §"War history".
  */
 export async function backfillWarLog(
   clanTag: string,

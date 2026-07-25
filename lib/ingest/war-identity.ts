@@ -1,6 +1,6 @@
 /**
  * War identity matching — pure logic extracted from `syncCurrentWar` so it can
- * be unit-tested without a database (concept/12 Step 1.0.D / the "mocked
+ * be unit-tested without a database (docs/concept/12 Step 1.0.D / the "mocked
  * query boundary" test strategy — see tests/README.md).
  *
  * `matchExistingWar` implements the stable-identity rule that makes war sync

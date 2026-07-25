@@ -6,7 +6,7 @@ import { EmptyState } from "./empty-state";
 
 /**
  * DataTable — the shared table primitive used across the Members, War, and
- * Capital surfaces. See concept/10-mobile-support.md §4 (member tables become
+ * Capital surfaces. See docs/concept/10-mobile-support.md §4 (member tables become
  * cards below the `md` breakpoint) and §Accessibility (rows are keyboard
  * operable, hover detail has tap + keyboard equivalent).
  *
@@ -189,7 +189,7 @@ export function DataTable<T>({
         </tbody>
       </TableShell>
 
-      {/* Mobile: stacked cards (below md). See concept/10 §4. */}
+      {/* Mobile: stacked cards (below md). See docs/concept/10 §4. */}
       <ul className="space-y-3 md:hidden" aria-label={ariaLabel}>
         {sortedRows.map((row, index) => {
           const key = rowKey(row, index);

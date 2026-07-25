@@ -28,7 +28,7 @@ Fixed a critical bug in the donation chart where all bars showed the same amount
 
 ## Decisions Made
 
-- **Per-bucket delta computation**: The reset-aware donation rule from concept/04 applies to time windows, but the chart needs per-bucket deltas. Implemented the same rule at the bucket level: each bucket gets its own baseline (last snapshot before bucket start) and computes deltas within the bucket.
+- **Per-bucket delta computation**: The reset-aware donation rule from docs/concept/04 applies to time windows, but the chart needs per-bucket deltas. Implemented the same rule at the bucket level: each bucket gets its own baseline (last snapshot before bucket start) and computes deltas within the bucket.
 - **Fetch all snapshots up to win.to**: Previously only fetched in-window snapshots. Now fetches all snapshots up to `win.to` so the baseline for the first bucket is available. This is slightly more data but ensures correct delta computation.
 - **Top donors on the right**: Moving the leaderboard to the right side of the chart gives the chart more horizontal space and more height, making it the visual focus. The 240px fixed width for the donors column keeps it compact.
 

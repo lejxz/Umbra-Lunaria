@@ -1,10 +1,10 @@
 /**
- * Typed view models for the War Center (concept/07-clan-war.md).
+ * Typed view models for the War Center (docs/concept/07-clan-war.md).
  *
  * Page components receive these shapes — never raw Drizzle rows or raw CoC API
  * payloads. Every value is explicitly typed so the UI can render loading,
  * empty, unavailable, private-war-log, stale-capture, and refresh-error
- * states without guessing. See concept/00 "Product contract".
+ * states without guessing. See docs/concept/00 "Product contract".
  */
 
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";

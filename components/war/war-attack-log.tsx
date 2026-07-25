@@ -7,7 +7,7 @@ import { IconSwords } from "@/components/ui/icons";
 /**
  * Attack log — every attack in the current war, ordered by attack order, with
  * attacker → defender, map positions, stars, destruction, and duration
- * (concept/07 §"Attack log"). Own-clan attackers link to the shared member
+ * (docs/concept/07 §"Attack log"). Own-clan attackers link to the shared member
  * detail sheet; opponent attackers are not clickable.
  *
  * Improved: tighter rows, colored star pills, clearer attacker/defender

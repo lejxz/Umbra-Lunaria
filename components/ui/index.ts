@@ -3,7 +3,7 @@
  * rather than reaching into individual files so the surface stays stable as
  * files move.
  *
- * See concept/12-Implemantation-plan-and-modularity.md for the module
+ * See docs/concept/12-Implemantation-plan-and-modularity.md for the module
  * boundary contract.
  */
 

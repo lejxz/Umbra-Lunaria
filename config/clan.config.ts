@@ -22,11 +22,11 @@ export const clanConfig = {
   timezone: "Asia/Manila",
 
   // How long a departed member's data is retained before the daily purge
-  // job deletes it. See concept/03-data-model-and-database.md.
+  // job deletes it. See docs/concept/03-data-model-and-database.md.
   memberRetentionDays: 14,
 
   // Target poll cadence, in minutes. Informational only — the actual
-  // schedule lives in the third-party cron-job service (see concept/04);
+  // schedule lives in the third-party cron-job service (see docs/concept/04);
   // changing this value alone does not change anything at runtime.
   pollIntervalMinutes: 5,
 

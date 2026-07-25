@@ -5,15 +5,15 @@
 
 ## Summary of Session
 
-Rebuilt the product concept around `concept/final-feature-list.md` so the dashboard, members, war, Capital, planning, data model, polling, mobile, and configuration documents share one finalized product contract. The existing implementation-plan document was intentionally left unchanged.
+Rebuilt the product concept around `docs/concept/final-feature-list.md` so the dashboard, members, war, Capital, planning, data model, polling, mobile, and configuration documents share one finalized product contract. The existing implementation-plan document was intentionally left unchanged.
 
 ## Work Completed
 
 - Updated concept documents `00` through `11` to distinguish direct API facts, tracked history, derived metrics, and unavailable data.
 - Finalized dashboard hierarchy, reset-aware donation rules, Member Activity Score, member detail behavior, war/CWL behavior, Capital scope, planning rules, mobile requirements, and administration boundaries.
-- Updated `concept/design_proposal.html` to visually represent the finalized dashboard hierarchy and current clan/API examples.
+- Updated `docs/concept/design_proposal.html` to visually represent the finalized dashboard hierarchy and current clan/API examples.
 - Corrected stale references to the renamed implementation-plan file and confirmed all internal Markdown links resolve.
-- Confirmed `concept/12-Implemantation-plan-and-modularity.md` has no changes.
+- Confirmed `docs/concept/12-Implemantation-plan-and-modularity.md` has no changes.
 
 ## Decisions Made
 

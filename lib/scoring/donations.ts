@@ -4,7 +4,7 @@
  * Donation counters reset weekly (Supercell side). A naive `last - first`
  * calculation across a window that spans a reset produces a wrong, often
  * negative, number. Instead, donations are summed from consecutive snapshot
- * pairs using the rule documented in concept/04-activity-tracking-and-polling.md
+ * pairs using the rule documented in docs/concept/04-activity-tracking-and-polling.md
  * under "Reset-aware donation accounting":
  *
  * ```text
@@ -73,7 +73,7 @@ export function calculateDonationDelta(
  * in-window capture would be lost.
  *
  * Window boundaries should be computed in the clan timezone and converted to
- * UTC before calling this function (see concept/04, "Time-window boundaries
+ * UTC before calling this function (see docs/concept/04, "Time-window boundaries
  * are calculated in the clan timezone, then queried as UTC timestamps"). The
  * function itself is timezone-agnostic — it only compares absolute
  * instants.

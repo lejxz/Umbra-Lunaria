@@ -5,7 +5,7 @@
 
 ## Summary of Session
 
-Pulled recent changes (logs 039-042 with clan identity redesigns). Reviewed the codebase for hardcoded values — found hardcoded `"Asia/Manila"` timezone strings throughout components (should use `clanConfig.timezone` but that's a larger refactor). Redesigned the member detail popup: merged Career section into Profile, improved Activity section, implemented rushed analysis using the API's `maxLevel` field (no longer requires separate cap reference files), and redesigned all sections for consistency. Updated concept/06 and the implementation plan.
+Pulled recent changes (logs 039-042 with clan identity redesigns). Reviewed the codebase for hardcoded values — found hardcoded `"Asia/Manila"` timezone strings throughout components (should use `clanConfig.timezone` but that's a larger refactor). Redesigned the member detail popup: merged Career section into Profile, improved Activity section, implemented rushed analysis using the API's `maxLevel` field (no longer requires separate cap reference files), and redesigned all sections for consistency. Updated docs/concept/06 and the implementation plan.
 
 ## Work Completed
 
@@ -47,8 +47,8 @@ Pulled recent changes (logs 039-042 with clan identity redesigns). Reviewed the 
 New order: Profile → Activity → Donations → War → Progression → Rushed → Achievements
 
 ### Docs updated
-- `concept/06-members.md` §7: Updated rushed analysis to note it uses API maxLevel, not TH-specific cap files
-- `concept/12-Implemantation-plan-and-modularity.md` Step 3.0: Checked off rushed implementation items, noted TH-specific caps as future enhancement
+- `docs/concept/06-members.md` §7: Updated rushed analysis to note it uses API maxLevel, not TH-specific cap files
+- `docs/concept/12-Implemantation-plan-and-modularity.md` Step 3.0: Checked off rushed implementation items, noted TH-specific caps as future enhancement
 
 ### Code quality
 - Removed unused `Link` imports from capital-summary-card, current-war-card, war-record-card
