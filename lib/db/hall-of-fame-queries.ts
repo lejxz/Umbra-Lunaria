@@ -108,32 +108,37 @@ async function getLastComputedAt(): Promise<Date | null> {
  * Categories:
  *   - Most raid gold all-time (capital_contributions)
  *   - Most raid medals all-time (capital_contributions)
- *   - Highest single-raid-weekend score (capital_contributions max per season)
  *   - Most bonus attacks used (capital_contributions.bonusAttackLimit)
  *   - Raid MVP per season (top looter each season — only the latest N seasons)
- *   - Most war attacks used (war_participants)
+ *   - Most seasons participated (capital_contributions count per member)
+ *   - Best gold per attack (capital_contributions gold / attacks efficiency)
  *   - Perfect-attendance wars (war_participants where used === allowed)
  *   - Fastest 3-star attack (war_attacks where stars=3, min duration)
  *   - Longest-tenured member (membership_events earliest join, still active)
+ *
+ * Removed:
+ *   - Most war attacks used (war_participants) — dropped per user request.
+ *   - Highest raid score (capital_contributions max per season) — redundant
+ *     with The Capitalist cached award (same metric).
  */
 async function getLiveRecords(): Promise<LiveRecordCategory[]> {
   const [
     raidGold,
     raidMedals,
-    highestRaidScore,
     mostBonusAttacks,
     raidMvp,
-    warAttacksUsed,
+    mostSeasons,
+    bestGoldPerAttack,
     perfectAttendance,
     fastestThreeStar,
     longestTenure,
   ] = await Promise.all([
     safe("most raid gold", computeMostRaidGold()),
     safe("most raid medals", computeMostRaidMedals()),
-    safe("highest raid score", computeHighestRaidScore()),
     safe("most bonus attacks", computeMostBonusAttacks()),
     safe("raid MVP", computeRaidMvp()),
-    safe("most war attacks", computeMostWarAttacks()),
+    safe("most seasons", computeMostSeasons()),
+    safe("best gold per attack", computeBestGoldPerAttack()),
     safe("perfect attendance", computePerfectAttendance()),
     safe("fastest 3-star", computeFastestThreeStar()),
     safe("longest tenure", computeLongestTenure()),
@@ -142,10 +147,10 @@ async function getLiveRecords(): Promise<LiveRecordCategory[]> {
   return [
     raidGold,
     raidMedals,
-    highestRaidScore,
     mostBonusAttacks,
     raidMvp,
-    warAttacksUsed,
+    mostSeasons,
+    bestGoldPerAttack,
     perfectAttendance,
     fastestThreeStar,
     longestTenure,
@@ -217,43 +222,6 @@ async function computeMostRaidMedals(): Promise<LiveRecordCategory | null> {
       name: r.name,
       value: r.total,
       valueLabel: `${r.total.toLocaleString()} 🏅`,
-    })),
-  };
-}
-
-// ── Highest single-raid-weekend score ──────────────────────────────────
-// The best gold-looted total a single player achieved in ONE raid weekend
-// (not all-time — that's "Most Raid Gold" above). This is the "single best
-// performance" record — who had the biggest weekend ever.
-async function computeHighestRaidScore(): Promise<LiveRecordCategory | null> {
-  const rows = await db
-    .select({
-      playerTag: capitalContributions.playerTag,
-      name: members.name,
-      best: sql<number>`max(${capitalContributions.capitalResourcesLooted})::int`,
-      seasonStart: capitalRaidSeasons.startTime,
-    })
-    .from(capitalContributions)
-    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
-    .innerJoin(capitalRaidSeasons, eq(capitalRaidSeasons.id, capitalContributions.raidSeasonId))
-    .groupBy(capitalContributions.playerTag, members.name, capitalRaidSeasons.startTime)
-    .orderBy(desc(sql`max(${capitalContributions.capitalResourcesLooted})`))
-    .limit(10);
-
-  if (rows.length === 0) return null;
-  return {
-    key: "highest-raid-score",
-    title: "Highest Raid Score",
-    description: "Most gold looted by one player in a single raid weekend.",
-    icon: "coins",
-    entries: rows.map((r) => ({
-      playerTag: r.playerTag,
-      name: r.name,
-      value: r.best,
-      valueLabel: `${r.best.toLocaleString()} gold`,
-      metaLabel: r.seasonStart
-        ? `weekend of ${r.seasonStart.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
-        : null,
     })),
   };
 }
@@ -337,34 +305,72 @@ async function computeRaidMvp(): Promise<LiveRecordCategory | null> {
   };
 }
 
-// ── Most war attacks used ────────────────────────────────────────────────
-async function computeMostWarAttacks(): Promise<LiveRecordCategory | null> {
+// ── Most seasons participated ──────────────────────────────────────────
+// Count of distinct raid seasons each member contributed to — the loyal
+// raiders who show up every weekend.
+async function computeMostSeasons(): Promise<LiveRecordCategory | null> {
   const rows = await db
     .select({
-      playerTag: warParticipants.playerTag,
+      playerTag: capitalContributions.playerTag,
       name: members.name,
-      total: sql<number>`coalesce(sum(${warParticipants.attacksUsed}), 0)::int`,
-      wars: sql<number>`count(*)::int`,
+      seasons: sql<number>`count(distinct ${capitalContributions.raidSeasonId})::int`,
     })
-    .from(warParticipants)
-    .innerJoin(members, eq(members.playerTag, warParticipants.playerTag))
-    .groupBy(warParticipants.playerTag, members.name)
-    .orderBy(desc(sql`sum(${warParticipants.attacksUsed})`))
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .groupBy(capitalContributions.playerTag, members.name)
+    .orderBy(desc(sql`count(distinct ${capitalContributions.raidSeasonId})`))
     .limit(10);
 
   if (rows.length === 0) return null;
   return {
-    key: "most-war-attacks",
-    title: "Most War Attacks",
-    description: "Total attacks used across all tracked wars.",
-    icon: "swords",
+    key: "most-seasons",
+    title: "Most Seasons",
+    description: "Most raid weekends attended.",
+    icon: "users",
     entries: rows.map((r) => ({
       playerTag: r.playerTag,
       name: r.name,
-      value: r.total,
-      valueLabel: `${r.total} attacks`,
-      metaLabel: `in ${r.wars} wars`,
+      value: r.seasons,
+      valueLabel: `${r.seasons} seasons`,
     })),
+  };
+}
+
+// ── Best gold per attack ──────────────────────────────────────────────
+// Gold looted divided by attacks used — the most efficient looter. Requires
+// at least 1 attack to avoid divide-by-zero. Members with 0 attacks are
+// excluded.
+async function computeBestGoldPerAttack(): Promise<LiveRecordCategory | null> {
+  const rows = await db
+    .select({
+      playerTag: capitalContributions.playerTag,
+      name: members.name,
+      totalGold: sql<number>`coalesce(sum(${capitalContributions.capitalResourcesLooted}), 0)::int`,
+      totalAttacks: sql<number>`coalesce(sum(${capitalContributions.attacksUsed}), 0)::int`,
+    })
+    .from(capitalContributions)
+    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
+    .groupBy(capitalContributions.playerTag, members.name)
+    .having(sql`coalesce(sum(${capitalContributions.attacksUsed}), 0) > 0`)
+    .orderBy(desc(sql`coalesce(sum(${capitalContributions.capitalResourcesLooted}), 0)::float / coalesce(sum(${capitalContributions.attacksUsed}), 1)::float`))
+    .limit(10);
+
+  if (rows.length === 0) return null;
+  return {
+    key: "best-gold-per-attack",
+    title: "Best Gold/Attack",
+    description: "Most gold per attack — efficiency leader.",
+    icon: "coins",
+    entries: rows.map((r) => {
+      const efficiency = r.totalAttacks > 0 ? Math.round(r.totalGold / r.totalAttacks) : 0;
+      return {
+        playerTag: r.playerTag,
+        name: r.name,
+        value: efficiency,
+        valueLabel: `${efficiency.toLocaleString()} gold/atk`,
+        metaLabel: `${r.totalGold.toLocaleString()} gold in ${r.totalAttacks} atk`,
+      };
+    }),
   };
 }
 

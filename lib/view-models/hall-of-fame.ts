@@ -74,7 +74,7 @@ export interface LiveRecordCategory {
   /** Short description of what the record measures. */
   description: string;
   /** Icon name (mapped to a Lucide icon in the UI). */
-  icon: "coins" | "swords" | "flame" | "gift" | "crown" | "clock" | "trophy" | "zap";
+  icon: "coins" | "swords" | "flame" | "gift" | "crown" | "clock" | "trophy" | "zap" | "users";
   /** Ranked entries, highest first. */
   entries: LiveRecordEntry[];
 }
