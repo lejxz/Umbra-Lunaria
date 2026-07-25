@@ -319,7 +319,12 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
  */
 export async function getRaidTimer(): Promise<RaidTimer | null> {
   try {
-    const res = await cocClient.getCapitalRaidSeasons(clanConfig.clanTag);
+    // Pass revalidate=300 so the fetch uses next: { revalidate: 300 } instead
+    // of cache: "no-store". This keeps the capital page ISR-cached — without
+    // it, the "no-store" fetch would force the page to be dynamically
+    // rendered on every request (no ISR). The timer data can be stale by up
+    // to 5 min, which is fine for a countdown display.
+    const res = await cocClient.getCapitalRaidSeasons(clanConfig.clanTag, 300);
     const latest = res.items?.[0];
     if (!latest || latest.state !== "inProgress") return null;
     const start = parseCoCTime(latest.startTime);

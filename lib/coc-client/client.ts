@@ -23,19 +23,37 @@ function encodeTag(tag: string): string {
   return encodeURIComponent(tag.startsWith("#") ? tag : `#${tag}`);
 }
 
-async function cocFetch<T>(path: string): Promise<T> {
+/**
+ * Fetch a CoC API path.
+ *
+ * @param path — the API path (already URL-encoded by the caller).
+ * @param revalidate — optional ISR revalidation period in seconds. When set,
+ *   the fetch uses `next: { revalidate }` instead of `cache: "no-store"`,
+ *   so the result is cached in the Next.js Data Cache and the page stays
+ *   ISR-cached. Omit (default) for fresh data on every call (used by the
+ *   ingest + refresh routes, which need live data and aren't page-render paths).
+ */
+async function cocFetch<T>(path: string, revalidate?: number): Promise<T> {
   if (!TOKEN) {
     throw new Error(
       "COC_API_TOKEN is not set. See .env.example and README.md 'Getting a Clash of Clans API key'.",
     );
   }
 
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const fetchOptions: RequestInit & { next?: { revalidate: number } } = {
     headers: { Authorization: `Bearer ${TOKEN}` },
-    // No caching at this layer — callers (ingest route, refresh route)
-    // decide their own freshness rules.
-    cache: "no-store",
-  });
+  };
+
+  if (revalidate !== undefined) {
+    // ISR-cached fetch — the result is cached for `revalidate` seconds.
+    // This keeps the page ISR-cached (the fetch doesn't force dynamic rendering).
+    fetchOptions.next = { revalidate };
+  } else {
+    // No caching — fresh data on every call (ingest route, refresh route).
+    fetchOptions.cache = "no-store";
+  }
+
+  const res = await fetch(`${BASE_URL}${path}`, fetchOptions);
 
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -342,8 +360,9 @@ export const cocClient = {
   getCwlWar: (warTag: string) =>
     cocFetch<CocCwlWar>(`/clanwarleagues/wars/${encodeTag(warTag)}`),
 
-  getCapitalRaidSeasons: (clanTag: string) =>
+  getCapitalRaidSeasons: (clanTag: string, revalidate?: number) =>
     cocFetch<{ items: CocCapitalRaidSeason[] }>(
       `/clans/${encodeTag(clanTag)}/capitalraidseasons`,
+      revalidate,
     ),
 };
