@@ -33,9 +33,8 @@ import {
 /**
  * POST /api/ingest
  *
- * Called by the GitHub Actions workflow (.github/workflows/poll.yml) on two
- * schedules: a light poll every 15 min, and a daily batch. See
- * concept/04-activity-tracking-and-polling.md for the full design.
+ * Called by the third-party cron-job service (cron-job.org) every 5 min for
+ * the light poll, and once daily for the batch. See concept/04.
  *
  * Auth: `Authorization: Bearer <INGEST_SECRET>`.
  * Body: `{ batch?: boolean }` — `true` on the daily-batch cron trigger.
@@ -45,10 +44,25 @@ import {
  * batch) are best-effort: each is wrapped in try/catch and the rest of the
  * poll continues. See concept/04 "Cold starts, partial data, and failures".
  */
+
+// Vercel Hobby tier caps function duration at 10s by default. The daily
+// batch (full player-detail fetches for 40+ members) can take 20-30s, so
+// raise the limit. The light poll finishes in <5s regardless.
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get("authorization");
   const expected = `Bearer ${process.env.INGEST_SECRET}`;
   if (!process.env.INGEST_SECRET || authHeader !== expected) {
+    // Observability: log whether this was a missing secret (config issue) vs
+    // a wrong-secret request (cron service misconfigured). This disambiguates
+    // "no calls arriving" from "calls arriving with wrong secret" in Vercel
+    // runtime logs, which is the single most useful diagnostic for overdue polls.
+    if (!process.env.INGEST_SECRET) {
+      console.warn("[ingest] rejected: INGEST_SECRET not configured");
+    } else {
+      console.warn("[ingest] rejected: auth mismatch (wrong secret or no header)");
+    }
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

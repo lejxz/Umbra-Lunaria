@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
 import { WarRecordCard } from "./war-record-card";
@@ -12,10 +13,10 @@ import { AttentionPanel } from "./needs-attention";
 import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
 import { MemberDetailSheet } from "./member-detail-sheet";
-import { HallOfFameCard } from "./hall-of-fame-card";
 import { WarPerformanceChart } from "./war-performance-chart";
 import { WarAttackDistributionChart } from "./war-attack-distribution";
 import { RosterSizeChart } from "./roster-size-chart";
+import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -182,9 +183,9 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         />
       </div>
 
-      {/* Row 6: Hall of Fame — full width */}
+      {/* Row 6: Hall of Fame — link to the dedicated page */}
       <div className="mt-5">
-        <HallOfFameCard data={data.hallOfFame} onMemberClick={setSelectedMember} />
+        <HallOfFameLink />
       </div>
 
       {/* Row 7: Navigation summary — full width strip */}
@@ -329,5 +330,34 @@ function Chip({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </div>
+  );
+}
+
+/**
+ * Compact Hall of Fame link banner — replaces the full HoF card that used to
+ * live on the dashboard. The full leaderboards now live at /hall-of-fame.
+ */
+function HallOfFameLink() {
+  return (
+    <Link
+      href="/hall-of-fame"
+      className="glass focus-ring flex items-center justify-between gap-4 rounded-2xl p-5 transition hover:border-umbra-purple/40"
+    >
+      <div className="flex items-center gap-4">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-umbra-purple/15 text-umbra-purple">
+          <IconTrophy className="h-5 w-5" />
+        </span>
+        <div>
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            All-time clan records
+          </p>
+          <h3 className="font-display text-lg text-umbra-lilac">Hall of Fame</h3>
+        </div>
+      </div>
+      <span className="flex items-center gap-1.5 font-mono text-label uppercase tracking-wider text-umbra-muted">
+        View all
+        <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
+      </span>
+    </Link>
   );
 }
