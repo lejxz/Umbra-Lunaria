@@ -321,32 +321,49 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
 export async function getRaidTimer(): Promise<RaidTimer | null> {
   try {
     // Pass revalidate=300 so the fetch uses next: { revalidate: 300 } instead
-    // of cache: "no-store". This keeps the capital page ISR-cached — without
-    // it, the "no-store" fetch would force the page to be dynamically
-    // rendered on every request (no ISR). The timer data can be stale by up
-    // to 5 min, which is fine for a countdown display.
+    // of cache: "no-store". This keeps the capital page ISR-cached.
     const res = await cocClient.getCapitalRaidSeasons(clanConfig.clanTag, 300);
-    const latest = res.items?.[0];
-    if (!latest) return null;
+    const items = res.items ?? [];
+    if (items.length === 0) return null;
 
-    const start = parseCoCTime(latest.startTime);
-    const end = parseCoCTime(latest.endTime);
-    if (!start || !end) return null;
+    const now = Date.now();
 
-    if (latest.state === "inProgress") {
-      return { state: "inProgress", startTime: start, endTime: end };
+    // Parse all seasons into {start, end, state} so we can search reliably.
+    // The API returns seasons newest-first, but we don't rely on that — we
+    // scan for the season whose time window contains `now` (active raid),
+    // falling back to the most recent ended season (for the "next raid"
+    // estimate).
+    const parsed = items
+      .map((s) => ({
+        start: parseCoCTime(s.startTime),
+        end: parseCoCTime(s.endTime),
+        state: s.state,
+      }))
+      .filter((s): s is { start: Date; end: Date; state: string } => s.start !== null && s.end !== null)
+      .sort((a, b) => b.start.getTime() - a.start.getTime()); // newest first
+
+    if (parsed.length === 0) return null;
+
+    // Find an active raid: either the API says state="inProgress", or the
+    // current time falls within a season's [start, end) window.
+    const active = parsed.find(
+      (s) => s.state === "inProgress" || (now >= s.start.getTime() && now < s.end.getTime()),
+    );
+
+    if (active) {
+      return { state: "inProgress", startTime: active.start, endTime: active.end };
     }
 
-    // No raid in progress — estimate the next raid weekend.
-    // Capital raid weekends are weekly: the next one starts ~7 days after
-    // the last season's startTime. The duration is typically ~3 days
+    // No raid in progress — estimate the next raid weekend from the most
+    // recent season. Capital raid weekends are weekly: the next one starts
+    // ~7 days after the last season's startTime. Duration is ~3 days
     // (Friday → Monday), so endTime = nextStart + 3 days.
-    const nextStart = new Date(start.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const latest = parsed[0]!;
+    const nextStart = new Date(latest.start.getTime() + 7 * 24 * 60 * 60 * 1000);
     const nextEnd = new Date(nextStart.getTime() + 3 * 24 * 60 * 60 * 1000);
 
     // Don't show "next raid" if it's more than 7 days away (the estimate
     // breaks down if the API returns stale data or the clan is new).
-    const now = Date.now();
     if (nextStart.getTime() - now > 7 * 24 * 60 * 60 * 1000) return null;
 
     return { state: "next", startTime: nextStart, endTime: nextEnd };
