@@ -32,7 +32,7 @@ export function computeWindow(kind: WindowKind, now: Date = new Date()): TimeWin
 
   switch (kind) {
     case "24h":
-      from.setUTCHours(from.getUTCHours() - 23);
+      from.setUTCHours(from.getUTCHours() - 24);
       from.setUTCMinutes(0, 0, 0); // Snap to the top of the hour for clean axis labels
       break;
     case "7d":
