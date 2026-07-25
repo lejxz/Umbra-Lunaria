@@ -46,8 +46,10 @@ interface RecordCandidate {
 
 export async function checkHallOfFameRecords(): Promise<string[]> {
   const errors: string[] = [];
-  // Set a high limit so we store ranks for the whole clan (for member detail views)
-  const LIMIT = 1000;
+  // Store top-100 per award — enough for any clan (max 50 members) plus
+  // departed members. The dashboard shows top-5; the HoF page shows top-10.
+  // Was 1000 (5000 rows total = ~1 MB) — reduced to 100 (500 rows = ~100 KB).
+  const LIMIT = 100;
 
   const allMembersRaw = await db
     .select({

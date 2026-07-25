@@ -68,6 +68,9 @@ export async function GET(req: NextRequest) {
     prunedSnapshots: 0,
     prunedCapitalSnaps: 0,
     prunedWars: 0,
+    prunedWarSnapshots: 0,
+    prunedDepartedSnapshots: 0,
+    dbSizeBytes: null as number | null,
   };
 
   // ── 0. Safety checkpoint re-computation ──
@@ -137,6 +140,62 @@ export async function GET(req: NextRequest) {
       AND war_type = 'regular'
   `);
   result.prunedWars = prunedWars.rowCount ?? 0;
+
+  // ── 5. Old warSnapshot pruning (>90 days, warEnded) ──
+  // The warSnapshot JSONB (25-30 KB per 50v50 war) is only used by the
+  // war-detail sheet — after 90 days, users almost never open it. The
+  // summary columns on wars (stars, destruction, result, opponent, etc.)
+  // remain for the history list. This reclaims ~1 MB/year.
+  const prunedWarSnaps = await db.execute(sql`
+    UPDATE wars
+    SET war_snapshot = NULL
+    WHERE end_time < ${ninetyDaysAgo}
+      AND state = 'warEnded'
+      AND war_snapshot IS NOT NULL
+  `);
+  result.prunedWarSnapshots = prunedWarSnaps.rowCount ?? 0;
+
+  // ── 6. Departed-member snapshot safety net (>30 days departed) ──
+  // The 14-day purgeAt window (pass 1) is the primary cleanup. But if the
+  // cron failed for a while, departed members' snapshots could accumulate.
+  // This catches any member who left >30 days ago and is still in the DB
+  // (not yet purged) — deletes their snapshots to reclaim space.
+  const thirtyDaysAgo = new Date(now);
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const departedSnaps = await db.execute(sql`
+    DELETE FROM member_snapshots
+    WHERE player_tag IN (
+      SELECT player_tag FROM members
+      WHERE left_at IS NOT NULL AND left_at < ${thirtyDaysAgo}
+    )
+  `);
+  result.prunedDepartedSnapshots = departedSnaps.rowCount ?? 0;
+
+  // ── 7. DB size monitoring ──
+  // Log the current DB size so we get an early warning before hitting the
+  // 500 MB Supabase free-tier limit. If over 400 MB, log a warning.
+  try {
+    const sizeResult = await db.execute(sql`
+      SELECT pg_database_size(current_database()) as size
+    `);
+    const sizeRow = sizeResult.rows?.[0] as { size: number } | undefined;
+    const size = sizeRow?.size;
+    if (size !== undefined) {
+      result.dbSizeBytes = size;
+      if (size > 400 * 1024 * 1024) {
+        console.warn(
+          `[purge] DB size is ${(size / 1024 / 1024).toFixed(1)} MB — approaching the 500 MB Supabase limit`,
+        );
+      } else {
+        console.info(
+          `[purge] DB size: ${(size / 1024 / 1024).toFixed(1)} MB`,
+        );
+      }
+    }
+  } catch {
+    // Monitoring is best-effort — don't fail the purge if the size query fails.
+  }
 
   // Bust the ISR cache so the dashboard/members/capital pages reflect the
   // pruned data on the next page view (not up to 15 min later).

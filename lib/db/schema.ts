@@ -362,48 +362,6 @@ export const capitalContributions = pgTable(
 );
 
 // ---------------------------------------------------------------------------
-// Planning entities
-// ---------------------------------------------------------------------------
-
-export const warRosters = pgTable("war_rosters", {
-  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  title: text("title"),
-  warSize: integer("war_size").notNull(),
-  status: text("status").notNull().default("draft"), // "draft" | "finalized"
-  // Snapshot of the auto-select config version at finalization time.
-  configVersion: text("config_version"),
-  createdBy: text("created_by"),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-  finalizedAt: timestamp("finalized_at", { withTimezone: true }),
-});
-
-export const warRosterSlots = pgTable(
-  "war_roster_slots",
-  {
-    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-    rosterId: integer("roster_id")
-      .notNull()
-      .references(() => warRosters.id),
-    playerTag: text("player_tag")
-      .notNull()
-      .references(() => members.playerTag),
-    mapPosition: integer("map_position").notNull(),
-  },
-  (table) => [
-    index("war_roster_slots_roster_id_idx").on(table.rosterId),
-    uniqueIndex("war_roster_slots_roster_position_idx").on(
-      table.rosterId,
-      table.mapPosition,
-    ),
-  ],
-);
-
-// ---------------------------------------------------------------------------
 // hall_of_fame_records — one row per award category. A new all-time high
 // overwrites the existing row; no historical entries are kept here (the raw
 // data in member_snapshots / war_attacks / capital_contributions is the
