@@ -15,7 +15,7 @@ jobs:
         id: batch
         run: |
           # With no cron triggers, this will always be false
-          echo "is_batch=false" >> "$GITHUB_OUTPUT"
+          echo "is_batch=true" >> "$GITHUB_OUTPUT"
 
       - name: Call /api/ingest
         id: ingest
