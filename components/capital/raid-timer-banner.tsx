@@ -16,7 +16,14 @@
 import { LiveCountdown } from "@/components/ui/live-countdown";
 import { IconCapital, IconClock } from "@/components/ui/icons";
 
-export function RaidTimerBanner({ endTime }: { endTime: Date }) {
+export function RaidTimerBanner({
+  endTime,
+  serverNow,
+}: {
+  endTime: Date;
+  /** Server's current time in ms — for clock-drift-tolerant countdown. */
+  serverNow?: number;
+}) {
   // Format the end time for the "ends at" label.
   const endsAt = endTime.toLocaleString("en-US", {
     weekday: "short",
@@ -51,7 +58,7 @@ export function RaidTimerBanner({ endTime }: { endTime: Date }) {
             Ends in
           </span>
           <span className="font-display text-lg text-umbra-lilac">
-            <LiveCountdown targetDate={endTime} />
+            <LiveCountdown targetDate={endTime} serverNow={serverNow} />
           </span>
         </div>
         <span className="hidden font-mono text-xs text-umbra-muted sm:block">

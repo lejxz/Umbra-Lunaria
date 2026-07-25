@@ -40,6 +40,7 @@ export default async function WarPage() {
         data={data}
         clanBadgeUrls={clanIdentity?.badgeUrls ?? null}
         clanName={clanIdentity?.name ?? null}
+        serverNow={Date.now()}
       />
     </PageScaffold>
   );

@@ -31,7 +31,7 @@ export default async function CapitalPage() {
 
   return (
     <PageScaffold section="Capital" title="Clan capital">
-      <CapitalShell data={data} />
+      <CapitalShell data={data} serverNow={Date.now()} />
     </PageScaffold>
   );
 }

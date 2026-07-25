@@ -17,6 +17,7 @@ import { WarPerformanceChart } from "./war-performance-chart";
 import { WarAttackDistributionChart } from "./war-attack-distribution";
 import { RosterSizeChart } from "./roster-size-chart";
 import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
+import { useServerClock } from "@/lib/time/use-server-clock";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -27,7 +28,15 @@ import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
  * is fetched server-side and passed in, so tab switches are instant with no
  * API calls or page reloads.
  */
-export function DashboardShell({ data }: { data: DashboardData }) {
+export function DashboardShell({
+  data,
+  serverNow,
+}: {
+  data: DashboardData;
+  /** Server's current time in ms — passed to the freshness footer so the
+   * "next update overdue" calculation is immune to client clock skew. */
+  serverNow: number;
+}) {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
   return (
@@ -202,6 +211,7 @@ export function DashboardShell({ data }: { data: DashboardData }) {
         lastBatch={data.clan.lastDailyBatchAt}
         trackingStart={data.trackingStart}
         warSynced={data.warSummary.lastSyncedAt}
+        serverNow={serverNow}
       />
 
       {/* Footer */}
@@ -225,28 +235,40 @@ export function DashboardShell({ data }: { data: DashboardData }) {
  * The poll interval is 5 minutes (third-party cron-job service, every-5-min
  * schedule — see concept/04). The countdown shows how long until the next
  * poll should fire.
+ *
+ * Clock-drift tolerant: uses the server's current time (passed as `serverNow`)
+ * to compute the countdown, so a misconfigured client clock (e.g. a school lab
+ * PC set to the wrong date) won't produce a false "overdue" badge. See
+ * lib/time/use-server-clock.ts.
  */
 function FreshnessFooter({
   lastPoll,
   lastBatch,
   trackingStart,
   warSynced,
+  serverNow,
 }: {
   lastPoll: Date | string | null;
   lastBatch: Date | string | null;
   trackingStart: Date | string | null;
   warSynced: Date | string | null;
+  /** Server's current time in ms (from the server component at render time). */
+  serverNow: number;
 }) {
   const POLL_INTERVAL_MINUTES = 5;
-  const [now, setNow] = useState(Date.now());
-  const [mounted, setMounted] = useState(false);
+  const { serverNow: getServerNow, mounted } = useServerClock(serverNow);
+  const [tick, setTick] = useState(0);
 
-  // Update every second for the countdown
+  // Re-render every second for the countdown — the actual time comes from
+  // getServerNow(), not Date.now(), so it's drift-corrected.
   useEffect(() => {
-    setMounted(true);
-    const timer = setInterval(() => setNow(Date.now()), 1000);
+    const timer = setInterval(() => setTick((t) => t + 1), 1000);
     return () => clearInterval(timer);
   }, []);
+  void tick; // forces re-render so `now` is recomputed each second
+
+  // Use the server-adjusted time for all calculations.
+  const now = mounted ? getServerNow() : serverNow;
 
   // Calculate next poll time: last poll + 5 min
   const lastPollDate = lastPoll ? new Date(lastPoll) : null;

@@ -21,6 +21,7 @@ export function WarHero({
   lastResult,
   leadAnalysis,
   refreshTtlSeconds,
+  serverNow,
 }: {
   currentWar: CurrentWarDetail | null;
   clanBadgeUrls?: ClanBadgeUrls | null;
@@ -28,6 +29,8 @@ export function WarHero({
   lastResult?: WarHistoryEntry | null;
   leadAnalysis?: WarLeadAnalysis;
   refreshTtlSeconds: number;
+  /** Server's current time in ms — for clock-drift-tolerant countdown. */
+  serverNow?: number;
 }) {
   if (!currentWar) {
     return (
@@ -172,7 +175,7 @@ export function WarHero({
                 {currentWar.state === "preparation" ? "Starts in" : "Ends in"}
               </p>
               <p className="mt-0.5 font-mono text-xl font-bold tracking-tight text-white drop-shadow-md">
-                <LiveCountdown targetDate={countdownTarget} />
+                <LiveCountdown targetDate={countdownTarget} serverNow={serverNow} />
               </p>
             </div>
           ) : currentWar.state === "warEnded" && currentWar.endTime ? (

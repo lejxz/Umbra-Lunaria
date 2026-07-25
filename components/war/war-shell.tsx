@@ -31,10 +31,14 @@ export function WarShell({
   data,
   clanBadgeUrls,
   clanName,
+  serverNow,
 }: {
   data: WarCenterData;
   clanBadgeUrls?: ClanBadgeUrls | null;
   clanName?: string | null;
+  /** Server's current time in ms — passed to the war hero countdown so it's
+   * immune to client clock skew. */
+  serverNow?: number;
 }) {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [detailWarId, setDetailWarId] = useState<number | null>(null);
@@ -53,6 +57,7 @@ export function WarShell({
         lastResult={data.lastResult}
         leadAnalysis={data.leadAnalysis}
         refreshTtlSeconds={data.refreshTtlSeconds}
+        serverNow={serverNow}
       />
 
       {data.currentWar && (

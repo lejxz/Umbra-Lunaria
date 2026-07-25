@@ -21,7 +21,14 @@ import { DistrictList } from "./district-list";
  *   4. Upgrade timeline — tracked district-level changes over time.
  *   5. District list — the full current-level reference.
  */
-export function CapitalShell({ data }: { data: CapitalPageData }) {
+export function CapitalShell({
+  data,
+  serverNow,
+}: {
+  data: CapitalPageData;
+  /** Server's current time in ms — for clock-drift-tolerant raid countdown. */
+  serverNow?: number;
+}) {
   const [filter, setFilter] = useState<string>("all");
 
   return (
@@ -31,7 +38,9 @@ export function CapitalShell({ data }: { data: CapitalPageData }) {
         <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
       </div>
 
-      {data.raidTimer && <RaidTimerBanner endTime={data.raidTimer.endTime} />}
+      {data.raidTimer && (
+        <RaidTimerBanner endTime={data.raidTimer.endTime} serverNow={serverNow} />
+      )}
 
       {data.raidHistoryAvailable && data.raidHistory ? (
         <RaidHistory history={data.raidHistory} />

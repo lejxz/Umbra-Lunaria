@@ -50,5 +50,5 @@ export default async function DashboardPage() {
     );
   }
 
-  return <DashboardShell data={data} />;
+  return <DashboardShell data={data} serverNow={Date.now()} />;
 }
