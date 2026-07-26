@@ -127,11 +127,13 @@ export async function getStrategyPage(): Promise<StrategyPageData> {
     const threeStarRate = attacksUsed > 0 ? threeStars / attacksUsed : null;
 
     const lastActiveAt = activity?.lastActiveAt ?? null;
-    const isActive = lastActiveAt
-      ? now - lastActiveAt.getTime() < 7 * 24 * 60 * 60 * 1000
+    // Drizzle may return the Date as a string from raw SQL — normalize it.
+    const lastActiveDate = lastActiveAt ? new Date(lastActiveAt) : null;
+    const isActive = lastActiveDate
+      ? now - lastActiveDate.getTime() < 7 * 24 * 60 * 60 * 1000
       : false;
-    const daysSinceActive = lastActiveAt
-      ? Math.floor((now - lastActiveAt.getTime()) / (24 * 60 * 60 * 1000))
+    const daysSinceActive = lastActiveDate
+      ? Math.floor((now - lastActiveDate.getTime()) / (24 * 60 * 60 * 1000))
       : null;
 
     const isNewMember = warsTracked < minWars;
@@ -188,7 +190,7 @@ export async function getStrategyPage(): Promise<StrategyPageData> {
       threeStarRate,
       activityScore,
       rushedPercent: m.rushedPercent,
-      lastActiveAt: lastActiveAt ? lastActiveAt.toISOString() : null,
+      lastActiveAt: lastActiveDate ? lastActiveDate.toISOString() : null,
       isActive,
       isNewMember,
       compositeScore: Math.round(compositeScore * 10) / 10,
