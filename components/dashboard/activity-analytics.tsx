@@ -19,6 +19,7 @@ import {
   Cell,
 } from "recharts";
 import { IconActivityEmpty } from "@/components/ui/icons";
+import { axisTickStyle, tooltipProps } from "@/lib/chart-theme";
 
 /**
  * Activity Analytics — unified panel for activity timeline + member score.
@@ -181,7 +182,7 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 0 }} barCategoryGap="20%">
         <XAxis
           dataKey="label"
-          tick={{ fill: "#A89CC4", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
@@ -191,23 +192,14 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
           height={40}
         />
         <YAxis
-          tick={{ fill: "#A89CC4", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           width={32}
           allowDecimals={false}
         />
         <Tooltip
-          cursor={{ fill: "rgba(182, 120, 255, 0.08)" }}
-          contentStyle={{
-            background: "#12101C",
-            border: "1px solid rgba(190, 151, 255, 0.15)",
-            borderRadius: "8px",
-            fontSize: "12px",
-            color: "#EEE5FF",
-          }}
-          labelStyle={{ color: "#A89CC4" }}
-          itemStyle={{ color: "#EEE5FF" }}
+          {...tooltipProps}
           formatter={(value) => [`${value} active`, "Members"]}
         />
         <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="active" radius={[3, 3, 0, 0]} name="Active">

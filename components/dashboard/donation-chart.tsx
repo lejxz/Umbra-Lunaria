@@ -10,6 +10,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import type { DonationBucket } from "@/lib/view-models/dashboard";
+import { CHART_COLORS, axisTickStyle, tooltipProps } from "@/lib/chart-theme";
 
 /**
  * Donation bar chart. Uses Recharts with the dark observatory theme.
@@ -40,7 +41,7 @@ export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(190,151,255,0.06)" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
@@ -50,29 +51,20 @@ export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
           height={40}
         />
         <YAxis
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           width={32}
           allowDecimals={false}
         />
         <Tooltip
-          cursor={{ fill: "rgba(182, 120, 255, 0.08)" }}
-          contentStyle={{
-            background: "#12101C",
-            border: "1px solid rgba(190, 151, 255, 0.15)",
-            borderRadius: "8px",
-            fontSize: "12px",
-            color: "#EEE5FF",
-          }}
-          labelStyle={{ color: "#9287AD" }}
-          itemStyle={{ color: "#EEE5FF" }}
+          {...tooltipProps}
           formatter={(value, name) => [
             String(value ?? 0),
             name === "given" ? "Given" : "Received",
           ]}
         />
-        <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="given" fill="#B678FF" radius={[3, 3, 0, 0]} name="given" />
+        <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="given" fill={CHART_COLORS.purple} radius={[3, 3, 0, 0]} name="given" />
         <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="received" fill="#7552DF" radius={[3, 3, 0, 0]} name="received" />
       </BarChart>
     </ResponsiveContainer>

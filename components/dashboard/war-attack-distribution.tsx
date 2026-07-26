@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import type { WarAttackDistribution } from "@/lib/view-models/dashboard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconSwords } from "@/components/ui/icons";
+import { tooltipProps } from "@/lib/chart-theme";
 
 /**
  * War attack distribution — a donut chart showing the breakdown of attack
@@ -63,15 +64,7 @@ export function WarAttackDistributionChart({
             ))}
           </Pie>
           <Tooltip
-            contentStyle={{
-              background: "#12101C",
-              border: "1px solid rgba(190, 151, 255, 0.15)",
-              borderRadius: "8px",
-              fontSize: "12px",
-              color: "#EEE5FF",
-            }}
-            labelStyle={{ color: "#9287AD" }}
-            itemStyle={{ color: "#EEE5FF" }}
+            {...tooltipProps}
             formatter={(value, name) => [
               `${value ?? 0} attacks (${Math.round((Number(value ?? 0) / distribution.total) * 100)}%)`,
               String(name),

@@ -13,6 +13,7 @@ import {
 import type { WarPerformanceTrend } from "@/lib/view-models/dashboard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconWarEmpty } from "@/components/ui/icons";
+import { CHART_COLORS, axisTickStyle, tooltipProps } from "@/lib/chart-theme";
 
 /**
  * War performance trend — a line chart showing own stars vs opponent stars
@@ -49,7 +50,7 @@ export function WarPerformanceChart({ trend }: { trend: WarPerformanceTrend }) {
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(190,151,255,0.06)" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
@@ -59,22 +60,14 @@ export function WarPerformanceChart({ trend }: { trend: WarPerformanceTrend }) {
           height={36}
         />
         <YAxis
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           width={28}
           allowDecimals={false}
         />
         <Tooltip
-          contentStyle={{
-            background: "#12101C",
-            border: "1px solid rgba(190, 151, 255, 0.15)",
-            borderRadius: "8px",
-            fontSize: "12px",
-            color: "#EEE5FF",
-          }}
-          labelStyle={{ color: "#9287AD" }}
-          itemStyle={{ color: "#EEE5FF" }}
+          {...tooltipProps}
           formatter={(value, name) => [
             `${value ?? 0} ★`,
             name === "own" ? "Us" : "Opponent",
@@ -88,9 +81,9 @@ export function WarPerformanceChart({ trend }: { trend: WarPerformanceTrend }) {
         <Line
           type="monotone"
           dataKey="own"
-          stroke="#B678FF"
+          stroke={CHART_COLORS.purple}
           strokeWidth={2}
-          dot={{ r: 3, fill: "#B678FF" }}
+          dot={{ r: 3, fill: CHART_COLORS.purple }}
           activeDot={{ r: 5 }}
           name="own"
         />

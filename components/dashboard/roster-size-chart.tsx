@@ -12,6 +12,7 @@ import {
 import type { RosterSizeTrend } from "@/lib/view-models/dashboard";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconUserCheck } from "@/components/ui/icons";
+import { CHART_COLORS, axisTickStyle, tooltipProps } from "@/lib/chart-theme";
 
 /**
  * Roster size trend — an area chart showing distinct retained members per day.
@@ -43,14 +44,14 @@ export function RosterSizeChart({ trend }: { trend: RosterSizeTrend }) {
       <AreaChart data={data} margin={{ top: 8, right: 12, bottom: 0, left: 0 }}>
         <defs>
           <linearGradient id="rosterGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#B678FF" stopOpacity={0.35} />
-            <stop offset="100%" stopColor="#B678FF" stopOpacity={0.02} />
+            <stop offset="0%" stopColor={CHART_COLORS.purple} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={CHART_COLORS.purple} stopOpacity={0.02} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="rgba(190,151,255,0.06)" vertical={false} />
         <XAxis
           dataKey="label"
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           interval="preserveStartEnd"
@@ -60,28 +61,20 @@ export function RosterSizeChart({ trend }: { trend: RosterSizeTrend }) {
           height={36}
         />
         <YAxis
-          tick={{ fill: "#9287AD", fontSize: 9, fontFamily: "JetBrains Mono" }}
+          tick={axisTickStyle}
           tickLine={false}
           axisLine={false}
           width={28}
           allowDecimals={false}
         />
         <Tooltip
-          contentStyle={{
-            background: "#12101C",
-            border: "1px solid rgba(190, 151, 255, 0.15)",
-            borderRadius: "8px",
-            fontSize: "12px",
-            color: "#EEE5FF",
-          }}
-          labelStyle={{ color: "#9287AD" }}
-          itemStyle={{ color: "#EEE5FF" }}
+          {...tooltipProps}
           formatter={(value) => [`${value ?? 0} members`, "Roster"]}
         />
         <Area
           type="monotone"
           dataKey="count"
-          stroke="#B678FF"
+          stroke={CHART_COLORS.purple}
           strokeWidth={2}
           fill="url(#rosterGrad)"
           name="count"
