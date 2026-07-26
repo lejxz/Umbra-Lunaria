@@ -32,7 +32,6 @@ import {
  * wants the headline numbers.
  */
 export function RaidHistory({ history }: { history: RaidHistoryView }) {
-  const [seasonsOpen, setSeasonsOpen] = useState(true);
   const latest = history.seasons[0] ?? null;
 
   return (
@@ -110,30 +109,30 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
         </span>
       </div>
 
-      {/* ── Season list (collapsible) ────────────────────────────────────── */}
+      {/* ── Season list ────────────────────────────────────── */}
       <div className="mt-5">
-        <button
-          type="button"
-          onClick={() => setSeasonsOpen((v) => !v)}
-          className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
-          aria-expanded={seasonsOpen}
-        >
-          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
-            Recent seasons ({history.seasons.length})
-          </span>
-          {seasonsOpen ? (
-            <IconChevronUp className="h-4 w-4 text-umbra-muted" />
-          ) : (
-            <IconChevronDown className="h-4 w-4 text-umbra-muted" />
-          )}
-        </button>
-        {seasonsOpen && (
-          <ol className="mt-2 space-y-1.5">
-            {history.seasons.map((s) => (
-              <SeasonRow key={s.seasonId} season={s} />
-            ))}
-          </ol>
-        )}
+        <h4 className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+          Recent seasons ({history.seasons.length})
+        </h4>
+        <div className="mt-3 data-container">
+          <table className="w-full text-left text-sm">
+            <thead className="data-thead">
+              <tr>
+                <th className="data-th">Date</th>
+                <th className="data-th">Total Loot</th>
+                <th className="data-th">Raids</th>
+                <th className="data-th text-center">Attacks</th>
+                <th className="data-th text-center">Members</th>
+                <th className="data-th text-right">Medals</th>
+              </tr>
+            </thead>
+            <tbody className="data-tbody">
+              {history.seasons.map((s) => (
+                <SeasonRow key={s.seasonId} season={s} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* ── Contribution leaderboard ──────────────────────────────────────── */}
@@ -263,24 +262,27 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
     year: "numeric",
   });
   return (
-    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/30 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
-      <span className="font-mono text-umbra-lilac">{dateLabel}</span>
-      <span className="text-umbra-muted">
-        {(season.capitalTotalLoot ?? 0).toLocaleString()} gold
-      </span>
-      <span className="text-umbra-muted">
-        {season.raidsCompleted ?? 0} raids
-      </span>
-      <span className="text-umbra-muted">
-        {season.totalAttacks ?? 0} attacks
-      </span>
-      <span className="text-umbra-muted">
-        {season.participantCount} members
-      </span>
-      <span className="text-amber-300/80">
-        {(season.offensiveReward ?? 0).toLocaleString()}🏅
-      </span>
-    </li>
+    <tr className="data-tr">
+      <td className="data-td font-mono text-umbra-lilac">
+        {dateLabel}
+      </td>
+      <td className="data-td text-umbra-muted">
+        <span className="text-amber-400">{(season.capitalTotalLoot ?? 0).toLocaleString()}</span>
+        <span className="text-2xs text-umbra-muted/50 ml-1">gold</span>
+      </td>
+      <td className="data-td text-umbra-muted">
+        <span className="text-umbra-lilac">{season.raidsCompleted ?? 0}</span>
+      </td>
+      <td className="data-td text-center text-umbra-muted">
+        <span className="text-umbra-lilac">{season.totalAttacks ?? 0}</span>
+      </td>
+      <td className="data-td text-center text-umbra-muted">
+        <span className="text-umbra-lilac">{season.participantCount}</span>
+      </td>
+      <td className="data-td text-right text-amber-300/80">
+        {(season.offensiveReward ?? 0).toLocaleString()} 🏅
+      </td>
+    </tr>
   );
 }
 
