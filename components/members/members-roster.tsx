@@ -229,9 +229,9 @@ export function MembersRoster({
                         )}
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-umbra-lilac">{m.name}</p>
-                          <p className="font-mono text-label text-umbra-muted">
-                            {m.playerTag} · <span className="capitalize">{m.role}</span>
-                          </p>
+                          <div className="flex items-center gap-1.5 font-mono text-2xs text-umbra-muted">
+                            {m.playerTag} · <span>{formatRole(m.role)}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -313,7 +313,7 @@ export function MembersRoster({
                     <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
                   </div>
                   <p className="font-mono text-label text-umbra-muted">
-                    TH{m.townHallLevel} · <span className="capitalize">{m.role}</span>
+                    TH{m.townHallLevel} · <span>{formatRole(m.role)}</span>
                   </p>
                   <p className="font-mono text-label text-umbra-muted">
                     ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
@@ -353,6 +353,19 @@ function roleOrder(role: string): number {
       return 2;
     default:
       return 3;
+  }
+}
+
+export function formatRole(role: string): string {
+  switch (role) {
+    case "leader":
+      return "Leader";
+    case "coLeader":
+      return "Co-Leader";
+    case "admin":
+      return "Elder";
+    default:
+      return "Member";
   }
 }
 

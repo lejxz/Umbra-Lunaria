@@ -85,7 +85,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
             )}
           </div>
           <p className="font-mono text-xs text-umbra-muted mt-1">
-            {p.playerTag} · <span className="capitalize">{p.role}</span>
+            {p.playerTag} · <span>{formatRole(p.role)}</span>
             {detail.donations.activityScoreRank ? (
               <span className="ml-2 inline-flex items-center rounded bg-umbra-purple/20 px-1.5 py-0.5 text-label font-semibold text-umbra-lilac">
                 #{detail.donations.activityScoreRank} Activity Rank
