@@ -8,6 +8,7 @@ import {
   NavIconMembers,
   NavIconWar,
   NavIconCapital,
+  NavIconPlanning,
   NavIconHallOfFame,
   IconChevronLeft,
   IconChevronRight,
@@ -17,6 +18,7 @@ const links = [
   [<NavIconDashboard key="dash" />, "Dashboard", "/"],
   [<NavIconMembers key="members" />, "Members", "/members"],
   [<NavIconWar key="war" />, "War center", "/war"],
+  [<NavIconPlanning key="strat" />, "Strategy", "/strategy"],
   [<NavIconCapital key="cap" />, "Capital", "/capital"],
   [<NavIconHallOfFame key="hof" />, "Hall of Fame", "/hall-of-fame"],
 ] as const;
