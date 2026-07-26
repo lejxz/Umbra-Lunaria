@@ -107,9 +107,10 @@ function WarDetailContent({
   const { detail: w, attackLog, analysis } = data;
 
   return (
-    <div>
+    <div className="space-y-5">
       {/* ---- Header ---- */}
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-umbra-line pb-4">
+      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-detail-title">
+        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-umbra-line/40 pb-4">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             {w.warType === "cwl" ? "Clan War League" : "Regular war"} · {stateLabel(w.state)}
@@ -217,13 +218,14 @@ function WarDetailContent({
           </div>
         </div>
       )}
+      </section>
 
       {/* ---- Analysis panel ---- */}
-      <div className="mt-5">
+      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="analysis-title">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Analysis
         </p>
-        <h3 className="mt-1 font-display text-base text-umbra-lilac">Performance breakdown</h3>
+        <h3 id="analysis-title" className="mt-1 font-display text-base text-umbra-lilac">Performance breakdown</h3>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <StatCard
             label="3★ rate"
@@ -288,10 +290,10 @@ function WarDetailContent({
             <Highlight>No attacks were recorded for this war.</Highlight>
           )}
         </div>
-      </div>
+      </section>
 
       {/* ---- Roster ---- */}
-      <div className="mt-5">
+      <div>
         <WarRosters
           currentWar={w}
           onMemberClick={() => {}} // Disabled in detail view as per original concept
@@ -299,7 +301,7 @@ function WarDetailContent({
       </div>
 
       {/* ---- Attack log ---- */}
-      <div className="mt-5">
+      <div>
         <WarAttackLog
           attackLog={attackLog}
           warState={w.state}

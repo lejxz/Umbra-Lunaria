@@ -50,35 +50,36 @@ export function WarAttackLog({
           <thead className="data-thead">
             <tr>
               <th className="w-8 data-th text-center">#</th>
-              <th className="data-th">Attacker</th>
-              <th className="data-th text-center"></th>
-              <th className="data-th">Defender</th>
-              <th className="data-th text-center">★</th>
-              <th className="hidden data-th text-right sm:table-cell">Destr.</th>
-              <th className="hidden data-th text-right sm:table-cell">Dur.</th>
+              <th className="w-[35%] data-th text-right pr-4">Attacker</th>
+              <th className="w-10 data-th text-center px-0"></th>
+              <th className="w-[35%] data-th pl-4">Defender</th>
+              <th className="w-12 data-th text-center">★</th>
+              <th className="hidden w-16 data-th text-right sm:table-cell">Destr.</th>
+              <th className="hidden w-16 data-th text-right sm:table-cell">Dur.</th>
             </tr>
           </thead>
           <tbody className="data-tbody">
             {attackLog.map((a) => (
               <tr key={a.order} className="text-sm data-tr">
                 <td className="data-td text-center font-mono text-2xs text-umbra-muted/70">{a.order}</td>
-                <td className="data-td">
+                <td className="data-td text-right pr-4">
                   <AttackParticipant
                     tag={a.attackerTag}
                     name={a.attackerName}
                     mapPosition={a.attackerMapPosition}
                     townhall={a.attackerTownhallLevel}
                     isOwnClan={a.attackerIsOwnClan}
+                    reverse={true}
                     onMemberClick={onMemberClick}
                   />
                 </td>
-                <td className="data-td text-center">
+                <td className="data-td text-center px-0">
                   <IconSwords 
                     className={`mx-auto h-3 w-3 ${a.attackerIsOwnClan ? "text-umbra-purple/60" : "text-red-400/60"}`} 
                     aria-hidden 
                   />
                 </td>
-                <td className="data-td">
+                <td className="data-td pl-4">
                   <AttackParticipant
                     tag={a.defenderTag}
                     name={a.defenderName}
@@ -114,6 +115,7 @@ function AttackParticipant({
   mapPosition,
   townhall,
   isOwnClan,
+  reverse = false,
   onMemberClick,
 }: {
   tag: string;
@@ -121,6 +123,7 @@ function AttackParticipant({
   mapPosition: number | null;
   townhall: number | null;
   isOwnClan: boolean;
+  reverse?: boolean;
   onMemberClick: (playerTag: string) => void;
 }) {
   const isOpponent = !isOwnClan;
@@ -130,13 +133,13 @@ function AttackParticipant({
   const nameColor = isOwnClan ? "text-umbra-lilac" : "text-red-300/80";
 
   const inner = (
-    <span className="flex items-center gap-2">
+    <span className={`flex items-center gap-2 ${reverse ? "flex-row-reverse" : ""}`}>
       {mapPosition != null && (
         <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded font-mono text-2xs font-semibold ${badgeColor}`}>
           {mapPosition}
         </span>
       )}
-      <div className="flex min-w-0 flex-col justify-center">
+      <div className={`flex min-w-0 flex-col justify-center ${reverse ? "items-end text-right" : ""}`}>
         <span className={`truncate text-xs ${nameColor}`}>{name}</span>
         {townhall != null && <span className="font-mono text-2xs text-umbra-muted/60">TH{townhall}</span>}
       </div>

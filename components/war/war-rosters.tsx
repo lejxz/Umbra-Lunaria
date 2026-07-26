@@ -206,8 +206,15 @@ function RosterColumn({
                 <th className="px-3 py-2 font-medium">Player</th>
                 <th className="px-3 py-2 font-medium">TH</th>
                 <th className="px-3 py-2 font-medium text-center">Adv</th>
-                <th className="px-3 py-2 text-right font-medium">
-                  {isPrep || mode === "base" ? "Base" : "Attacks"}
+                <th className="w-40 px-3 py-2 text-right font-medium">
+                  <div className="relative flex h-4 items-center justify-end overflow-hidden">
+                    <span className={`absolute transition-all duration-300 ${isPrep || mode === "base" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
+                      Base
+                    </span>
+                    <span className={`absolute transition-all duration-300 ${!isPrep && mode === "attacks" ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"}`}>
+                      Attacks
+                    </span>
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -279,23 +286,26 @@ function RosterRow({
       </td>
 
       {/* Right column — attacks (offense) or base (defense) */}
-      <td className="px-3 py-2 text-right align-middle">
-        {isPrep || mode === "base" ? (
-          <BaseState
-            stars={m.worstDefenseStars}
-            destruction={m.worstDefenseDestruction}
-            defendedAgainst={m.defendedAgainst}
-            isPrep={isPrep}
-          />
-        ) : (
-          <AttacksState
-            attacksUsed={m.attacksUsed}
-            attacksAllowed={m.attacksAllowed}
-            attacksRemaining={m.attacksRemaining}
-            bestStars={m.bestStars}
-            bestDestruction={m.bestDestruction}
-          />
-        )}
+      <td className="w-40 px-3 py-2 text-right align-middle">
+        <div className="relative flex h-6 items-center justify-end">
+          <span className={`absolute transition-all duration-300 ${isPrep || mode === "base" ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 pointer-events-none"}`}>
+            <BaseState
+              stars={m.worstDefenseStars}
+              destruction={m.worstDefenseDestruction}
+              defendedAgainst={m.defendedAgainst}
+              isPrep={isPrep}
+            />
+          </span>
+          <span className={`absolute transition-all duration-300 ${!isPrep && mode === "attacks" ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none"}`}>
+            <AttacksState
+              attacksUsed={m.attacksUsed}
+              attacksAllowed={m.attacksAllowed}
+              attacksRemaining={m.attacksRemaining}
+              bestStars={m.bestStars}
+              bestDestruction={m.bestDestruction}
+            />
+          </span>
+        </div>
       </td>
     </>
   );
