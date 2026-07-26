@@ -340,30 +340,30 @@ function ContributionHistoryTable({
       </button>
 
       {open && (
-        <div className="mt-2 overflow-x-auto rounded-lg border border-umbra-line/50">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-umbra-line bg-umbra-surface/40">
-                <th className="sticky left-0 z-10 bg-umbra-surface/95 px-3 py-2 text-left font-mono uppercase tracking-wider text-umbra-muted">
+        <div className="mt-2 overflow-x-auto data-container">
+          <table className="w-full text-left text-xs">
+            <thead className="data-thead">
+              <tr>
+                <th className="sticky left-0 z-10 data-th bg-umbra-surface/95 text-left font-mono uppercase tracking-wider text-umbra-muted">
                   Member
                 </th>
                 {seasons.map((s) => (
                   <th
                     key={s.seasonId}
-                    className="px-3 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted whitespace-nowrap"
+                    className="data-th text-center font-mono uppercase tracking-wider text-umbra-muted whitespace-nowrap"
                   >
                     {s.startTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </th>
                 ))}
-                <th className="px-3 py-2 text-right font-mono uppercase tracking-wider text-umbra-purple">
+                <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-purple">
                   Total
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="data-tbody">
               {visibleMembers.map((m) => (
-                <tr key={m.tag} className="border-b border-umbra-line/20 hover:bg-white/[.04]">
-                  <td className="sticky left-0 z-10 bg-umbra-ink/95 px-3 py-2 font-medium text-umbra-lilac whitespace-nowrap">
+                <tr key={m.tag} className="data-tr hover:bg-white/[.04]">
+                  <td className="sticky left-0 z-10 data-td bg-umbra-ink/95 font-medium text-umbra-lilac whitespace-nowrap">
                     {m.name}
                   </td>
                   {seasons.map((s) => {
@@ -371,7 +371,7 @@ function ContributionHistoryTable({
                     return (
                       <td
                         key={s.seasonId}
-                        className="px-3 py-2 text-center text-umbra-muted"
+                        className="data-td text-center text-umbra-muted"
                         title={entry ? `${entry.attacksUsed}/${entry.attackLimit ?? "—"} attacks, ${entry.capitalResourcesLooted.toLocaleString()} gold${entry.raidWeekendMedals ? `, ${entry.raidWeekendMedals}🏅` : ""}` : "Did not participate"}
                       >
                         {entry ? (
@@ -386,7 +386,7 @@ function ContributionHistoryTable({
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2 text-right font-semibold text-umbra-purple">
+                  <td className="data-td text-right font-semibold text-umbra-purple">
                     {m.totalGold.toLocaleString()}
                   </td>
                 </tr>

@@ -105,9 +105,23 @@ export function MembersRoster({
   const selectedDetail = activeSelectedTag ? memberDetails[activeSelectedTag] : null;
 
   return (
-    <div>
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="members-title">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+          Participant Roster
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-label text-umbra-muted">
+            {sorted.length} of {roster.totalMembers}
+          </span>
+        </div>
+      </div>
+      <h3 id="members-title" className="mt-1 font-display text-lg text-umbra-lilac">
+        Clan Members
+      </h3>
+
       {/* Filter and Sort bar */}
-      <div className="relative z-20 glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
+      <div className="relative z-20 mt-5 mb-5 flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
           <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Filter</span>
         </div>
@@ -172,12 +186,6 @@ export function MembersRoster({
         >
           {sortDir === "asc" ? "↑" : "↓"}
         </button>
-
-        <div className="ml-auto flex items-center gap-2">
-          <span className="font-mono text-label text-umbra-muted">
-            {sorted.length} of {roster.totalMembers}
-          </span>
-        </div>
       </div>
 
       {/* Roster */}
@@ -189,7 +197,7 @@ export function MembersRoster({
       ) : (
         <>
           {/* Desktop table */}
-          <div className="glass hidden overflow-hidden rounded-2xl md:block">
+          <div className="data-container hidden md:block">
             <table className="w-full text-left">
               <thead className="data-thead">
                 <tr>
@@ -294,7 +302,7 @@ export function MembersRoster({
               <button
                 key={m.playerTag}
                 onClick={() => handleMemberClick(m.playerTag)}
-                className="glass flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-white/[.04] focus-ring"
+                className="flex w-full items-center gap-3 rounded-lg border border-umbra-line bg-white/[.03] p-3 text-left transition hover:bg-white/[.04] focus-ring"
               >
                 {m.leagueTier?.iconUrls?.small && (
                   <Image
@@ -338,7 +346,7 @@ export function MembersRoster({
           onClose={() => handleMemberClick(null)}
         />
       )}
-    </div>
+    </section>
   );
 }
 

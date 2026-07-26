@@ -55,7 +55,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
                     <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-muted">Status</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="data-tbody">
                   {data.suggested.map((p, i) => (
                     <SuggestedRow
                       key={p.playerTag}

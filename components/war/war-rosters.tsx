@@ -200,13 +200,13 @@ function RosterColumn({
           </p>
         ) : (
           <table className="w-full text-left">
-            <thead className="sticky top-0 z-10 border-b border-umbra-line bg-umbra-ink/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur supports-[backdrop-filter]:bg-umbra-ink/80">
+            <thead className="data-thead">
               <tr>
-                <th className="w-8 px-2 py-2 text-center font-medium">#</th>
-                <th className="px-2 py-2 font-medium">Player</th>
-                <th className="w-12 px-2 py-2 font-medium">TH</th>
-                <th className="w-12 px-2 py-2 font-medium text-center">Adv</th>
-                <th className="w-32 px-2 py-2 text-right font-medium">
+                <th className="w-8 data-th text-center font-medium">#</th>
+                <th className="data-th font-medium">Player</th>
+                <th className="w-12 data-th font-medium">TH</th>
+                <th className="w-12 data-th font-medium text-center">Adv</th>
+                <th className="w-32 data-th text-right font-medium">
                   <div className="relative flex h-4 items-center justify-end overflow-hidden">
                     <span className={`absolute transition-all duration-300 ${isPrep || mode === "base" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
                       Base
@@ -218,7 +218,7 @@ function RosterColumn({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-umbra-line/60">
+            <tbody className="data-tbody">
               {members.map((m) => {
                 const isOwn = tone === "own" && m.tag;
                 return (
