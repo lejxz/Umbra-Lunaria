@@ -563,13 +563,7 @@ function AchievementsSection({ detail }: { detail: MemberDetailView }) {
 // Shared helpers
 // ---------------------------------------------------------------------------
 
-function SectionLabel({ children, noMargin }: { children: React.ReactNode, noMargin?: boolean }) {
-  return (
-    <div className={`flex items-center gap-2 border-b border-umbra-line/50 pb-1 ${noMargin ? '' : 'mb-3'}`}>
-      <h3 className="font-display text-sm font-semibold text-umbra-lilac">{children}</h3>
-    </div>
-  );
-}
+
 
 // ---------------------------------------------------------------------------
 // Section 8: Hall of Fame Records

@@ -14,7 +14,7 @@
  *                    not the normalized 0-100 score, so it grows without cap)
  */
 
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   members,

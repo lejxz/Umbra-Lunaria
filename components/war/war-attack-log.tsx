@@ -137,7 +137,6 @@ function AttackParticipant({
   reverse?: boolean;
   onMemberClick: (playerTag: string) => void;
 }) {
-  const isOpponent = !isOwnClan;
   const badgeColor = isOwnClan
     ? "bg-umbra-purple/15 text-umbra-purple"
     : "bg-red-400/10 text-red-400/90";

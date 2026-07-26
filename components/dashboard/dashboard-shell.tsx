@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
 import { WarRecordCard } from "./war-record-card";
+import { Badge } from "@/components/ui/badge";
 import { CurrentWarCard } from "./current-war-card";
 import { CapitalSummaryCard } from "./capital-summary-card";
 import { DonationAnalytics } from "./donation-analytics";

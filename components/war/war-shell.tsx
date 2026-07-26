@@ -77,7 +77,6 @@ export function WarShell({
       <WarHistory
         history={data.history}
         warLogPublic={data.warLogPublic}
-        trackingStart={data.trackingStart}
         onViewDetail={setDetailWarId}
       />
 

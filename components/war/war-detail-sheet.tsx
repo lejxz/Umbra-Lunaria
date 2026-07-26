@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { Modal } from "@/components/ui/modal";
 import { SectionLabel } from "@/components/ui/section-label";
 import type { WarDetailView } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { TimeAgo } from "@/components/ui/time-ago";
-import { IconSwords, IconLoader, IconAlert, IconWarEmpty } from "@/components/ui/icons";
+import { IconSwords, IconLoader, IconAlert } from "@/components/ui/icons";
 import { WarClanColumn, StateBadge } from "./war-hero";
 import { WarRosters } from "./war-rosters";
 import { WarAttackLog } from "./war-attack-log";

@@ -15,6 +15,8 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+
+
 const eslintConfig = [
   // Ignore build artifacts and vendored files.
   {

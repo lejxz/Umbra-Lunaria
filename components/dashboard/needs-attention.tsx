@@ -1,7 +1,5 @@
-import type { NeedsAttention as NeedsAttentionData } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { MemberDetailSheet } from "@/components/members/member-detail-sheet";
 import { IconClock, IconSwords, IconShieldOff } from "@/components/ui/icons";
 
 export function AttentionPanel({

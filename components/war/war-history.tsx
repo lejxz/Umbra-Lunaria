@@ -24,12 +24,10 @@ import { IconWarEmpty, IconChevronRight } from "@/components/ui/icons";
 export function WarHistory({
   history,
   warLogPublic,
-  trackingStart,
   onViewDetail,
 }: {
   history: WarHistoryEntry[];
   warLogPublic: boolean | null;
-  trackingStart: Date | null;
   onViewDetail: (warId: number) => void;
 }) {
   // Win/loss/tie record over the displayed history.

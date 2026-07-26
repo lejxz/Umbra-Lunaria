@@ -13,7 +13,7 @@
  * from a client component.
  */
 
-import { and, desc, eq, inArray, ne, sql } from "drizzle-orm";
+import { desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { wars, clans, cwlSeasons } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";

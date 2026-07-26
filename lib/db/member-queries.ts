@@ -16,7 +16,6 @@ import {
   unitLevels,
   hallOfFameRecords,
 } from "@/lib/db/schema";
-import { clanConfig } from "@/config/clan.config";
 import type {
   MemberRosterEntry,
   MemberRoster,
