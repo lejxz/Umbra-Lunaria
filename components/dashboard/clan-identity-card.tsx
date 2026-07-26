@@ -47,7 +47,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
                   unoptimized
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-xl border border-umbra-line bg-umbra-elevated/50">
+                <div className="flex h-24 w-24 items-center justify-center rounded-lg border border-umbra-line bg-umbra-elevated/50">
                   <span className="font-display text-4xl text-umbra-purple">
                     {clan.name.charAt(0)}
                   </span>
@@ -59,7 +59,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
             <div>
               <h2
                 id="clan-identity-title"
-                className="font-display text-3xl font-semibold text-umbra-lilac drop-shadow-md"
+                className="font-display text-3xl font-semibold text-umbra-lilac drop-shadow-lg"
               >
                 {clan.name}
               </h2>
@@ -69,7 +69,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
 
           {/* Description */}
           {clan.description && (
-            <div className="mt-5 w-full max-w-[420px] rounded-xl border border-umbra-line/50 bg-umbra-ink/50 p-4 backdrop-blur-sm">
+            <div className="mt-5 w-full max-w-[420px] rounded-lg border border-umbra-line/50 bg-umbra-ink/50 p-4 backdrop-blur-sm">
               <p className="whitespace-pre-line break-words text-center text-sm leading-relaxed text-umbra-muted">
                 {clan.description}
               </p>
@@ -78,7 +78,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
         </div>
 
         {/* ===== RIGHT COLUMN: Stats List ===== */}
-        <div className="flex w-full shrink-0 flex-col rounded-xl border border-white/5 bg-umbra-ink/40 p-5 backdrop-blur-md md:max-w-[340px] lg:max-w-[400px]">
+        <div className="flex w-full shrink-0 flex-col rounded-lg border border-white/5 bg-umbra-ink/40 p-5 backdrop-blur-md md:max-w-[340px] lg:max-w-[400px]">
           <StatRow label="Members" value={clan.memberCount ? `${clan.memberCount}/50` : <UnavailableValue />} />
           <StatRow label="Clan Level" value={clan.clanLevel ?? <UnavailableValue />} />
           <StatRow label="Clan Points" value={clan.clanPoints != null ? clan.clanPoints.toLocaleString() : <UnavailableValue />} />
@@ -109,7 +109,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
               {clan.labels.map((label) => (
                 <span
                   key={label.name}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-umbra-ink/50 px-2 py-1 text-micro font-semibold uppercase tracking-wider text-umbra-muted backdrop-blur-sm shadow-md"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-umbra-ink/50 px-2 py-1 text-micro font-semibold uppercase tracking-wider text-umbra-muted backdrop-blur-sm shadow-lg"
                 >
                   {label.iconUrls?.small && (
                     <Image
@@ -121,7 +121,7 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
                       unoptimized
                     />
                   )}
-                  <span className="drop-shadow-md text-white">{label.name}</span>
+                  <span className="drop-shadow-lg text-white">{label.name}</span>
                 </span>
               ))}
             </div>

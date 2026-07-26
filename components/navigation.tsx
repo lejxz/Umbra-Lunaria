@@ -92,10 +92,10 @@ export function Navigation() {
               href={href}
               aria-current={active ? "page" : undefined}
               title={isCollapsed ? label : undefined}
-              className={`focus-ring flex flex-col items-center gap-1 rounded-[10px] border px-3 py-2 text-label lg:flex-row lg:gap-3 lg:py-3 lg:text-sm ${mounted ? "transition-all duration-300" : ""} ${
+              className={`focus-ring flex flex-col items-center gap-1 rounded-lg border px-3 py-2 text-label lg:flex-row lg:gap-3 lg:py-3 lg:text-sm ${mounted ? "transition-all duration-300" : ""} ${
                 active
                   ? "border-umbra-line bg-umbra-purple/10 text-umbra-lilac"
-                  : "border-transparent text-umbra-muted hover:bg-white/5 hover:text-umbra-lilac"
+                  : "border-transparent text-umbra-muted hover:bg-white/[.04] hover:text-umbra-lilac"
               } ${isCollapsed ? "lg:px-0 lg:justify-center" : "lg:px-4"}`}
             >
               <span className="w-5 shrink-0 text-center text-base leading-none text-umbra-purple">

@@ -291,7 +291,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
             ))}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-6">
+          <div className="glass rounded-2xl p-5">
             <p className="text-sm text-umbra-muted">
               War records will appear here once the tracker has accumulated
               enough war attack data.
@@ -315,7 +315,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
             ))}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-6">
+          <div className="glass rounded-2xl p-5">
             <p className="text-sm text-umbra-muted">
               Capital records will appear here once the daily batch ingests
               completed raid-weekend data. This runs automatically — check
@@ -343,7 +343,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       )}
 
       {!hasAny && (
-        <section className="glass rounded-2xl p-8">
+        <section className="glass rounded-2xl p-5">
           <EmptyState
             icon={<IconTrophy className="h-10 w-10 text-umbra-purple/40" />}
             title="No records yet"

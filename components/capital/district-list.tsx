@@ -51,7 +51,7 @@ export function DistrictList({
           {sorted.map((d) => (
             <li
               key={d.name}
-              className="flex items-center justify-between rounded-lg bg-white/[.035] px-3 py-2 transition hover:bg-white/[.06]"
+              className="flex items-center justify-between rounded-lg bg-white/[.03] px-3 py-2 transition hover:bg-white/[.04]"
             >
               <span className="truncate text-sm text-umbra-lilac" title={d.name}>
                 {d.name}

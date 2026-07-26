@@ -47,7 +47,7 @@ export function ComingSoon({
   description: string;
 }) {
   return (
-    <section className="glass rounded-2xl p-8 sm:p-10">
+    <section className="glass rounded-2xl p-5 sm:p-10">
       <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
         {label}
       </p>
@@ -58,15 +58,15 @@ export function ComingSoon({
         {description}
       </p>
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl bg-white/[.035] p-4">
+        <div className="rounded-lg bg-white/[.03] p-4">
           <p className="text-xs uppercase tracking-wider text-umbra-muted">Data source</p>
           <p className="mt-2 text-sm text-umbra-lilac">Neon snapshots</p>
         </div>
-        <div className="rounded-xl bg-white/[.035] p-4">
+        <div className="rounded-lg bg-white/[.03] p-4">
           <p className="text-xs uppercase tracking-wider text-umbra-muted">Status</p>
           <p className="mt-2 text-sm text-emerald-300">Ready for build</p>
         </div>
-        <div className="rounded-xl bg-white/[.035] p-4">
+        <div className="rounded-lg bg-white/[.03] p-4">
           <p className="text-xs uppercase tracking-wider text-umbra-muted">Next signal</p>
           <p className="mt-2 text-sm text-umbra-lilac">Coming soon</p>
         </div>

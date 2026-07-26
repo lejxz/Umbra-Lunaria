@@ -79,7 +79,7 @@ export function WarHistory({
         </p>
       )}
 
-      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-xl border border-umbra-line bg-white/[.02] shadow-inner shadow-black/20">
+      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-lg border border-umbra-line bg-white/[.03] shadow-inner shadow-black/20">
         <table className="w-full text-left text-sm">
           <thead className="sticky top-0 z-10 border-b border-umbra-line bg-[#0E0C13]/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur">
             <tr>
@@ -119,7 +119,7 @@ function RecordChip({ label, value, tone }: { label: string; value: number; tone
     amber: "border-amber-400/30 text-amber-400",
   }[tone];
   return (
-    <span className={`flex items-center gap-1 rounded-lg border bg-white/[.02] px-2 py-1 text-2xs font-semibold ${toneClass}`}>
+    <span className={`flex items-center gap-1 rounded-lg border bg-white/[.03] px-2 py-1 text-2xs font-semibold ${toneClass}`}>
       <span className="opacity-70">{label}</span>
       <span className="font-display text-sm">{value}</span>
     </span>
@@ -197,7 +197,7 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
           <button
             type="button"
             onClick={() => onViewDetail(w.warId)}
-            className="focus-ring inline-flex items-center gap-1 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/60 hover:bg-umbra-purple/20"
+            className="focus-ring inline-flex items-center gap-1 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:bg-umbra-purple/10"
             aria-label={`View details for war vs ${w.opponentName ?? "opponent"}`}
           >
             Details

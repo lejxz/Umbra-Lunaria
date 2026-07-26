@@ -79,7 +79,7 @@ export function CurrentWarCard({
                     src={clanBadgeUrls.small}
                     alt={clanName ?? "Our Clan"}
                     fill
-                    className="object-contain drop-shadow-md"
+                    className="object-contain drop-shadow-lg"
                   />
                 </div>
               )}
@@ -88,7 +88,7 @@ export function CurrentWarCard({
               </p>
               
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-white/[.035] px-4 py-2">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-lg bg-white/[.03] px-4 py-2">
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.ownStars ?? <UnavailableValue />}
                   </span>
@@ -109,7 +109,7 @@ export function CurrentWarCard({
                   warSummary.state === "inWar"
                     ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
                     : warSummary.state === "preparation"
-                      ? "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple"
+                      ? "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple"
                       : "border-white/10 bg-white/5 text-umbra-muted"
                 }`}
               >
@@ -121,13 +121,13 @@ export function CurrentWarCard({
               </span>
 
               {/* VS Icon */}
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20 text-umbra-purple/80 shadow-[inset_0_0_12px_rgba(182,120,255,0.15)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/40 text-umbra-purple/80 shadow-[inset_0_0_12px_rgba(182,120,255,0.15)]">
                 <IconSwords className="h-6 w-6" />
               </div>
 
               {/* Team size */}
               {warSummary.teamSize && (
-                <div className="mt-3.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 shadow-sm">
+                <div className="mt-3.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 shadow-lg">
                   <span className="text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
                     {warSummary.teamSize}v{warSummary.teamSize}
                   </span>
@@ -143,7 +143,7 @@ export function CurrentWarCard({
                     src={warSummary.opponentBadgeUrls.small}
                     alt={`${warSummary.opponentName ?? "Enemy"} Badge`}
                     fill
-                    className="object-contain drop-shadow-md grayscale hover:grayscale-0 transition-all duration-300"
+                    className="object-contain drop-shadow-lg grayscale hover:grayscale-0 transition-all duration-300"
                   />
                 </div>
               )}
@@ -152,7 +152,7 @@ export function CurrentWarCard({
               </p>
               
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 rounded-xl bg-white/[.035] px-4 py-2">
+                <div className="flex items-baseline justify-center gap-1.5 rounded-lg bg-white/[.03] px-4 py-2">
                   <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
                     ★{warSummary.opponentStars ?? <UnavailableValue />}
                   </span>

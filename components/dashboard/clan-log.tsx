@@ -59,10 +59,10 @@ export function ClanLogPanel({
                   !entry.isPurged && onMemberClick?.(entry.playerTag)
                 }
                 disabled={entry.isPurged}
-                className={`flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.035] px-3 py-2 text-left transition ${
+                className={`flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition ${
                   entry.isPurged
                     ? "cursor-default opacity-60"
-                    : "hover:bg-white/[.06] focus-ring"
+                    : "hover:bg-white/[.04] focus-ring"
                 }`}
               >
                 <div className="flex min-w-0 items-center gap-2.5">

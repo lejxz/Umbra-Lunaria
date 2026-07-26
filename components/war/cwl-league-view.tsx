@@ -67,8 +67,8 @@ export function CwlLeagueView({
                 isActive
                   ? "border-umbra-purple/50 bg-umbra-purple/15 text-umbra-lilac"
                   : hasData
-                    ? "border-umbra-line bg-white/[.02] text-umbra-muted hover:border-umbra-purple/30 hover:text-umbra-lilac"
-                    : "border-white/5 bg-white/[.01] text-umbra-muted/30"
+                    ? "border-umbra-line bg-white/[.03] text-umbra-muted hover:border-umbra-purple/40 hover:text-umbra-lilac"
+                    : "border-white/5 bg-white/[.015] text-umbra-muted/30"
               }`}
             >
               Day {i + 1}
@@ -82,7 +82,7 @@ export function CwlLeagueView({
 
       {/* Active round detail */}
       {round && (
-        <div className="mt-3 rounded-xl border border-umbra-line bg-white/[.02] px-4 py-3">
+        <div className="mt-3 rounded-lg border border-umbra-line bg-white/[.03] px-4 py-3">
           {round.opponentName ? (
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -97,7 +97,7 @@ export function CwlLeagueView({
                 {round.state && (
                   <span className={`rounded-full border px-2 py-0.5 text-micro font-semibold uppercase tracking-wider ${
                     round.state === "inWar" ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
-                    : round.state === "preparation" ? "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple"
+                    : round.state === "preparation" ? "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple"
                     : "border-white/10 bg-white/5 text-umbra-muted"
                   }`}>{round.state}</span>
                 )}
@@ -112,7 +112,7 @@ export function CwlLeagueView({
                   <button
                     type="button"
                     onClick={() => onViewDetail(round.warId!)}
-                    className="focus-ring inline-flex items-center gap-1 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/60 hover:bg-umbra-purple/20"
+                    className="focus-ring inline-flex items-center gap-1 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:bg-umbra-purple/10"
                   >
                     Details <IconChevronRight className="h-3 w-3" aria-hidden />
                   </button>
@@ -147,7 +147,7 @@ export function CwlLeagueView({
               {season.standings.map((s, i) => (
                 <tr
                   key={s.tag}
-                  className={`text-xs transition hover:bg-white/[.03] ${
+                  className={`text-xs transition hover:bg-white/[.04] ${
                     s.isOwnClan ? "bg-umbra-purple/5" : ""
                   }`}
                 >

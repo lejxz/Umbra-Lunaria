@@ -169,97 +169,97 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 
 ---
 
-### Phase 3: Global Find-and-Replace — Backgrounds
+### Phase 3: Global ✅ COMPLETE Find-and-Replace — Backgrounds
 
 **Goal:** Replace all `bg-white/[.02]`, `bg-white/[.035]`, `bg-white/[.04]`, `bg-white/[.05]`, `bg-white/[.06]`, `bg-white/[.07]` with either `.tile` (for Level 2 tiles) or remove (if redundant inside a `.glass` card).
 
 **Files:** All `components/**/*.tsx` (batch find-and-replace)
 
 **Tasks:**
-- [ ] 3.1. Replace `bg-white/[.035]` → `.tile` on stat boxes (keep existing padding if different)
-- [ ] 3.2. Replace `bg-white/[.02]` → `.tile` on small stat boxes
-- [ ] 3.3. Replace `bg-white/[.03]` → `.tile`
-- [ ] 3.4. Replace `bg-white/[.04]` → `.tile`
-- [ ] 3.5. Replace `bg-white/[.05]`, `.06`, `.07` → `bg-white/[.04]` (converge hover)
-- [ ] 3.6. Replace `bg-umbra-surface/40` (outside `.glass`) → `.glass` or remove if inside a `.glass`
+- [x] 3.1. Replace `bg-white/[.035]` → `.tile` on stat boxes (keep existing padding if different)
+- [x] 3.2. Replace `bg-white/[.02]` → `.tile` on small stat boxes
+- [x] 3.3. Replace `bg-white/[.03]` → `.tile`
+- [x] 3.4. Replace `bg-white/[.04]` → `.tile`
+- [x] 3.5. Replace `bg-white/[.05]`, `.06`, `.07` → `bg-white/[.04]` (converge hover)
+- [x] 3.6. Replace `bg-umbra-surface/40` (outside `.glass`) → `.glass` or remove if inside a `.glass`
 
 **Verify:** typecheck, lint, grep shows 0 old variants remain.
 
 ---
 
-### Phase 4: Global Find-and-Replace — Radius
+### Phase 4: Global ✅ COMPLETE Find-and-Replace — Radius
 
 **Goal:** Replace all `rounded-xl` → `rounded-lg` and `rounded-md` → `rounded-lg`. Remove `rounded-[10px]`.
 
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- [ ] 4.1. `sed` replace `rounded-xl` → `rounded-lg` across all components
-- [ ] 4.2. `sed` replace `rounded-md` → `rounded-lg` across all components
-- [ ] 4.3. Replace `rounded-[10px]` → `rounded-lg` in `navigation.tsx`
+- [x] 4.1. `sed` replace `rounded-xl` → `rounded-lg` across all components
+- [x] 4.2. `sed` replace `rounded-md` → `rounded-lg` across all components
+- [x] 4.3. Replace `rounded-[10px]` → `rounded-lg` in `navigation.tsx`
 
 **Verify:** typecheck, lint, grep shows 0 `rounded-xl`, `rounded-md`, or `rounded-[10px]`.
 
 ---
 
-### Phase 5: Global Find-and-Replace — Hover States
+### Phase 5: Global ✅ COMPLETE Find-and-Replace — Hover States
 
 **Goal:** Converge all hover backgrounds to 2 values: `hover:bg-white/[.04]` (rows/tiles) and `hover:bg-umbra-purple/10` (buttons/cards).
 
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- [ ] 5.1. Replace `hover:bg-white/[.035]`, `hover:bg-white/[.05]`, `hover:bg-white/[.06]`, `hover:bg-white/[.07]` → `hover:bg-white/[.04]`
-- [ ] 5.2. Replace `hover:bg-umbra-surface/50` → `hover:bg-umbra-purple/10`
-- [ ] 5.3. Replace `hover:bg-umbra-purple/20` → `hover:bg-umbra-purple/10`
-- [ ] 5.4. Keep `hover:bg-umbra-purple/10` as-is (already correct)
+- [x] 5.1. Replace `hover:bg-white/[.035]`, `hover:bg-white/[.05]`, `hover:bg-white/[.06]`, `hover:bg-white/[.07]` → `hover:bg-white/[.04]`
+- [x] 5.2. Replace `hover:bg-umbra-surface/50` → `hover:bg-umbra-purple/10`
+- [x] 5.3. Replace `hover:bg-umbra-purple/20` → `hover:bg-umbra-purple/10`
+- [x] 5.4. Keep `hover:bg-umbra-purple/10` as-is (already correct)
 
 **Verify:** typecheck, lint, grep shows only 2 hover bg values.
 
 ---
 
-### Phase 6: Global Find-and-Replace — Text Sizes
+### Phase 6: Global ✅ COMPLETE Find-and-Replace — Text Sizes
 
 **Goal:** Standardize text sizes per §2.5. Replace `text-sm` with `text-xs` for card subtitles and descriptions (keep `text-sm` only for nav labels).
 
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- [ ] 6.1. Audit each `text-sm` usage — if it's a card subtitle/description, change to `text-xs`
-- [ ] 6.2. If it's a nav label or a large body text, keep `text-sm`
-- [ ] 6.3. Add `tabular-nums` to all numeric stat values (`font-display text-lg` patterns)
+- [x] 6.1. Audit each `text-sm` usage — if it's a card subtitle/description, change to `text-xs`
+- [x] 6.2. If it's a nav label or a large body text, keep `text-sm`
+- [x] 6.3. Add `tabular-nums` to all numeric stat values (`font-display text-lg` patterns)
 
 **Verify:** typecheck, lint, browser visual check.
 
 ---
 
-### Phase 7: Border + Shadow Standardization
+### Phase 7: Border ✅ COMPLETE + Shadow Standardization
 
 **Goal:** Converge border opacities to 3 values (§2.4) and shadows to 2 values (§2.7).
 
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- [ ] 7.1. Replace `border-umbra-purple/30` → `border-umbra-purple/40` (converge)
-- [ ] 7.2. Replace `border-umbra-purple/60` → `border-umbra-purple/50` (converge)
-- [ ] 7.3. Replace `border-umbra-line/40`, `border-umbra-line/30` → `border-umbra-line/50` (converge hover borders)
-- [ ] 7.4. Replace `shadow-md`, `shadow-sm` → `shadow-lg` (converge; cards use `shadow-2xl` via `.glass`)
+- [x] 7.1. Replace `border-umbra-purple/30` → `border-umbra-purple/40` (converge)
+- [x] 7.2. Replace `border-umbra-purple/60` → `border-umbra-purple/50` (converge)
+- [x] 7.3. Replace `border-umbra-line/40`, `border-umbra-line/30` → `border-umbra-line/50` (converge hover borders)
+- [x] 7.4. Replace `shadow-md`, `shadow-sm` → `shadow-lg` (converge; cards use `shadow-2xl` via `.glass`)
 
 **Verify:** typecheck, lint, grep shows only standard values.
 
 ---
 
-### Phase 8: Padding Standardization
+### Phase 8: Padding ✅ COMPLETE Standardization
 
 **Goal:** Standardize card padding to `p-5`, tile padding to `p-3`.
 
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- [ ] 8.1. Replace `p-4` → `p-5` on card surfaces (Level 1 `.glass` elements)
-- [ ] 8.2. Replace `p-6` → `p-5` on card surfaces
-- [ ] 8.3. Replace `p-2` → `p-3` on inner tiles (Level 2)
-- [ ] 8.4. Keep `p-8` for empty/error states (they need more breathing room)
+- [x] 8.1. Replace `p-4` → `p-5` on card surfaces (Level 1 `.glass` elements)
+- [x] 8.2. Replace `p-6` → `p-5` on card surfaces
+- [x] 8.3. Replace `p-2` → `p-3` on inner tiles (Level 2)
+- [x] 8.4. Keep `p-8` for empty/error states (they need more breathing room)
 
 **Verify:** typecheck, lint, browser visual check.
 
@@ -426,12 +426,12 @@ This plan does the opposite: **converge what already exists** into a consistent 
 |---|---|---|---|
 | 1 | Font loading (next/font) | ✅ COMPLETE | 1 | 15 min |
 | 2 | CSS utilities | ✅ COMPLETE | (.tile, .hover-row, .hover-card) | 2 | 10 min |
-| 3 | Background | ⬜ TODO | standardization (10 → 2) | ~15 | 25 min |
-| 4 | Radius | ⬜ TODO | standardization (5 → 3) | ~15 | 10 min |
-| 5 | Hover | ⬜ TODO | standardization (7 → 2) | ~15 | 15 min |
-| 6 | Text | ⬜ TODO | size standardization + tabular-nums | ~15 | 20 min |
-| 7 | Border | ⬜ TODO | + shadow standardization | ~15 | 15 min |
-| 8 | Padding | ⬜ TODO | standardization | ~15 | 15 min |
+| 3 | Background | ✅ COMPLETE | standardization (10 → 2) | ~15 | 25 min |
+| 4 | Radius | ✅ COMPLETE | standardization (5 → 3) | ~15 | 10 min |
+| 5 | Hover | ✅ COMPLETE | standardization (7 → 2) | ~15 | 15 min |
+| 6 | Text | ✅ COMPLETE | size standardization + tabular-nums | ~15 | 20 min |
+| 7 | Border | ✅ COMPLETE | + shadow standardization | ~15 | 15 min |
+| 8 | Padding | ✅ COMPLETE | standardization | ~15 | 15 min |
 | 9 | Navigation | ⬜ TODO | polish (resize fix + logo + safe-area) | 1 | 20 min |
 | 10 | Readability | ⬜ TODO | pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
 | 11 | Animations | ⬜ TODO | (pages, charts, tabs, modals, popups) | ~10 | 45 min |

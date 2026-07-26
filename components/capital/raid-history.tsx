@@ -115,7 +115,7 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
         <button
           type="button"
           onClick={() => setSeasonsOpen((v) => !v)}
-          className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-surface/50"
+          className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
           aria-expanded={seasonsOpen}
         >
           <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
@@ -146,7 +146,7 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
             {history.contributionLeaderboard.map((m, i) => (
               <li
                 key={m.playerTag}
-                className="flex items-center gap-3 rounded-lg border border-umbra-line/40 bg-umbra-surface/20 px-3 py-1.5"
+                className="flex items-center gap-3 rounded-lg border border-umbra-line/50 bg-umbra-surface/20 px-3 py-1.5"
               >
                 <span className="w-5 text-center font-mono text-xs font-semibold text-umbra-muted">
                   {i + 1}
@@ -232,7 +232,7 @@ function HeadlineTile({
         ? format(value)
         : value.toLocaleString();
   return (
-    <div className="rounded-xl border border-umbra-line bg-umbra-surface/40 p-3">
+    <div className="rounded-lg border border-umbra-line bg-umbra-surface/40 p-3">
       <div className="flex items-center gap-1.5 text-umbra-muted">
         <span className="text-umbra-purple">{icon}</span>
         <span className="font-mono text-[0.6rem] uppercase tracking-wider">
@@ -263,7 +263,7 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
     year: "numeric",
   });
   return (
-    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/40 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
+    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/50 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
       <span className="font-mono text-umbra-lilac">{dateLabel}</span>
       <span className="text-umbra-muted">
         {(season.capitalTotalLoot ?? 0).toLocaleString()} gold
@@ -324,7 +324,7 @@ function ContributionHistoryTable({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-surface/50"
+        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
         aria-expanded={open}
       >
         <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
@@ -338,7 +338,7 @@ function ContributionHistoryTable({
       </button>
 
       {open && (
-        <div className="mt-2 overflow-x-auto rounded-lg border border-umbra-line/40">
+        <div className="mt-2 overflow-x-auto rounded-lg border border-umbra-line/50">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-umbra-line bg-umbra-surface/40">
@@ -360,7 +360,7 @@ function ContributionHistoryTable({
             </thead>
             <tbody>
               {visibleMembers.map((m) => (
-                <tr key={m.tag} className="border-b border-umbra-line/20 hover:bg-white/[.02]">
+                <tr key={m.tag} className="border-b border-umbra-line/20 hover:bg-white/[.04]">
                   <td className="sticky left-0 z-10 bg-umbra-ink/95 px-3 py-2 font-medium text-umbra-lilac whitespace-nowrap">
                     {m.name}
                   </td>
@@ -415,7 +415,7 @@ function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-surface/50"
+        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
         aria-expanded={open}
       >
         <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">

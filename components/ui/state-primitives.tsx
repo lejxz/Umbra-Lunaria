@@ -18,7 +18,7 @@ type MetricSource = "api" | "tracked" | "derived";
 const sourceMeta: Record<MetricSource, { label: string; tone: string }> = {
   api: {
     label: "API",
-    tone: "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple",
+    tone: "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple",
   },
   tracked: {
     label: "Tracked",

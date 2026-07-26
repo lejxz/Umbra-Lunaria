@@ -191,7 +191,7 @@ export function MembersRoster({
           {/* Desktop table */}
           <div className="glass hidden overflow-hidden rounded-2xl md:block">
             <table className="w-full text-left">
-              <thead className="border-b border-umbra-line bg-white/[.02]">
+              <thead className="border-b border-umbra-line bg-white/[.03]">
                 <tr>
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">#</th>
                   <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Member</th>
@@ -237,7 +237,7 @@ export function MembersRoster({
                     </td>
                     {/* TH */}
                     <td className="px-4 py-3">
-                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-md bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
+                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
                         {m.townHallLevel ?? "—"}
                       </span>
                     </td>
@@ -294,7 +294,7 @@ export function MembersRoster({
               <button
                 key={m.playerTag}
                 onClick={() => handleMemberClick(m.playerTag)}
-                className="glass flex w-full items-center gap-3 rounded-xl p-3 text-left transition hover:bg-white/[.04] focus-ring"
+                className="glass flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-white/[.04] focus-ring"
               >
                 {m.leagueTier?.iconUrls?.small && (
                   <Image

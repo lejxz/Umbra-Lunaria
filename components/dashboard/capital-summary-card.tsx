@@ -45,7 +45,7 @@ export function CapitalSummaryCard({
       </div>
 
       {/* League — centered, fills remaining space */}
-      <div className="mt-3 flex flex-1 items-center justify-center rounded-xl bg-white/[.035] p-3">
+      <div className="mt-3 flex flex-1 items-center justify-center rounded-lg bg-white/[.03] p-3">
         <div className="text-center">
           <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
             Capital league
@@ -67,7 +67,7 @@ function MiniStat({
   value: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg bg-white/[.035] p-2.5 text-center">
+    <div className="rounded-lg bg-white/[.03] p-2.5 text-center">
       <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </p>

@@ -80,7 +80,7 @@ export function WarDetailSheet({
         </div>
       )}
       {error && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-400/30 bg-red-400/5 px-4 py-6 text-red-300">
+        <div className="flex items-start gap-3 rounded-lg border border-red-400/30 bg-red-400/5 px-4 py-6 text-red-300">
           <IconAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
           <div>
             <p className="text-sm font-medium">Couldn&apos;t load war detail</p>
@@ -154,13 +154,13 @@ function WarDetailContent({
           <StateBadge label={stateLabel(w.state)} tone={w.state === "warEnded" ? "muted" : "amber"} />
 
           {w.teamSize != null && (
-            <span className="rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
+            <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
               {w.teamSize}v{w.teamSize}
               {w.attacksPerMember != null && ` · ${w.attacksPerMember} atk`}
             </span>
           )}
 
-          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/30 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
             <IconSwords className="h-5 w-5" />
           </div>
 
@@ -201,9 +201,9 @@ function WarDetailContent({
       {w.teamSize != null && w.teamSize > 0 && (
         <div className="mt-8 px-4 sm:px-8">
           <div className="mb-2 flex items-center justify-between font-mono text-xs font-semibold text-umbra-muted">
-            <span className="drop-shadow-sm text-amber-400/90">★ {w.clan.stars}</span>
+            <span className="drop-shadow-lg text-amber-400/90">★ {w.clan.stars}</span>
             <span className="text-2xs uppercase tracking-widest text-umbra-muted/50">{w.teamSize * 3} Max</span>
-            <span className="drop-shadow-sm text-red-400/90">{w.opponent.stars} ★</span>
+            <span className="drop-shadow-lg text-red-400/90">{w.opponent.stars} ★</span>
           </div>
           <div className="relative flex h-3 overflow-hidden rounded-full border border-white/5 bg-black/40 shadow-inner shadow-black/50">
             <div className="absolute inset-x-0 top-0 h-px bg-white/5" />
@@ -367,7 +367,7 @@ function StatCard({
   }
 
   return (
-    <div className="glass relative overflow-hidden rounded-xl p-3 sm:p-4 border border-umbra-line/50 transition-all duration-300 hover:border-umbra-purple/30 hover:bg-white/[.04]">
+    <div className="glass relative overflow-hidden rounded-lg p-3 sm:p-4 border border-umbra-line/50 transition-all duration-300 hover:border-umbra-purple/40 hover:bg-white/[.04]">
       {/* Subtle win glow */}
       {ownWins && <div className="pointer-events-none absolute left-0 top-0 h-full w-[2px] bg-emerald-400/50 shadow-[0_0_10px_rgba(52,211,153,0.3)]" />}
       {oppWins && <div className="pointer-events-none absolute right-0 top-0 h-full w-[2px] bg-red-400/50 shadow-[0_0_10px_rgba(248,113,113,0.3)]" />}
@@ -393,7 +393,7 @@ function StatCard({
 
 function Highlight({ children }: { children: React.ReactNode }) {
   return (
-    <div className="relative flex items-start gap-3 overflow-hidden rounded-xl border border-white/5 bg-gradient-to-r from-white/[0.03] to-transparent p-3 text-xs leading-6 text-white/70">
+    <div className="relative flex items-start gap-3 overflow-hidden rounded-lg border border-white/5 bg-gradient-to-r from-white/[0.03] to-transparent p-3 text-xs leading-6 text-white/70">
       <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-umbra-purple" />
       {children}
     </div>

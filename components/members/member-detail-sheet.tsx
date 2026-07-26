@@ -96,7 +96,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
           </p>
         </div>
         {p.townHallLevel && (
-          <div className="shrink-0 rounded-xl bg-umbra-purple/15 px-4 py-2 text-center shadow-[0_0_15px_rgba(182,120,255,0.1)]">
+          <div className="shrink-0 rounded-lg bg-umbra-purple/15 px-4 py-2 text-center shadow-[0_0_15px_rgba(182,120,255,0.1)]">
             <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">TH</p>
             <p className="font-display text-2xl font-bold text-umbra-purple">{p.townHallLevel}</p>
           </div>
@@ -117,13 +117,13 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
 
       {/* Builder Base (if present) */}
       {(p.builderHallLevel || p.builderBaseTrophies) && (
-        <div className="mt-3 flex flex-wrap items-center gap-4 rounded-lg bg-white/[.02] px-4 py-2">
+        <div className="mt-3 flex flex-wrap items-center gap-4 rounded-lg bg-white/[.03] px-4 py-2">
           <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">Builder Base</p>
           <div className="h-4 w-px bg-umbra-line/30" />
           <p className="font-mono text-xs text-white">BH {p.builderHallLevel ?? "—"}</p>
           <p className="font-mono text-xs text-white">🏆 {p.builderBaseTrophies ?? "—"} <span className="text-umbra-muted text-label">(Best: {p.bestBuilderBaseTrophies ?? "—"})</span></p>
           {p.builderBaseLeague && (
-            <span className="rounded-full border border-umbra-line/40 bg-umbra-surface/40 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-umbra-lilac">
+            <span className="rounded-full border border-umbra-line/50 bg-umbra-surface/40 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-umbra-lilac">
               {p.builderBaseLeague.name}
             </span>
           )}
@@ -183,7 +183,7 @@ function ActivitySection({ detail }: { detail: MemberDetailView }) {
               <div
                 key={i}
                 title={`${b.label}: ${b.active ? "active" : "inactive"}`}
-                className={`flex-1 rounded-sm transition-all hover:scale-y-[1.05] ${
+                className={`flex-1 rounded-lg transition-all hover:scale-y-[1.05] ${
                   b.active
                     ? "bg-gradient-to-t from-umbra-indigo/40 to-umbra-purple shadow-[0_0_8px_rgba(182,120,255,0.2)]"
                     : "bg-white/[.03] border border-white/5"
@@ -287,7 +287,7 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       <SectionLabel>Donations</SectionLabel>
-      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 rounded-lg bg-white/[.02] border border-white/[.02] px-4 py-2">
+      <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 rounded-lg bg-white/[.03] border border-white/[.02] px-4 py-2">
         <DonationInline label="24h" given={d.given24h} received={d.received24h} />
         <DonationInline label="7d" given={d.given7d} received={d.received7d} />
         <DonationInline label="30d" given={d.given30d} received={d.received30d} />
@@ -324,7 +324,7 @@ function ActivityScoreSection({ detail }: { detail: MemberDetailView }) {
   if (score === null) return null;
 
   return (
-    <div className="rounded-xl border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
+    <div className="rounded-lg border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
       <SectionLabel noMargin>Activity Score</SectionLabel>
       <div className="mt-4 flex items-center gap-6">
         <div className="text-center">
@@ -359,7 +359,7 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
   const toneClass = tone === "emerald" ? "text-emerald-400" : tone === "amber" ? "text-amber-400" : "text-red-400";
 
   return (
-    <div className="rounded-xl border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
+    <div className="rounded-lg border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
       <SectionLabel noMargin>Rushed Analysis</SectionLabel>
       <div className="mt-4 flex items-center gap-6">
         <div className="text-center">
@@ -500,7 +500,7 @@ function ProgressionCard({ name, level, maxLevel }: { name: string; level: numbe
   const isMaxed = maxLevel !== null && level >= maxLevel;
   return (
     <div className="group relative" title={`${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`}>
-      <div className={`relative aspect-square w-full overflow-hidden rounded-md border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
+      <div className={`relative aspect-square w-full overflow-hidden rounded-lg border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
         <Image src={icon} alt={name} fill className="object-contain p-1" unoptimized />
         <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
           {isMaxed ? "MAX" : level}
@@ -591,7 +591,7 @@ function HallOfFameSection({ detail }: { detail: MemberDetailView }) {
   ];
 
   return (
-    <div className="rounded-xl border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
+    <div className="rounded-lg border border-umbra-line bg-umbra-surface/40 p-4 shadow-lg backdrop-blur-md">
       <SectionLabel noMargin>All-Time Records</SectionLabel>
       <div className="mt-4 flex flex-1">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5 w-full">

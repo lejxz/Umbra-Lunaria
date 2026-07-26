@@ -57,7 +57,7 @@ export function ActivityAnalytics({
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <div className="hidden md:flex items-center rounded-xl bg-white/5 p-1">
+          <div className="hidden md:flex items-center rounded-lg bg-white/5 p-1">
             <StatChip
               label={`Active · ${window}`}
               value={`${current.totalActiveMembers}/${current.totalMembers}`}
@@ -112,7 +112,7 @@ export function ActivityAnalytics({
               {entries.slice(0, 5).map((entry) => {
                 // Podium styling — same as DonationAnalytics top donors
                 let rankColor = "text-umbra-purple";
-                let badgeStyle = "bg-white/[.02] border border-white/5";
+                let badgeStyle = "bg-white/[.03] border border-white/5";
 
                 if (entry.rank === 1) {
                   rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
@@ -129,7 +129,7 @@ export function ActivityAnalytics({
                   <button
                     key={entry.playerTag}
                     onClick={() => onMemberClick?.(entry.playerTag)}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] ${badgeStyle}`}
+                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.04] ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-xs font-bold ${rankColor}`}>

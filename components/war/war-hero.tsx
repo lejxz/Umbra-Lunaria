@@ -34,7 +34,7 @@ export function WarHero({
 }) {
   if (!currentWar) {
     return (
-      <section className="glass flex flex-col rounded-2xl p-6" aria-labelledby="war-hero-title">
+      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-hero-title">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
@@ -56,7 +56,7 @@ export function WarHero({
             history below.
           </p>
           {lastResult && (
-            <div className="mt-5 w-full max-w-md rounded-xl border border-umbra-line bg-white/[.03] px-4 py-3">
+            <div className="mt-5 w-full max-w-md rounded-lg border border-umbra-line bg-white/[.03] px-4 py-3">
               <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
                 Last result
               </p>
@@ -117,7 +117,7 @@ export function WarHero({
   }[currentWar.state];
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-6 shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]" aria-labelledby="war-hero-title">
+    <section className="glass flex flex-col rounded-2xl p-5 shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]" aria-labelledby="war-hero-title">
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -174,7 +174,7 @@ export function WarHero({
               <p className="font-mono text-2xs uppercase tracking-[.16em] text-umbra-purple/70">
                 {currentWar.state === "preparation" ? "Starts in" : "Ends in"}
               </p>
-              <p className="mt-0.5 font-mono text-xl font-bold tracking-tight text-white drop-shadow-md">
+              <p className="mt-0.5 font-mono text-xl font-bold tracking-tight text-white drop-shadow-lg">
                 <LiveCountdown targetDate={countdownTarget} serverNow={serverNow} />
               </p>
             </div>
@@ -185,13 +185,13 @@ export function WarHero({
           ) : null}
 
           {currentWar.teamSize != null && (
-            <span className="rounded-full border border-umbra-purple/20 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
+            <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
               {currentWar.teamSize}v{currentWar.teamSize}
               {currentWar.attacksPerMember != null && ` · ${currentWar.attacksPerMember} atk`}
             </span>
           )}
 
-          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/30 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
             <IconSwords className="h-5 w-5" />
           </div>
 
@@ -228,9 +228,9 @@ export function WarHero({
       {maxPossibleStars != null && maxPossibleStars > 0 && (
         <div className="mt-8 px-4 sm:px-8">
           <div className="mb-2 flex items-center justify-between font-mono text-xs font-semibold text-umbra-muted">
-            <span className="drop-shadow-sm text-amber-400/90">★ {ownStars}</span>
+            <span className="drop-shadow-lg text-amber-400/90">★ {ownStars}</span>
             <span className="text-2xs uppercase tracking-widest text-umbra-muted/50">{maxPossibleStars} Max</span>
-            <span className="drop-shadow-sm text-red-400/90">{oppStars} ★</span>
+            <span className="drop-shadow-lg text-red-400/90">{oppStars} ★</span>
           </div>
           <div className="relative flex h-3 overflow-hidden rounded-full border border-white/5 bg-black/40 shadow-inner shadow-black/50">
             <div className="absolute inset-x-0 top-0 h-px bg-white/5" />
@@ -259,7 +259,7 @@ export function StateBadge({
   tone: "purple" | "amber" | "muted";
 }) {
   const toneClass = {
-    purple: "border-umbra-purple/30 bg-umbra-purple/15 text-umbra-purple",
+    purple: "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple",
     amber: "border-amber-400/30 bg-amber-400/10 text-amber-400",
     muted: "border-white/10 bg-white/5 text-umbra-muted",
   }[tone];
@@ -299,7 +299,7 @@ export function WarClanColumn({
             src={badgeUrls.small}
             alt={`${name} badge`}
             fill
-            className={`object-contain drop-shadow-md ${tone === "opponent" ? "grayscale" : ""}`}
+            className={`object-contain drop-shadow-lg ${tone === "opponent" ? "grayscale" : ""}`}
           />
         </div>
       )}

@@ -47,10 +47,10 @@ export function Select({ value, onChange, options, className = "" }: SelectProps
                 onChange(o.value);
                 setOpen(false);
               }}
-              className={`flex w-full text-left items-center rounded-md px-2 py-1.5 text-xs transition-colors ${
+              className={`flex w-full text-left items-center rounded-lg px-2 py-1.5 text-xs transition-colors ${
                 value === o.value
                   ? "text-white font-medium bg-umbra-purple/10"
-                  : "text-umbra-lilac hover:bg-white/[.05] hover:text-white"
+                  : "text-umbra-lilac hover:bg-white/[.04] hover:text-white"
               }`}
             >
               {o.label}

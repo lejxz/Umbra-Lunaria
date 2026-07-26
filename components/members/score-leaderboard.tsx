@@ -48,7 +48,7 @@ export function ScoreLeaderboard({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-4 py-2 text-label font-bold uppercase tracking-wider text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.02] hover:text-white"
+            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-4 py-2 text-label font-bold uppercase tracking-wider text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.04] hover:text-white"
           >
             View Full List &rarr;
           </button>
@@ -136,7 +136,7 @@ function TruePodiumCard({
   onMemberClick?: (playerTag: string) => void;
 }) {
   let rankColor = "text-umbra-purple";
-  let badgeStyle = "bg-white/[.02] border-t border-white/5";
+  let badgeStyle = "bg-white/[.03] border-t border-white/5";
 
   if (entry.rank === 1) {
     rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
@@ -155,7 +155,7 @@ function TruePodiumCard({
   return (
     <button
       onClick={() => onMemberClick?.(entry.playerTag)}
-      className={`flex w-full flex-col items-center justify-between rounded-t-xl px-2 py-3 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle} ${heightClass}`}
+      className={`flex w-full flex-col items-center justify-between rounded-t-xl px-2 py-3 transition-colors hover:bg-white/[.04] focus-ring ${badgeStyle} ${heightClass}`}
     >
       <div className="flex flex-col items-center gap-1 w-full">
         <span className={`font-mono text-base font-black ${rankColor}`}>
@@ -167,7 +167,7 @@ function TruePodiumCard({
             alt=""
             width={20}
             height={20}
-            className="h-[20px] w-[20px] shrink-0 drop-shadow-md"
+            className="h-[20px] w-[20px] shrink-0 drop-shadow-lg"
             unoptimized
           />
         )}
@@ -211,7 +211,7 @@ function LeaderboardRow({
   onMemberClick?: (playerTag: string) => void;
 }) {
   let rankColor = "text-umbra-purple";
-  let badgeStyle = "bg-white/[.02] border border-white/5";
+  let badgeStyle = "bg-white/[.03] border border-white/5";
 
   if (entry.rank === 1) {
     rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
@@ -230,7 +230,7 @@ function LeaderboardRow({
   return (
     <button
       onClick={() => onMemberClick?.(entry.playerTag)}
-      className={`flex w-full items-center justify-between rounded-xl px-4 py-3 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle}`}
+      className={`flex w-full items-center justify-between rounded-lg px-4 py-3 transition-colors hover:bg-white/[.04] focus-ring ${badgeStyle}`}
     >
       <div className="flex min-w-0 items-center gap-3">
         <span className={`font-mono text-sm font-bold w-6 text-center ${rankColor}`}>

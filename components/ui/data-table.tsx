@@ -328,7 +328,7 @@ function TableRow<T>({
       onKeyDown={onClick ? handleKeyDown : undefined}
       aria-pressed={onClick ? selected : undefined}
       className={`text-umbra-lilac transition ${
-        onClick ? "cursor-pointer hover:bg-white/[.035] focus:bg-white/[.035]" : ""
+        onClick ? "cursor-pointer hover:bg-white/[.04] focus:bg-white/[.03]" : ""
       } ${selected ? "bg-umbra-purple/10" : ""}`}
     >
       {columns.map((column) => (
@@ -372,7 +372,7 @@ function MobileCard<T>({
       aria-pressed={onClick ? selected : undefined}
       className={`glass rounded-2xl p-4 transition ${
         onClick ? "cursor-pointer hover:border-umbra-purple/40 focus:border-umbra-purple/40" : ""
-      } ${selected ? "border-umbra-purple/60 bg-umbra-purple/10" : ""}`}
+      } ${selected ? "border-umbra-purple/50 bg-umbra-purple/10" : ""}`}
     >
       {headline && (
         <div className="font-display text-base text-umbra-lilac">

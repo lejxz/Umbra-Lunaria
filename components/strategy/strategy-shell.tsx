@@ -69,7 +69,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
             </div>
           </div>
         ) : (
-          <div className="glass rounded-2xl p-8">
+          <div className="glass rounded-2xl p-5">
             <EmptyState
               icon={<IconSwords className="h-10 w-10 text-umbra-purple/40" />}
               title="No participants ranked yet"
@@ -104,7 +104,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
             </div>
           </div>
         ) : (
-          <div className="glass rounded-2xl p-8">
+          <div className="glass rounded-2xl p-5">
             <EmptyState
               icon={<IconUsers className="h-10 w-10 text-umbra-purple/40" />}
               title="Everyone looks good"
@@ -222,7 +222,7 @@ function ReviewRow({
   return (
     <li
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-3 rounded-lg border border-umbra-line/30 bg-white/[.015] px-3 py-2.5 transition hover:bg-white/[.04]"
+      className="flex cursor-pointer items-center gap-3 rounded-lg border border-umbra-line/50 bg-white/[.015] px-3 py-2.5 transition hover:bg-white/[.04]"
     >
       {m.townHallLevel && (
         <span className="font-mono text-[0.6rem] font-bold text-umbra-muted">

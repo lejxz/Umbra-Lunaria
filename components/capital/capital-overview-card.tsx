@@ -31,7 +31,7 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
       {/* Hero: Capital Hall level centerpiece + side stats */}
       <div className="mt-4 flex flex-col items-center justify-center gap-5 py-6">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/20">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/40">
             <IconCapital className="h-7 w-7 text-umbra-purple/80" aria-hidden />
           </div>
           <div>
@@ -44,7 +44,7 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
           </div>
         </div>
 
-        <div className="flex items-center rounded-xl bg-white/5 p-1">
+        <div className="flex items-center rounded-lg bg-white/5 p-1">
           <TotalChip label="Capital Points" value={overview.capitalPoints} />
           <div className="h-4 w-px bg-white/10 mx-1" />
           <TotalChip label="Districts" value={overview.districtCount} />

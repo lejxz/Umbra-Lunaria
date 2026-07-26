@@ -85,7 +85,7 @@ export function RecordCard({
               {entries.length > TOP_N && (
                 <button
                   onClick={() => setViewAll(true)}
-                  className="mt-2 flex w-full items-center justify-center rounded-lg border border-umbra-line/30 bg-white/[0.02] py-2.5 text-xs font-medium text-umbra-muted transition-colors hover:bg-white/[0.04] hover:text-umbra-lilac"
+                  className="mt-2 flex w-full items-center justify-center rounded-lg border border-umbra-line/50 bg-white/[.03] py-2.5 text-xs font-medium text-umbra-muted transition-colors hover:bg-white/[.04] hover:text-umbra-lilac"
                 >
                   View all {entries.length} rankings
                 </button>
@@ -117,7 +117,7 @@ export function RecordCard({
               </div>
               <button
                 onClick={() => setViewAll(false)}
-                className="rounded-full p-2 text-umbra-muted transition-colors hover:bg-white/10 hover:text-white"
+                className="rounded-full p-2 text-umbra-muted transition-colors hover:bg-umbra-purple/10 hover:text-white"
               >
                 <IconX className="h-5 w-5" />
               </button>
@@ -155,7 +155,7 @@ function RankRow({
 }) {
   const rank = entry.rank ?? 0;
   let rankColor = "text-umbra-muted";
-  let badgeStyle = "bg-white/[.02] border border-white/5";
+  let badgeStyle = "bg-white/[.03] border border-white/5";
 
   if (rank === 1) {
     rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
@@ -171,7 +171,7 @@ function RankRow({
   return (
     <button
       onClick={onClick}
-      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/[.07] focus-ring text-left ${badgeStyle}`}
+      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/[.04] focus-ring text-left ${badgeStyle}`}
     >
       <span className={`w-5 shrink-0 text-center font-mono text-xs font-bold ${rankColor}`}>
         {rank === 1 ? "👑" : rank > 0 ? `#${rank}` : ""}

@@ -184,7 +184,7 @@ function RosterColumn({
   opposingThByPos: Map<number, number>;
 }) {
   return (
-    <div className="flex flex-col rounded-xl border border-umbra-line bg-white/[.02]">
+    <div className="flex flex-col rounded-lg border border-umbra-line bg-white/[.03]">
       <div className="flex items-center justify-between border-b border-umbra-line px-3 py-2">
         <span
           className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"}`}

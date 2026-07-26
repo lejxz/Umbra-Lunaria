@@ -46,7 +46,7 @@ export function RaidTimerBanner({
 
   // Accent color: amber for "in progress", purple for "next raid".
   const accent = isInProgress
-    ? "border-umbra-purple/30"
+    ? "border-umbra-purple/40"
     : "border-amber-400/30";
   const iconBg = isInProgress
     ? "bg-umbra-purple/15 text-umbra-purple"
@@ -75,7 +75,7 @@ export function RaidTimerBanner({
       </span>
 
       <div className="ml-auto flex items-center gap-4">
-        <div className="flex items-center gap-2 rounded-xl border border-umbra-line bg-umbra-ink/50 px-4 py-2">
+        <div className="flex items-center gap-2 rounded-lg border border-umbra-line bg-umbra-ink/50 px-4 py-2">
           <IconClock className="h-4 w-4 text-umbra-purple" aria-hidden />
           <span className="font-mono text-xs uppercase tracking-wider text-umbra-muted">
             {label}

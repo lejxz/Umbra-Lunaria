@@ -38,7 +38,7 @@ export function UpgradeTimeline({
           Upgrade history · tracked
         </p>
         {history.events.length > 0 && (
-          <span className="rounded-full border border-umbra-purple/30 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold text-umbra-purple">
+          <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold text-umbra-purple">
             {history.events.length} {history.events.length === 1 ? "upgrade" : "upgrades"}
           </span>
         )}
@@ -84,7 +84,7 @@ export function UpgradeTimeline({
             {filteredEvents.map((e, i) => (
               <li key={`${e.districtName}-${e.observedAt.getTime()}-${i}`} className="relative">
                 <span className="absolute -left-[1.4rem] top-2 flex h-2.5 w-2.5 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/20" />
-                <div className="rounded-lg border border-umbra-line/60 bg-white/[.02] px-3 py-2">
+                <div className="rounded-lg border border-umbra-line/60 bg-white/[.03] px-3 py-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-xs font-medium text-umbra-lilac">
                       {e.districtName}
@@ -117,7 +117,7 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
       className={`focus-ring rounded-full border px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider transition ${
         active
           ? "border-umbra-purple/50 bg-umbra-purple/15 text-umbra-lilac"
-          : "border-umbra-line bg-white/[.02] text-umbra-muted hover:border-umbra-purple/30 hover:text-umbra-lilac"
+          : "border-umbra-line bg-white/[.03] text-umbra-muted hover:border-umbra-purple/40 hover:text-umbra-lilac"
       }`}
     >
       {label}

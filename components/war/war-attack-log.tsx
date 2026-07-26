@@ -45,7 +45,7 @@ export function WarAttackLog({
       </div>
       <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
 
-      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-xl border border-umbra-line bg-white/[.02]">
+      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-lg border border-umbra-line bg-white/[.03]">
         <table className="w-full text-left">
           <thead className="sticky top-0 z-10 border-b border-umbra-line bg-umbra-ink/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur supports-[backdrop-filter]:bg-umbra-ink/80">
             <tr>
@@ -144,7 +144,7 @@ function AttackParticipant({
   );
   if (isOwnClan && tag) {
     return (
-      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring -m-1 rounded-md p-1 text-left transition hover:bg-umbra-purple/10">
+      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring -m-1 rounded-lg p-1 text-left transition hover:bg-umbra-purple/10">
         {inner}
       </button>
     );

@@ -57,7 +57,7 @@ export function DonationAnalytics({
         
         <div className="flex flex-wrap items-center gap-4">
           {/* Compact totals card */}
-          <div className="hidden md:flex items-center rounded-xl bg-white/5 p-1">
+          <div className="hidden md:flex items-center rounded-lg bg-white/5 p-1">
             <TotalChip label="Given" value={current.totals.given} />
             <div className="h-4 w-px bg-white/10 mx-1" />
             <TotalChip label="Received" value={current.totals.received} />
@@ -111,7 +111,7 @@ export function DonationAnalytics({
               {current.leaderboard.topDonors.slice(0, 5).map((donor) => {
                 // Determine rank styling
                 let rankColor = "text-umbra-purple";
-                let badgeStyle = "bg-white/[.02] border border-white/5";
+                let badgeStyle = "bg-white/[.03] border border-white/5";
                 
                 if (donor.rank === 1) {
                   rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
@@ -128,7 +128,7 @@ export function DonationAnalytics({
                   <button
                     key={donor.playerTag}
                     onClick={() => onMemberClick?.(donor.playerTag)}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.07] focus-ring ${badgeStyle}`}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.04] focus-ring ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-xs font-bold ${rankColor}`}>

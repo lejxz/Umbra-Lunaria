@@ -13,7 +13,7 @@ export function Tabs({
 }) {
   return (
     <div
-      className="flex gap-1 rounded-xl bg-white/5 p-1"
+      className="flex gap-1 rounded-lg bg-white/5 p-1"
       role="tablist"
       aria-label={label}
     >
