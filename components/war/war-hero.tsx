@@ -147,7 +147,7 @@ export function WarHero({
       )}
 
       {/* VS matchup */}
-      <div className="relative mt-8 flex items-stretch justify-center gap-2 sm:gap-6">
+      <div className="relative mt-8 py-4 flex items-stretch justify-center gap-2 sm:gap-6">
         {/* Glowing auras */}
         <div className="pointer-events-none absolute inset-0 flex overflow-hidden rounded-2xl">
            {leadAnalysis?.leader === "own" && <div className="absolute left-[-20%] top-[-20%] h-[140%] w-[70%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-emerald-500/15 via-emerald-500/5 to-transparent" />}

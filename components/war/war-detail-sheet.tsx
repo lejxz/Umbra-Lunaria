@@ -129,7 +129,7 @@ function WarDetailContent({
       </div>
 
       {/* ---- Score line (VS Arena Layout) ---- */}
-      <div className="relative mt-8 flex items-stretch justify-center gap-2 sm:gap-6">
+      <div className="relative mt-8 py-4 flex items-stretch justify-center gap-2 sm:gap-6">
         {/* Glowing auras based on result */}
         <div className="pointer-events-none absolute inset-0 flex overflow-hidden rounded-2xl">
           {w.state === "warEnded" && resultFromStars(w) === "win" && (
