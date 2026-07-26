@@ -50,32 +50,24 @@ export function WarHistory({
         </p>
         <span className="text-2xs text-umbra-muted">{history.length} recorded</span>
       </div>
-      <h3 id="war-history-title" className="mt-1 font-display text-lg text-umbra-lilac">
-        Past wars
-      </h3>
-
-      {/* Record summary */}
-      {history.length > 0 && (
-        <div className="mt-3 flex items-center gap-2">
-          <RecordChip label="W" value={record.wins} tone="emerald" />
-          <RecordChip label="L" value={record.losses} tone="red" />
-          <RecordChip label="T" value={record.ties} tone="amber" />
-          <span className="ml-auto text-2xs text-umbra-muted">
-            {record.wins + record.losses + record.ties > 0
-              ? `${Math.round((record.wins / (record.wins + record.losses + record.ties)) * 100)}% win rate`
-              : "—"}
-          </span>
-        </div>
-      )}
+      <div className="mt-1 flex items-center justify-between">
+        <h3 id="war-history-title" className="font-display text-lg text-umbra-lilac">
+          Past wars
+        </h3>
+        
+        {/* Record summary */}
+        {history.length > 0 && (
+          <div className="flex items-center gap-2">
+            <RecordChip label="W" value={record.wins} tone="emerald" />
+            <RecordChip label="L" value={record.losses} tone="red" />
+            <RecordChip label="T" value={record.ties} tone="amber" />
+          </div>
+        )}
+      </div>
 
       {warLogPublic === false && (
         <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-2xs text-amber-400">
           This clan&apos;s war log is private — history before tracking may be incomplete.
-        </p>
-      )}
-      {warLogPublic === true && trackingStart && (
-        <p className="mt-3 text-2xs text-umbra-muted">
-          History before tracking began (<TimeAgo date={trackingStart} />) is incomplete.
         </p>
       )}
 
