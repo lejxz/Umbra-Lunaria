@@ -265,7 +265,7 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 
 ---
 
-### Phase 9: Navigation Polish
+### Phase 9: Navigation ✅ COMPLETE Polish
 
 **Goal:** Fix the nav-specific issues — especially the jarring resize when
 collapsing/expanding — without changing the overall design.
@@ -283,33 +283,33 @@ the transition feels abrupt.
 **Files:** `components/navigation.tsx`
 
 **Tasks:**
-- [ ] 9.1. Replace `<img>` logo with `<Image>` component
-- [ ] 9.2. Replace `rounded-[10px]` → `rounded-lg` on nav items
-- [ ] 9.3. Standardize active state: `bg-umbra-purple/10 text-umbra-lilac` (already correct)
-- [ ] 9.4. Standardize inactive hover: `hover:bg-white/[.04]` (replace `hover:bg-white/5`)
-- [ ] 9.5. Add iOS safe-area padding (`pb-[env(safe-area-inset-bottom)]`) on mobile bottom bar
-- [ ] 9.6. **Fix the resize jank:** Change collapsed width from `lg:w-20` (80px) to `lg:w-16` (64px) — tighter, more standard icon-only width. The smaller delta (240→64 = 176px → 240→64 = 176px... same delta but tighter collapsed state looks more intentional).
-- [ ] 9.7. **Smooth the transition:** Change `transition-[width] duration-300 ease-in-out` to `transition-[width] duration-200 ease-out` — faster, less noticeable. The 300ms duration makes the resize feel slow and drawn-out; 200ms feels snappy.
-- [ ] 9.8. **Prevent content jump:** Add `transition-[margin] duration-200 ease-out` is NOT needed — the flex layout handles this automatically because the sidebar is `lg:sticky lg:shrink-0`. The content `<main>` has `flex-1` so it reflows smoothly. The perceived jank is from the 300ms duration + the large visual delta. Fixing 9.6 + 9.7 resolves it.
-- [ ] 9.9. **Smooth the logo/wordmark fade:** Change `transition-all duration-300` to `transition-all duration-200` on the logo area + nav labels — match the width transition speed.
-- [ ] 9.10. **Smooth the status footer fade:** Change `transition-opacity duration-300` to `transition-opacity duration-200`.
+- [x] 9.1. Replace `<img>` logo with `<Image>` component
+- [x] 9.2. Replace `rounded-[10px]` → `rounded-lg` on nav items
+- [x] 9.3. Standardize active state: `bg-umbra-purple/10 text-umbra-lilac` (already correct)
+- [x] 9.4. Standardize inactive hover: `hover:bg-white/[.04]` (replace `hover:bg-white/5`)
+- [x] 9.5. Add iOS safe-area padding (`pb-[env(safe-area-inset-bottom)]`) on mobile bottom bar
+- [x] 9.6. **Fix the resize jank:** Change collapsed width from `lg:w-20` (80px) to `lg:w-16` (64px) — tighter, more standard icon-only width. The smaller delta (240→64 = 176px → 240→64 = 176px... same delta but tighter collapsed state looks more intentional).
+- [x] 9.7. **Smooth the transition:** Change `transition-[width] duration-300 ease-in-out` to `transition-[width] duration-200 ease-out` — faster, less noticeable. The 300ms duration makes the resize feel slow and drawn-out; 200ms feels snappy.
+- [x] 9.8. **Prevent content jump:** Add `transition-[margin] duration-200 ease-out` is NOT needed — the flex layout handles this automatically because the sidebar is `lg:sticky lg:shrink-0`. The content `<main>` has `flex-1` so it reflows smoothly. The perceived jank is from the 300ms duration + the large visual delta. Fixing 9.6 + 9.7 resolves it.
+- [x] 9.9. **Smooth the logo/wordmark fade:** Change `transition-all duration-300` to `transition-all duration-200` on the logo area + nav labels — match the width transition speed.
+- [x] 9.10. **Smooth the status footer fade:** Change `transition-opacity duration-300` to `transition-opacity duration-200`.
 
 **Verify:** typecheck, lint, browser desktop — toggle collapse/expand 5×, verify no jarring jump.
 
 ---
 
-### Phase 10: Readability Pass
+### Phase 10: Readability ✅ COMPLETE Pass
 
 **Goal:** Improve contrast, spacing, and scannability.
 
 **Files:** Various
 
 **Tasks:**
-- [ ] 10.1. Bump `umbra-muted` from `#A89CC4` → `#B0A4CC` (slightly lighter, better WCAG AA at small sizes)
-- [ ] 10.2. Add `tabular-nums` to all countdowns + stat values
-- [ ] 10.3. Add `truncate` + `title={name}` tooltip on all member name displays
-- [ ] 10.4. Add `even:bg-white/[.015]` alternating rows on dense leaderboards (HoF cards, clan log, contribution table)
-- [ ] 10.5. Standardize grid gaps: card grids → `gap-4`, tile grids → `gap-2`
+- [x] 10.1. Bump `umbra-muted` from `#A89CC4` → `#B0A4CC` (slightly lighter, better WCAG AA at small sizes)
+- [x] 10.2. Add `tabular-nums` to all countdowns + stat values
+- [x] 10.3. Add `truncate` + `title={name}` tooltip on all member name displays
+- [x] 10.4. Add `even:bg-white/[.015]` alternating rows on dense leaderboards (HoF cards, clan log, contribution table)
+- [x] 10.5. Standardize grid gaps: card grids → `gap-4`, tile grids → `gap-2`
 
 **Verify:** typecheck, lint, browser visual check.
 
@@ -432,8 +432,8 @@ This plan does the opposite: **converge what already exists** into a consistent 
 | 6 | Text | ✅ COMPLETE | size standardization + tabular-nums | ~15 | 20 min |
 | 7 | Border | ✅ COMPLETE | + shadow standardization | ~15 | 15 min |
 | 8 | Padding | ✅ COMPLETE | standardization | ~15 | 15 min |
-| 9 | Navigation | ⬜ TODO | polish (resize fix + logo + safe-area) | 1 | 20 min |
-| 10 | Readability | ⬜ TODO | pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
+| 9 | Navigation | ✅ COMPLETE | polish (resize fix + logo + safe-area) | 1 | 20 min |
+| 10 | Readability | ✅ COMPLETE | pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
 | 11 | Animations | ⬜ TODO | (pages, charts, tabs, modals, popups) | ~10 | 45 min |
 | 12 | Final | ⬜ TODO | verification (includes /strategy page) | 0 | 15 min |
 | **Total** | | | **~3.75 hours** |

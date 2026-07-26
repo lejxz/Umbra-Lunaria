@@ -158,7 +158,7 @@ function SuggestedRow({
               TH{p.townHallLevel}
             </span>
           )}
-          <span className="truncate font-medium text-umbra-lilac">{p.name}</span>
+          <span className="truncate font-medium text-umbra-lilac" title={p.name}>{p.name}</span>
           {p.isNewMember && (
             <span className="rounded-full border border-sky-400/30 bg-sky-400/10 px-1.5 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider text-sky-300">
               New
@@ -230,7 +230,7 @@ function ReviewRow({
         </span>
       )}
       <div className="min-w-0 flex-1">
-        <span className="block truncate text-sm text-umbra-lilac">{m.name}</span>
+        <span className="block truncate text-sm text-umbra-lilac" title={m.name}>{m.name}</span>
         <div className="mt-1 flex flex-wrap gap-1">
           {m.reasons.map((r, i) => (
             <span
