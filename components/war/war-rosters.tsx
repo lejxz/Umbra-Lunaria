@@ -59,38 +59,49 @@ export function WarRosters({
 
   return (
     <section className={contained ? "glass flex flex-col rounded-2xl p-5" : "flex flex-col"} aria-labelledby="war-rosters-title">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          {isPrep ? "Preparation · scout" : "War roster"}
-        </p>
-        <div className="flex items-center gap-3">
+      {contained ? (
+        <>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+              {isPrep ? "Preparation · scout" : "War roster"}
+            </p>
+            <div className="flex items-center gap-3">
+              <Badge tone="brand">
+                {currentWar.clan.members.length} vs {currentWar.opponent.members.length}
+              </Badge>
+              {!isPrep && (
+                <div
+                  role="tablist"
+                  aria-label="Roster right-column view"
+                  className="flex rounded-full border border-umbra-line bg-umbra-ink/40 p-0.5"
+                >
+                  <ToggleTab active={mode === "attacks"} onClick={() => setMode("attacks")} label="Attacks" />
+                  <ToggleTab active={mode === "base"} onClick={() => setMode("base")} label="Base" />
+                </div>
+              )}
+            </div>
+          </div>
+          <h3 id="war-rosters-title" className="mt-1 font-display text-lg text-umbra-lilac">
+            {isPrep ? "Roster scouting" : "Participant roster"}
+          </h3>
+        </>
+      ) : (
+        <div className="flex items-center justify-between mb-4">
           <Badge tone="brand">
             {currentWar.clan.members.length} vs {currentWar.opponent.members.length}
           </Badge>
-          {/* Toggle — only meaningful once attacks exist (battle/ended). */}
           {!isPrep && (
             <div
               role="tablist"
               aria-label="Roster right-column view"
               className="flex rounded-full border border-umbra-line bg-umbra-ink/40 p-0.5"
             >
-              <ToggleTab
-                active={mode === "attacks"}
-                onClick={() => setMode("attacks")}
-                label="Attacks"
-              />
-              <ToggleTab
-                active={mode === "base"}
-                onClick={() => setMode("base")}
-                label="Base"
-              />
+              <ToggleTab active={mode === "attacks"} onClick={() => setMode("attacks")} label="Attacks" />
+              <ToggleTab active={mode === "base"} onClick={() => setMode("base")} label="Base" />
             </div>
           )}
         </div>
-      </div>
-      <h3 id="war-rosters-title" className="mt-1 font-display text-lg text-umbra-lilac">
-        {isPrep ? "Roster scouting" : "Participant roster"}
-      </h3>
+      )}
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <RosterColumn
@@ -202,7 +213,7 @@ function RosterColumn({
             No roster data
           </p>
         ) : (
-          <table className="w-full text-left">
+          <table className="w-full text-left table-fixed">
             <thead className="data-thead">
               <tr>
                 <th className="w-8 data-th text-center font-medium">#</th>
@@ -272,7 +283,7 @@ function RosterRow({
       </td>
 
       {/* Name */}
-      <td className="px-2 py-2 align-middle max-w-0 w-full">
+      <td className="px-2 py-2 align-middle w-full">
         <div className="min-w-0 truncate text-xs text-umbra-lilac" title={m.name}>
           {m.name}
         </div>

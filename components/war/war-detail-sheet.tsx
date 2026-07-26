@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Modal } from "@/components/ui/modal";
+import { SectionLabel } from "@/components/ui/section-label";
 import type { WarDetailView } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { TimeAgo } from "@/components/ui/time-ago";
@@ -222,10 +223,7 @@ function WarDetailContent({
 
       {/* ---- Analysis panel ---- */}
       <section className="flex flex-col" aria-labelledby="analysis-title">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          Analysis
-        </p>
-        <h3 id="analysis-title" className="mt-1 font-display text-base text-umbra-lilac">Performance breakdown</h3>
+        <SectionLabel>Performance breakdown</SectionLabel>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <StatCard
             label="3★ rate"
@@ -292,8 +290,9 @@ function WarDetailContent({
         </div>
       </section>
 
-      {/* ---- Roster ---- */}
-      <div>
+      {/* ---- Rosters ---- */}
+      <div className="flex flex-col">
+        <SectionLabel>Participant Roster</SectionLabel>
         <WarRosters
           currentWar={w}
           contained={false}
@@ -301,8 +300,9 @@ function WarDetailContent({
         />
       </div>
 
-      {/* ---- Attack log ---- */}
-      <div>
+      {/* ---- Attack Log ---- */}
+      <div className="flex flex-col">
+        <SectionLabel>Attack Log</SectionLabel>
         <WarAttackLog
           attackLog={attackLog}
           warState={w.state}

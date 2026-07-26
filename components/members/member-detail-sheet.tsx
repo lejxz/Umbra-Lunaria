@@ -4,6 +4,7 @@ import Image from "next/image";
 import type { MemberDetailView } from "@/lib/view-models/members";
 import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
+import { SectionLabel } from "@/components/ui/section-label";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import { IconSwords } from "@/components/ui/icons";
 import { DonationChart } from "@/components/dashboard/donation-chart";

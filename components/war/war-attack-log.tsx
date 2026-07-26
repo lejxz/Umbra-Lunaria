@@ -42,11 +42,19 @@ export function WarAttackLog({
 
   return (
     <section className={contained ? "glass flex flex-col rounded-2xl p-5" : "flex flex-col"} aria-labelledby="war-attacks-title">
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
-        <Badge tone="muted">{attackLog.length} attacks</Badge>
-      </div>
-      <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
+      {contained ? (
+        <>
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
+            <Badge tone="muted">{attackLog.length} attacks</Badge>
+          </div>
+          <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
+        </>
+      ) : (
+        <div className="flex justify-end mb-4">
+          <Badge tone="muted">{attackLog.length} attacks</Badge>
+        </div>
+      )}
 
       <div className="mt-4 data-container">
         <table className="w-full text-left">
