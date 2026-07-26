@@ -79,19 +79,19 @@ export function WarHistory({
         </p>
       )}
 
-      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-lg border border-umbra-line bg-white/[.03] shadow-inner shadow-black/20">
+      <div className="mt-4 data-container">
         <table className="w-full text-left text-sm">
-          <thead className="sticky top-0 z-10 border-b border-umbra-line bg-[#0E0C13]/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur">
+          <thead className="data-thead">
             <tr>
-              <th className="w-10 px-3 py-2 font-medium">Result</th>
-              <th className="px-3 py-2 font-medium">Opponent</th>
-              <th className="px-3 py-2 font-medium">Type</th>
-              <th className="px-3 py-2 text-center font-medium">Score</th>
-              <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Destruction</th>
-              <th className="px-3 py-2 text-right font-medium">Action</th>
+              <th className="w-10 data-th">Result</th>
+              <th className="data-th">Opponent</th>
+              <th className="data-th">Type</th>
+              <th className="data-th text-center">Score</th>
+              <th className="hidden data-th text-right sm:table-cell">Destruction</th>
+              <th className="data-th text-right">Action</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="data-tbody">
             {history.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-3 py-8">
@@ -128,14 +128,14 @@ function RecordChip({ label, value, tone }: { label: string; value: number; tone
 
 function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: (warId: number) => void }) {
   return (
-    <tr className="group transition hover:bg-white/[.04]">
+    <tr className="data-tr">
       {/* Result */}
-      <td className="px-3 py-2 align-middle">
+      <td className="data-td">
         <ResultPill result={w.result} />
       </td>
 
       {/* Opponent badge + name */}
-      <td className="px-3 py-2 align-middle">
+      <td className="data-td">
         <div className="flex items-center gap-2.5">
           {w.opponentBadgeUrls?.small ? (
             <div className="relative h-6 w-6 shrink-0">
@@ -158,7 +158,7 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
       </td>
 
       {/* Type / Meta */}
-      <td className="px-3 py-2 align-middle">
+      <td className="data-td">
         <div className="flex flex-col gap-0.5">
           <span className="font-mono text-2xs text-umbra-muted">
             <span className="rounded bg-white/5 px-1 text-umbra-purple/80">{w.warType === "cwl" ? "CWL" : "REG"}</span>
@@ -171,14 +171,14 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
       </td>
 
       {/* Score line */}
-      <td className="px-3 py-2 text-center align-middle font-display text-sm font-bold">
+      <td className="data-td text-center font-display text-sm font-bold">
         <span className="text-amber-400">{w.ownStars ?? "—"}</span>
         <span className="mx-1 text-2xs text-umbra-muted/50">–</span>
         <span className="text-umbra-muted">{w.opponentStars ?? "—"}</span>
       </td>
 
       {/* Destruction */}
-      <td className="hidden px-3 py-2 text-right align-middle font-mono text-2xs text-umbra-muted sm:table-cell">
+      <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted sm:table-cell">
         {w.ownDestructionPercentage != null && w.opponentDestructionPercentage != null ? (
           <span>
             <span className={w.ownDestructionPercentage === 100 ? "text-amber-400" : "text-umbra-lilac"}>{w.ownDestructionPercentage}</span>
@@ -192,7 +192,7 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
       </td>
 
       {/* Details button */}
-      <td className="px-3 py-2 text-right align-middle">
+      <td className="data-td text-right">
         {w.hasDetail ? (
           <button
             type="button"

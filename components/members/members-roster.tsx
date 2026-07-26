@@ -191,31 +191,31 @@ export function MembersRoster({
           {/* Desktop table */}
           <div className="glass hidden overflow-hidden rounded-2xl md:block">
             <table className="w-full text-left">
-              <thead className="border-b border-umbra-line bg-white/[.03]">
+              <thead className="data-thead">
                 <tr>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">#</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Member</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">TH</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Trophies</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Donations</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Last Seen</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">Wars</th>
-                  <th className="px-4 py-3 font-mono text-micro uppercase tracking-wider text-umbra-muted">War</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">#</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Member</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">TH</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Trophies</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Donations</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Last Seen</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Wars</th>
+                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">War</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-umbra-line/50">
+              <tbody className="data-tbody">
                 {sorted.map((m) => (
                   <tr
                     key={m.playerTag}
                     onClick={() => handleMemberClick(m.playerTag)}
-                    className="cursor-pointer transition hover:bg-white/[.04] focus-ring"
+                    className="cursor-pointer data-tr focus-ring"
                   >
                     {/* Rank */}
-                    <td className="px-4 py-3 font-mono text-xs text-umbra-muted">
+                    <td className="data-td font-mono text-xs text-umbra-muted">
                       {m.clanRank ?? "—"}
                     </td>
                     {/* Member — icon + name + tag + role */}
-                    <td className="px-4 py-3">
+                    <td className="data-td">
                       <div className="flex items-center gap-3">
                         {m.leagueTier?.iconUrls?.small && (
                           <Image
@@ -236,13 +236,13 @@ export function MembersRoster({
                       </div>
                     </td>
                     {/* TH */}
-                    <td className="px-4 py-3">
+                    <td className="data-td">
                       <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
                         {m.townHallLevel ?? "—"}
                       </span>
                     </td>
                     {/* Trophies */}
-                    <td className="px-4 py-3 font-mono text-sm text-white">
+                    <td className="data-td font-mono text-sm text-white">
                       {m.trophies ?? "—"}
                       {m.leagueTier?.name && (
                         <span className="ml-1 text-label text-umbra-muted">
@@ -251,18 +251,18 @@ export function MembersRoster({
                       )}
                     </td>
                     {/* Donations */}
-                    <td className="px-4 py-3">
+                    <td className="data-td">
                       <div className="flex items-center gap-2 font-mono text-xs">
                         <span className="text-emerald-400">↑{m.currentDonations ?? 0}</span>
                         <span className="text-umbra-muted">↓{m.currentDonationsReceived ?? 0}</span>
                       </div>
                     </td>
                     {/* Activity */}
-                    <td className="px-4 py-3">
+                    <td className="data-td">
                       <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
                     </td>
                     {/* Wars — attended / tracked (X out of Y = how many you participated in) */}
-                    <td className="px-4 py-3 font-mono text-xs text-white">
+                    <td className="data-td font-mono text-xs text-white">
                       {m.warsTracked > 0 ? (
                         <span>
                           <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
@@ -275,7 +275,7 @@ export function MembersRoster({
                       )}
                     </td>
                     {/* War pref */}
-                    <td className="px-4 py-3">
+                    <td className="data-td">
                       {m.warPreference && (
                         <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
                           {m.warPreference}

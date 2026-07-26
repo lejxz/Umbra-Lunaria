@@ -64,6 +64,39 @@ body > * {
   .hover-card {
     @apply transition hover:border-umbra-line/50;
   }
+
+  /* ── Standardized table/list system ────────────────────────────────── */
+  /* All tables and scrollable lists use the same container, header, row,
+     and cell styles. No more per-component copy-paste. */
+
+  /* Table/list container — wraps the scrollable table or list. */
+  .data-container {
+    @apply max-h-[32rem] overflow-y-auto rounded-lg border border-umbra-line bg-white/[.03];
+  }
+  /* Table header (sticky thead). */
+  .data-thead {
+    @apply sticky top-0 z-10 border-b border-umbra-line bg-umbra-surface/95 font-mono text-2xs uppercase tracking-wider text-umbra-muted backdrop-blur-sm;
+  }
+  /* Table header cell. */
+  .data-th {
+    @apply px-3 py-2 font-medium;
+  }
+  /* Table body — row dividers. */
+  .data-tbody {
+    @apply divide-y divide-umbra-line/30;
+  }
+  /* Table row. */
+  .data-tr {
+    @apply transition hover:bg-white/[.04];
+  }
+  /* Table cell. */
+  .data-td {
+    @apply px-3 py-2 align-middle;
+  }
+  /* List item — for non-table lists (capital seasons, contribution log, etc). */
+  .data-li {
+    @apply rounded-lg border border-umbra-line/30 bg-umbra-surface/20 px-3 py-2 transition hover:bg-white/[.04];
+  }
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umbra-purple focus-visible:ring-offset-2 focus-visible:ring-offset-umbra-ink;
   }

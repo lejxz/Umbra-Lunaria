@@ -45,24 +45,24 @@ export function WarAttackLog({
       </div>
       <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
 
-      <div className="mt-4 max-h-[32rem] overflow-y-auto rounded-lg border border-umbra-line bg-white/[.03]">
+      <div className="mt-4 data-container">
         <table className="w-full text-left">
-          <thead className="sticky top-0 z-10 border-b border-umbra-line bg-umbra-ink/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur supports-[backdrop-filter]:bg-umbra-ink/80">
+          <thead className="data-thead">
             <tr>
-              <th className="w-8 px-3 py-2 text-center font-medium">#</th>
-              <th className="px-3 py-2 font-medium">Attacker</th>
-              <th className="px-3 py-2 text-center font-medium"></th>
-              <th className="px-3 py-2 font-medium">Defender</th>
-              <th className="px-3 py-2 text-center font-medium">★</th>
-              <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Destr.</th>
-              <th className="hidden px-3 py-2 text-right font-medium sm:table-cell">Dur.</th>
+              <th className="w-8 data-th text-center">#</th>
+              <th className="data-th">Attacker</th>
+              <th className="data-th text-center"></th>
+              <th className="data-th">Defender</th>
+              <th className="data-th text-center">★</th>
+              <th className="hidden data-th text-right sm:table-cell">Destr.</th>
+              <th className="hidden data-th text-right sm:table-cell">Dur.</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-umbra-line/60">
+          <tbody className="data-tbody">
             {attackLog.map((a) => (
-              <tr key={a.order} className="text-sm transition hover:bg-umbra-purple/10">
-                <td className="px-3 py-2 text-center align-middle font-mono text-2xs text-umbra-muted/70">{a.order}</td>
-                <td className="px-3 py-2 align-middle">
+              <tr key={a.order} className="text-sm data-tr">
+                <td className="data-td text-center font-mono text-2xs text-umbra-muted/70">{a.order}</td>
+                <td className="data-td">
                   <AttackParticipant
                     tag={a.attackerTag}
                     name={a.attackerName}
@@ -72,13 +72,13 @@ export function WarAttackLog({
                     onMemberClick={onMemberClick}
                   />
                 </td>
-                <td className="px-3 py-2 text-center align-middle">
+                <td className="data-td text-center">
                   <IconSwords 
                     className={`mx-auto h-3 w-3 ${a.attackerIsOwnClan ? "text-umbra-purple/60" : "text-red-400/60"}`} 
                     aria-hidden 
                   />
                 </td>
-                <td className="px-3 py-2 align-middle">
+                <td className="data-td">
                   <AttackParticipant
                     tag={a.defenderTag}
                     name={a.defenderName}
@@ -88,15 +88,15 @@ export function WarAttackLog({
                     onMemberClick={onMemberClick}
                   />
                 </td>
-                <td className="px-3 py-2 text-center align-middle">
+                <td className="data-td text-center">
                   <span className={a.stars >= 3 ? "text-amber-400" : "text-umbra-muted/70"}>
                     <Stars value={a.stars} />
                   </span>
                 </td>
-                <td className={`hidden px-3 py-2 text-right align-middle font-mono text-2xs sm:table-cell ${a.destructionPercentage === 100 ? "text-amber-400" : "text-umbra-muted"}`}>
+                <td className={`hidden data-td text-right font-mono text-2xs sm:table-cell ${a.destructionPercentage === 100 ? "text-amber-400" : "text-umbra-muted"}`}>
                   {a.destructionPercentage}%
                 </td>
-                <td className="hidden px-3 py-2 text-right align-middle font-mono text-2xs text-umbra-muted/50 sm:table-cell">
+                <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted/50 sm:table-cell">
                   {a.duration}s
                 </td>
               </tr>

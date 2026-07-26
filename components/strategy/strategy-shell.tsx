@@ -39,20 +39,20 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
         </div>
 
         {data.suggested.length > 0 ? (
-          <div className="glass rounded-2xl p-3">
+          <div className="data-container">
             <div className="max-h-[500px] overflow-y-auto">
               <table className="w-full text-xs">
-                <thead className="sticky top-0 z-10 bg-umbra-surface/95 backdrop-blur-sm">
-                  <tr className="border-b border-umbra-line">
-                    <th className="px-2 py-2 text-left font-mono uppercase tracking-wider text-umbra-muted">#</th>
-                    <th className="px-2 py-2 text-left font-mono uppercase tracking-wider text-umbra-muted">Member</th>
-                    <th className="px-2 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted">Score</th>
-                    <th className="hidden px-2 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted sm:table-cell">Part.</th>
-                    <th className="hidden px-2 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted sm:table-cell">Avg★</th>
-                    <th className="hidden px-2 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted md:table-cell">3★%</th>
-                    <th className="hidden px-2 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted md:table-cell">Activity</th>
-                    <th className="hidden px-2 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted lg:table-cell">Rushed</th>
-                    <th className="px-2 py-2 text-right font-mono uppercase tracking-wider text-umbra-muted">Status</th>
+                <thead className="data-thead">
+                  <tr>
+                    <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">#</th>
+                    <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">Member</th>
+                    <th className="data-th text-center font-mono uppercase tracking-wider text-umbra-muted">Score</th>
+                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted sm:table-cell">Part.</th>
+                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted sm:table-cell">Avg★</th>
+                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted md:table-cell">3★%</th>
+                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted md:table-cell">Activity</th>
+                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted lg:table-cell">Rushed</th>
+                    <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-muted">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -146,12 +146,12 @@ function SuggestedRow({
   return (
     <tr
       onClick={onClick}
-      className="cursor-pointer border-b border-umbra-line/20 transition hover:bg-white/[.04]"
+      className="cursor-pointer data-tr"
     >
-      <td className="px-2 py-2.5 text-center font-mono text-umbra-muted">
+      <td className="data-td text-center font-mono text-umbra-muted">
         {rank === 1 ? "👑" : rank}
       </td>
-      <td className="px-2 py-2.5">
+      <td className="data-td">
         <div className="flex items-center gap-2">
           {p.townHallLevel && (
             <span className="font-mono text-[0.6rem] font-bold text-umbra-muted">
@@ -171,31 +171,31 @@ function SuggestedRow({
           )}
         </div>
       </td>
-      <td className="px-2 py-2.5 text-center">
+      <td className="data-td text-center">
         <span className={`font-mono font-bold ${scoreColor}`}>{p.compositeScore}</span>
       </td>
-      <td className="hidden px-2 py-2.5 text-center text-umbra-muted sm:table-cell">
+      <td className="hidden data-td text-center text-umbra-muted sm:table-cell">
         {p.participationRate !== null
           ? `${Math.round(p.participationRate * 100)}%`
           : "—"}
       </td>
-      <td className="hidden px-2 py-2.5 text-center text-umbra-muted sm:table-cell">
+      <td className="hidden data-td text-center text-umbra-muted sm:table-cell">
         {p.averageStars !== null ? p.averageStars.toFixed(1) : "—"}
       </td>
-      <td className="hidden px-2 py-2.5 text-center text-umbra-muted md:table-cell">
+      <td className="hidden data-td text-center text-umbra-muted md:table-cell">
         {p.threeStarRate !== null
           ? `${Math.round(p.threeStarRate * 100)}%`
           : "—"}
       </td>
-      <td className="hidden px-2 py-2.5 text-center text-umbra-muted md:table-cell">
+      <td className="hidden data-td text-center text-umbra-muted md:table-cell">
         {p.activityScore !== null ? Math.round(p.activityScore) : "—"}
       </td>
-      <td className="hidden px-2 py-2.5 text-center text-umbra-muted lg:table-cell">
+      <td className="hidden data-td text-center text-umbra-muted lg:table-cell">
         {p.rushedPercent !== null
           ? `${Math.round(p.rushedPercent)}%`
           : "—"}
       </td>
-      <td className="px-2 py-2.5 text-right">
+      <td className="data-td text-right">
         <span
           className={`font-mono text-[0.6rem] uppercase tracking-wider ${
             p.isActive ? "text-emerald-400" : "text-umbra-muted/50"

@@ -146,7 +146,7 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
             {history.contributionLeaderboard.map((m, i) => (
               <li
                 key={m.playerTag}
-                className="flex items-center gap-3 rounded-lg border border-umbra-line/50 bg-umbra-surface/20 px-3 py-1.5"
+                className="flex items-center gap-3 rounded-lg border border-umbra-line/30 bg-umbra-surface/20 px-3 py-1.5"
               >
                 <span className="w-5 text-center font-mono text-xs font-semibold text-umbra-muted">
                   {i + 1}
@@ -263,7 +263,7 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
     year: "numeric",
   });
   return (
-    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/50 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
+    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/30 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
       <span className="font-mono text-umbra-lilac">{dateLabel}</span>
       <span className="text-umbra-muted">
         {(season.capitalTotalLoot ?? 0).toLocaleString()} gold
@@ -441,7 +441,7 @@ function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
             return (
               <li
                 key={`${entry.playerTag}-${i}`}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs ${
+                className={`flex items-center gap-3 rounded-lg border border-umbra-line/30 px-3 py-2 text-xs ${
                   i % 2 === 0 ? "bg-white/[.015]" : ""
                 }`}
               >
