@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useMemo } from "react";
 import type { WarHistoryEntry } from "@/lib/view-models/war";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TimeAgo } from "@/components/ui/time-ago";
 import { IconWarEmpty, IconChevronRight } from "@/components/ui/icons";
@@ -48,7 +49,7 @@ export function WarHistory({
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           War history
         </p>
-        <span className="text-2xs text-umbra-muted">{history.length} recorded</span>
+        <Badge tone="muted">{history.length} recorded</Badge>
       </div>
       <div className="mt-1 flex items-center justify-between">
         <h3 id="war-history-title" className="font-display text-lg text-umbra-lilac">

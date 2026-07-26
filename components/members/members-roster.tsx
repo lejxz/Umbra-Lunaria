@@ -111,9 +111,9 @@ export function MembersRoster({
           Participant Roster
         </p>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-label text-umbra-muted">
+          <Badge tone="brand">
             {sorted.length} of {roster.totalMembers}
-          </span>
+          </Badge>
         </div>
       </div>
       <h3 id="members-title" className="mt-1 font-display text-lg text-umbra-lilac">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { CurrentWarDetail, WarRosterMember } from "@/lib/view-models/war";
+import { Badge } from "@/components/ui/badge";
 import {
   IconArrowUp,
   IconArrowDown,
@@ -63,9 +64,9 @@ export function WarRosters({
           {isPrep ? "Preparation · scout" : "War roster"}
         </p>
         <div className="flex items-center gap-3">
-          <span className="text-2xs text-umbra-muted">
+          <Badge tone="brand">
             {currentWar.clan.members.length} vs {currentWar.opponent.members.length}
-          </span>
+          </Badge>
           {/* Toggle — only meaningful once attacks exist (battle/ended). */}
           {!isPrep && (
             <div

@@ -1,6 +1,7 @@
 import type { CapitalOverview } from "@/lib/view-models/capital";
 import { UnavailableValue } from "@/components/ui/state-primitives";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { Badge } from "@/components/ui/badge";
 import { IconCapital } from "@/components/ui/icons";
 
 /**
@@ -19,9 +20,9 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
           Clan capital · current
         </p>
         {overview.lastCaptureAt && (
-          <span className="text-2xs text-umbra-muted">
+          <Badge tone="info">
             Captured <TimeAgo date={overview.lastCaptureAt} />
-          </span>
+          </Badge>
         )}
       </div>
       <h3 id="capital-overview-title" className="mt-1 font-display text-lg text-umbra-lilac">

@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import type { CapitalDistrict } from "@/lib/view-models/capital";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconCapital } from "@/components/ui/icons";
@@ -31,7 +32,7 @@ export function DistrictList({
           Districts · reference
         </p>
         {hasDistricts && (
-          <span className="text-2xs text-umbra-muted">{districts.length} districts</span>
+          <Badge tone="brand">{districts.length} districts</Badge>
         )}
       </div>
       <h3 id="district-list-title" className="mt-1 font-display text-lg text-umbra-lilac">

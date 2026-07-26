@@ -1,6 +1,7 @@
 "use client";
 
 import type { WarAttackLogEntry } from "@/lib/view-models/war";
+import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconSwords } from "@/components/ui/icons";
 
@@ -43,7 +44,7 @@ export function WarAttackLog({
     <section className={contained ? "glass flex flex-col rounded-2xl p-5" : "flex flex-col"} aria-labelledby="war-attacks-title">
       <div className="flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
-        <span className="text-2xs text-umbra-muted">{attackLog.length} attacks</span>
+        <Badge tone="muted">{attackLog.length} attacks</Badge>
       </div>
       <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
 
