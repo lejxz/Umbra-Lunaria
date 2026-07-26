@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { WarSummaryView, CapitalNavSummary } from "@/lib/view-models/dashboard";
 import { Badge, UnavailableValue } from "@/components/ui";
+import { IconChevronRight } from "@/components/ui/icons";
 
 /**
  * Navigation summaries — two strips at the bottom of the dashboard:
@@ -16,14 +17,14 @@ export function NavSummaries({
   capitalNav: CapitalNavSummary;
 }) {
   return (
-    <section className="glass rounded-2xl p-5">
+    <section className="lunar-card p-5">
       {/* Current war strip */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Navigation summary
           </p>
-          <h3 className="mt-1 font-display text-lg text-umbra-lilac">
+          <h3 className="mt-1 font-display text-lg text-umbra-moonlight">
             Current war
           </h3>
           {warSummary.state === null ? (
@@ -55,12 +56,12 @@ export function NavSummaries({
                 <span className="text-umbra-muted">vs {warSummary.opponentName}</span>
               )}
               {warSummary.ownStars !== null && warSummary.opponentStars !== null && (
-                <span className="font-mono text-white">
+                <span className="font-mono text-umbra-moonlight">
                   ⭐ {warSummary.ownStars} - {warSummary.opponentStars}
                 </span>
               )}
               {warSummary.endTime && (
-                <span className="font-mono text-xs text-umbra-muted">
+                <span className="font-mono text-xs text-umbra-faint">
                   ends {new Date(warSummary.endTime).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Asia/Manila" })}
                 </span>
               )}
@@ -69,19 +70,20 @@ export function NavSummaries({
         </div>
         <Link
           href="/war"
-          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="btn-ghost focus-ring shrink-0"
         >
-          Open War Center →
+          Open War Center
+          <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
       </div>
 
-      {/* Divider */}
-      <div className="my-4 border-t border-umbra-line" />
+      {/* Lunar divider ornament */}
+      <div className="lunar-divider my-4" />
 
       {/* Capital raid weekend strip */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <h3 className="font-display text-lg text-umbra-lilac">
+          <h3 className="font-display text-lg text-umbra-moonlight">
             Capital raid weekend
           </h3>
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-umbra-muted">
@@ -95,15 +97,13 @@ export function NavSummaries({
               {capitalNav.districtCount ?? <UnavailableValue />} districts tracked
             </span>
           </div>
-          <p className="mt-1 text-xs text-umbra-muted">
-            Raid-weekend history appears after completed seasons are ingested.
-          </p>
         </div>
         <Link
           href="/capital"
-          className="shrink-0 rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
+          className="btn-ghost focus-ring shrink-0"
         >
-          Open Capital →
+          Open Capital
+          <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
       </div>
     </section>

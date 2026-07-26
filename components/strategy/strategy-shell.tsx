@@ -10,13 +10,21 @@
  *      participation, low activity, rushed, opted out).
  *
  * Each member row is clickable → opens the shared MemberDetailSheet.
+ *
+ * Layout (Celestial Observatory redesign):
+ *   • A trio of `.lunar-tile` headline stats (total members, suggested count,
+ *     review count) sits at the top of the page inside a single `.glass` band.
+ *   • The suggested-participant table uses the unified `.data-container`
+ *     system with sticky header + accent-bar row hover.
+ *   • The review list renders each member as a `.data-li` row.
  */
 
 import { useState } from "react";
 import { PageScaffold } from "@/components/page-scaffold";
 import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
 import { EmptyState } from "@/components/ui/empty-state";
-import { IconSwords, IconUsers } from "@/components/ui/icons";
+import { CardMount } from "@/components/ui/card-mount";
+import { IconSwords, IconUsers, IconAlert } from "@/components/ui/icons";
 import type { StrategyPageData, SuggestedParticipant, ReviewMember } from "@/lib/view-models/strategy";
 
 export function StrategyShell({ data }: { data: StrategyPageData }) {
@@ -28,71 +36,115 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
       title="War Strategy"
       description="Automatic ranking of suggested war participants and members needing review."
     >
-      {/* ── Section 1: Suggested Participants ────────────────────────────── */}
-      <section className="mb-8">
-        <div className="mb-4 flex items-center gap-3">
-          <span className="h-5 w-1 rounded-full bg-umbra-purple" aria-hidden />
-          <h2 className="font-display text-xl text-umbra-lilac">Suggested Participants</h2>
-          <span className="font-mono text-xs text-umbra-muted">
-            {data.suggested.length} ranked
-          </span>
-        </div>
-
-        {data.suggested.length > 0 ? (
-          <div className="data-container">
-            <div className="max-h-[500px] overflow-y-auto">
-              <table className="w-full text-xs">
-                <thead className="data-thead">
-                  <tr>
-                    <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">#</th>
-                    <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">Member</th>
-                    <th className="data-th text-center font-mono uppercase tracking-wider text-umbra-muted">Score</th>
-                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted sm:table-cell">Part.</th>
-                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted sm:table-cell">Avg★</th>
-                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted md:table-cell">3★%</th>
-                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted md:table-cell">Activity</th>
-                    <th className="hidden data-th text-center font-mono uppercase tracking-wider text-umbra-muted lg:table-cell">Rushed</th>
-                    <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-muted">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.suggested.map((p, i) => (
-                    <SuggestedRow
-                      key={p.playerTag}
-                      participant={p}
-                      rank={i + 1}
-                      onClick={() => setSelectedMember(p.playerTag)}
-                    />
-                  ))}
-                </tbody>
-              </table>
+      {/* ── Headline stat trio ────────────────────────────────────────────── */}
+      <CardMount delay={0}>
+        <section className="glass rounded-2xl p-5" aria-label="Strategy summary">
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="lunar-tile">
+              <p className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+                Total members
+              </p>
+              <p className="mt-2 font-display text-2xl text-umbra-moonlight">
+                {data.totalMembers}
+              </p>
+            </div>
+            <div className="lunar-tile">
+              <p className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+                Suggested
+              </p>
+              <p className="mt-2 font-display text-2xl text-umbra-moonlight">
+                {data.suggested.length}
+              </p>
+            </div>
+            <div className="lunar-tile">
+              <p className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+                Flagged for review
+              </p>
+              <p className="mt-2 font-display text-2xl text-umbra-moonlight">
+                {data.review.length}
+              </p>
             </div>
           </div>
-        ) : (
-          <div className="glass rounded-2xl p-5">
-            <EmptyState
-              icon={<IconSwords className="h-10 w-10 text-umbra-purple/40" />}
-              title="No participants ranked yet"
-              description="Members will appear here once the tracker has accumulated enough data."
+        </section>
+      </CardMount>
+
+      {/* ── Section 1: Suggested Participants ────────────────────────────── */}
+      <CardMount delay={0.04} className="mt-8">
+        <section>
+          <div className="mb-4 flex items-center gap-3">
+            <span
+              className="h-5 w-1 rounded-full bg-gradient-to-b from-umbra-purple to-umbra-violet shadow-glow-sm"
+              aria-hidden
             />
+            <h2 className="font-display text-xl text-umbra-moonlight">
+              Suggested Participants
+            </h2>
+            <span className="font-mono text-2xs uppercase tracking-wider text-umbra-faint">
+              {data.suggested.length} ranked
+            </span>
           </div>
-        )}
-      </section>
+
+          {data.suggested.length > 0 ? (
+            <div className="data-container">
+              <div className="max-h-[500px] overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="data-thead">
+                    <tr>
+                      <th className="data-th text-left">#</th>
+                      <th className="data-th text-left">Member</th>
+                      <th className="data-th text-center">Score</th>
+                      <th className="hidden data-th text-center sm:table-cell">Part.</th>
+                      <th className="hidden data-th text-center sm:table-cell">Avg★</th>
+                      <th className="hidden data-th text-center md:table-cell">3★%</th>
+                      <th className="hidden data-th text-center md:table-cell">Activity</th>
+                      <th className="hidden data-th text-center lg:table-cell">Rushed</th>
+                      <th className="data-th text-right">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="data-tbody">
+                    {data.suggested.map((p, i) => (
+                      <SuggestedRow
+                        key={p.playerTag}
+                        participant={p}
+                        rank={i + 1}
+                        onClick={() => setSelectedMember(p.playerTag)}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="glass rounded-2xl p-5">
+              <EmptyState
+                icon={<IconSwords className="h-10 w-10" />}
+                title="No participants ranked yet"
+                description="Members will appear here once the tracker has accumulated enough data."
+              />
+            </div>
+          )}
+        </section>
+      </CardMount>
 
       {/* ── Section 2: Review Needed ────────────────────────────────────── */}
-      <section>
-        <div className="mb-4 flex items-center gap-3">
-          <span className="h-5 w-1 rounded-full bg-rose-400" aria-hidden />
-          <h2 className="font-display text-xl text-umbra-lilac">Review Needed</h2>
-          <span className="font-mono text-xs text-umbra-muted">
-            {data.review.length} flagged
-          </span>
-        </div>
+      <CardMount delay={0.08} className="mt-8">
+        <section>
+          <div className="mb-4 flex items-center gap-3">
+            <span
+              className="h-5 w-1 rounded-full bg-rose-400/80"
+              aria-hidden
+            />
+            <h2 className="font-display text-xl text-umbra-moonlight">
+              Review Needed
+            </h2>
+            <span className="font-mono text-2xs uppercase tracking-wider text-umbra-faint">
+              {data.review.length} flagged
+            </span>
+          </div>
 
-        {data.review.length > 0 ? (
-          <div className="glass rounded-2xl p-3">
-            <div className="max-h-[400px] overflow-y-auto">
-              <ul className="space-y-2">
+          {data.review.length > 0 ? (
+            <div className="data-container p-2">
+              <ul className="max-h-[400px] space-y-1.5 overflow-y-auto">
                 {data.review.map((m) => (
                   <ReviewRow
                     key={m.playerTag}
@@ -102,17 +154,17 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
                 ))}
               </ul>
             </div>
-          </div>
-        ) : (
-          <div className="glass rounded-2xl p-5">
-            <EmptyState
-              icon={<IconUsers className="h-10 w-10 text-umbra-purple/40" />}
-              title="Everyone looks good"
-              description="No members currently flagged for review."
-            />
-          </div>
-        )}
-      </section>
+          ) : (
+            <div className="glass rounded-2xl p-5">
+              <EmptyState
+                icon={<IconUsers className="h-10 w-10" />}
+                title="Everyone looks good"
+                description="No members currently flagged for review."
+              />
+            </div>
+          )}
+        </section>
+      </CardMount>
 
       {/* ── Shared member detail sheet ──────────────────────────────────── */}
       <MemberDetailSheet
@@ -146,21 +198,21 @@ function SuggestedRow({
   return (
     <tr
       onClick={onClick}
-      className="cursor-pointer data-tr"
+      className="data-tr cursor-pointer"
     >
-      <td className="data-td text-center font-mono text-umbra-muted">
-        {rank === 1 ? "👑" : rank}
+      <td className="data-td text-center font-mono text-umbra-faint">
+        {rank === 1 ? "♛" : rank}
       </td>
       <td className="data-td">
         <div className="flex items-center gap-2">
           {p.townHallLevel && (
-            <span className="font-mono text-[0.6rem] font-bold text-umbra-muted">
+            <span className="font-mono text-[0.6rem] font-bold text-umbra-faint">
               TH{p.townHallLevel}
             </span>
           )}
           <span className="truncate font-medium text-umbra-lilac" title={p.name}>{p.name}</span>
           {p.isNewMember && (
-            <span className="rounded-full border border-sky-400/30 bg-sky-400/10 px-1.5 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider text-sky-300">
+            <span className="rounded-full border border-umbra-line-bright bg-umbra-purple/10 px-1.5 py-0.5 font-mono text-[0.55rem] uppercase tracking-wider text-umbra-purple">
               New
             </span>
           )}
@@ -198,7 +250,7 @@ function SuggestedRow({
       <td className="data-td text-right">
         <span
           className={`font-mono text-[0.6rem] uppercase tracking-wider ${
-            p.isActive ? "text-emerald-400" : "text-umbra-muted/50"
+            p.isActive ? "text-emerald-400" : "text-umbra-faint"
           }`}
         >
           {p.isActive ? "Active" : "Inactive"}
@@ -222,10 +274,10 @@ function ReviewRow({
   return (
     <li
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-3 rounded-lg border border-umbra-line/50 bg-white/[.015] px-3 py-2.5 transition hover:bg-white/[.04]"
+      className="data-li flex cursor-pointer items-center gap-3 px-3 py-2.5"
     >
       {m.townHallLevel && (
-        <span className="font-mono text-[0.6rem] font-bold text-umbra-muted">
+        <span className="font-mono text-[0.6rem] font-bold text-umbra-faint">
           TH{m.townHallLevel}
         </span>
       )}
@@ -249,7 +301,10 @@ function ReviewRow({
         </div>
       </div>
       {m.daysInactive !== null && m.daysInactive >= 4 && (
-        <span className="font-mono text-xs text-rose-400">{m.daysInactive}d</span>
+        <span className="flex shrink-0 items-center gap-1 font-mono text-xs text-rose-400">
+          <IconAlert className="h-3 w-3" aria-hidden />
+          {m.daysInactive}d
+        </span>
       )}
     </li>
   );

@@ -3,8 +3,7 @@
 /**
  * HallOfFameShell — the dedicated /hall-of-fame page composition root.
  *
- * Uses the shared RecordCard design (moved from the dashboard). Four
- * categorized sections:
+ * Four categorized sections of trophy-case RecordCards:
  *
  *   1. All-Time Legends — general cached awards that don't fit a specific
  *      category (Philanthropist, Dedicated, Unsleeping).
@@ -28,6 +27,7 @@ import { PageScaffold } from "@/components/page-scaffold";
 import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
 import { RecordCard, type RecordMeta, type RecordEntry } from "./record-card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CardMount } from "@/components/ui/card-mount";
 import {
   IconGift,
   IconSwords,
@@ -135,8 +135,8 @@ const LIVE_META: Record<string, RecordMeta> = {
     title: "Most Seasons",
     subtitle: "Most raid weekends attended",
     icon: <IconUsers className="w-5 h-5" />,
-    color: "text-sky-300",
-    accent: "border-sky-400/40 bg-sky-400/5",
+    color: "text-umbra-violet",
+    accent: "border-umbra-violet/40 bg-umbra-violet/5",
   },
   "best-gold-per-attack": {
     title: "Best Gold/Attack",
@@ -149,8 +149,8 @@ const LIVE_META: Record<string, RecordMeta> = {
     title: "Longest Tenured",
     subtitle: "Members here the longest",
     icon: <IconClock className="w-5 h-5" />,
-    color: "text-sky-300",
-    accent: "border-sky-400/40 bg-sky-400/5",
+    color: "text-umbra-violet",
+    accent: "border-umbra-violet/40 bg-umbra-violet/5",
   },
 };
 
@@ -244,7 +244,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
     <PageScaffold section="Hall of Fame" title="Hall of Fame">
       {/* ── Last-computed freshness stamp ──────────────────────────────── */}
       {lastComputedAt && (
-        <p className="mb-6 font-mono text-xs text-umbra-muted">
+        <p className="mb-6 font-mono text-xs text-umbra-faint">
           Cached awards last recomputed{" "}
           <span className="text-umbra-lilac">
             {lastComputedAt.toLocaleString("en-US", {
@@ -265,12 +265,13 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
           <SectionHeader title="All-Time Legends" />
           <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {allTimeCards.map((card, i) => (
-              <RecordCard
-                key={`alltime-${i}`}
-                meta={card.meta}
-                entries={card.entries}
-                onMemberClick={setSelectedMember}
-              />
+              <CardMount key={`alltime-${i}`} delay={i * 0.04} className="h-full">
+                <RecordCard
+                  meta={card.meta}
+                  entries={card.entries}
+                  onMemberClick={setSelectedMember}
+                />
+              </CardMount>
             ))}
           </div>
         </section>
@@ -282,21 +283,24 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
         {warCards.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {warCards.map((card, i) => (
-              <RecordCard
-                key={`war-${i}`}
-                meta={card.meta}
-                entries={card.entries}
-                onMemberClick={setSelectedMember}
-              />
+              <CardMount key={`war-${i}`} delay={i * 0.04} className="h-full">
+                <RecordCard
+                  meta={card.meta}
+                  entries={card.entries}
+                  onMemberClick={setSelectedMember}
+                />
+              </CardMount>
             ))}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-5">
-            <p className="text-sm text-umbra-muted">
-              War records will appear here once the tracker has accumulated
-              enough war attack data.
-            </p>
-          </div>
+          <CardMount delay={0}>
+            <div className="glass rounded-2xl p-5">
+              <p className="text-sm text-umbra-muted">
+                War records will appear here once the tracker has accumulated
+                enough war attack data.
+              </p>
+            </div>
+          </CardMount>
         )}
       </section>
 
@@ -306,22 +310,24 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
         {capitalCards.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {capitalCards.map((card, i) => (
-              <RecordCard
-                key={`capital-${i}`}
-                meta={card.meta}
-                entries={card.entries}
-                onMemberClick={setSelectedMember}
-              />
+              <CardMount key={`capital-${i}`} delay={i * 0.04} className="h-full">
+                <RecordCard
+                  meta={card.meta}
+                  entries={card.entries}
+                  onMemberClick={setSelectedMember}
+                />
+              </CardMount>
             ))}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-5">
-            <p className="text-sm text-umbra-muted">
-              Capital records will appear here once the daily batch ingests
-              completed raid-weekend data. This runs automatically — check
-              back after the next daily batch (06:00 AM PHT).
-            </p>
-          </div>
+          <CardMount delay={0}>
+            <div className="glass rounded-2xl p-5">
+              <p className="text-sm text-umbra-muted">
+                Capital records will appear here once the daily batch ingests
+                completed raid-weekend data.
+              </p>
+            </div>
+          </CardMount>
         )}
       </section>
 
@@ -331,25 +337,28 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
           <SectionHeader title="Tenure" />
           <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {tenureCards.map((card, i) => (
-              <RecordCard
-                key={`tenure-${i}`}
-                meta={card.meta}
-                entries={card.entries}
-                onMemberClick={setSelectedMember}
-              />
+              <CardMount key={`tenure-${i}`} delay={i * 0.04} className="h-full">
+                <RecordCard
+                  meta={card.meta}
+                  entries={card.entries}
+                  onMemberClick={setSelectedMember}
+                />
+              </CardMount>
             ))}
           </div>
         </section>
       )}
 
       {!hasAny && (
-        <section className="glass rounded-2xl p-5">
-          <EmptyState
-            icon={<IconTrophy className="h-10 w-10 text-umbra-purple/40" />}
-            title="No records yet"
-            description="Records will appear here once the tracker has accumulated enough data."
-          />
-        </section>
+        <CardMount delay={0}>
+          <section className="glass rounded-2xl p-5">
+            <EmptyState
+              icon={<IconTrophy className="h-10 w-10" />}
+              title="No records yet"
+              description="Records will appear here once the tracker has accumulated enough data."
+            />
+          </section>
+        </CardMount>
       )}
 
       {/* ── Shared member detail sheet (lazy fetch) ──────────────────────── */}
@@ -368,8 +377,11 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
 function SectionHeader({ title }: { title: string }) {
   return (
     <div className="mb-4 flex items-center gap-3">
-      <span className="h-5 w-1 rounded-full bg-umbra-purple" aria-hidden />
-      <h2 className="font-display text-xl text-umbra-lilac">{title}</h2>
+      <span
+        className="h-5 w-1 rounded-full bg-gradient-to-b from-umbra-purple to-umbra-violet shadow-glow-sm"
+        aria-hidden
+      />
+      <h2 className="font-display text-xl text-umbra-moonlight">{title}</h2>
     </div>
   );
 }

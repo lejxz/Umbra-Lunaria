@@ -34,29 +34,29 @@ export function WarHero({
 }) {
   if (!currentWar) {
     return (
-      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-hero-title">
+      <section className="lunar-card flex flex-col" aria-labelledby="war-hero-title">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
               Live status
             </p>
-            <h2 id="war-hero-title" className="mt-1 font-display text-2xl text-umbra-lilac">
+            <h2 id="war-hero-title" className="mt-1 font-display text-2xl text-umbra-moonlight">
               Current war
             </h2>
           </div>
           <WarRefreshButton ttlSeconds={refreshTtlSeconds} />
         </div>
         <div className="mt-6 flex flex-1 flex-col items-center justify-center py-10">
-          <div className="mb-3 flex justify-center text-umbra-purple/40">
+          <div className="mb-3 flex justify-center text-umbra-purple/50">
             <IconWarEmpty className="h-14 w-14" />
           </div>
-          <p className="font-display text-lg text-umbra-lilac">No active war</p>
+          <p className="font-display text-lg text-umbra-moonlight">No active war</p>
           <p className="mt-1 max-w-sm text-center text-sm text-umbra-muted">
             The clan isn&apos;t in a war right now. The most recent result appears in the
             history below.
           </p>
           {lastResult && (
-            <div className="mt-5 w-full max-w-md rounded-lg border border-umbra-line bg-white/[.03] px-4 py-3">
+            <div className="lunar-tile mt-5 w-full max-w-md !px-4 !py-3">
               <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
                 Last result
               </p>
@@ -117,14 +117,14 @@ export function WarHero({
   }[currentWar.state];
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-5 shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]" aria-labelledby="war-hero-title">
+    <section className="lunar-card flex flex-col shadow-[inset_0_0_20px_rgba(0,0,0,0.2)]" aria-labelledby="war-hero-title">
       {/* Header row */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Live status · {currentWar.warType === "cwl" ? "Clan War League" : "Regular war"}
           </p>
-          <h2 id="war-hero-title" className="mt-1 font-display text-2xl text-umbra-lilac">
+          <h2 id="war-hero-title" className="mt-1 font-display text-2xl text-umbra-moonlight">
             Current war
           </h2>
         </div>
@@ -140,7 +140,7 @@ export function WarHero({
 
       {/* Stale-capture notice */}
       {stale && (
-        <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-2xs text-amber-400">
+        <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-2xs text-amber-300">
           This capture is over an hour old — it may not reflect the live war state. Use
           Refresh to update.
         </p>
@@ -171,10 +171,10 @@ export function WarHero({
 
           {countdownTarget && isWarActive ? (
             <div className="flex flex-col items-center text-center">
-              <p className="font-mono text-2xs uppercase tracking-[.16em] text-umbra-purple/70">
+              <p className="font-mono text-2xs uppercase tracking-[.16em] text-umbra-purple/80">
                 {currentWar.state === "preparation" ? "Starts in" : "Ends in"}
               </p>
-              <p className="mt-0.5 font-mono text-xl font-bold tracking-tight text-white drop-shadow-lg">
+              <p className="mt-0.5 font-mono text-xl font-bold tracking-tight text-umbra-moonlight drop-shadow-lg">
                 <LiveCountdown targetDate={countdownTarget} serverNow={serverNow} />
               </p>
             </div>
@@ -185,13 +185,13 @@ export function WarHero({
           ) : null}
 
           {currentWar.teamSize != null && (
-            <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
+            <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider text-umbra-purple">
               {currentWar.teamSize}v{currentWar.teamSize}
               {currentWar.attacksPerMember != null && ` · ${currentWar.attacksPerMember} atk`}
             </span>
           )}
 
-          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(139,92,246,0.1)]">
+          <div className="relative mt-2 flex h-10 w-10 items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 text-umbra-purple shadow-[0_0_15px_rgba(182,120,255,0.25)]">
             <IconSwords className="h-5 w-5" />
           </div>
 
@@ -199,10 +199,10 @@ export function WarHero({
             <div
               className={`mt-1 flex items-center justify-center rounded-full border px-3 py-1 backdrop-blur-md ${
                 leadAnalysis.leader === "own"
-                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-400"
+                  ? "border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
                   : leadAnalysis.leader === "opponent"
-                    ? "border-red-400/30 bg-red-400/10 text-red-400"
-                    : "border-amber-400/30 bg-amber-400/10 text-amber-400"
+                    ? "border-red-400/30 bg-red-400/10 text-red-300"
+                    : "border-amber-400/30 bg-amber-400/10 text-amber-300"
               }`}
             >
               <p className="whitespace-nowrap text-center font-display text-2xs font-bold uppercase leading-tight tracking-wide">
@@ -228,11 +228,11 @@ export function WarHero({
       {maxPossibleStars != null && maxPossibleStars > 0 && (
         <div className="mt-8 px-4 sm:px-8">
           <div className="mb-2 flex items-center justify-between font-mono text-xs font-semibold text-umbra-muted">
-            <span className="drop-shadow-lg text-amber-400/90">★ {ownStars}</span>
-            <span className="text-2xs uppercase tracking-widest text-umbra-muted/50">{maxPossibleStars} Max</span>
-            <span className="drop-shadow-lg text-red-400/90">{oppStars} ★</span>
+            <span className="drop-shadow-lg text-amber-400">★ {ownStars}</span>
+            <span className="text-2xs uppercase tracking-widest text-umbra-faint">{maxPossibleStars} Max</span>
+            <span className="drop-shadow-lg text-red-400">{oppStars} ★</span>
           </div>
-          <div className="relative flex h-3 overflow-hidden rounded-full border border-white/5 bg-black/40 shadow-inner shadow-black/50">
+          <div className="relative flex h-3 overflow-hidden rounded-full border border-umbra-line bg-black/40 shadow-inner shadow-black/50">
             <div className="absolute inset-x-0 top-0 h-px bg-white/5" />
             {/* Left side (Us) */}
             <div className="flex w-1/2 justify-end">
@@ -260,8 +260,8 @@ export function StateBadge({
 }) {
   const toneClass = {
     purple: "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple",
-    amber: "border-amber-400/30 bg-amber-400/10 text-amber-400",
-    muted: "border-white/10 bg-white/5 text-umbra-muted",
+    amber: "border-amber-400/30 bg-amber-400/10 text-amber-300",
+    muted: "border-umbra-line bg-white/5 text-umbra-muted",
   }[tone];
   return (
     <span
@@ -305,7 +305,7 @@ export function WarClanColumn({
       )}
       <p
         className={`font-display text-sm font-medium leading-tight line-clamp-2 ${
-          tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"
+          tone === "opponent" ? "text-red-300/90" : "text-umbra-moonlight"
         }`}
       >
         {name}
@@ -314,8 +314,8 @@ export function WarClanColumn({
         <p className="mt-0.5 text-2xs text-umbra-muted">Lv {clanLevel}</p>
       )}
       <div className="mt-2 flex w-full flex-col items-center gap-1">
-        <div className="flex items-baseline justify-center gap-1.5 rounded-lg bg-white/[.04] px-3 py-1.5">
-          <span className="font-display text-xl font-bold text-amber-400 leading-none tracking-tight">
+        <div className="lunar-tile flex items-baseline justify-center gap-1.5 !px-3 !py-1.5">
+          <span className="font-display text-xl font-bold text-amber-400 leading-none tracking-tight drop-shadow-[0_0_8px_rgba(252,211,77,0.35)]">
             ★{stars}
           </span>
           <span className="font-mono text-2xs font-medium text-umbra-muted">
@@ -333,24 +333,28 @@ export function WarClanColumn({
 function ResultBadge({ result }: { result: "win" | "loss" | "tie" | null }) {
   if (result === "win")
     return (
-      <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-2xs font-semibold uppercase text-emerald-400">
+      <span className="badge good">
+        <span className="d" aria-hidden />
         Win
       </span>
     );
   if (result === "loss")
     return (
-      <span className="rounded-full border border-red-400/30 bg-red-400/10 px-2 py-0.5 text-2xs font-semibold uppercase text-red-400">
+      <span className="badge danger">
+        <span className="d" aria-hidden />
         Loss
       </span>
     );
   if (result === "tie")
     return (
-      <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-2xs font-semibold uppercase text-amber-400">
+      <span className="badge warn">
+        <span className="d" aria-hidden />
         Tie
       </span>
     );
   return (
-    <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-2xs font-semibold uppercase text-umbra-muted">
+    <span className="badge muted">
+      <span className="d" aria-hidden />
       —
     </span>
   );

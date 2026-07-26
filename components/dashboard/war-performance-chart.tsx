@@ -86,6 +86,9 @@ export function WarPerformanceChart({ trend }: { trend: WarPerformanceTrend }) {
           dot={{ r: 3, fill: CHART_COLORS.purple }}
           activeDot={{ r: 5 }}
           name="own"
+          isAnimationActive
+          animationDuration={300}
+          animationEasing="ease-out"
         />
         <Line
           type="monotone"
@@ -95,6 +98,9 @@ export function WarPerformanceChart({ trend }: { trend: WarPerformanceTrend }) {
           strokeDasharray="4 3"
           dot={false}
           name="opp"
+          isAnimationActive
+          animationDuration={300}
+          animationEasing="ease-out"
         />
       </LineChart>
     </ResponsiveContainer>

@@ -44,28 +44,31 @@ export function RaidTimerBanner({
     hour12: true,
   });
 
-  // Accent color: amber for "in progress", purple for "next raid".
-  const accent = isInProgress
-    ? "border-umbra-purple/40"
-    : "border-amber-400/30";
+  // Accent: amber for "in progress", purple for "next raid".
   const iconBg = isInProgress
-    ? "bg-umbra-purple/15 text-umbra-purple"
-    : "bg-amber-400/15 text-amber-300";
-  const titleColor = isInProgress ? "text-umbra-lilac" : "text-amber-300";
+    ? "bg-umbra-purple/[.06] text-umbra-purple shadow-glow-sm"
+    : "bg-amber-400/10 text-amber-300";
+  const titleColor = isInProgress ? "text-umbra-moonlight" : "text-amber-300";
   const eyebrow = isInProgress ? "Raid weekend" : "Next raid";
   const title = isInProgress ? "In progress" : "Coming up";
+  // The pulsing status dot: green (good) when a raid is live, amber (warn) otherwise.
+  const statusDot = isInProgress ? "bg-emerald-400" : "bg-amber-400";
 
   return (
     <section
-      className={`glass flex flex-wrap items-center gap-4 rounded-2xl border ${accent} p-4 sm:p-5`}
+      className="glass flex flex-wrap items-center gap-4 rounded-2xl p-4 sm:p-5"
       aria-label={isInProgress ? "Raid weekend in progress" : "Next raid weekend"}
     >
       <span className="flex items-center gap-3">
-        <span className={`flex h-10 w-10 items-center justify-center rounded-full ${iconBg}`}>
+        <span className={`flex h-10 w-10 items-center justify-center rounded-full border border-umbra-line ${iconBg}`}>
           <IconCapital className="h-5 w-5" />
         </span>
         <span>
-          <span className="block font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+          <span className="flex items-center gap-2 font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-purple">
+            <span
+              className={`inline-block h-1.5 w-1.5 rounded-full ${statusDot} animate-pulse-soft`}
+              aria-hidden
+            />
             {eyebrow}
           </span>
           <span className={`block font-display text-lg ${titleColor}`}>
@@ -75,16 +78,16 @@ export function RaidTimerBanner({
       </span>
 
       <div className="ml-auto flex items-center gap-4">
-        <div className="flex items-center gap-2 rounded-lg border border-umbra-line bg-umbra-ink/50 px-4 py-2">
+        <div className="lunar-tile flex items-center gap-2 px-4 py-2">
           <IconClock className="h-4 w-4 text-umbra-purple" aria-hidden />
-          <span className="font-mono text-xs uppercase tracking-wider text-umbra-muted">
+          <span className="font-mono text-xs uppercase tracking-wider text-umbra-faint">
             {label}
           </span>
-          <span className="font-display text-lg text-umbra-lilac">
+          <span className="font-mono text-lg text-umbra-moonlight">
             <LiveCountdown targetDate={target} serverNow={serverNow} />
           </span>
         </div>
-        <span className="hidden font-mono text-xs text-umbra-muted sm:block">
+        <span className="hidden font-mono text-2xs uppercase tracking-wider text-umbra-faint sm:block">
           {isInProgress ? "ends" : "starts"} {atLabel}
         </span>
       </div>

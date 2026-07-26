@@ -10,6 +10,7 @@ import type {
 import { Badge, EmptyState, Select, Toggle } from "@/components/ui";
 import { MemberDetailSheet } from "./member-detail-sheet";
 import type { MemberDetailView } from "@/lib/view-models/members";
+import { IconArrowUp, IconArrowDown, IconSearch } from "@/components/ui/icons";
 
 /**
  * Members roster — client component with sorting, filtering, and member
@@ -107,17 +108,20 @@ export function MembersRoster({
   return (
     <div>
       {/* Filter and Sort bar */}
-      <div className="relative z-20 glass mb-5 flex flex-wrap items-center gap-3 rounded-2xl p-4">
+      <div className="lunar-card relative z-20 mb-5 flex flex-wrap items-center gap-3 !p-4">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Filter</span>
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">Filter</span>
         </div>
-        <input
-          type="text"
-          placeholder="Search by name or #tag..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="h-8 w-48 rounded-lg border border-umbra-line bg-umbra-ink/60 px-3 text-xs text-umbra-lilac placeholder-umbra-muted/50 focus:border-umbra-purple/50 focus:outline-none focus:ring-1 focus:ring-umbra-purple/50 transition"
-        />
+        <div className="relative">
+          <IconSearch className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-umbra-faint" aria-hidden />
+          <input
+            type="text"
+            placeholder="Search by name or #tag..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="focus-ring h-8 w-48 rounded-lg border border-umbra-line bg-umbra-ink/60 py-1.5 pl-8 pr-3 text-xs text-umbra-lilac placeholder-umbra-muted/50 transition hover:border-umbra-line-bright"
+          />
+        </div>
         <Select
           value={filterRole}
           onChange={setFilterRole}
@@ -145,12 +149,12 @@ export function MembersRoster({
             label="Active only"
           />
         </div>
-        
+
         {/* Separator */}
         <div className="mx-2 hidden h-4 w-px bg-umbra-line/50 sm:block"></div>
-        
+
         <div className="flex items-center gap-2">
-          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">Sort</span>
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">Sort</span>
         </div>
         <Select
           value={sortField}
@@ -167,14 +171,19 @@ export function MembersRoster({
         />
         <button
           onClick={() => setSortDir(sortDir === "asc" ? "desc" : "asc")}
-          className="flex h-7 w-7 items-center justify-center rounded-lg border border-umbra-line bg-umbra-ink/60 text-xs text-umbra-lilac transition hover:border-umbra-purple/50 focus-ring"
+          className="focus-ring flex h-7 w-7 items-center justify-center rounded-lg border border-umbra-line bg-umbra-ink/60 text-umbra-lilac transition hover:border-umbra-line-bright hover:bg-umbra-purple/10"
           title={`Toggle to ${sortDir === "asc" ? "descending" : "ascending"}`}
+          aria-label={`Toggle sort direction, currently ${sortDir === "asc" ? "ascending" : "descending"}`}
         >
-          {sortDir === "asc" ? "↑" : "↓"}
+          {sortDir === "asc" ? (
+            <IconArrowUp className="h-3.5 w-3.5" aria-hidden />
+          ) : (
+            <IconArrowDown className="h-3.5 w-3.5" aria-hidden />
+          )}
         </button>
 
         <div className="ml-auto flex items-center gap-2">
-          <span className="font-mono text-label text-umbra-muted">
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">
             {sorted.length} of {roster.totalMembers}
           </span>
         </div>
@@ -189,145 +198,147 @@ export function MembersRoster({
       ) : (
         <>
           {/* Desktop table */}
-          <div className="glass hidden overflow-hidden rounded-2xl md:block">
-            <table className="w-full text-left">
-              <thead className="data-thead">
-                <tr>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">#</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Member</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">TH</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Trophies</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Donations</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Last Seen</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">Wars</th>
-                  <th className="data-th font-mono text-micro uppercase tracking-wider text-umbra-muted">War</th>
-                </tr>
-              </thead>
-              <tbody className="data-tbody">
-                {sorted.map((m) => (
-                  <tr
-                    key={m.playerTag}
-                    onClick={() => handleMemberClick(m.playerTag)}
-                    className="cursor-pointer data-tr focus-ring"
-                  >
-                    {/* Rank */}
-                    <td className="data-td font-mono text-xs text-umbra-muted">
-                      {m.clanRank ?? "—"}
-                    </td>
-                    {/* Member — icon + name + tag + role */}
-                    <td className="data-td">
-                      <div className="flex items-center gap-3">
-                        {m.leagueTier?.iconUrls?.small && (
-                          <Image
-                            src={m.leagueTier.iconUrls.small}
-                            alt=""
-                            width={28}
-                            height={28}
-                            className="h-7 w-7 shrink-0"
-                            unoptimized
-                          />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-umbra-lilac">{m.name}</p>
-                          <p className="font-mono text-label text-umbra-muted">
-                            {m.playerTag} · <span className="capitalize">{m.role}</span>
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                    {/* TH */}
-                    <td className="data-td">
-                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
-                        {m.townHallLevel ?? "—"}
-                      </span>
-                    </td>
-                    {/* Trophies */}
-                    <td className="data-td font-mono text-sm text-white">
-                      {m.trophies ?? "—"}
-                      {m.leagueTier?.name && (
-                        <span className="ml-1 text-label text-umbra-muted">
-                          {m.leagueTier.name}
-                        </span>
-                      )}
-                    </td>
-                    {/* Donations */}
-                    <td className="data-td">
-                      <div className="flex items-center gap-2 font-mono text-xs">
-                        <span className="text-emerald-400">↑{m.currentDonations ?? 0}</span>
-                        <span className="text-umbra-muted">↓{m.currentDonationsReceived ?? 0}</span>
-                      </div>
-                    </td>
-                    {/* Activity */}
-                    <td className="data-td">
-                      <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
-                    </td>
-                    {/* Wars — attended / tracked (X out of Y = how many you participated in) */}
-                    <td className="data-td font-mono text-xs text-white">
-                      {m.warsTracked > 0 ? (
-                        <span>
-                          <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
-                            {m.warsTracked - m.warsMissed}
-                          </span>
-                          <span className="text-umbra-muted">/{m.warsTracked}</span>
-                        </span>
-                      ) : (
-                        <span className="text-umbra-muted">—</span>
-                      )}
-                    </td>
-                    {/* War pref */}
-                    <td className="data-td">
-                      {m.warPreference && (
-                        <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
-                          {m.warPreference}
-                        </Badge>
-                      )}
-                    </td>
+          <div className="hidden md:block">
+            <div className="data-container overflow-hidden !max-h-none">
+              <table className="w-full text-left">
+                <thead className="data-thead">
+                  <tr>
+                    <th className="data-th">#</th>
+                    <th className="data-th">Member</th>
+                    <th className="data-th">TH</th>
+                    <th className="data-th">Trophies</th>
+                    <th className="data-th">Donations</th>
+                    <th className="data-th">Last Seen</th>
+                    <th className="data-th">Wars</th>
+                    <th className="data-th">War</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="data-tbody">
+                  {sorted.map((m) => (
+                    <tr
+                      key={m.playerTag}
+                      onClick={() => handleMemberClick(m.playerTag)}
+                      className="cursor-pointer data-tr focus-ring"
+                    >
+                      {/* Rank */}
+                      <td className="data-td mono">
+                        {m.clanRank ?? "—"}
+                      </td>
+                      {/* Member — icon + name + tag + role */}
+                      <td className="data-td">
+                        <div className="flex items-center gap-3">
+                          {m.leagueTier?.iconUrls?.small && (
+                            <Image
+                              src={m.leagueTier.iconUrls.small}
+                              alt=""
+                              width={28}
+                              height={28}
+                              className="h-7 w-7 shrink-0"
+                              unoptimized
+                            />
+                          )}
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-umbra-moonlight">{m.name}</p>
+                            <p className="font-mono text-label text-umbra-muted">
+                              {m.playerTag} · <span className="capitalize">{m.role}</span>
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      {/* TH — lunar th-badge ramp */}
+                      <td className="data-td">
+                        <ThBadge level={m.townHallLevel} />
+                      </td>
+                      {/* Trophies */}
+                      <td className="data-td mono">
+                        <span className="text-umbra-moonlight">{m.trophies ?? "—"}</span>
+                        {m.leagueTier?.name && (
+                          <span className="ml-1 text-label text-umbra-muted">
+                            {m.leagueTier.name}
+                          </span>
+                        )}
+                      </td>
+                      {/* Donations */}
+                      <td className="data-td">
+                        <div className="flex items-center gap-2 font-mono text-xs">
+                          <span className="text-emerald-400">↑{m.currentDonations ?? 0}</span>
+                          <span className="text-umbra-muted">↓{m.currentDonationsReceived ?? 0}</span>
+                        </div>
+                      </td>
+                      {/* Activity */}
+                      <td className="data-td">
+                        <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
+                      </td>
+                      {/* Wars — attended / tracked */}
+                      <td className="data-td mono">
+                        {m.warsTracked > 0 ? (
+                          <span>
+                            <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
+                              {m.warsTracked - m.warsMissed}
+                            </span>
+                            <span className="text-umbra-muted">/{m.warsTracked}</span>
+                          </span>
+                        ) : (
+                          <span className="text-umbra-muted">—</span>
+                        )}
+                      </td>
+                      {/* War pref */}
+                      <td className="data-td">
+                        {m.warPreference && (
+                          <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
+                            {m.warPreference}
+                          </Badge>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Mobile cards */}
-          <div className="space-y-2 md:hidden">
+          <ul className="space-y-2 md:hidden">
             {sorted.map((m) => (
-              <button
+              <li
                 key={m.playerTag}
-                onClick={() => handleMemberClick(m.playerTag)}
-                className="glass flex w-full items-center gap-3 rounded-lg p-3 text-left transition hover:bg-white/[.04] focus-ring"
               >
-                {m.leagueTier?.iconUrls?.small && (
-                  <Image
-                    src={m.leagueTier.iconUrls.small}
-                    alt=""
-                    width={36}
-                    height={36}
-                    className="h-9 w-9 shrink-0"
-                    unoptimized
-                  />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium text-umbra-lilac">{m.name}</p>
-                    {/* Activity dot for compact view */}
-                    <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
+                <button
+                  onClick={() => handleMemberClick(m.playerTag)}
+                  className="focus-ring lunar-tile lunar-hover flex w-full items-center gap-3 rounded-xl p-3 text-left"
+                >
+                  {m.leagueTier?.iconUrls?.small && (
+                    <Image
+                      src={m.leagueTier.iconUrls.small}
+                      alt=""
+                      width={36}
+                      height={36}
+                      className="h-9 w-9 shrink-0"
+                      unoptimized
+                    />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium text-umbra-moonlight">{m.name}</p>
+                      <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
+                    </div>
+                    <p className="font-mono text-label text-umbra-muted">
+                      TH{m.townHallLevel} · <span className="capitalize">{m.role}</span>
+                    </p>
+                    <p className="font-mono text-label text-umbra-muted">
+                      ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
+                      {m.warsTracked > 0 && ` · ${m.warsTracked - m.warsMissed}/${m.warsTracked} wars`}
+                    </p>
                   </div>
-                  <p className="font-mono text-label text-umbra-muted">
-                    TH{m.townHallLevel} · <span className="capitalize">{m.role}</span>
-                  </p>
-                  <p className="font-mono text-label text-umbra-muted">
-                    ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
-                    {m.warsTracked > 0 && ` · ${m.warsTracked - m.warsMissed}/${m.warsTracked} wars`}
-                  </p>
-                </div>
-                {m.warPreference && (
-                  <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
-                    {m.warPreference}
-                  </Badge>
-                )}
-              </button>
+                  {m.warPreference && (
+                    <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
+                      {m.warPreference}
+                    </Badge>
+                  )}
+                </button>
+              </li>
             ))}
-          </div>
+          </ul>
         </>
       )}
 
@@ -356,7 +367,15 @@ function roleOrder(role: string): number {
   }
 }
 
-
+/** Town Hall badge using the celestial th-badge ramp. */
+function ThBadge({ level }: { level: number | null }) {
+  if (level === null || level === undefined) {
+    return <span className="th-badge th-unknown">—</span>;
+  }
+  const toneClass =
+    level >= 14 ? "th-high" : level >= 11 ? "th-mid" : "th-low";
+  return <span className={`th-badge ${toneClass}`}>TH{level}</span>;
+}
 
 function ActivityIndicator({
   isActive,
@@ -371,7 +390,7 @@ function ActivityIndicator({
     const lastActiveStr = lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
     return todayStr === lastActiveStr;
   })();
-  
+
   const colorClass = isActive
     ? isRecent
       ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"

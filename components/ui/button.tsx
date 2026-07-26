@@ -3,11 +3,13 @@
 /**
  * Button — the shared button primitive.
  *
- * Extracted from the inline pattern used across navigation.tsx,
- * war-refresh-button.tsx, and tabs.tsx. Three variants, three sizes.
- * All use rounded-lg, focus-ring, transition.
+ * Celestial Observatory variants:
+ *  • primary — violet→purple gradient with a glow halo that intensifies on
+ *    hover and lifts 1px on press.
+ *  • ghost — translucent glass surface that brightens + glows on hover.
+ *  • icon — square glass tile for icon-only actions.
  *
- * Replaces hand-crafted <button> elements with inline Tailwind strings.
+ * Three sizes (sm/md/lg). All use rounded-r-sm, focus-ring, 140ms transitions.
  */
 
 import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
@@ -16,12 +18,9 @@ type Variant = "primary" | "ghost" | "icon";
 type Size = "sm" | "md" | "lg";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary:
-    "border-umbra-purple/40 bg-umbra-purple/10 text-umbra-purple hover:bg-umbra-purple/10",
-  ghost:
-    "border-umbra-line text-umbra-muted hover:text-umbra-lilac hover:bg-white/[.04]",
-  icon:
-    "border-transparent text-umbra-muted hover:text-umbra-lilac hover:bg-white/[.04]",
+  primary: "btn-primary",
+  ghost: "btn-ghost",
+  icon: "btn-icon",
 };
 
 const SIZE_CLASSES: Record<Size, string> = {
@@ -31,9 +30,9 @@ const SIZE_CLASSES: Record<Size, string> = {
 };
 
 const ICON_SIZE_CLASSES: Record<Size, string> = {
-  sm: "p-1.5 h-7 w-7",
-  md: "p-2 h-8 w-8",
-  lg: "p-2.5 h-9 w-9",
+  sm: "h-7 w-7",
+  md: "h-8 w-8",
+  lg: "h-9 w-9",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -48,8 +47,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const isIconOnly = variant === "icon" || (!!icon && !children);
 
     const classes = [
-      "focus-ring inline-flex items-center justify-center font-semibold uppercase tracking-wider transition disabled:opacity-40 disabled:cursor-not-allowed",
-      isIconOnly ? "" : "rounded-lg border",
+      "focus-ring inline-flex items-center justify-center font-semibold uppercase tracking-wider transition-all duration-150 ease-lunar disabled:cursor-not-allowed disabled:opacity-40",
       VARIANT_CLASSES[variant],
       isIconOnly ? ICON_SIZE_CLASSES[size] : SIZE_CLASSES[size],
       className,

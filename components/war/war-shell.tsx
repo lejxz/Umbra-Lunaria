@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { WarCenterData } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
+import { CardMount } from "@/components/ui/card-mount";
 import { WarHero } from "./war-hero";
 import { WarRosters } from "./war-rosters";
 import { WarAttackLog } from "./war-attack-log";
@@ -43,43 +44,61 @@ export function WarShell({
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [detailWarId, setDetailWarId] = useState<number | null>(null);
 
+  // Staggered fade-in: each top-level section gets a slightly later delay.
+  let delay = 0;
+  const stepDelay = () => {
+    const d = delay;
+    delay += 0.04;
+    return d;
+  };
+
   return (
     <div className="space-y-5">
       {/* CWL league view — shown when the clan is in CWL */}
       {data.cwlSeason && (
-        <CwlLeagueView season={data.cwlSeason} onViewDetail={setDetailWarId} />
+        <CardMount delay={stepDelay()}>
+          <CwlLeagueView season={data.cwlSeason} onViewDetail={setDetailWarId} />
+        </CardMount>
       )}
 
-      <WarHero
-        currentWar={data.currentWar}
-        clanBadgeUrls={clanBadgeUrls}
-        clanName={clanName}
-        lastResult={data.lastResult}
-        leadAnalysis={data.leadAnalysis}
-        refreshTtlSeconds={data.refreshTtlSeconds}
-        serverNow={serverNow}
-      />
+      <CardMount delay={stepDelay()}>
+        <WarHero
+          currentWar={data.currentWar}
+          clanBadgeUrls={clanBadgeUrls}
+          clanName={clanName}
+          lastResult={data.lastResult}
+          leadAnalysis={data.leadAnalysis}
+          refreshTtlSeconds={data.refreshTtlSeconds}
+          serverNow={serverNow}
+        />
+      </CardMount>
 
       {data.currentWar && (
         <>
-          <WarRosters
-            currentWar={data.currentWar}
-            onMemberClick={setSelectedTag}
-          />
-          <WarAttackLog
-            attackLog={data.attackLog}
-            warState={data.currentWar.state}
-            onMemberClick={setSelectedTag}
-          />
+          <CardMount delay={stepDelay()}>
+            <WarRosters
+              currentWar={data.currentWar}
+              onMemberClick={setSelectedTag}
+            />
+          </CardMount>
+          <CardMount delay={stepDelay()}>
+            <WarAttackLog
+              attackLog={data.attackLog}
+              warState={data.currentWar.state}
+              onMemberClick={setSelectedTag}
+            />
+          </CardMount>
         </>
       )}
 
-      <WarHistory
-        history={data.history}
-        warLogPublic={data.warLogPublic}
-        trackingStart={data.trackingStart}
-        onViewDetail={setDetailWarId}
-      />
+      <CardMount delay={stepDelay()}>
+        <WarHistory
+          history={data.history}
+          warLogPublic={data.warLogPublic}
+          trackingStart={data.trackingStart}
+          onViewDetail={setDetailWarId}
+        />
+      </CardMount>
 
       <MemberDetailSheet playerTag={selectedTag} onClose={() => setSelectedTag(null)} />
       <WarDetailSheet

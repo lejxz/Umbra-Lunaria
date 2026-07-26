@@ -132,11 +132,11 @@ export function DataTable<T>({
     return (
       <TableShell ariaLabel={ariaLabel} caption={caption}>
         <DesktopHeader columns={columns} />
-        <tbody className="divide-y divide-white/5">
+        <tbody className="data-tbody">
           {Array.from({ length: loadingRows }).map((_, i) => (
-            <tr key={`skeleton-${i}`} className="text-umbra-lilac">
+            <tr key={`skeleton-${i}`} className="data-tr">
               {columns.map((column) => (
-                <td className="px-4 py-3" key={column.key}>
+                <td className="data-td" key={column.key}>
                   <div className="h-4 w-full max-w-[160px] animate-pulse rounded bg-white/5" />
                 </td>
               ))}
@@ -149,7 +149,7 @@ export function DataTable<T>({
 
   if (rows.length === 0) {
     return (
-      <div className="rounded-2xl border border-umbra-line">
+      <div>
         {emptyState ?? (
           <EmptyState
             title="No rows to display"
@@ -172,7 +172,7 @@ export function DataTable<T>({
           onSortClick={handleSortClick}
           sortable={sortable}
         />
-        <tbody className="divide-y divide-white/5">
+        <tbody className="data-tbody">
           {sortedRows.map((row, index) => {
             const key = rowKey(row, index);
             const selected = selectedRowId !== undefined && selectedRowId === key;
@@ -223,13 +223,12 @@ function TableShell({
   return (
     <div className={className}>
       {caption && <div className="mb-3">{caption}</div>}
-      <div className="overflow-x-auto rounded-2xl border border-umbra-line">
+      <div className="data-container overflow-x-auto">
         <table className="w-full text-left text-sm" aria-label={ariaLabel}>
           {children}
         </table>
       </div>
-    </div>
-  );
+    </div>);
 }
 
 function DesktopHeader<T>({
@@ -244,7 +243,7 @@ function DesktopHeader<T>({
   sortable?: boolean;
 }) {
   return (
-    <thead className="bg-white/5 text-xs uppercase tracking-wider text-umbra-muted">
+    <thead className="data-thead">
       <tr>
         {columns.map((column) => {
           const canSort = Boolean(column.sortable || (sortable && onSortClick));
@@ -259,7 +258,7 @@ function DesktopHeader<T>({
             : undefined;
           return (
             <th
-              className="px-4 py-3"
+              className="data-th"
               key={column.key}
               scope="col"
               aria-sort={ariaSort}
@@ -327,12 +326,13 @@ function TableRow<T>({
       onClick={onClick ? () => onClick(row) : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       aria-pressed={onClick ? selected : undefined}
-      className={`text-umbra-lilac transition ${
-        onClick ? "cursor-pointer hover:bg-white/[.04] focus:bg-white/[.03]" : ""
+      className={`data-tr ${
+        onClick ? "cursor-pointer focus:bg-umbra-purple/[.04]" : ""
       } ${selected ? "bg-umbra-purple/10" : ""}`}
+      style={selected ? { boxShadow: "inset 2px 0 0 #B678FF" } : undefined}
     >
       {columns.map((column) => (
-        <td className="px-4 py-3" key={column.key}>
+        <td className="data-td" key={column.key}>
           {column.render(row)}
         </td>
       ))}
@@ -370,12 +370,12 @@ function MobileCard<T>({
       onClick={onClick ? () => onClick(row) : undefined}
       onKeyDown={onClick ? handleKeyDown : undefined}
       aria-pressed={onClick ? selected : undefined}
-      className={`glass rounded-2xl p-4 transition ${
-        onClick ? "cursor-pointer hover:border-umbra-purple/40 focus:border-umbra-purple/40" : ""
+      className={`data-li ${
+        onClick ? "cursor-pointer focus:border-umbra-purple/40" : ""
       } ${selected ? "border-umbra-purple/50 bg-umbra-purple/10" : ""}`}
     >
       {headline && (
-        <div className="font-display text-base text-umbra-lilac">
+        <div className="font-display text-base text-umbra-moonlight">
           {headline.render(row)}
         </div>
       )}
@@ -383,7 +383,7 @@ function MobileCard<T>({
         <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
           {columns.slice(1).map((column) => (
             <div key={column.key}>
-              <dt className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+              <dt className="font-mono text-label uppercase tracking-wider text-umbra-faint">
                 {column.label}
               </dt>
               <dd className="mt-0.5 text-sm text-umbra-lilac">

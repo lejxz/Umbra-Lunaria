@@ -27,7 +27,7 @@ export function CurrentWarCard({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="lunar-card lunar-hover flex h-full flex-col p-5"
       aria-labelledby="current-war-title"
     >
       <div className="flex items-start justify-between gap-4">
@@ -37,17 +37,17 @@ export function CurrentWarCard({
           </p>
           <h3
             id="current-war-title"
-            className="mt-1 font-display text-lg text-umbra-lilac"
+            className="mt-1 font-display text-lg text-umbra-moonlight"
           >
             Current war
           </h3>
         </div>
         {countdownTarget && isWarActive && (
           <div className="flex flex-col items-end text-right">
-            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-faint">
               {warSummary.state === "preparation" ? "Starts in" : "Ends in"}
             </p>
-            <p className="mt-1 font-mono text-lg text-umbra-lilac font-medium tracking-wider">
+            <p className="mt-1 font-mono text-lg font-medium tracking-wider text-umbra-moonlight">
               <LiveCountdown targetDate={countdownTarget} />
             </p>
           </div>
@@ -59,10 +59,10 @@ export function CurrentWarCard({
           <div className="mb-3 flex justify-center text-umbra-purple/40">
             <IconWarEmpty className="h-12 w-12" />
           </div>
-          <p className="text-sm text-umbra-muted">
+          <p className="text-sm text-umbra-lilac">
             {warSummary.state === null ? "No war data yet" : "Clan is at peace"}
           </p>
-          <p className="mt-1 text-xs text-umbra-muted">
+          <p className="mt-1 text-xs text-umbra-faint">
             Wars appear here when they start
           </p>
         </div>
@@ -79,17 +79,17 @@ export function CurrentWarCard({
                     src={clanBadgeUrls.small}
                     alt={clanName ?? "Our Clan"}
                     fill
-                    className="object-contain drop-shadow-lg"
+                    className="object-contain drop-shadow-[0_0_10px_rgba(182,120,255,0.35)]"
                   />
                 </div>
               )}
-              <p className="font-display text-sm font-medium text-umbra-lilac leading-tight line-clamp-2">
+              <p className="font-display text-sm font-medium text-umbra-moonlight leading-tight line-clamp-2">
                 {clanName ?? "Our Clan"}
               </p>
-              
+
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 rounded-lg bg-white/[.03] px-4 py-2">
-                  <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
+                <div className="lunar-tile flex items-baseline justify-center gap-1.5 !px-4 !py-2">
+                  <span className="font-display text-2xl font-bold text-amber-300 leading-none tracking-tight drop-shadow-[0_0_8px_rgba(252,211,77,0.4)]">
                     ★{warSummary.ownStars ?? <UnavailableValue />}
                   </span>
                   <span className="font-mono text-2xs font-medium text-umbra-muted">
@@ -107,10 +107,10 @@ export function CurrentWarCard({
               <span
                 className={`mb-3.5 inline-flex items-center rounded-full border px-2.5 py-0.5 text-label font-semibold uppercase tracking-wider whitespace-nowrap ${
                   warSummary.state === "inWar"
-                    ? "border-amber-400/30 bg-amber-400/10 text-amber-400"
+                    ? "border-amber-400/30 bg-amber-400/10 text-amber-300"
                     : warSummary.state === "preparation"
                       ? "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple"
-                      : "border-white/10 bg-white/5 text-umbra-muted"
+                      : "border-umbra-line bg-white/5 text-umbra-muted"
                 }`}
               >
                 {warSummary.state === "inWar"
@@ -121,14 +121,14 @@ export function CurrentWarCard({
               </span>
 
               {/* VS Icon */}
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/40 text-umbra-purple/80 shadow-[inset_0_0_12px_rgba(182,120,255,0.15)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 text-umbra-purple shadow-glow-sm">
                 <IconSwords className="h-6 w-6" />
               </div>
 
               {/* Team size */}
               {warSummary.teamSize && (
-                <div className="mt-3.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 shadow-lg">
-                  <span className="text-label font-semibold uppercase tracking-wider text-umbra-purple/90">
+                <div className="mt-3.5 inline-flex items-center justify-center rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5">
+                  <span className="text-label font-semibold uppercase tracking-wider text-umbra-purple">
                     {warSummary.teamSize}v{warSummary.teamSize}
                   </span>
                 </div>
@@ -143,17 +143,17 @@ export function CurrentWarCard({
                     src={warSummary.opponentBadgeUrls.small}
                     alt={`${warSummary.opponentName ?? "Enemy"} Badge`}
                     fill
-                    className="object-contain drop-shadow-lg grayscale hover:grayscale-0 transition-all duration-300"
+                    className="object-contain drop-shadow-lg grayscale transition-all duration-300 hover:grayscale-0"
                   />
                 </div>
               )}
-              <p className="font-display text-sm font-medium text-red-300/90 leading-tight line-clamp-2">
+              <p className="font-display text-sm font-medium text-rose-300/90 leading-tight line-clamp-2">
                 {warSummary.opponentName ?? "Enemy"}
               </p>
-              
+
               <div className="mt-3 flex w-full flex-col items-center">
-                <div className="flex items-baseline justify-center gap-1.5 rounded-lg bg-white/[.03] px-4 py-2">
-                  <span className="font-display text-2xl font-bold text-amber-400 leading-none tracking-tight">
+                <div className="lunar-tile flex items-baseline justify-center gap-1.5 !px-4 !py-2">
+                  <span className="font-display text-2xl font-bold text-amber-300 leading-none tracking-tight drop-shadow-[0_0_8px_rgba(252,211,77,0.4)]">
                     ★{warSummary.opponentStars ?? <UnavailableValue />}
                   </span>
                   <span className="font-mono text-2xs font-medium text-umbra-muted">

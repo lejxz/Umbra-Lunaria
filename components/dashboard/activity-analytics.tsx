@@ -42,7 +42,7 @@ export function ActivityAnalytics({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="lunar-card flex flex-col p-5"
       aria-labelledby="activity-title"
       style={{ minHeight: "380px" }}
     >
@@ -52,18 +52,18 @@ export function ActivityAnalytics({
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Roster signal & support
           </p>
-          <h3 id="activity-title" className="mt-1 font-display text-lg text-umbra-lilac">
+          <h3 id="activity-title" className="mt-1 font-display text-lg text-umbra-moonlight">
             Activity Analytics
           </h3>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <div className="hidden md:flex items-center rounded-lg bg-white/5 p-1">
+          <div className="hidden md:flex items-center rounded-r-md border border-umbra-line bg-umbra-ink/40 p-1 backdrop-blur-sm">
             <StatChip
               label={`Active · ${window}`}
               value={`${current.totalActiveMembers}/${current.totalMembers}`}
             />
-            <div className="h-4 w-px bg-white/10 mx-1" />
+            <div className="h-4 w-px bg-umbra-line-soft mx-1" />
             <StatChip
               label="Rate"
               value={
@@ -73,7 +73,7 @@ export function ActivityAnalytics({
               }
             />
             {current.hasPartialData && (
-              <span className="ml-2 pr-3 text-label text-amber-400">⚠ Partial</span>
+              <span className="ml-2 pr-3 text-label text-amber-300">⚠ Partial</span>
             )}
           </div>
 
@@ -104,8 +104,8 @@ export function ActivityAnalytics({
         </div>
 
         {/* Leaderboard — podium styling matching DonationAnalytics top donors */}
-        <div className="flex flex-col lg:border-l lg:border-white/5 lg:pl-6">
-          <p className="mb-3 font-mono text-label uppercase tracking-wider text-umbra-muted">
+        <div className="flex flex-col lg:border-l lg:border-umbra-line-soft lg:pl-6">
+          <p className="mb-3 font-mono text-label uppercase tracking-wider text-umbra-faint">
             Top 5 Activity · {window}
           </p>
           {entries.length > 0 ? (
@@ -113,24 +113,24 @@ export function ActivityAnalytics({
               {entries.slice(0, 5).map((entry) => {
                 // Podium styling — same as DonationAnalytics top donors
                 let rankColor = "text-umbra-purple";
-                let badgeStyle = "bg-white/[.03] border border-white/5";
+                let badgeStyle = "border-umbra-line bg-umbra-ink/40";
 
                 if (entry.rank === 1) {
                   rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
-                  badgeStyle = "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
+                  badgeStyle = "border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent";
                 } else if (entry.rank === 2) {
                   rankColor = "text-slate-300";
-                  badgeStyle = "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
+                  badgeStyle = "border-slate-400/25 bg-gradient-to-r from-slate-400/10 to-transparent";
                 } else if (entry.rank === 3) {
-                  rankColor = "text-orange-400";
-                  badgeStyle = "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
+                  rankColor = "text-orange-300";
+                  badgeStyle = "border-orange-500/25 bg-gradient-to-r from-orange-500/10 to-transparent";
                 }
 
                 return (
                   <button
                     key={entry.playerTag}
                     onClick={() => onMemberClick?.(entry.playerTag)}
-                    className={`flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.04] ${badgeStyle}`}
+                    className={`data-li focus-ring flex items-center justify-between !rounded-r-md !px-3 !py-2.5 text-left ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-xs font-bold ${rankColor}`}>
@@ -158,7 +158,7 @@ export function ActivityAnalytics({
               })}
             </div>
           ) : (
-            <p className="text-xs text-umbra-muted">No scores yet</p>
+            <p className="text-xs text-umbra-faint">No scores yet</p>
           )}
         </div>
       </div>
@@ -169,8 +169,8 @@ export function ActivityAnalytics({
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
-      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{label}</span>
-      <span className="font-display text-xs font-bold text-white">{value}</span>
+      <span className="font-mono text-micro uppercase tracking-wider text-umbra-faint">{label}</span>
+      <span className="font-display text-xs font-bold text-umbra-moonlight">{value}</span>
     </div>
   );
 }

@@ -13,17 +13,15 @@ export function CapitalSummaryCard({
 }) {
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="lunar-card lunar-hover flex h-full flex-col p-5"
       aria-labelledby="capital-title"
     >
-      <div className="flex items-center justify-between">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-          Clan capital
-        </p>
-      </div>
+      <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+        Clan capital
+      </p>
       <h3
         id="capital-title"
-        className="mt-1 font-display text-lg text-umbra-lilac"
+        className="mt-1 font-display text-lg text-umbra-moonlight"
       >
         Capital overview
       </h3>
@@ -45,12 +43,12 @@ export function CapitalSummaryCard({
       </div>
 
       {/* League — centered, fills remaining space */}
-      <div className="mt-3 flex flex-1 items-center justify-center rounded-lg bg-white/[.03] p-3">
+      <div className="lunar-tile mt-3 flex flex-1 items-center justify-center !p-3">
         <div className="text-center">
-          <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
+          <p className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
             Capital league
           </p>
-          <p className="mt-1 font-display text-lg font-bold text-umbra-lilac">
+          <p className="mt-1 font-display text-lg font-bold text-umbra-moonlight">
             {capital.capitalLeague?.name ?? <UnavailableValue />}
           </p>
         </div>
@@ -67,11 +65,11 @@ function MiniStat({
   value: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg bg-white/[.03] p-2.5 text-center">
-      <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
+    <div className="lunar-tile !p-2.5 text-center">
+      <p className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
         {label}
       </p>
-      <p className="mt-1 font-display text-lg font-bold text-white">{value}</p>
+      <p className="mt-1 font-display text-lg font-bold text-umbra-moonlight">{value}</p>
     </div>
   );
 }

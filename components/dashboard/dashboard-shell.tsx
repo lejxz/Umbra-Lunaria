@@ -17,6 +17,7 @@ import { WarPerformanceChart } from "./war-performance-chart";
 import { WarAttackDistributionChart } from "./war-attack-distribution";
 import { RosterSizeChart } from "./roster-size-chart";
 import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
+import { CardMount } from "@/components/ui/card-mount";
 import { useServerClock } from "@/lib/time/use-server-clock";
 
 /**
@@ -47,50 +48,65 @@ export function DashboardShell({
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Dashboard
           </p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
+          <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-moonlight sm:text-4xl">
             The clan observatory
           </h1>
+          <p className="mt-2 max-w-2xl text-sm text-umbra-muted">
+            A live read on the Moon&apos;s Shadow roster — wars, capital, and contribution pulse in one view.
+          </p>
         </div>
       </header>
 
       {/* Row 1: Identity card — full width */}
-      <ClanIdentityCard clan={data.clan} />
+      <CardMount delay={0}>
+        <ClanIdentityCard clan={data.clan} />
+      </CardMount>
 
       {/* Row 2: War record | Current war | Capital overview — 3 even columns */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <WarRecordCard record={data.warRecord} />
-        <CurrentWarCard warSummary={data.warSummary} clanBadgeUrls={data.clan.badgeUrls} clanName={data.clan.name} />
-        <CapitalSummaryCard capital={data.capital} />
+        <CardMount delay={0.04} className="h-full">
+          <WarRecordCard record={data.warRecord} />
+        </CardMount>
+        <CardMount delay={0.08} className="h-full">
+          <CurrentWarCard warSummary={data.warSummary} clanBadgeUrls={data.clan.badgeUrls} clanName={data.clan.name} />
+        </CardMount>
+        <CardMount delay={0.12} className="h-full">
+          <CapitalSummaryCard capital={data.capital} />
+        </CardMount>
       </div>
 
       {/* Row 2b: War analytics — performance trend (2/3) + attack distribution donut (1/3) */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <section className="glass flex flex-col rounded-2xl p-5 lg:col-span-2" aria-labelledby="war-trend-title">
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            War performance · last 20
-          </p>
-          <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
-            Stars per war
-          </h3>
-          <div className="mt-3 h-56">
-            <WarPerformanceChart trend={data.warPerformanceTrend} />
-          </div>
-        </section>
-        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="attack-dist-title">
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Attack quality
-          </p>
-          <h3 id="attack-dist-title" className="mt-1 font-display text-lg text-umbra-lilac">
-            Star distribution
-          </h3>
-          <div className="mt-3 flex-1">
-            <WarAttackDistributionChart distribution={data.warAttackDistribution} />
-          </div>
-        </section>
+        <CardMount delay={0.16} className="h-full lg:col-span-2">
+          <section className="lunar-card flex h-full flex-col p-5" aria-labelledby="war-trend-title">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+              War performance · last 20
+            </p>
+            <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+              Stars per war
+            </h3>
+            <div className="mt-3 h-56">
+              <WarPerformanceChart trend={data.warPerformanceTrend} />
+            </div>
+          </section>
+        </CardMount>
+        <CardMount delay={0.2} className="h-full">
+          <section className="lunar-card flex h-full flex-col p-5" aria-labelledby="attack-dist-title">
+            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+              Attack quality
+            </p>
+            <h3 id="attack-dist-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+              Star distribution
+            </h3>
+            <div className="mt-3 flex-1">
+              <WarAttackDistributionChart distribution={data.warAttackDistribution} />
+            </div>
+          </section>
+        </CardMount>
       </div>
 
       {/* Row 3: Clan donations — full width (primary analytical panel) */}
-      <div className="mt-5">
+      <CardMount delay={0.24} className="mt-5">
         <DonationAnalytics
           dataByWindow={{
             "24h": {
@@ -111,10 +127,10 @@ export function DashboardShell({
           }}
           onMemberClick={setSelectedMember}
         />
-      </div>
+      </CardMount>
 
       {/* Row 4: Unified Activity Analytics (Timeline + Score) */}
-      <div className="mt-5">
+      <CardMount delay={0.28} className="mt-5">
         <ActivityAnalytics
           dataByWindow={{
             "24h": data.activityTimeline,
@@ -128,11 +144,11 @@ export function DashboardShell({
           }}
           onMemberClick={setSelectedMember}
         />
-      </div>
+      </CardMount>
 
       {/* Row 4b: Roster size trend — full width */}
-      <div className="mt-5">
-        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="roster-trend-title">
+      <CardMount delay={0.32} className="mt-5">
+        <section className="lunar-card flex flex-col p-5" aria-labelledby="roster-trend-title">
           <div className="flex items-center justify-between">
             <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
               Roster size · 30 days
@@ -143,73 +159,79 @@ export function DashboardShell({
                 : "—"}
             </span>
           </div>
-          <h3 id="roster-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
+          <h3 id="roster-trend-title" className="mt-1 font-display text-lg text-umbra-moonlight">
             Roster growth
           </h3>
           <div className="mt-3 h-40">
             <RosterSizeChart trend={data.rosterSizeTrend} />
           </div>
         </section>
-      </div>
+      </CardMount>
 
       {/* Row 5: Needs Attention | Clan Log — 3 cols */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <AttentionPanel
-          title="Attention Queue"
-          subtitle="Inactive & No-shows"
-          groups={[
-            {
-              label: "No attacks in current war",
-              tone: "warning",
-              icon: "swords",
-              members: data.needsAttention.attacksRemaining,
-            },
-            {
-              label: `Inactive (${data.needsAttention.inactivityThresholdDays}d+)`,
-              tone: "danger",
-              icon: "clock",
-              members: data.needsAttention.inactive,
-            },
-            {
-              label: "Rushed (>60%)",
-              tone: "danger",
-              icon: "shield",
-              members: data.needsAttention.rushed,
-            },
-          ]}
-          onMemberClick={setSelectedMember}
-        />
-        <AttentionPanel
-          title="Opted Out"
-          subtitle="War Preference"
-          groups={[
-            {
-              label: "Opted out of wars",
-              tone: "muted",
-              icon: "shield",
-              members: data.needsAttention.warPreferenceOut,
-            }
-          ]}
-          onMemberClick={setSelectedMember}
-        />
-        <ClanLogPanel
-          log={data.clanLog}
-          onMemberClick={setSelectedMember}
-        />
+        <CardMount delay={0.36} className="h-full">
+          <AttentionPanel
+            title="Attention Queue"
+            subtitle="Inactive & No-shows"
+            groups={[
+              {
+                label: "No attacks in current war",
+                tone: "warning",
+                icon: "swords",
+                members: data.needsAttention.attacksRemaining,
+              },
+              {
+                label: `Inactive (${data.needsAttention.inactivityThresholdDays}d+)`,
+                tone: "danger",
+                icon: "clock",
+                members: data.needsAttention.inactive,
+              },
+              {
+                label: "Rushed (>60%)",
+                tone: "danger",
+                icon: "shield",
+                members: data.needsAttention.rushed,
+              },
+            ]}
+            onMemberClick={setSelectedMember}
+          />
+        </CardMount>
+        <CardMount delay={0.4} className="h-full">
+          <AttentionPanel
+            title="Opted Out"
+            subtitle="War Preference"
+            groups={[
+              {
+                label: "Opted out of wars",
+                tone: "muted",
+                icon: "shield",
+                members: data.needsAttention.warPreferenceOut,
+              }
+            ]}
+            onMemberClick={setSelectedMember}
+          />
+        </CardMount>
+        <CardMount delay={0.44} className="h-full">
+          <ClanLogPanel
+            log={data.clanLog}
+            onMemberClick={setSelectedMember}
+          />
+        </CardMount>
       </div>
 
       {/* Row 6: Hall of Fame — link to the dedicated page */}
-      <div className="mt-5">
+      <CardMount delay={0.48} className="mt-5">
         <HallOfFameLink />
-      </div>
+      </CardMount>
 
       {/* Row 7: Navigation summary — full width strip */}
-      <div className="mt-5">
+      <CardMount delay={0.52} className="mt-5">
         <NavSummaries
           warSummary={data.warSummary}
           capitalNav={data.capitalNav}
         />
-      </div>
+      </CardMount>
 
       {/* Compact data freshness footer with next-poll countdown */}
       <FreshnessFooter
@@ -221,8 +243,8 @@ export function DashboardShell({
       />
 
       {/* Footer */}
-      <footer className="mt-6 border-t border-umbra-line pt-4 text-center">
-        <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+      <footer className="mt-6 border-t border-umbra-line-soft pt-4 text-center">
+        <p className="font-mono text-label uppercase tracking-wider text-umbra-faint">
           Umbra Lunaria · Clan Observatory · Single-clan deployment
         </p>
       </footer>
@@ -321,14 +343,14 @@ function FreshnessFooter({
       : "—";
 
   return (
-    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 rounded-lg border border-umbra-line/50 bg-umbra-ink/30 px-4 py-3">
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 rounded-r-md border border-umbra-line bg-umbra-ink/40 px-4 py-3 backdrop-blur-sm">
       <Chip label="Last update" value={fmt(lastPoll)} />
       <Chip label="Daily batch" value={fmt(lastBatch)} />
       <Chip label="Tracking" value={fmt(trackingStart)} />
       <Chip label="War synced" value={fmt(warSynced)} />
       {/* Next poll countdown */}
-      <div className="flex items-center gap-1.5 border-l border-umbra-line/50 pl-5">
-        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+      <div className="flex items-center gap-1.5 border-l border-umbra-line-soft pl-5">
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">
           Next update
         </span>
         <span
@@ -351,7 +373,7 @@ function FreshnessFooter({
 function Chip({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+      <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">
         {label}
       </span>
       <span className="font-mono text-label text-umbra-lilac" suppressHydrationWarning>
@@ -369,17 +391,17 @@ function HallOfFameLink() {
   return (
     <Link
       href="/hall-of-fame"
-      className="glass focus-ring flex items-center justify-between gap-4 rounded-2xl p-5 transition hover:border-umbra-purple/40"
+      className="lunar-card lunar-hover focus-ring flex items-center justify-between gap-4 p-5 transition"
     >
       <div className="flex items-center gap-4">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-umbra-purple/15 text-umbra-purple">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full border border-umbra-line bg-umbra-purple/15 text-umbra-purple shadow-glow-sm">
           <IconTrophy className="h-5 w-5" />
         </span>
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             All-time clan records
           </p>
-          <h3 className="font-display text-lg text-umbra-lilac">Hall of Fame</h3>
+          <h3 className="font-display text-lg text-umbra-moonlight">Hall of Fame</h3>
         </div>
       </div>
       <span className="flex items-center gap-1.5 font-mono text-label uppercase tracking-wider text-umbra-muted">

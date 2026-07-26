@@ -78,6 +78,9 @@ export function RosterSizeChart({ trend }: { trend: RosterSizeTrend }) {
           strokeWidth={2}
           fill="url(#rosterGrad)"
           name="count"
+          isAnimationActive
+          animationDuration={300}
+          animationEasing="ease-out"
         />
       </AreaChart>
     </ResponsiveContainer>

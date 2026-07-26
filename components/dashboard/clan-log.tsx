@@ -22,7 +22,7 @@ export function ClanLogPanel({
 }) {
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5 h-[450px]"
+      className="lunar-card flex flex-col p-5 h-[450px]"
       aria-labelledby="clan-log-title"
     >
       {/* Header */}
@@ -34,7 +34,7 @@ export function ClanLogPanel({
       </div>
       <h3
         id="clan-log-title"
-        className="mt-1 font-display text-lg text-umbra-lilac"
+        className="mt-1 font-display text-lg text-umbra-moonlight"
       >
         Clan Log
       </h3>
@@ -47,7 +47,7 @@ export function ClanLogPanel({
           />
         </div>
       ) : (
-        <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto pr-2">
+        <div className="mt-4 flex-1 space-y-1.5 overflow-y-auto pr-1">
           {log.entries.map((entry) => {
             const visuals = getEventVisuals(entry);
             const labelText = getBadgeLabel(entry);
@@ -59,26 +59,26 @@ export function ClanLogPanel({
                   !entry.isPurged && onMemberClick?.(entry.playerTag)
                 }
                 disabled={entry.isPurged}
-                className={`flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition ${
+                className={`data-li focus-ring flex w-full items-center justify-between gap-2.5 !px-3 !py-2 text-left ${
                   entry.isPurged
                     ? "cursor-default opacity-60"
-                    : "hover:bg-white/[.04] focus-ring"
+                    : ""
                 }`}
               >
                 <div className="flex min-w-0 items-center gap-2.5">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-r-sm bg-umbra-void/40">
                     <visuals.Icon className={`h-[14px] w-[14px] ${visuals.color}`} />
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm text-umbra-lilac">
                       {visuals.title}
                       {entry.isPurged && (
-                        <span className="ml-2 text-xs text-umbra-muted">
+                        <span className="ml-2 text-xs text-umbra-faint">
                           · data removed
                         </span>
                       )}
                     </p>
-                    <p className="truncate text-2xs text-umbra-muted">
+                    <p className="truncate text-2xs text-umbra-faint">
                       <span className="font-mono">{entry.playerTag}</span> ·{" "}
                       {visuals.subtext}
                     </p>
@@ -135,7 +135,7 @@ function getEventVisuals(entry: ClanLogEntry): EventVisual {
     case "rejoin":
       return {
         Icon: IconUserCheck,
-        color: "text-amber-400",
+        color: "text-amber-300",
         tone: "brand",
         title: entry.name,
         subtext: dateLabel,
@@ -151,7 +151,7 @@ function getEventVisuals(entry: ClanLogEntry): EventVisual {
         color = "text-red-400";
         tone = "danger";
       } else if (rushed !== null && rushed >= 30) {
-        color = "text-amber-400";
+        color = "text-amber-300";
         tone = "warning";
       }
       const subtext =

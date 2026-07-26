@@ -7,6 +7,7 @@ import type {
   MemberActivityScore,
 } from "@/lib/view-models/dashboard";
 import { Modal } from "@/components/ui/modal";
+import { IconChevronRight } from "@/components/ui/icons";
 
 export function ScoreLeaderboard({
   leaderboard,
@@ -30,7 +31,7 @@ export function ScoreLeaderboard({
 
   return (
     <section
-      className="glass rounded-2xl p-5 mb-5"
+      className="lunar-card rounded-r-lg p-5 mb-5"
       aria-labelledby="score-leaderboard-title"
     >
       <div className="flex items-center justify-between mb-8">
@@ -40,7 +41,7 @@ export function ScoreLeaderboard({
           </p>
           <h3
             id="score-leaderboard-title"
-            className="mt-1 font-display text-lg text-umbra-lilac"
+            className="mt-1 font-display text-lg text-umbra-moonlight"
           >
             Activity Score Leaderboard
           </h3>
@@ -48,11 +49,12 @@ export function ScoreLeaderboard({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="focus-ring rounded-lg border border-umbra-line bg-umbra-surface px-4 py-2 text-label font-bold uppercase tracking-wider text-umbra-lilac transition hover:border-umbra-purple/50 hover:bg-white/[.04] hover:text-white"
+            className="btn-ghost focus-ring"
           >
-            View Full List &rarr;
+            View Full List
+            <IconChevronRight className="h-3.5 w-3.5" aria-hidden />
           </button>
-          <span className="font-mono text-label font-bold uppercase tracking-wider text-amber-300 bg-amber-500/20 px-2 py-1 rounded drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]">
+          <span className="font-mono text-label font-bold uppercase tracking-wider text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-1 rounded-r-sm drop-shadow-[0_0_8px_rgba(252,211,77,0.4)]">
             {window === "all" ? "LIFETIME" : window}
           </span>
         </div>
@@ -104,7 +106,10 @@ export function ScoreLeaderboard({
         maxWidth="max-w-2xl"
       >
         <div className="mb-6">
-          <h2 className="font-display text-xl text-umbra-lilac">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Observed clan support
+          </p>
+          <h2 className="mt-1 font-display text-xl text-umbra-moonlight">
             Full Activity Score Leaderboard
           </h2>
         </div>
@@ -136,7 +141,7 @@ function TruePodiumCard({
   onMemberClick?: (playerTag: string) => void;
 }) {
   let rankColor = "text-umbra-purple";
-  let badgeStyle = "bg-white/[.03] border-t border-white/5";
+  let badgeStyle = "border-t border-umbra-line bg-umbra-ink/40";
 
   if (entry.rank === 1) {
     rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
@@ -147,7 +152,7 @@ function TruePodiumCard({
     badgeStyle =
       "bg-gradient-to-t from-slate-400/10 to-transparent border-t border-slate-400/30";
   } else if (entry.rank === 3) {
-    rankColor = "text-orange-400";
+    rankColor = "text-orange-300";
     badgeStyle =
       "bg-gradient-to-t from-orange-500/10 to-transparent border-t border-orange-500/30";
   }
@@ -155,7 +160,7 @@ function TruePodiumCard({
   return (
     <button
       onClick={() => onMemberClick?.(entry.playerTag)}
-      className={`flex w-full flex-col items-center justify-between rounded-t-xl px-2 py-3 transition-colors hover:bg-white/[.04] focus-ring ${badgeStyle} ${heightClass}`}
+      className={`focus-ring flex w-full flex-col items-center justify-between rounded-t-lg px-2 py-3 transition-colors hover:bg-umbra-purple/[.06] ${badgeStyle} ${heightClass}`}
     >
       <div className="flex flex-col items-center gap-1 w-full">
         <span className={`font-mono text-base font-black ${rankColor}`}>
@@ -167,7 +172,7 @@ function TruePodiumCard({
             alt=""
             width={20}
             height={20}
-            className="h-[20px] w-[20px] shrink-0 drop-shadow-lg"
+            className="h-[20px] w-[20px] shrink-0 drop-shadow-[0_0_8px_rgba(182,120,255,0.3)]"
             unoptimized
           />
         )}
@@ -175,13 +180,13 @@ function TruePodiumCard({
           <span className="block truncate text-center text-xs font-bold text-umbra-lilac w-full">
             {entry.name}
           </span>
-          <span className="block truncate text-center text-micro text-umbra-muted">
+          <span className="block truncate text-center text-micro text-umbra-faint">
             TH{entry.townHallLevel}
           </span>
         </div>
       </div>
-      
-      <div className="text-center w-full mt-1 pt-1.5 border-t border-white/5">
+
+      <div className="text-center w-full mt-1 pt-1.5 border-t border-umbra-line-soft">
         <span className="block font-mono text-sm font-semibold text-emerald-400">
           {entry.totalScore.toFixed(1)}
         </span>
@@ -193,7 +198,7 @@ function TruePodiumCard({
                 c.available ? c.points.toFixed(1) : "unavailable"
               }`}
               className={`h-1 w-3 rounded-full ${
-                c.available ? "bg-umbra-purple" : "bg-white/10"
+                c.available ? "bg-umbra-purple" : "bg-umbra-line"
               }`}
             />
           ))}
@@ -211,26 +216,26 @@ function LeaderboardRow({
   onMemberClick?: (playerTag: string) => void;
 }) {
   let rankColor = "text-umbra-purple";
-  let badgeStyle = "bg-white/[.03] border border-white/5";
+  let badgeStyle = "border-umbra-line bg-umbra-ink/40";
 
   if (entry.rank === 1) {
     rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
     badgeStyle =
-      "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
+      "border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent";
   } else if (entry.rank === 2) {
     rankColor = "text-slate-300";
     badgeStyle =
-      "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
+      "border-slate-400/25 bg-gradient-to-r from-slate-400/10 to-transparent";
   } else if (entry.rank === 3) {
-    rankColor = "text-orange-400";
+    rankColor = "text-orange-300";
     badgeStyle =
-      "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
+      "border-orange-500/25 bg-gradient-to-r from-orange-500/10 to-transparent";
   }
 
   return (
     <button
       onClick={() => onMemberClick?.(entry.playerTag)}
-      className={`flex w-full items-center justify-between rounded-lg px-4 py-3 transition-colors hover:bg-white/[.04] focus-ring ${badgeStyle}`}
+      className={`data-li focus-ring flex w-full items-center justify-between !rounded-r-md !px-4 !py-3 text-left ${badgeStyle}`}
     >
       <div className="flex min-w-0 items-center gap-3">
         <span className={`font-mono text-sm font-bold w-6 text-center ${rankColor}`}>
@@ -250,7 +255,7 @@ function LeaderboardRow({
           <span className="block truncate text-sm font-medium text-umbra-lilac">
             {entry.name}
           </span>
-          <span className="block truncate text-2xs text-umbra-muted">
+          <span className="block truncate text-2xs text-umbra-faint">
             TH{entry.townHallLevel}
             {entry.leagueTier?.name && ` · ${entry.leagueTier.name}`}
           </span>
@@ -268,7 +273,7 @@ function LeaderboardRow({
                 c.available ? c.points.toFixed(1) : "unavailable"
               }`}
               className={`h-1.5 w-4 rounded-full ${
-                c.available ? "bg-umbra-purple" : "bg-white/10"
+                c.available ? "bg-umbra-purple" : "bg-umbra-line"
               }`}
             />
           ))}
