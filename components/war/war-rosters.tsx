@@ -184,8 +184,8 @@ function RosterColumn({
   opposingThByPos: Map<number, number>;
 }) {
   return (
-    <div className="flex flex-col rounded-lg border border-umbra-line bg-white/[.03]">
-      <div className="flex items-center justify-between border-b border-umbra-line px-3 py-2">
+    <div className="glass flex flex-col rounded-lg">
+      <div className="flex items-center justify-between border-b border-umbra-line/40 px-3 py-2">
         <span
           className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"}`}
         >
@@ -202,11 +202,11 @@ function RosterColumn({
           <table className="w-full text-left">
             <thead className="sticky top-0 z-10 border-b border-umbra-line bg-umbra-ink/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur supports-[backdrop-filter]:bg-umbra-ink/80">
               <tr>
-                <th className="w-8 px-3 py-2 text-center font-medium">#</th>
-                <th className="px-3 py-2 font-medium">Player</th>
-                <th className="px-3 py-2 font-medium">TH</th>
-                <th className="px-3 py-2 font-medium text-center">Adv</th>
-                <th className="w-40 px-3 py-2 text-right font-medium">
+                <th className="w-8 px-2 py-2 text-center font-medium">#</th>
+                <th className="px-2 py-2 font-medium">Player</th>
+                <th className="w-12 px-2 py-2 font-medium">TH</th>
+                <th className="w-12 px-2 py-2 font-medium text-center">Adv</th>
+                <th className="w-32 px-2 py-2 text-right font-medium">
                   <div className="relative flex h-4 items-center justify-end overflow-hidden">
                     <span className={`absolute transition-all duration-300 ${isPrep || mode === "base" ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
                       Base
@@ -262,31 +262,31 @@ function RosterRow({
   const content = (
     <>
       {/* # — map position */}
-      <td className="px-3 py-2 text-center align-middle">
+      <td className="px-2 py-2 text-center align-middle">
         <span className="flex h-5 w-5 items-center justify-center rounded bg-umbra-purple/15 mx-auto font-mono text-2xs font-semibold text-umbra-purple">
           {m.mapPosition}
         </span>
       </td>
 
       {/* Name */}
-      <td className="px-3 py-2 align-middle">
+      <td className="px-2 py-2 align-middle">
         <div className="min-w-0 truncate text-xs text-umbra-lilac" title={m.name}>
           {m.name}
         </div>
       </td>
 
       {/* TH */}
-      <td className="px-3 py-2 align-middle font-mono text-2xs text-umbra-muted">
+      <td className="w-12 px-2 py-2 align-middle font-mono text-2xs text-umbra-muted">
         TH{m.townhallLevel}
       </td>
 
       {/* TH advantage / disadvantage */}
-      <td className="px-3 py-2 text-center align-middle">
+      <td className="w-12 px-2 py-2 text-center align-middle">
         <ThAdvantage diff={diff} ownTh={m.townhallLevel} oppTh={opposingTh ?? null} />
       </td>
 
       {/* Right column — attacks (offense) or base (defense) */}
-      <td className="w-40 px-3 py-2 text-right align-middle">
+      <td className="w-32 px-2 py-2 text-right align-middle">
         <div className="relative flex h-6 items-center justify-end">
           <span className={`absolute transition-all duration-300 ${isPrep || mode === "base" ? "opacity-100 translate-x-0" : "opacity-0 translate-x-4 pointer-events-none"}`}>
             <BaseState

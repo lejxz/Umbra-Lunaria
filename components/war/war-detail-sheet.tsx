@@ -369,7 +369,7 @@ function StatCard({
   }
 
   return (
-    <div className="glass relative overflow-hidden rounded-lg p-3 sm:p-4 border border-umbra-line/50 transition-all duration-300 hover:border-umbra-purple/40 hover:bg-white/[.04]">
+    <div className="glass relative overflow-hidden rounded-lg p-3 sm:p-4">
       {/* Subtle win glow */}
       {ownWins && <div className="pointer-events-none absolute left-0 top-0 h-full w-[2px] bg-emerald-400/50 shadow-[0_0_10px_rgba(52,211,153,0.3)]" />}
       {oppWins && <div className="pointer-events-none absolute right-0 top-0 h-full w-[2px] bg-red-400/50 shadow-[0_0_10px_rgba(248,113,113,0.3)]" />}
