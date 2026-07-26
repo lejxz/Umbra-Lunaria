@@ -265,7 +265,18 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 
 ### Phase 9: Navigation Polish
 
-**Goal:** Fix the nav-specific issues without changing the overall design.
+**Goal:** Fix the nav-specific issues — especially the jarring resize when
+collapsing/expanding — without changing the overall design.
+
+**Problem:** When the sidebar collapses from 240px → 80px, the page content
+visually jumps because the sidebar width changes by 160px in one transition.
+The current `transition-[width] duration-300` animates the width, but the
+content area doesn't smoothly reflow — it snaps after the transition ends.
+The fix is to use `flex-shrink-0` (already present) + ensure the `<main>`
+element doesn't jump by using a CSS `transition` on its margin/width too.
+Additionally, the collapsed width (80px / `lg:w-20`) is too wide — icons
+only need ~56px. And the expanded width (240px / `lg:w-60`) is fine but
+the transition feels abrupt.
 
 **Files:** `components/navigation.tsx`
 
@@ -275,8 +286,13 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 - 9.3. Standardize active state: `bg-umbra-purple/10 text-umbra-lilac` (already correct)
 - 9.4. Standardize inactive hover: `hover:bg-white/[.04]` (replace `hover:bg-white/5`)
 - 9.5. Add iOS safe-area padding (`pb-[env(safe-area-inset-bottom)]`) on mobile bottom bar
+- 9.6. **Fix the resize jank:** Change collapsed width from `lg:w-20` (80px) to `lg:w-16` (64px) — tighter, more standard icon-only width. The smaller delta (240→64 = 176px → 240→64 = 176px... same delta but tighter collapsed state looks more intentional).
+- 9.7. **Smooth the transition:** Change `transition-[width] duration-300 ease-in-out` to `transition-[width] duration-200 ease-out` — faster, less noticeable. The 300ms duration makes the resize feel slow and drawn-out; 200ms feels snappy.
+- 9.8. **Prevent content jump:** Add `transition-[margin] duration-200 ease-out` is NOT needed — the flex layout handles this automatically because the sidebar is `lg:sticky lg:shrink-0`. The content `<main>` has `flex-1` so it reflows smoothly. The perceived jank is from the 300ms duration + the large visual delta. Fixing 9.6 + 9.7 resolves it.
+- 9.9. **Smooth the logo/wordmark fade:** Change `transition-all duration-300` to `transition-all duration-200` on the logo area + nav labels — match the width transition speed.
+- 9.10. **Smooth the status footer fade:** Change `transition-opacity duration-300` to `transition-opacity duration-200`.
 
-**Verify:** typecheck, lint, browser desktop + mobile.
+**Verify:** typecheck, lint, browser desktop — toggle collapse/expand 5×, verify no jarring jump.
 
 ---
 
@@ -299,20 +315,74 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 
 ### Phase 11: Animations
 
-**Goal:** Add subtle, on-brand animations. Install framer-motion.
+**Goal:** Add subtle, on-brand animations across the entire app — pages,
+cards, charts, tabs, modals, and popups. Install framer-motion.
 
 **Files:** `app/layout.tsx`, `components/**/*.tsx`
 
 **Tasks:**
-- 11.1. Install `framer-motion`
-- 11.2. Add page transition: fade-in (`opacity 0→1`, 150ms) in `app/layout.tsx`
-- 11.3. Add card mount: fade + slight translateY (`8px→0`, 200ms) on `.glass` elements
-- 11.4. Add card hover: border brighten (`hover:border-umbra-line/50`) + slight lift (`hover:-translate-y-px`)
-- 11.5. Add row hover: unified `hover:bg-white/[.04]` (already done in Phase 5)
-- 11.6. Add `prefers-reduced-motion` guard (disable transforms, keep opacity)
-- 11.7. Add modal open/close: scale + fade (150ms)
 
-**Verify:** typecheck, lint, browser visual check, reduced-motion check.
+**Page transitions:**
+- 11.1. Install `framer-motion`
+- 11.2. Add page transition wrapper in `app/layout.tsx` — fade-in
+  (`opacity: 0→1`, 200ms, `ease-out`) on route change. Use
+  `usePathname()` as the `key` so the transition fires on every navigation.
+- 11.3. Add a subtle slide-up (`translateY: 8px → 0`, 200ms) combined
+  with the fade — so pages "rise into view" like moonlight.
+
+**Card mount:**
+- 11.4. Add card mount animation on `.glass` elements — fade + slight
+  translateY (`8px→0`, 200ms, staggered by 50ms per card so cards cascade
+  in from top to bottom).
+
+**Card hover:**
+- 11.5. Add card hover: border brighten (`hover:border-umbra-line/50`) +
+  slight lift (`hover:-translate-y-px`, 150ms, `ease`).
+
+**Chart time-frame switching:**
+- 11.6. **Animate chart data transitions** when switching between 24h/7d/30d
+  tabs. Currently the chart data swaps instantly with no animation — it
+  feels jarring. Use Framer Motion's `<motion.div key={window}>` wrapper
+  so the chart container fades + slides when the tab changes:
+  - Old chart: `opacity: 1→0, translateY: 0→-4px` (100ms, `ease-in`)
+  - New chart: `opacity: 0→1, translateY: 4px→0` (200ms, `ease-out`)
+  - Apply to: `donation-chart.tsx`, `activity-analytics.tsx` chart area,
+    `war-performance-chart.tsx`, `war-attack-distribution.tsx`,
+    `roster-size-chart.tsx`
+- 11.7. **Animate the Recharts data change** itself — Recharts supports
+  `isAnimationActive={true}` + `animationDuration={300}` + `animationEasing="ease-out"`.
+  Enable these on all `<LineChart>`, `<BarChart>`, `<AreaChart>`,
+  `<PieChart>` components so the bars/lines animate to their new positions
+  when the time-frame switches. This is the most impactful animation —
+  the chart visually morphs from one time-frame's data to another.
+
+**Tab switch:**
+- 11.8. Add `layoutId` underline slide on the `<Tabs>` component — the
+  active tab indicator slides horizontally between tabs instead of
+  teleporting. Use Framer Motion `motion.layout`.
+
+**Modal/sheet open + close:**
+- 11.9. Add modal open: `scale: 0.96→1` + `opacity: 0→1` (150ms,
+  `ease-out`).
+- 11.10. Add modal close: `scale: 1→0.96` + `opacity: 1→0` (100ms,
+  `ease-in`).
+- 11.11. Apply to: `MemberDetailSheet`, `WarDetailSheet`, all `<Modal>`
+  usages.
+
+**Popup/sheet content transitions:**
+- 11.12. When content inside a modal/sheet changes (e.g. loading → data,
+  or switching between sections), animate the content swap: old content
+  fades out (100ms), new content fades in (150ms). Use `AnimatePresence`
+  with `mode="wait"`.
+
+**Reduced motion:**
+- 11.13. Add `prefers-reduced-motion` guard — check `useReducedMotion()`.
+  If true: disable all transforms (translateY, scale), keep opacity
+  transitions (they're not motion). Duration → 0ms.
+
+**Verify:** typecheck, lint, browser visual check on all 5 pages — verify
+page transitions, chart tab switching, card hover lift, modal open/close,
+reduced-motion.
 
 ---
 
@@ -352,18 +422,18 @@ This plan does the opposite: **converge what already exists** into a consistent 
 
 | Phase | Goal | Files | Est. time |
 |---|---|---|---|
-| 1 | Font loading | 1 | 15 min |
-| 2 | CSS utilities | 2 | 10 min |
-| 3 | Background standardization | ~15 | 25 min |
-| 4 | Radius standardization | ~15 | 10 min |
-| 5 | Hover standardization | ~15 | 15 min |
-| 6 | Text size standardization | ~15 | 20 min |
+| 1 | Font loading (next/font) | 1 | 15 min |
+| 2 | CSS utilities (.tile, .hover-row, .hover-card) | 2 | 10 min |
+| 3 | Background standardization (10 → 2) | ~15 | 25 min |
+| 4 | Radius standardization (5 → 3) | ~15 | 10 min |
+| 5 | Hover standardization (7 → 2) | ~15 | 15 min |
+| 6 | Text size standardization + tabular-nums | ~15 | 20 min |
 | 7 | Border + shadow standardization | ~15 | 15 min |
 | 8 | Padding standardization | ~15 | 15 min |
-| 9 | Navigation polish | 1 | 15 min |
-| 10 | Readability pass | ~10 | 20 min |
-| 11 | Animations | ~5 | 30 min |
+| 9 | Navigation polish (resize fix + logo + safe-area) | 1 | 20 min |
+| 10 | Readability pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
+| 11 | Animations (pages, charts, tabs, modals, popups) | ~10 | 45 min |
 | 12 | Final verification | 0 | 15 min |
-| **Total** | | | **~3.5 hours** |
+| **Total** | | | **~3.75 hours** |
 
 Each phase can be committed + pushed independently. If any phase causes issues, it can be reverted without affecting the others.
