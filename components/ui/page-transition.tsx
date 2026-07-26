@@ -1,0 +1,38 @@
+"use client";
+
+/**
+ * PageTransition — wraps page content with a fade + slide-up animation
+ * on route change. Uses usePathname() as the key so the transition fires
+ * on every navigation.
+ *
+ * Reduced motion: disables the slide-up transform, keeps the opacity fade
+ * (opacity is not motion — it's a visual change).
+ */
+
+import { motion, useReducedMotion } from "framer-motion";
+import { usePathname } from "next/navigation";
+
+export function PageTransition({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      key={pathname}
+      initial={{
+        opacity: 0,
+        y: prefersReducedMotion ? 0 : 8,
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.2,
+        ease: "easeOut",
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}

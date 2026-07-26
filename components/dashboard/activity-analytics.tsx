@@ -210,7 +210,7 @@ function ActivityChart({ buckets }: { buckets: ActivityBucket[] }) {
           itemStyle={{ color: "#EEE5FF" }}
           formatter={(value) => [`${value} active`, "Members"]}
         />
-        <Bar dataKey="active" radius={[3, 3, 0, 0]} name="Active">
+        <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="active" radius={[3, 3, 0, 0]} name="Active">
           {data.map((_, i) => (
             <Cell key={i} fill="#7552DF" />
           ))}

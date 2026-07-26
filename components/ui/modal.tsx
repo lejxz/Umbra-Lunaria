@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { IconX } from "@/components/ui/icons";
 
 /**
@@ -191,46 +192,49 @@ export function Sheet({
 }: CommonProps) {
   const mounted = useMounted();
   const panelRef = useRef<HTMLDivElement>(null);
-  const [animateIn, setAnimateIn] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useScrollLock(open && mounted);
   const { onKeyDown } = useFocusTrap(open && mounted, panelRef, onClose);
 
-  useEffect(() => {
-    if (!open || !mounted) return;
-    const raf = requestAnimationFrame(() => setAnimateIn(true));
-    return () => {
-      cancelAnimationFrame(raf);
-      setAnimateIn(false);
-    };
-  }, [open, mounted]);
-
-  if (!open || !mounted) return null;
-
-  const panelTransform = animateIn
-    ? "translate-y-0 sm:translate-x-0"
-    : "translate-y-full sm:translate-x-full";
+  if (!mounted) return null;
 
   return createPortal(
-    <div
-      className={`fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm transition-opacity duration-200 ${
-        animateIn ? "opacity-100" : "opacity-0"
-      }`}
-      role="presentation"
-      onClick={onClose}
-      onKeyDown={onKeyDown}
-    >
-      <div
-        ref={panelRef}
-        className={`glass absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col overflow-hidden rounded-t-2xl transition-transform duration-300 ease-out sm:inset-y-0 sm:left-auto sm:w-full ${maxWidth} sm:rounded-none sm:rounded-l-2xl ${panelTransform}`}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={ariaLabelledBy}
-        aria-describedby={ariaDescribedBy}
-        aria-label={ariaLabel}
-        tabIndex={-1}
-        onClick={(event) => event.stopPropagation()}
-      >
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm"
+          role="presentation"
+          onClick={onClose}
+          onKeyDown={onKeyDown}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
+        >
+          <motion.div
+            ref={panelRef}
+            className={`glass absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col overflow-hidden rounded-t-2xl sm:inset-y-0 sm:left-auto sm:w-full ${maxWidth} sm:rounded-none sm:rounded-l-2xl`}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={ariaLabelledBy}
+            aria-describedby={ariaDescribedBy}
+            aria-label={ariaLabel}
+            tabIndex={-1}
+            onClick={(event) => event.stopPropagation()}
+            initial={{
+              opacity: 0,
+              scale: prefersReducedMotion ? 1 : 0.96,
+              y: prefersReducedMotion ? 0 : 20,
+            }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{
+              opacity: 0,
+              scale: prefersReducedMotion ? 1 : 0.96,
+              y: prefersReducedMotion ? 0 : 20,
+            }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+          >
         <button
           type="button"
           onClick={onClose}
@@ -240,8 +244,10 @@ export function Sheet({
           <IconX className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="overflow-y-auto p-6">{children}</div>
-      </div>
-    </div>,
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.body,
   );
 }

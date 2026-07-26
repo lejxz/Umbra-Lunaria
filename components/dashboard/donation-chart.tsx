@@ -72,8 +72,8 @@ export function DonationChart({ buckets }: { buckets: DonationBucket[] }) {
             name === "given" ? "Given" : "Received",
           ]}
         />
-        <Bar dataKey="given" fill="#B678FF" radius={[3, 3, 0, 0]} name="given" />
-        <Bar dataKey="received" fill="#7552DF" radius={[3, 3, 0, 0]} name="received" />
+        <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="given" fill="#B678FF" radius={[3, 3, 0, 0]} name="given" />
+        <Bar isAnimationActive animationDuration={300} animationEasing="ease-out" dataKey="received" fill="#7552DF" radius={[3, 3, 0, 0]} name="received" />
       </BarChart>
     </ResponsiveContainer>
   );

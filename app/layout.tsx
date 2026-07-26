@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Cinzel, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
+import { PageTransition } from "@/components/ui/page-transition";
 
 /**
  * Font loading via next/font — ensures the custom fonts (Cinzel, Inter,
@@ -58,7 +59,9 @@ export default function RootLayout({
       <body className="min-h-screen antialiased">
         <div className="min-h-screen lg:flex">
           <Navigation />
-          <main className="min-w-0 flex-1 pb-20 lg:pb-0">{children}</main>
+          <main className="min-w-0 flex-1 pb-20 lg:pb-0">
+            <PageTransition>{children}</PageTransition>
+          </main>
         </div>
       </body>
     </html>

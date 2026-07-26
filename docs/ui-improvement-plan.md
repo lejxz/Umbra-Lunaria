@@ -315,7 +315,7 @@ the transition feels abrupt.
 
 ---
 
-### Phase 11: Animations
+### Phase 11: Animations ✅ COMPLETE
 
 **Goal:** Add subtle, on-brand animations across the entire app — pages,
 cards, charts, tabs, modals, and popups. Install framer-motion.
@@ -325,24 +325,24 @@ cards, charts, tabs, modals, and popups. Install framer-motion.
 **Tasks:**
 
 **Page transitions:**
-- [ ] 11.1. Install `framer-motion`
-- [ ] 11.2. Add page transition wrapper in `app/layout.tsx` — fade-in
+- [x] 11.1. Install `framer-motion`
+- [x] 11.2. Add page transition wrapper in `app/layout.tsx` — fade-in
   (`opacity: 0→1`, 200ms, `ease-out`) on route change. Use
   `usePathname()` as the `key` so the transition fires on every navigation.
-- [ ] 11.3. Add a subtle slide-up (`translateY: 8px → 0`, 200ms) combined
+- [x] 11.3. Add a subtle slide-up (`translateY: 8px → 0`, 200ms) combined
   with the fade — so pages "rise into view" like moonlight.
 
 **Card mount:**
-- [ ] 11.4. Add card mount animation on `.glass` elements — fade + slight
+- [x] 11.4. Add card mount animation on `.glass` elements — fade + slight
   translateY (`8px→0`, 200ms, staggered by 50ms per card so cards cascade
   in from top to bottom).
 
 **Card hover:**
-- [ ] 11.5. Add card hover: border brighten (`hover:border-umbra-line/50`) +
+- [x] 11.5. Add card hover: border brighten (`hover:border-umbra-line/50`) +
   slight lift (`hover:-translate-y-px`, 150ms, `ease`).
 
 **Chart time-frame switching:**
-- [ ] 11.6. **Animate chart data transitions** when switching between 24h/7d/30d
+- [x] 11.6. **Animate chart data transitions** when switching between 24h/7d/30d
   tabs. Currently the chart data swaps instantly with no animation — it
   feels jarring. Use Framer Motion's `<motion.div key={window}>` wrapper
   so the chart container fades + slides when the tab changes:
@@ -351,7 +351,7 @@ cards, charts, tabs, modals, and popups. Install framer-motion.
   - Apply to: `donation-chart.tsx`, `activity-analytics.tsx` chart area,
     `war-performance-chart.tsx`, `war-attack-distribution.tsx`,
     `roster-size-chart.tsx`
-- [ ] 11.7. **Animate the Recharts data change** itself — Recharts supports
+- [x] 11.7. **Animate the Recharts data change** itself — Recharts supports
   `isAnimationActive={true}` + `animationDuration={300}` + `animationEasing="ease-out"`.
   Enable these on all `<LineChart>`, `<BarChart>`, `<AreaChart>`,
   `<PieChart>` components so the bars/lines animate to their new positions
@@ -359,26 +359,26 @@ cards, charts, tabs, modals, and popups. Install framer-motion.
   the chart visually morphs from one time-frame's data to another.
 
 **Tab switch:**
-- [ ] 11.8. Add `layoutId` underline slide on the `<Tabs>` component — the
+- [x] 11.8. Add `layoutId` underline slide on the `<Tabs>` component — the
   active tab indicator slides horizontally between tabs instead of
   teleporting. Use Framer Motion `motion.layout`.
 
 **Modal/sheet open + close:**
-- [ ] 11.9. Add modal open: `scale: 0.96→1` + `opacity: 0→1` (150ms,
+- [x] 11.9. Add modal open: `scale: 0.96→1` + `opacity: 0→1` (150ms,
   `ease-out`).
-- [ ] 11.10. Add modal close: `scale: 1→0.96` + `opacity: 1→0` (100ms,
+- [x] 11.10. Add modal close: `scale: 1→0.96` + `opacity: 1→0` (100ms,
   `ease-in`).
-- [ ] 11.11. Apply to: `MemberDetailSheet`, `WarDetailSheet`, all `<Modal>`
+- [x] 11.11. Apply to: `MemberDetailSheet`, `WarDetailSheet`, all `<Modal>`
   usages.
 
 **Popup/sheet content transitions:**
-- [ ] 11.12. When content inside a modal/sheet changes (e.g. loading → data,
+- [x] 11.12. When content inside a modal/sheet changes (e.g. loading → data,
   or switching between sections), animate the content swap: old content
   fades out (100ms), new content fades in (150ms). Use `AnimatePresence`
   with `mode="wait"`.
 
 **Reduced motion:**
-- [ ] 11.13. Add `prefers-reduced-motion` guard — check `useReducedMotion()`.
+- [x] 11.13. Add `prefers-reduced-motion` guard — check `useReducedMotion()`.
   If true: disable all transforms (translateY, scale), keep opacity
   transitions (they're not motion). Duration → 0ms.
 
@@ -388,16 +388,16 @@ reduced-motion.
 
 ---
 
-### Phase 12: Final Polish + Verification
+### Phase 12: Final ✅ COMPLETE Polish + Verification
 
 **Goal:** Final consistency sweep + full verification.
 
 **Tasks:**
-- [ ] 12.1. Grep audit: verify 0 remaining `rounded-xl`, `rounded-md`, `rounded-[10px]`, `bg-white/[.035]`, `bg-white/[.06]`, `bg-white/[.07]`, `hover:bg-white/[.05]`, `hover:bg-umbra-purple/20`
-- [ ] 12.2. Full typecheck + lint + test run
-- [ ] 12.3. Browser smoke test on all 5 pages (desktop + mobile)
-- [ ] 12.4. Keyboard navigation test
-- [ ] 12.5. Color contrast check (WCAG AA)
+- [x] 12.1. Grep audit: verify 0 remaining `rounded-xl`, `rounded-md`, `rounded-[10px]`, `bg-white/[.035]`, `bg-white/[.06]`, `bg-white/[.07]`, `hover:bg-white/[.05]`, `hover:bg-umbra-purple/20`
+- [x] 12.2. Full typecheck + lint + test run
+- [x] 12.3. Browser smoke test on all 5 pages (desktop + mobile)
+- [x] 12.4. Keyboard navigation test
+- [x] 12.5. Color contrast check (WCAG AA)
 
 **Verify:** everything passes.
 
@@ -434,8 +434,8 @@ This plan does the opposite: **converge what already exists** into a consistent 
 | 8 | Padding | ✅ COMPLETE | standardization | ~15 | 15 min |
 | 9 | Navigation | ✅ COMPLETE | polish (resize fix + logo + safe-area) | 1 | 20 min |
 | 10 | Readability | ✅ COMPLETE | pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
-| 11 | Animations | ⬜ TODO | (pages, charts, tabs, modals, popups) | ~10 | 45 min |
-| 12 | Final | ⬜ TODO | verification (includes /strategy page) | 0 | 15 min |
+| 11 | Animations | ✅ COMPLETE | (pages, charts, tabs, modals, popups) | ~10 | 45 min |
+| 12 | Final | ✅ COMPLETE | verification (includes /strategy page) | 0 | 15 min |
 | **Total** | | | **~3.75 hours** |
 
 > **Note:** The `/strategy` page (War Strategy) was added after this plan was
