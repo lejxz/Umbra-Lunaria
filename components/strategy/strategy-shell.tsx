@@ -33,7 +33,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
       <section className="glass rounded-2xl p-5 mb-8">
         <div className="mb-4 flex items-center gap-3">
           <h2 className="font-display text-xl text-umbra-lilac">Suggested Participants</h2>
-          <span className="font-mono text-xs text-umbra-muted">
+          <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-widest text-emerald-400">
             {data.suggested.length} ranked
           </span>
         </div>
@@ -83,7 +83,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
       <section className="glass rounded-2xl p-5 mb-8">
         <div className="mb-4 flex items-center gap-3">
           <h2 className="font-display text-xl text-umbra-lilac">Review Needed</h2>
-          <span className="font-mono text-xs text-umbra-muted">
+          <span className="rounded-full border border-rose-400/30 bg-rose-400/10 px-2 py-0.5 font-mono text-[0.65rem] uppercase tracking-widest text-rose-400">
             {data.review.length} flagged
           </span>
         </div>
@@ -94,16 +94,18 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
               <table className="w-full text-xs">
                 <thead className="data-thead">
                   <tr>
+                    <th className="w-12 data-th text-center font-mono uppercase tracking-wider text-umbra-muted">#</th>
                     <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">Member</th>
                     <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">Flags</th>
                     <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-muted">Status</th>
                   </tr>
                 </thead>
                 <tbody className="data-tbody">
-                  {data.review.map((m) => (
+                  {data.review.map((m, i) => (
                     <ReviewRow
                       key={m.playerTag}
                       member={m}
+                      rank={i + 1}
                       onClick={() => setSelectedMember(m.playerTag)}
                     />
                   ))}
@@ -222,16 +224,23 @@ function SuggestedRow({
 
 function ReviewRow({
   member: m,
+  rank,
   onClick,
 }: {
   member: ReviewMember;
+  rank: number;
   onClick: () => void;
 }) {
+  const isActive = m.daysInactive === null || m.daysInactive < 4;
+
   return (
     <tr
       onClick={onClick}
       className="cursor-pointer data-tr"
     >
+      <td className="data-td text-center font-mono text-umbra-muted">
+        {rank}
+      </td>
       <td className="data-td">
         <div className="flex items-center gap-2">
           {m.townHallLevel && (
@@ -261,11 +270,13 @@ function ReviewRow({
         </div>
       </td>
       <td className="data-td text-right">
-        {m.daysInactive !== null && m.daysInactive >= 4 ? (
-          <span className="font-mono text-xs text-rose-400">{m.daysInactive}d inactive</span>
-        ) : (
-          <span className="font-mono text-xs text-umbra-muted">—</span>
-        )}
+        <span
+          className={`font-mono text-[0.6rem] uppercase tracking-wider ${
+            isActive ? "text-emerald-400" : "text-umbra-muted/50"
+          }`}
+        >
+          {isActive ? "Active" : "Inactive"}
+        </span>
       </td>
     </tr>
   );
