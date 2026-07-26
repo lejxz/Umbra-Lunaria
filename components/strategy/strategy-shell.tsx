@@ -29,9 +29,9 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
       description="Automatic ranking of suggested war participants and members needing review."
     >
       {/* ── Section 1: Suggested Participants ────────────────────────────── */}
-      <section className="mb-8">
+      {/* ── Section 1: Suggested Participants ────────────────────────────── */}
+      <section className="glass rounded-2xl p-5 mb-8">
         <div className="mb-4 flex items-center gap-3">
-          <span className="h-5 w-1 rounded-full bg-umbra-purple" aria-hidden />
           <h2 className="font-display text-xl text-umbra-lilac">Suggested Participants</h2>
           <span className="font-mono text-xs text-umbra-muted">
             {data.suggested.length} ranked
@@ -69,7 +69,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
             </div>
           </div>
         ) : (
-          <div className="glass rounded-2xl p-5">
+          <div className="rounded-xl border border-umbra-line/40 bg-umbra-surface/20 p-8 text-center">
             <EmptyState
               icon={<IconSwords className="h-10 w-10 text-umbra-purple/40" />}
               title="No participants ranked yet"
@@ -80,9 +80,8 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
       </section>
 
       {/* ── Section 2: Review Needed ────────────────────────────────────── */}
-      <section>
+      <section className="glass rounded-2xl p-5 mb-8">
         <div className="mb-4 flex items-center gap-3">
-          <span className="h-5 w-1 rounded-full bg-rose-400" aria-hidden />
           <h2 className="font-display text-xl text-umbra-lilac">Review Needed</h2>
           <span className="font-mono text-xs text-umbra-muted">
             {data.review.length} flagged
@@ -90,21 +89,30 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
         </div>
 
         {data.review.length > 0 ? (
-          <div className="glass rounded-2xl p-3">
+          <div className="data-container">
             <div className="max-h-[400px] overflow-y-auto">
-              <ul className="space-y-2">
-                {data.review.map((m) => (
-                  <ReviewRow
-                    key={m.playerTag}
-                    member={m}
-                    onClick={() => setSelectedMember(m.playerTag)}
-                  />
-                ))}
-              </ul>
+              <table className="w-full text-xs">
+                <thead className="data-thead">
+                  <tr>
+                    <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">Member</th>
+                    <th className="data-th text-left font-mono uppercase tracking-wider text-umbra-muted">Flags</th>
+                    <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-muted">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="data-tbody">
+                  {data.review.map((m) => (
+                    <ReviewRow
+                      key={m.playerTag}
+                      member={m}
+                      onClick={() => setSelectedMember(m.playerTag)}
+                    />
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         ) : (
-          <div className="glass rounded-2xl p-5">
+          <div className="rounded-xl border border-umbra-line/40 bg-umbra-surface/20 p-8 text-center">
             <EmptyState
               icon={<IconUsers className="h-10 w-10 text-umbra-purple/40" />}
               title="Everyone looks good"
@@ -220,18 +228,22 @@ function ReviewRow({
   onClick: () => void;
 }) {
   return (
-    <li
+    <tr
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-3 rounded-lg border border-umbra-line/50 bg-white/[.015] px-3 py-2.5 transition hover:bg-white/[.04]"
+      className="cursor-pointer data-tr"
     >
-      {m.townHallLevel && (
-        <span className="font-mono text-[0.6rem] font-bold text-umbra-muted">
-          TH{m.townHallLevel}
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <span className="block truncate text-sm text-umbra-lilac" title={m.name}>{m.name}</span>
-        <div className="mt-1 flex flex-wrap gap-1">
+      <td className="data-td">
+        <div className="flex items-center gap-2">
+          {m.townHallLevel && (
+            <span className="font-mono text-[0.6rem] font-bold text-umbra-muted">
+              TH{m.townHallLevel}
+            </span>
+          )}
+          <span className="truncate font-medium text-umbra-lilac" title={m.name}>{m.name}</span>
+        </div>
+      </td>
+      <td className="data-td">
+        <div className="flex flex-wrap gap-1">
           {m.reasons.map((r, i) => (
             <span
               key={i}
@@ -247,10 +259,14 @@ function ReviewRow({
             </span>
           ))}
         </div>
-      </div>
-      {m.daysInactive !== null && m.daysInactive >= 4 && (
-        <span className="font-mono text-xs text-rose-400">{m.daysInactive}d</span>
-      )}
-    </li>
+      </td>
+      <td className="data-td text-right">
+        {m.daysInactive !== null && m.daysInactive >= 4 ? (
+          <span className="font-mono text-xs text-rose-400">{m.daysInactive}d inactive</span>
+        ) : (
+          <span className="font-mono text-xs text-umbra-muted">—</span>
+        )}
+      </td>
+    </tr>
   );
 }
