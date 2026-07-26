@@ -413,14 +413,14 @@ async function computeFastestThreeStar(): Promise<LiveRecordCategory | null> {
     .select({
       attackerTag: warAttacks.attackerTag,
       name: members.name,
-      duration: warAttacks.duration,
-      destruction: warAttacks.destructionPercentage,
-      warId: warAttacks.warId,
+      duration: sql<number>`min(${warAttacks.duration})`,
+      destruction: sql<number>`max(${warAttacks.destructionPercentage})`,
     })
     .from(warAttacks)
     .innerJoin(members, eq(members.playerTag, warAttacks.attackerTag))
     .where(and(eq(warAttacks.stars, 3), sql`${warAttacks.duration} is not null`))
-    .orderBy(sql`${warAttacks.duration} asc`)
+    .groupBy(warAttacks.attackerTag, members.name)
+    .orderBy(sql`min(${warAttacks.duration}) asc`)
     .limit(10);
 
   if (rows.length === 0) return null;
