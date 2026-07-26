@@ -613,3 +613,16 @@ function HallOfFameSection({ detail }: { detail: MemberDetailView }) {
     </div>
   );
 }
+
+function formatRole(role: string): string {
+  switch (role) {
+    case "leader":
+      return "Leader";
+    case "coLeader":
+      return "Co-Leader";
+    case "admin":
+      return "Elder";
+    default:
+      return "Member";
+  }
+}
