@@ -137,11 +137,11 @@ export function DashboardShell({
             <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
               Roster size · 30 days
             </p>
-            <span className="text-2xs text-umbra-muted">
+            <Badge tone="brand">
               {data.rosterSizeTrend.points.length > 0
                 ? `${data.rosterSizeTrend.points[data.rosterSizeTrend.points.length - 1]?.count ?? 0} current`
                 : "—"}
-            </span>
+            </Badge>
           </div>
           <h3 id="roster-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Roster growth
