@@ -3,6 +3,7 @@ import { Cinzel, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { PageTransition } from "@/components/ui/page-transition";
+import { cookies } from "next/headers";
 
 /**
  * Font loading via next/font — ensures the custom fonts (Cinzel, Inter,
@@ -46,11 +47,13 @@ export const metadata: Metadata = {
   description: "Clan dashboard",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const isCollapsed = cookieStore.get("umbra_sidebar_collapsed")?.value === "true";
   return (
     <html
       lang="en"
@@ -58,7 +61,7 @@ export default function RootLayout({
     >
       <body className="min-h-screen antialiased">
         <div className="min-h-screen lg:flex">
-          <Navigation />
+          <Navigation initialCollapsed={isCollapsed} />
           <main className="min-w-0 flex-1 pb-20 lg:pb-0">
             <PageTransition>{children}</PageTransition>
           </main>

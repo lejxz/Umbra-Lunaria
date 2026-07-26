@@ -13,7 +13,7 @@
  * - Inactive hover: hover:bg-white/[.04] (standardized in Phase 5)
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -36,47 +36,39 @@ const links = [
   [<NavIconHallOfFame key="hof" />, "Hall of Fame", "/hall-of-fame"],
 ] as const;
 
-export function Navigation() {
+export function Navigation({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const stored = localStorage.getItem("umbra_sidebar_collapsed");
-    if (stored === "true") setIsCollapsed(true);
-  }, []);
+  const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
 
   const toggleCollapse = () => {
     const next = !isCollapsed;
     setIsCollapsed(next);
+    document.cookie = `umbra_sidebar_collapsed=${next}; path=/; max-age=31536000`;
     localStorage.setItem("umbra_sidebar_collapsed", String(next));
   };
 
   return (
     <aside
-      className={`fixed inset-x-0 bottom-0 z-20 border-t border-umbra-line bg-umbra-ink/95 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-r lg:border-t-0 ${
-        mounted ? "transition-[width] duration-200 ease-out" : ""
-      } ${isCollapsed ? "lg:w-16" : "lg:w-60"}`}
+      className={`fixed inset-x-0 bottom-0 z-20 border-t border-umbra-line bg-umbra-ink/95 backdrop-blur-xl lg:sticky lg:top-0 lg:h-screen lg:shrink-0 lg:border-r lg:border-t-0 transition-[width] duration-200 ease-out ${
+        isCollapsed ? "lg:w-16" : "lg:w-60"
+      }`}
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       {/* Collapse Toggle Button */}
-      {mounted && (
-        <button
-          onClick={toggleCollapse}
-          className="hidden lg:flex absolute -right-3 top-8 items-center justify-center h-6 w-6 rounded-full border border-umbra-line bg-umbra-ink text-umbra-muted hover:text-umbra-lilac hover:border-umbra-purple/50 transition-colors shadow-[0_0_10px_rgba(0,0,0,0.5)] z-30"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isCollapsed ? (
-            <IconChevronRight className="h-3.5 w-3.5" />
-          ) : (
-            <IconChevronLeft className="h-3.5 w-3.5 pr-[1px]" />
-          )}
-        </button>
-      )}
+      <button
+        onClick={toggleCollapse}
+        className="hidden lg:flex absolute -right-3 top-8 items-center justify-center h-6 w-6 rounded-full border border-umbra-line bg-umbra-ink text-umbra-muted hover:text-umbra-lilac hover:border-umbra-purple/50 transition-colors shadow-[0_0_10px_rgba(0,0,0,0.5)] z-30"
+        aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+      >
+        {isCollapsed ? (
+          <IconChevronRight className="h-3.5 w-3.5" />
+        ) : (
+          <IconChevronLeft className="h-3.5 w-3.5 pr-[1px]" />
+        )}
+      </button>
 
       {/* Logo Area */}
-      <div className={`hidden border-b border-umbra-line lg:block relative overflow-hidden ${mounted ? "transition-all duration-200" : ""} ${isCollapsed ? "h-16" : "h-32"}`}>
+      <div className={`hidden border-b border-umbra-line lg:block relative overflow-hidden transition-all duration-200 ${isCollapsed ? "h-16" : "h-32"}`}>
         {/* Background Image Container */}
         <div 
           className="absolute inset-0 bg-[url('/assets/Logo.png')] bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none" 
@@ -85,7 +77,7 @@ export function Navigation() {
 
         <Link href="/" className="relative z-10 w-full h-full flex flex-col items-center justify-center p-4 focus-ring">
           <span
-            className={`font-display font-semibold tracking-[0.1em] text-umbra-lilac whitespace-nowrap text-center text-lg drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] ${mounted ? "transition-all duration-200" : ""} ${
+            className={`font-display font-semibold tracking-[0.1em] text-umbra-lilac whitespace-nowrap text-center text-lg drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] transition-all duration-200 ${
               isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100 block"
             }`}
           >
@@ -109,7 +101,7 @@ export function Navigation() {
               href={href}
               aria-current={active ? "page" : undefined}
               title={isCollapsed ? label : undefined}
-              className={`focus-ring flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-label lg:flex-row lg:gap-4 lg:h-12 lg:py-0 ${mounted ? "transition-all duration-200" : ""} ${
+              className={`focus-ring flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-label lg:flex-row lg:gap-4 lg:h-12 lg:py-0 transition-all duration-200 ${
                 active
                   ? "border-umbra-purple/40 bg-umbra-purple/10 text-umbra-lilac shadow-[0_0_15px_rgba(168,85,247,0.25)]"
                   : "border-transparent text-umbra-muted hover:border-umbra-purple/40 hover:bg-white/[.02] hover:text-umbra-lilac hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md"
@@ -119,7 +111,7 @@ export function Navigation() {
                 {icon}
               </span>
               <span
-                className={`whitespace-nowrap overflow-hidden text-sm font-medium ${mounted ? "transition-all duration-200" : ""} ${
+                className={`whitespace-nowrap overflow-hidden text-sm font-medium transition-all duration-200 ${
                   isCollapsed ? "lg:w-0 lg:opacity-0 lg:hidden" : "lg:w-auto lg:opacity-100 lg:block"
                 }`}
               >
@@ -132,7 +124,7 @@ export function Navigation() {
 
       {/* Status footer */}
       <div
-        className={`absolute bottom-0 hidden w-full border-t border-umbra-line px-5 py-4 lg:block ${mounted ? "transition-opacity duration-200" : ""} ${
+        className={`absolute bottom-0 hidden w-full border-t border-umbra-line px-5 py-4 lg:block transition-opacity duration-200 ${
           isCollapsed ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
       >
