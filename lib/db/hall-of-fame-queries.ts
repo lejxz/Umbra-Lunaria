@@ -471,13 +471,14 @@ async function computeLongestTenure(): Promise<LiveRecordCategory | null> {
     description: "Members who have been here the longest (by first-observed join).",
     icon: "clock",
     entries: rows.map((r) => {
-      const days = Math.floor((now - r.firstSeen.getTime()) / 86_400_000);
+      const firstSeenDate = new Date(r.firstSeen);
+      const days = Math.floor((now - firstSeenDate.getTime()) / 86_400_000);
       return {
         playerTag: r.playerTag,
         name: r.name,
         value: days,
         valueLabel: `${days} days`,
-        metaLabel: `since ${r.firstSeen.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+        metaLabel: `since ${firstSeenDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
       };
     }),
   };
