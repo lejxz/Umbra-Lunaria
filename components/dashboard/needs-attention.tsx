@@ -31,7 +31,7 @@ export function AttentionPanel({
 
   return (
     <section
-      className="lunar-card flex flex-col p-5 h-[350px]"
+      className="glass flex flex-col rounded-2xl p-5 h-[350px]"
       aria-labelledby={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
     >
       {/* Header */}
@@ -45,7 +45,7 @@ export function AttentionPanel({
       </div>
       <h3
         id={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
-        className="mt-1 font-display text-lg text-umbra-moonlight"
+        className="mt-1 font-display text-lg text-umbra-lilac"
       >
         {title}
       </h3>
@@ -58,7 +58,7 @@ export function AttentionPanel({
           />
         </div>
       ) : (
-        <div className="mt-4 flex-1 space-y-4 overflow-y-auto pr-1">
+        <div className="mt-4 flex-1 space-y-4 overflow-y-auto pr-2">
           {groups.map((group) => {
             if (group.members.length === 0) return null;
             return (
@@ -100,32 +100,29 @@ function AttentionGroup({
 }) {
   const color =
     tone === "warning"
-      ? "text-amber-300"
+      ? "text-amber-400"
       : tone === "danger"
-        ? "text-rose-300"
+        ? "text-red-400"
         : "text-umbra-muted";
 
   return (
     <div>
-      <p className="mb-1.5 font-mono text-micro uppercase tracking-wider text-umbra-faint">
-        {label}
-      </p>
       <div className="space-y-1.5">
         {members.map((m) => (
           <button
             key={m.playerTag}
             onClick={() => onMemberClick?.(m.playerTag)}
-            className="data-li focus-ring flex w-full items-center justify-between gap-2.5 !px-3 !py-2 text-left"
+            className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
           >
             <div className="flex min-w-0 items-center gap-2.5">
-              <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-r-sm bg-umbra-void/40 ${color}`}>
+              <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20 ${color}`}>
                 {icon === "clock" && <IconClock className="h-4 w-4" />}
                 {icon === "swords" && <IconSwords className="h-4 w-4" />}
                 {icon === "shield" && <IconShieldOff className="h-4 w-4" />}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
-                <p className="truncate text-2xs text-umbra-faint">
+                <p className="truncate text-2xs text-umbra-muted">
                   {m.detail ?? m.reason}
                 </p>
               </div>

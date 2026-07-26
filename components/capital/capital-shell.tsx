@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { CapitalPageData } from "@/lib/view-models/capital";
-import { CardMount } from "@/components/ui/card-mount";
 import { CapitalOverviewCard } from "./capital-overview-card";
 import { RaidPendingCard } from "./raid-pending-card";
 import { RaidHistory } from "./raid-history";
@@ -35,35 +34,25 @@ export function CapitalShell({
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <CardMount delay={0.04}>
-          <CapitalOverviewCard overview={data.overview} />
-        </CardMount>
-        <CardMount delay={0.08}>
-          <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
-        </CardMount>
+        <CapitalOverviewCard overview={data.overview} />
+        <DistrictList districts={data.overview.districts} hasDistricts={data.overview.hasDistricts} />
       </div>
 
       {data.raidTimer && (
-        <CardMount delay={0.12}>
-          <RaidTimerBanner timer={data.raidTimer} serverNow={serverNow} />
-        </CardMount>
+        <RaidTimerBanner timer={data.raidTimer} serverNow={serverNow} />
       )}
 
-      <CardMount delay={0.16}>
-        {data.raidHistoryAvailable && data.raidHistory ? (
-          <RaidHistory history={data.raidHistory} />
-        ) : (
-          <RaidPendingCard available={false} />
-        )}
-      </CardMount>
+      {data.raidHistoryAvailable && data.raidHistory ? (
+        <RaidHistory history={data.raidHistory} />
+      ) : (
+        <RaidPendingCard available={false} />
+      )}
 
-      <CardMount delay={0.2}>
-        <UpgradeTimeline
-          history={data.upgradeHistory}
-          filter={filter}
-          onFilterChange={setFilter}
-        />
-      </CardMount>
+      <UpgradeTimeline
+        history={data.upgradeHistory}
+        filter={filter}
+        onFilterChange={setFilter}
+      />
     </div>
   );
 }

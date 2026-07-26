@@ -1,32 +1,24 @@
 import type { ReactNode } from "react";
 
-/**
- * Badge — semantic pill with a glowing dot.
- *
- * Tones map to the celestial semantic palette: good/warn/danger/info/brand/muted.
- * The dot carries a matching glow so status reads at a glance.
- */
 export function Badge({
   children,
   tone = "brand",
-  dot = true,
 }: {
   children: ReactNode;
-  tone?: "brand" | "success" | "warning" | "danger" | "info" | "muted";
-  dot?: boolean;
+  tone?: "brand" | "success" | "warning" | "danger" | "muted";
 }) {
   const toneClass = {
-    brand: "badge brand",
-    success: "badge good",
-    warning: "badge warn",
-    danger: "badge danger",
-    info: "badge info",
-    muted: "badge muted",
+    brand: "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple",
+    success: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
+    warning: "border-amber-400/30 bg-amber-400/10 text-amber-400",
+    danger: "border-red-400/30 bg-red-400/10 text-red-400",
+    muted: "border-white/10 bg-white/5 text-umbra-muted",
   }[tone];
 
   return (
-    <span className={toneClass}>
-      {dot && <span className="d" aria-hidden />}
+    <span
+      className={`inline-flex rounded-full border px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider ${toneClass}`}
+    >
       {children}
     </span>
   );

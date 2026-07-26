@@ -109,12 +109,12 @@ function WarDetailContent({
   return (
     <div>
       {/* ---- Header ---- */}
-      <div className="flex flex-wrap items-start justify-between gap-3 pb-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-umbra-line pb-4">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             {w.warType === "cwl" ? "Clan War League" : "Regular war"} · {stateLabel(w.state)}
           </p>
-          <h2 id="war-detail-title" className="mt-1 font-display text-xl text-umbra-moonlight">
+          <h2 id="war-detail-title" className="mt-1 font-display text-xl text-umbra-lilac">
             War details
           </h2>
           {w.endTime && (
@@ -125,7 +125,6 @@ function WarDetailContent({
           )}
         </div>
       </div>
-      <div className="lunar-divider mb-2" />
 
       {/* ---- Score line (VS Arena Layout) ---- */}
       <div className="relative mt-8 flex items-stretch justify-center gap-2 sm:gap-6">
@@ -224,7 +223,7 @@ function WarDetailContent({
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Analysis
         </p>
-        <h3 className="mt-1 font-display text-base text-umbra-moonlight">Performance breakdown</h3>
+        <h3 className="mt-1 font-display text-base text-umbra-lilac">Performance breakdown</h3>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           <StatCard
             label="3★ rate"
@@ -368,23 +367,23 @@ function StatCard({
   }
 
   return (
-    <div className="lunar-tile relative overflow-hidden !p-3 sm:!p-4">
+    <div className="glass relative overflow-hidden rounded-lg p-3 sm:p-4 border border-umbra-line/50 transition-all duration-300 hover:border-umbra-purple/40 hover:bg-white/[.04]">
       {/* Subtle win glow */}
-      {ownWins && <div className="pointer-events-none absolute left-0 top-0 h-full w-[2px] bg-emerald-400/60 shadow-[0_0_10px_rgba(52,211,153,0.35)]" />}
-      {oppWins && <div className="pointer-events-none absolute right-0 top-0 h-full w-[2px] bg-red-400/60 shadow-[0_0_10px_rgba(248,113,113,0.35)]" />}
-
-      <p className="font-mono text-micro uppercase tracking-wider text-umbra-faint">{label}</p>
-
+      {ownWins && <div className="pointer-events-none absolute left-0 top-0 h-full w-[2px] bg-emerald-400/50 shadow-[0_0_10px_rgba(52,211,153,0.3)]" />}
+      {oppWins && <div className="pointer-events-none absolute right-0 top-0 h-full w-[2px] bg-red-400/50 shadow-[0_0_10px_rgba(248,113,113,0.3)]" />}
+      
+      <p className="text-micro font-semibold uppercase tracking-wider text-umbra-muted/80">{label}</p>
+      
       <div className="mt-2 flex items-baseline justify-between gap-2">
-        <span className={`font-display text-lg sm:text-xl font-bold ${ownWins ? "text-emerald-300 drop-shadow-[0_0_8px_rgba(110,231,183,0.3)]" : "text-umbra-moonlight"}`}>
+        <span className={`font-display text-lg sm:text-xl font-bold ${ownWins ? "text-emerald-300 drop-shadow-[0_0_8px_rgba(110,231,183,0.3)]" : "text-umbra-lilac"}`}>
           {fmt(own, ownTotal)}
         </span>
         <span className={`font-display text-lg sm:text-xl font-bold ${oppWins ? "text-red-300 drop-shadow-[0_0_8px_rgba(252,165,165,0.3)]" : "text-red-300/80"}`}>
           {fmt(opp, oppTotal)}
         </span>
       </div>
-
-      <div className="mt-1 flex justify-between font-mono text-micro uppercase tracking-widest text-umbra-faint">
+      
+      <div className="mt-1 flex justify-between text-[0.6rem] uppercase tracking-widest text-umbra-muted/40">
         <span>us</span>
         <span>them</span>
       </div>
@@ -394,8 +393,8 @@ function StatCard({
 
 function Highlight({ children }: { children: React.ReactNode }) {
   return (
-    <div className="data-li relative flex items-start gap-3 !p-3 text-xs leading-6 text-umbra-lilac">
-      <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-umbra-purple shadow-[0_0_6px_rgba(182,120,255,0.6)]" />
+    <div className="relative flex items-start gap-3 overflow-hidden rounded-lg border border-white/5 bg-gradient-to-r from-white/[0.03] to-transparent p-3 text-xs leading-6 text-white/70">
+      <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-umbra-purple" />
       {children}
     </div>
   );

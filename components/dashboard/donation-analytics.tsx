@@ -37,7 +37,7 @@ export function DonationAnalytics({
 
   return (
     <section
-      className="lunar-card flex flex-col p-5"
+      className="glass flex flex-col rounded-2xl p-5"
       aria-labelledby="donation-title"
       style={{ minHeight: "380px" }}
     >
@@ -49,19 +49,19 @@ export function DonationAnalytics({
           </p>
           <h3
             id="donation-title"
-            className="mt-1 font-display text-lg text-umbra-moonlight"
+            className="mt-1 font-display text-lg text-umbra-lilac"
           >
             Clan donations
           </h3>
         </div>
-
+        
         <div className="flex flex-wrap items-center gap-4">
           {/* Compact totals card */}
-          <div className="hidden md:flex items-center rounded-r-md border border-umbra-line bg-umbra-ink/40 p-1 backdrop-blur-sm">
+          <div className="hidden md:flex items-center rounded-lg bg-white/5 p-1">
             <TotalChip label="Given" value={current.totals.given} />
-            <div className="h-4 w-px bg-umbra-line-soft mx-1" />
+            <div className="h-4 w-px bg-white/10 mx-1" />
             <TotalChip label="Received" value={current.totals.received} />
-            <div className="h-4 w-px bg-umbra-line-soft mx-1" />
+            <div className="h-4 w-px bg-white/10 mx-1" />
             <TotalChip
               label="Ratio"
               value={
@@ -71,10 +71,10 @@ export function DonationAnalytics({
               }
             />
             {current.totals.hasPartialData && (
-              <span className="ml-2 pr-3 text-label text-amber-300">⚠ Partial</span>
+              <span className="ml-2 pr-3 text-label text-amber-400">⚠ Partial</span>
             )}
           </div>
-
+          
           <Tabs
             items={["24h", "7d", "30d"]}
             active={window}
@@ -102,8 +102,8 @@ export function DonationAnalytics({
         </div>
 
         {/* Top donors — right side */}
-        <div className="flex flex-col lg:border-l lg:border-umbra-line-soft lg:pl-6">
-          <p className="mb-3 font-mono text-label uppercase tracking-wider text-umbra-faint">
+        <div className="flex flex-col lg:border-l lg:border-white/5 lg:pl-6">
+          <p className="mb-3 font-mono text-label uppercase tracking-wider text-umbra-muted">
             Top 5 Donors · {window}
           </p>
           {current.leaderboard.topDonors.length > 0 ? (
@@ -111,24 +111,24 @@ export function DonationAnalytics({
               {current.leaderboard.topDonors.slice(0, 5).map((donor) => {
                 // Determine rank styling
                 let rankColor = "text-umbra-purple";
-                let badgeStyle = "border-umbra-line bg-umbra-ink/40";
-
+                let badgeStyle = "bg-white/[.03] border border-white/5";
+                
                 if (donor.rank === 1) {
                   rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
-                  badgeStyle = "border-amber-500/30 bg-gradient-to-r from-amber-500/10 to-transparent";
+                  badgeStyle = "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
                 } else if (donor.rank === 2) {
                   rankColor = "text-slate-300";
-                  badgeStyle = "border-slate-400/25 bg-gradient-to-r from-slate-400/10 to-transparent";
+                  badgeStyle = "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
                 } else if (donor.rank === 3) {
-                  rankColor = "text-orange-300";
-                  badgeStyle = "border-orange-500/25 bg-gradient-to-r from-orange-500/10 to-transparent";
+                  rankColor = "text-orange-400";
+                  badgeStyle = "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
                 }
 
                 return (
                   <button
                     key={donor.playerTag}
                     onClick={() => onMemberClick?.(donor.playerTag)}
-                    className={`data-li focus-ring flex w-full items-center justify-between !rounded-r-md !px-3 !py-2.5 text-left ${badgeStyle}`}
+                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-white/[.04] focus-ring ${badgeStyle}`}
                   >
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={`font-mono text-xs font-bold ${rankColor}`}>
@@ -156,7 +156,7 @@ export function DonationAnalytics({
               })}
             </div>
           ) : (
-            <p className="text-xs text-umbra-faint">No donations tracked yet</p>
+            <p className="text-xs text-umbra-muted">No donations tracked yet</p>
           )}
         </div>
       </div>
@@ -174,10 +174,10 @@ function TotalChip({
 }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
-      <span className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
+      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-display text-xs font-bold text-umbra-moonlight">
+      <span className="font-display text-xs font-bold text-white">
         {value ?? <UnavailableValue />}
       </span>
     </div>

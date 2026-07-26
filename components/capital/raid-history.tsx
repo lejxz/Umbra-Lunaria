@@ -15,7 +15,6 @@ import {
   IconSwords,
   IconAlert,
   IconUsers,
-  IconTrophy,
 } from "@/components/ui/icons";
 
 /**
@@ -42,15 +41,14 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
       aria-labelledby="raid-history-title"
     >
       <div className="flex items-center justify-between">
-        <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Raid weekends
         </p>
-        <span className="badge good">
-          <span className="d" />
+        <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-2 py-0.5 text-[0.6rem] font-semibold uppercase tracking-wider text-emerald-300">
           {history.participation.totalSeasons} tracked
         </span>
       </div>
-      <h3 id="raid-history-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+      <h3 id="raid-history-title" className="mt-1 font-display text-lg text-umbra-lilac">
         Raid-weekend history
       </h3>
 
@@ -94,11 +92,11 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
       )}
 
       {/* ── Participation rate ────────────────────────────────────────────── */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 font-mono text-xs text-umbra-muted">
+      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-umbra-muted">
         <span>
           Latest participation:{" "}
           <ParticipationRate rate={history.participation.participationRate} />
-          <span className="text-umbra-faint">
+          <span className="text-umbra-muted/70">
             {" "}
             ({history.participation.latestSeasonParticipants}/
             {history.participation.latestSeasonRetainedMembers} retained)
@@ -117,10 +115,10 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
         <button
           type="button"
           onClick={() => setSeasonsOpen((v) => !v)}
-          className="focus-ring flex w-full items-center justify-between rounded-r-md border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:border-umbra-line-bright hover:bg-umbra-purple/[.06]"
+          className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
           aria-expanded={seasonsOpen}
         >
-          <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+          <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
             Recent seasons ({history.seasons.length})
           </span>
           {seasonsOpen ? (
@@ -141,14 +139,14 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
       {/* ── Contribution leaderboard ──────────────────────────────────────── */}
       {history.contributionLeaderboard.length > 0 && (
         <div className="mt-5">
-          <p className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+          <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">
             Contribution leaderboard (all tracked seasons)
           </p>
-          <ol className="data-container mt-2 max-h-72 space-y-1.5 overflow-y-auto p-2">
+          <ol className="mt-2 max-h-72 space-y-1 overflow-y-auto">
             {history.contributionLeaderboard.map((m, i) => (
               <li
                 key={m.playerTag}
-                className="data-li flex items-center gap-3 px-3 py-1.5"
+                className="flex items-center gap-3 rounded-lg border border-umbra-line/30 bg-umbra-surface/20 px-3 py-1.5"
               >
                 <span className="w-5 text-center font-mono text-xs font-semibold text-umbra-muted">
                   {i + 1}
@@ -156,14 +154,13 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
                 <span className="min-w-0 flex-1 truncate text-sm text-umbra-lilac">
                   {m.name}
                 </span>
-                <span className="font-mono text-xs text-umbra-muted">
+                <span className="text-xs text-umbra-muted">
                   {m.totalCapitalResourcesLooted.toLocaleString()} gold
                 </span>
-                <span className="flex items-center gap-1 font-mono text-xs text-amber-300/80">
-                  <IconTrophy className="h-3 w-3" />
-                  {m.totalRaidWeekendMedals.toLocaleString()}
+                <span className="text-xs text-amber-300/80">
+                  🏅 {m.totalRaidWeekendMedals.toLocaleString()}
                 </span>
-                <span className="hidden font-mono text-2xs text-umbra-faint sm:inline">
+                <span className="hidden text-xs text-umbra-muted/70 sm:inline">
                   {m.totalAttacks} atk · {m.seasonsParticipated} seasons
                 </span>
               </li>
@@ -235,14 +232,14 @@ function HeadlineTile({
         ? format(value)
         : value.toLocaleString();
   return (
-    <div className="lunar-tile p-3">
-      <div className="flex items-center gap-1.5 text-umbra-faint">
+    <div className="rounded-lg border border-umbra-line bg-umbra-surface/40 p-3">
+      <div className="flex items-center gap-1.5 text-umbra-muted">
         <span className="text-umbra-purple">{icon}</span>
-        <span className="font-mono text-micro uppercase tracking-wider">
+        <span className="font-mono text-[0.6rem] uppercase tracking-wider">
           {label}
         </span>
       </div>
-      <p className="mt-1 font-display text-lg text-umbra-moonlight">{display}</p>
+      <p className="mt-1 font-display text-lg text-umbra-lilac">{display}</p>
     </div>
   );
 }
@@ -266,8 +263,8 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
     year: "numeric",
   });
   return (
-    <li className="data-li grid grid-cols-2 gap-2 px-3 py-2 font-mono text-2xs sm:grid-cols-6">
-      <span className="text-umbra-lilac">{dateLabel}</span>
+    <li className="grid grid-cols-2 gap-2 rounded-lg border border-umbra-line/30 bg-umbra-surface/20 px-3 py-2 text-xs sm:grid-cols-6">
+      <span className="font-mono text-umbra-lilac">{dateLabel}</span>
       <span className="text-umbra-muted">
         {(season.capitalTotalLoot ?? 0).toLocaleString()} gold
       </span>
@@ -280,9 +277,8 @@ function SeasonRow({ season }: { season: RaidSeasonSummary }) {
       <span className="text-umbra-muted">
         {season.participantCount} members
       </span>
-      <span className="flex items-center gap-1 text-amber-300/80">
-        <IconTrophy className="h-3 w-3" />
-        {(season.offensiveReward ?? 0).toLocaleString()}
+      <span className="text-amber-300/80">
+        {(season.offensiveReward ?? 0).toLocaleString()}🏅
       </span>
     </li>
   );
@@ -328,10 +324,10 @@ function ContributionHistoryTable({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="focus-ring flex w-full items-center justify-between rounded-r-md border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:border-umbra-line-bright hover:bg-umbra-purple/[.06]"
+        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
         aria-expanded={open}
       >
-        <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
           Contribution history ({memberRows.length} members × {seasons.length} seasons)
         </span>
         {open ? (
@@ -342,30 +338,30 @@ function ContributionHistoryTable({
       </button>
 
       {open && (
-        <div className="data-container mt-2 overflow-x-auto">
+        <div className="mt-2 overflow-x-auto rounded-lg border border-umbra-line/50">
           <table className="w-full text-xs">
-            <thead className="data-thead">
-              <tr>
-                <th className="data-th sticky left-0 z-10 bg-umbra-ink/95">
+            <thead>
+              <tr className="border-b border-umbra-line bg-umbra-surface/40">
+                <th className="sticky left-0 z-10 bg-umbra-surface/95 px-3 py-2 text-left font-mono uppercase tracking-wider text-umbra-muted">
                   Member
                 </th>
                 {seasons.map((s) => (
                   <th
                     key={s.seasonId}
-                    className="data-th whitespace-nowrap text-center"
+                    className="px-3 py-2 text-center font-mono uppercase tracking-wider text-umbra-muted whitespace-nowrap"
                   >
                     {s.startTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </th>
                 ))}
-                <th className="data-th text-right text-umbra-purple">
+                <th className="px-3 py-2 text-right font-mono uppercase tracking-wider text-umbra-purple">
                   Total
                 </th>
               </tr>
             </thead>
-            <tbody className="data-tbody">
+            <tbody>
               {visibleMembers.map((m) => (
-                <tr key={m.tag} className="data-tr">
-                  <td className="data-td sticky left-0 z-10 whitespace-nowrap bg-umbra-ink/95 font-medium text-umbra-lilac">
+                <tr key={m.tag} className="border-b border-umbra-line/20 hover:bg-white/[.04]">
+                  <td className="sticky left-0 z-10 bg-umbra-ink/95 px-3 py-2 font-medium text-umbra-lilac whitespace-nowrap">
                     {m.name}
                   </td>
                   {seasons.map((s) => {
@@ -373,22 +369,22 @@ function ContributionHistoryTable({
                     return (
                       <td
                         key={s.seasonId}
-                        className="data-td text-center text-umbra-muted"
-                        title={entry ? `${entry.attacksUsed}/${entry.attackLimit ?? "—"} attacks, ${entry.capitalResourcesLooted.toLocaleString()} gold${entry.raidWeekendMedals ? `, ${entry.raidWeekendMedals} medals` : ""}` : "Did not participate"}
+                        className="px-3 py-2 text-center text-umbra-muted"
+                        title={entry ? `${entry.attacksUsed}/${entry.attackLimit ?? "—"} attacks, ${entry.capitalResourcesLooted.toLocaleString()} gold${entry.raidWeekendMedals ? `, ${entry.raidWeekendMedals}🏅` : ""}` : "Did not participate"}
                       >
                         {entry ? (
-                          <span className={entry.capitalResourcesLooted > 0 ? "text-umbra-lilac" : "text-umbra-faint"}>
+                          <span className={entry.capitalResourcesLooted > 0 ? "text-umbra-lilac" : "text-umbra-muted/50"}>
                             {entry.capitalResourcesLooted > 0
                               ? entry.capitalResourcesLooted.toLocaleString()
                               : "—"}
                           </span>
                         ) : (
-                          <span className="text-umbra-faint">·</span>
+                          <span className="text-umbra-muted/30">·</span>
                         )}
                       </td>
                     );
                   })}
-                  <td className="data-td text-right font-semibold text-umbra-purple">
+                  <td className="px-3 py-2 text-right font-semibold text-umbra-purple">
                     {m.totalGold.toLocaleString()}
                   </td>
                 </tr>
@@ -399,7 +395,7 @@ function ContributionHistoryTable({
       )}
 
       {!open && memberRows.length > 15 && (
-        <p className="mt-1 text-center font-mono text-2xs text-umbra-faint">
+        <p className="mt-1 text-center text-xs text-umbra-muted">
           Showing top 15 of {memberRows.length} — click to expand all
         </p>
       )}
@@ -419,10 +415,10 @@ function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="focus-ring flex w-full items-center justify-between rounded-r-md border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:border-umbra-line-bright hover:bg-umbra-purple/[.06]"
+        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-purple/10"
         aria-expanded={open}
       >
-        <span className="font-mono text-label uppercase tracking-wider text-umbra-faint">
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
           Contribution log ({entries.length} recent)
         </span>
         {open ? (
@@ -433,7 +429,7 @@ function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
       </button>
 
       {open && (
-        <ol className="data-container mt-2 max-h-72 space-y-1.5 overflow-y-auto p-2">
+        <ol className="mt-2 max-h-72 space-y-1 overflow-y-auto">
           {entries.map((entry, i) => {
             const timeLabel = entry.eventTime.toLocaleString("en-US", {
               month: "short",
@@ -445,22 +441,21 @@ function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
             return (
               <li
                 key={`${entry.playerTag}-${i}`}
-                className="data-li flex items-center gap-3 px-3 py-2 font-mono text-2xs"
+                className={`flex items-center gap-3 rounded-lg border border-umbra-line/30 px-3 py-2 text-xs ${
+                  i % 2 === 0 ? "bg-white/[.015]" : ""
+                }`}
               >
-                <span
-                  className="h-2 w-2 shrink-0 rounded-full bg-umbra-purple shadow-glow-sm"
-                  aria-hidden
-                />
+                <span className="h-2 w-2 shrink-0 rounded-full bg-yellow-400/60" />
                 <span className="min-w-0 flex-1 truncate text-umbra-lilac">
                   {entry.name}
                 </span>
-                <span className="shrink-0 font-semibold text-amber-300">
+                <span className="shrink-0 font-mono font-semibold text-yellow-400">
                   +{entry.amount.toLocaleString()}
                 </span>
-                <span className="shrink-0 text-umbra-faint">
+                <span className="shrink-0 font-mono text-umbra-muted/70">
                   ({entry.total.toLocaleString()} total)
                 </span>
-                <span className="hidden shrink-0 text-umbra-faint sm:block">
+                <span className="hidden shrink-0 font-mono text-umbra-muted/50 sm:block">
                   {timeLabel}
                 </span>
               </li>

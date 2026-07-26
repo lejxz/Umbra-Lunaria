@@ -471,19 +471,13 @@ async function computeLongestTenure(): Promise<LiveRecordCategory | null> {
     description: "Members who have been here the longest (by first-observed join).",
     icon: "clock",
     entries: rows.map((r) => {
-      // drizzle returns raw SQL min() as a string (or Date depending on the
-      // pg driver path); normalize so .getTime() / .toLocaleDateString() work.
-      const firstSeen =
-        r.firstSeen instanceof Date
-          ? r.firstSeen
-          : new Date(r.firstSeen as string | number);
-      const days = Math.floor((now - firstSeen.getTime()) / 86_400_000);
+      const days = Math.floor((now - r.firstSeen.getTime()) / 86_400_000);
       return {
         playerTag: r.playerTag,
         name: r.name,
         value: days,
         valueLabel: `${days} days`,
-        metaLabel: `since ${firstSeen.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+        metaLabel: `since ${r.firstSeen.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
       };
     }),
   };

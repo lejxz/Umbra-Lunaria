@@ -8,10 +8,9 @@ import { IconCapital } from "@/components/ui/icons";
  * change infrequently (a level-up is a multi-day event), so this is the
  * least-urgent section.
  *
- * Compact two-column grid of `.data-li` rows. Districts sorted by level
- * (descending) so the highest-level districts — the ones closest to a
- * milestone — surface first. A cold-start state is shown when no districts
- * payload exists yet.
+ * Compact two-column grid. Districts sorted by level (descending) so the
+ * highest-level districts — the ones closest to a milestone — surface first.
+ * A cold-start state is shown when no districts payload exists yet.
  */
 export function DistrictList({
   districts,
@@ -26,21 +25,16 @@ export function DistrictList({
   );
 
   return (
-    <section
-      className="glass flex h-full flex-col rounded-2xl p-5"
-      aria-labelledby="district-list-title"
-    >
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="district-list-title">
       <div className="flex items-center justify-between">
-        <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Districts · reference
         </p>
         {hasDistricts && (
-          <span className="font-mono text-2xs uppercase tracking-wider text-umbra-faint">
-            {districts.length} districts
-          </span>
+          <span className="text-2xs text-umbra-muted">{districts.length} districts</span>
         )}
       </div>
-      <h3 id="district-list-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+      <h3 id="district-list-title" className="mt-1 font-display text-lg text-umbra-lilac">
         District list
       </h3>
 
@@ -53,11 +47,11 @@ export function DistrictList({
           />
         </div>
       ) : (
-        <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-4 grid gap-1.5 sm:grid-cols-2">
           {sorted.map((d) => (
             <li
               key={d.name}
-              className="data-li flex items-center justify-between px-4 py-2.5"
+              className="flex items-center justify-between rounded-lg bg-white/[.03] px-3 py-2 transition hover:bg-white/[.04]"
             >
               <span className="truncate text-sm text-umbra-lilac" title={d.name}>
                 {d.name}
@@ -69,6 +63,7 @@ export function DistrictList({
           ))}
         </ul>
       )}
+
     </section>
   );
 }

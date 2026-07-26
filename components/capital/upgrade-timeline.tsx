@@ -32,22 +32,18 @@ export function UpgradeTimeline({
   }, [history.events, filter]);
 
   return (
-    <section
-      className="glass flex flex-col rounded-2xl p-5"
-      aria-labelledby="upgrade-timeline-title"
-    >
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="upgrade-timeline-title">
       <div className="flex items-center justify-between">
-        <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Upgrade history · tracked
         </p>
         {history.events.length > 0 && (
-          <span className="badge brand">
-            <span className="d" />
+          <span className="rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2 py-0.5 text-micro font-semibold text-umbra-purple">
             {history.events.length} {history.events.length === 1 ? "upgrade" : "upgrades"}
           </span>
         )}
       </div>
-      <h3 id="upgrade-timeline-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+      <h3 id="upgrade-timeline-title" className="mt-1 font-display text-lg text-umbra-lilac">
         District upgrade timeline
       </h3>
 
@@ -84,36 +80,31 @@ export function UpgradeTimeline({
             icon={<IconCapital className="h-10 w-10" />}
           />
         ) : (
-          <ol className="relative space-y-2 pl-4">
+          <ol className="relative space-y-2 border-l border-umbra-line pl-4">
             {filteredEvents.map((e, i) => (
-              <li
-                key={`${e.districtName}-${e.observedAt.getTime()}-${i}`}
-                className="data-li relative pl-5"
-              >
-                {/* Glowing node dot on the left rail. */}
-                <span
-                  className="absolute left-[-6px] top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-umbra-purple"
-                  style={{ boxShadow: "0 0 8px #B678FF" }}
-                  aria-hidden
-                />
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-xs font-medium text-umbra-lilac">
-                    {e.districtName}
-                  </span>
-                  <span className="flex shrink-0 items-center gap-1 font-mono text-2xs">
-                    <span className="text-umbra-faint">Lv {e.fromLevel}</span>
-                    <IconChevronRight className="h-3 w-3 text-umbra-faint" aria-hidden />
-                    <span className="text-emerald-300">Lv {e.toLevel}</span>
-                  </span>
+              <li key={`${e.districtName}-${e.observedAt.getTime()}-${i}`} className="relative">
+                <span className="absolute -left-[1.4rem] top-2 flex h-2.5 w-2.5 items-center justify-center rounded-full border border-emerald-400/40 bg-emerald-400/20" />
+                <div className="rounded-lg border border-umbra-line/60 bg-white/[.03] px-3 py-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="truncate text-xs font-medium text-umbra-lilac">
+                      {e.districtName}
+                    </span>
+                    <span className="flex shrink-0 items-center gap-1 font-mono text-2xs">
+                      <span className="text-umbra-muted">Lv {e.fromLevel}</span>
+                      <IconChevronRight className="h-3 w-3 text-umbra-muted/60" aria-hidden />
+                      <span className="text-emerald-400">Lv {e.toLevel}</span>
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-micro text-umbra-muted/70">
+                    <TimeAgo date={e.observedAt} />
+                  </p>
                 </div>
-                <p className="mt-0.5 font-mono text-micro text-umbra-faint">
-                  <TimeAgo date={e.observedAt} />
-                </p>
               </li>
             ))}
           </ol>
         )}
       </div>
+
     </section>
   );
 }
@@ -123,10 +114,10 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
     <button
       type="button"
       onClick={onClick}
-      className={`focus-ring rounded-full border px-2.5 py-1 font-mono text-2xs font-semibold uppercase tracking-wider transition ${
+      className={`focus-ring rounded-full border px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider transition ${
         active
-          ? "border-umbra-purple/50 bg-umbra-purple/15 text-umbra-lilac shadow-glow-sm"
-          : "border-umbra-line bg-white/[.03] text-umbra-muted hover:border-umbra-line-bright hover:text-umbra-lilac"
+          ? "border-umbra-purple/50 bg-umbra-purple/15 text-umbra-lilac"
+          : "border-umbra-line bg-white/[.03] text-umbra-muted hover:border-umbra-purple/40 hover:text-umbra-lilac"
       }`}
     >
       {label}

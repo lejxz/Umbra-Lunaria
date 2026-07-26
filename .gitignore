@@ -44,8 +44,3 @@ worklog.md
 tool-results/
 dev.dev
 package-lock.json
-
-# Redesign QA screenshots
-*.png
-!public/**/*.png
-!app/icon.png

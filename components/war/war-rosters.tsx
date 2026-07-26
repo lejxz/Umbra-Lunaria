@@ -11,6 +11,24 @@ import {
 /**
  * Side-by-side own/opponent roster for the current war (docs/concept/07 §"Roster
  * and attack status" + §"Preparation-day scouting").
+ *
+ * Compact row layout:
+ *
+ *   | # | Name | TH | TH adv/disadv |          [right column] |
+ *
+ * The RIGHT COLUMN adapts to the war state — this is the toggle (docs/concept/07
+ * wants BOTH offense "attacks used vs allowed + best stars" AND the defensive
+ * "base state"; we can't fit both compactly, so the state picks the default
+ * and the user can flip):
+ *
+ *   - Preparation → "base" (base state). No attacks exist yet, so this is
+ *     purely the scouting view (TH adv/disadv is the real cue; base shows —).
+ *   - Battle / ended → "attacks" by default: attacks used/allowed, best
+ *     stars/destruction, and a prominent no-attack / attacks-left state. The
+ *     user can toggle to "base" to see how destroyed each base is.
+ *
+ * Both rosters are ordered by map position. Own-clan rows link to the shared
+ * member detail sheet; opponent rows don't.
  */
 export function WarRosters({
   currentWar,
@@ -20,6 +38,8 @@ export function WarRosters({
   onMemberClick: (playerTag: string) => void;
 }) {
   const isPrep = currentWar.state === "preparation";
+  // Battle/ended default to "attacks" (urgency matters mid-war); prep defaults
+  // to "base" (no attacks exist, TH scouting is the cue).
   const [mode, setMode] = useState<"attacks" | "base">(
     isPrep ? "base" : "attacks",
   );
@@ -35,7 +55,7 @@ export function WarRosters({
   }
 
   return (
-    <section className="lunar-card flex flex-col" aria-labelledby="war-rosters-title">
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-rosters-title">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           {isPrep ? "Preparation · scout" : "War roster"}
@@ -65,7 +85,7 @@ export function WarRosters({
           )}
         </div>
       </div>
-      <h3 id="war-rosters-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+      <h3 id="war-rosters-title" className="mt-1 font-display text-lg text-umbra-lilac">
         {isPrep ? "Roster scouting" : "Participant roster"}
       </h3>
 
@@ -137,7 +157,7 @@ function ToggleTab({
       onClick={onClick}
       className={`focus-ring rounded-full px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider transition ${
         active
-          ? "bg-umbra-purple/20 text-umbra-moonlight"
+          ? "bg-umbra-purple/20 text-umbra-lilac"
           : "text-umbra-muted hover:text-umbra-lilac"
       }`}
     >
@@ -164,10 +184,10 @@ function RosterColumn({
   opposingThByPos: Map<number, number>;
 }) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-umbra-line bg-umbra-ink/40">
-      <div className="flex items-center justify-between border-b border-umbra-line px-3 py-2 bg-umbra-surface/60">
+    <div className="flex flex-col rounded-lg border border-umbra-line bg-white/[.03]">
+      <div className="flex items-center justify-between border-b border-umbra-line px-3 py-2">
         <span
-          className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-moonlight"}`}
+          className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"}`}
         >
           {title}
         </span>
@@ -180,18 +200,18 @@ function RosterColumn({
           </p>
         ) : (
           <table className="w-full text-left">
-            <thead className="data-thead">
+            <thead className="sticky top-0 z-10 border-b border-umbra-line bg-umbra-ink/95 font-mono text-2xs uppercase text-umbra-muted backdrop-blur supports-[backdrop-filter]:bg-umbra-ink/80">
               <tr>
-                <th className="data-th w-8 text-center">#</th>
-                <th className="data-th">Player</th>
-                <th className="data-th">TH</th>
-                <th className="data-th text-center">Adv</th>
-                <th className="data-th text-right">
+                <th className="w-8 px-3 py-2 text-center font-medium">#</th>
+                <th className="px-3 py-2 font-medium">Player</th>
+                <th className="px-3 py-2 font-medium">TH</th>
+                <th className="px-3 py-2 font-medium text-center">Adv</th>
+                <th className="px-3 py-2 text-right font-medium">
                   {isPrep || mode === "base" ? "Base" : "Attacks"}
                 </th>
               </tr>
             </thead>
-            <tbody className="data-tbody">
+            <tbody className="divide-y divide-umbra-line/60">
               {members.map((m) => {
                 const isOwn = tone === "own" && m.tag;
                 return (
@@ -235,31 +255,31 @@ function RosterRow({
   const content = (
     <>
       {/* # — map position */}
-      <td className="data-td text-center align-middle">
+      <td className="px-3 py-2 text-center align-middle">
         <span className="flex h-5 w-5 items-center justify-center rounded bg-umbra-purple/15 mx-auto font-mono text-2xs font-semibold text-umbra-purple">
           {m.mapPosition}
         </span>
       </td>
 
       {/* Name */}
-      <td className="data-td align-middle">
+      <td className="px-3 py-2 align-middle">
         <div className="min-w-0 truncate text-xs text-umbra-lilac" title={m.name}>
           {m.name}
         </div>
       </td>
 
-      {/* TH — th-badge ramp */}
-      <td className="data-td align-middle">
-        <RosterThBadge level={m.townhallLevel} />
+      {/* TH */}
+      <td className="px-3 py-2 align-middle font-mono text-2xs text-umbra-muted">
+        TH{m.townhallLevel}
       </td>
 
       {/* TH advantage / disadvantage */}
-      <td className="data-td text-center align-middle">
+      <td className="px-3 py-2 text-center align-middle">
         <ThAdvantage diff={diff} ownTh={m.townhallLevel} oppTh={opposingTh ?? null} />
       </td>
 
       {/* Right column — attacks (offense) or base (defense) */}
-      <td className="data-td text-right align-middle">
+      <td className="px-3 py-2 text-right align-middle">
         {isPrep || mode === "base" ? (
           <BaseState
             stars={m.worstDefenseStars}
@@ -284,27 +304,14 @@ function RosterRow({
     return (
       <tr
         onClick={onClick}
-        tabIndex={0}
-        role="button"
-        className="group cursor-pointer data-tr focus-ring"
+        className="group cursor-pointer transition hover:bg-umbra-purple/10"
       >
         {content}
       </tr>
     );
   }
 
-  return <tr className="data-tr">{content}</tr>;
-}
-
-/** Compact th-badge sized for the roster row. */
-function RosterThBadge({ level }: { level: number }) {
-  const toneClass =
-    level >= 14 ? "th-high" : level >= 11 ? "th-mid" : "th-low";
-  return (
-    <span className={`th-badge ${toneClass}`} title={`Town Hall ${level}`}>
-      {level}
-    </span>
-  );
+  return <tr>{content}</tr>;
 }
 
 function ThAdvantage({
@@ -317,7 +324,7 @@ function ThAdvantage({
   oppTh: number | null;
 }) {
   if (diff === null || oppTh === null) {
-    return <span className="text-micro text-umbra-faint">—</span>;
+    return <span className="text-micro text-umbra-muted/50">—</span>;
   }
   if (diff === 0) {
     return (
@@ -369,7 +376,7 @@ function BaseState({
   if (isPrep || stars === null || destruction === null) {
     return (
       <span
-        className="justify-self-end font-mono text-2xs text-umbra-faint"
+        className="justify-self-end font-mono text-2xs text-umbra-muted/40"
         title={isPrep ? "Base state hidden until battle day" : "Base not yet attacked"}
       >
         —
@@ -396,7 +403,9 @@ function BaseState({
 
 /**
  * Attacks state (offense) — attacks used/allowed, best stars/destruction, and
- * a prominent no-attack / attacks-left state.
+ * a prominent no-attack / attacks-left state (docs/concept/07 §"Roster and attack
+ * status" #3–5). During battle, members with 0 attacks get a red "no-attack"
+ * badge; members with attacks remaining get amber "N left"; done = emerald.
  */
 function AttacksState({
   attacksUsed,
@@ -427,27 +436,24 @@ function AttacksState({
       {/* Urgency badge */}
       {noAttack ? (
         <span
-          className="badge danger"
+          className="inline-flex items-center gap-1 rounded-full border border-red-400/30 bg-red-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-red-400"
           title="No attacks used yet"
         >
-          <span className="d" aria-hidden />
           <IconShieldOff className="h-3 w-3" aria-hidden />
-          {attacksUsed}/{attacksAllowed}
+          0/{attacksAllowed}
         </span>
       ) : attacksRemaining > 0 ? (
         <span
-          className="badge warn"
+          className="rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-amber-400"
           title={`${attacksRemaining} attack${attacksRemaining === 1 ? "" : "s"} left`}
         >
-          <span className="d" aria-hidden />
           {attacksUsed}/{attacksAllowed}
         </span>
       ) : (
         <span
-          className="badge good"
+          className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-1.5 py-0.5 text-micro font-semibold uppercase text-emerald-400"
           title="All attacks used"
         >
-          <span className="d" aria-hidden />
           ✓ {attacksUsed}/{attacksAllowed}
         </span>
       )}

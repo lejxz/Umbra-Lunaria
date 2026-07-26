@@ -6,11 +6,12 @@ import { IconSwords } from "@/components/ui/icons";
 
 /**
  * Attack log — every attack in the current war, ordered by attack order, with
- * attacker → defender, map positions, stars, destruction, and duration.
- * Own-clan attackers link to the shared member detail sheet; opponent
- * attackers are not clickable.
+ * attacker → defender, map positions, stars, destruction, and duration
+ * (docs/concept/07 §"Attack log"). Own-clan attackers link to the shared member
+ * detail sheet; opponent attackers are not clickable.
  *
- * Empty during preparation (no attacks yet).
+ * Improved: tighter rows, colored star pills, clearer attacker/defender
+ * separation. Empty during preparation (no attacks yet).
  */
 export function WarAttackLog({
   attackLog,
@@ -23,14 +24,13 @@ export function WarAttackLog({
 }) {
   if (warState === "preparation" || attackLog.length === 0) {
     return (
-      <section className="lunar-card flex flex-col" aria-labelledby="war-attacks-title">
+      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-attacks-title">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
-        <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-moonlight">Attacks</h3>
+        <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
         <div className="mt-4">
           <EmptyState
             title={warState === "preparation" ? "No attacks yet" : "No attacks recorded"}
             description={warState === "preparation" ? "Attacks appear here once the battle day begins." : "No attacks were observed for this war."}
-            icon={<IconSwords className="h-7 w-7" />}
           />
         </div>
       </section>
@@ -38,12 +38,12 @@ export function WarAttackLog({
   }
 
   return (
-    <section className="lunar-card flex flex-col" aria-labelledby="war-attacks-title">
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-attacks-title">
       <div className="flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
         <span className="text-2xs text-umbra-muted">{attackLog.length} attacks</span>
       </div>
-      <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-moonlight">Attacks</h3>
+      <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
 
       <div className="mt-4 data-container">
         <table className="w-full text-left">
@@ -60,8 +60,8 @@ export function WarAttackLog({
           </thead>
           <tbody className="data-tbody">
             {attackLog.map((a) => (
-              <tr key={a.order} className="data-tr">
-                <td className="data-td text-center font-mono text-2xs text-umbra-muted">{a.order}</td>
+              <tr key={a.order} className="text-sm data-tr">
+                <td className="data-td text-center font-mono text-2xs text-umbra-muted/70">{a.order}</td>
                 <td className="data-td">
                   <AttackParticipant
                     tag={a.attackerTag}
@@ -73,9 +73,9 @@ export function WarAttackLog({
                   />
                 </td>
                 <td className="data-td text-center">
-                  <IconSwords
-                    className={`mx-auto h-3 w-3 ${a.attackerIsOwnClan ? "text-umbra-purple/60" : "text-red-400/60"}`}
-                    aria-hidden
+                  <IconSwords 
+                    className={`mx-auto h-3 w-3 ${a.attackerIsOwnClan ? "text-umbra-purple/60" : "text-red-400/60"}`} 
+                    aria-hidden 
                   />
                 </td>
                 <td className="data-td">
@@ -89,14 +89,14 @@ export function WarAttackLog({
                   />
                 </td>
                 <td className="data-td text-center">
-                  <span className={a.stars >= 3 ? "text-amber-400" : "text-umbra-muted"}>
+                  <span className={a.stars >= 3 ? "text-amber-400" : "text-umbra-muted/70"}>
                     <Stars value={a.stars} />
                   </span>
                 </td>
                 <td className={`hidden data-td text-right font-mono text-2xs sm:table-cell ${a.destructionPercentage === 100 ? "text-amber-400" : "text-umbra-muted"}`}>
                   {a.destructionPercentage}%
                 </td>
-                <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted sm:table-cell">
+                <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted/50 sm:table-cell">
                   {a.duration}s
                 </td>
               </tr>
@@ -123,9 +123,10 @@ function AttackParticipant({
   isOwnClan: boolean;
   onMemberClick: (playerTag: string) => void;
 }) {
+  const isOpponent = !isOwnClan;
   const badgeColor = isOwnClan
     ? "bg-umbra-purple/15 text-umbra-purple"
-    : "bg-red-400/10 text-red-300/90";
+    : "bg-red-400/10 text-red-400/90";
   const nameColor = isOwnClan ? "text-umbra-lilac" : "text-red-300/80";
 
   const inner = (
@@ -137,17 +138,13 @@ function AttackParticipant({
       )}
       <div className="flex min-w-0 flex-col justify-center">
         <span className={`truncate text-xs ${nameColor}`}>{name}</span>
-        {townhall != null && <span className="font-mono text-2xs text-umbra-faint">TH{townhall}</span>}
+        {townhall != null && <span className="font-mono text-2xs text-umbra-muted/60">TH{townhall}</span>}
       </div>
     </span>
   );
   if (isOwnClan && tag) {
     return (
-      <button
-        type="button"
-        onClick={() => onMemberClick(tag)}
-        className="focus-ring -m-1 rounded-lg p-1 text-left transition hover:bg-umbra-purple/10"
-      >
+      <button type="button" onClick={() => onMemberClick(tag)} className="focus-ring -m-1 rounded-lg p-1 text-left transition hover:bg-umbra-purple/10">
         {inner}
       </button>
     );

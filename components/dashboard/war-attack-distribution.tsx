@@ -58,9 +58,6 @@ export function WarAttackDistributionChart({
             paddingAngle={2}
             dataKey="value"
             stroke="none"
-            isAnimationActive
-            animationDuration={300}
-            animationEasing="ease-out"
           >
             {data.map((entry) => (
               <Cell key={entry.name} fill={entry.color} />
@@ -80,7 +77,7 @@ export function WarAttackDistributionChart({
         <span className="font-display text-2xl font-bold text-emerald-400">
           {threeStarRate}%
         </span>
-        <span className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
+        <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
           3★ rate
         </span>
       </div>

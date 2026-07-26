@@ -6,9 +6,12 @@ import { useRef, type KeyboardEvent } from "react";
  * Tabs — accessible tab switcher with WAI-ARIA roving tabindex + arrow-key
  * navigation.
  *
- * Celestial Observatory: active tab gets a violet wash + glow ring; inactive
- * tabs brighten on hover. The whole control sits in a glass inset.
+ * The roving-tabindex pattern is already set up (aria-selected, tabIndex 0/-1).
+ * This adds the missing arrow-key handler so keyboard users can move between
+ * tabs with ArrowLeft/ArrowRight (and Home/End), as the WAI-ARIA tabs pattern
+ * expects.
  */
+
 export function Tabs({
   items,
   active,
@@ -54,7 +57,7 @@ export function Tabs({
 
   return (
     <div
-      className="flex gap-1 rounded-r-md border border-umbra-line bg-umbra-ink/40 p-1 backdrop-blur-sm"
+      className="flex gap-1 rounded-lg bg-white/5 p-1"
       role="tablist"
       aria-label={label}
     >
@@ -63,22 +66,15 @@ export function Tabs({
         return (
           <button
             key={item}
-            ref={(el) => {
-              tabRefs.current[index] = el;
-            }}
+            ref={(el) => { tabRefs.current[index] = el; }}
             role="tab"
             aria-selected={selected}
             tabIndex={selected ? 0 : -1}
-            className={`focus-ring rounded-r-sm px-3 py-1.5 font-mono text-label font-semibold uppercase tracking-wider transition-all duration-150 ${
+            className={`focus-ring rounded-lg px-3 py-2 text-xs font-semibold transition ${
               selected
-                ? "bg-umbra-purple/20 text-umbra-moonlight"
-                : "text-umbra-muted hover:bg-white/[.04] hover:text-umbra-lilac"
+                ? "bg-umbra-purple/20 text-umbra-purple"
+                : "text-umbra-muted hover:text-umbra-lilac"
             }`}
-            style={
-              selected
-                ? { boxShadow: "0 0 0 1px rgba(182,120,255,.3), 0 0 14px rgba(182,120,255,.28)" }
-                : undefined
-            }
             onClick={() => onChange(item)}
             onKeyDown={(e) => onKeyDown(e, index)}
           >

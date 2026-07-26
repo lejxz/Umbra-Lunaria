@@ -16,34 +16,32 @@ import { IconCapital } from "@/components/ui/icons";
  */
 export function RaidPendingCard({ available }: { available: boolean }) {
   if (available) {
+    // Future: Phase 3.1 renders the raid-history view here.
     return null;
   }
 
   return (
-    <section
-      className="glass flex flex-col rounded-2xl p-5"
-      aria-labelledby="raid-history-title"
-    >
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="raid-history-title">
       <div className="flex items-center justify-between">
-        <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Raid weekends
         </p>
-        <span className="badge warn">
-          <span className="d" />
+        <span className="rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-0.5 text-micro font-semibold uppercase tracking-wider text-amber-400">
           Pending
         </span>
       </div>
-      <h3 id="raid-history-title" className="mt-1 font-display text-lg text-umbra-moonlight">
+      <h3 id="raid-history-title" className="mt-1 font-display text-lg text-umbra-lilac">
         Raid-weekend history
       </h3>
 
       <div className="mt-4 flex flex-1 items-center justify-center py-6">
         <EmptyState
-          icon={<IconCapital className="h-10 w-10" />}
+          icon={<IconCapital className="h-10 w-10 text-umbra-purple/40" />}
           title="Coming soon"
           description="Completed raid-weekend results, the per-member contribution leaderboard, and participation rates will appear here once raid-season ingestion is active."
         />
       </div>
+
     </section>
   );
 }

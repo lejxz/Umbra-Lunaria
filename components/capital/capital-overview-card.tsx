@@ -13,35 +13,29 @@ import { IconCapital } from "@/components/ui/icons";
  */
 export function CapitalOverviewCard({ overview }: { overview: CapitalOverview }) {
   return (
-    <section
-      className="glass flex h-full flex-col rounded-2xl p-5"
-      aria-labelledby="capital-overview-title"
-    >
+    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="capital-overview-title">
       <div className="flex items-center justify-between">
-        <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-purple">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Clan capital · current
         </p>
         {overview.lastCaptureAt && (
-          <span className="font-mono text-2xs uppercase tracking-wider text-umbra-faint">
+          <span className="text-2xs text-umbra-muted">
             Captured <TimeAgo date={overview.lastCaptureAt} />
           </span>
         )}
       </div>
-      <h3
-        id="capital-overview-title"
-        className="mt-1 font-display text-lg text-umbra-moonlight"
-      >
+      <h3 id="capital-overview-title" className="mt-1 font-display text-lg text-umbra-lilac">
         Capital overview
       </h3>
 
       {/* Hero: Capital Hall level centerpiece + side stats */}
-      <div className="mt-4 flex flex-1 flex-col items-center justify-center gap-5 py-6">
+      <div className="mt-4 flex flex-col items-center justify-center gap-5 py-6">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-full border border-umbra-line bg-umbra-purple/[.06] text-umbra-purple shadow-glow-sm">
-            <IconCapital className="h-7 w-7" aria-hidden />
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-umbra-purple/10 border border-umbra-purple/40">
+            <IconCapital className="h-7 w-7 text-umbra-purple/80" aria-hidden />
           </div>
           <div>
-            <h4 className="font-display text-2xl font-semibold text-umbra-moonlight">
+            <h4 className="font-display text-2xl font-semibold text-umbra-lilac">
               Capital Peak Level {overview.capitalHallLevel ?? <UnavailableValue />}
             </h4>
             <p className="mt-1 font-mono text-xs uppercase tracking-wider text-umbra-muted">
@@ -50,12 +44,13 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
           </div>
         </div>
 
-        <div className="flex items-center gap-2 rounded-r-md border border-umbra-line bg-umbra-surface/40 p-1">
+        <div className="flex items-center rounded-lg bg-white/5 p-1">
           <TotalChip label="Capital Points" value={overview.capitalPoints} />
-          <div className="h-4 w-px bg-umbra-line-soft" />
+          <div className="h-4 w-px bg-white/10 mx-1" />
           <TotalChip label="Districts" value={overview.districtCount} />
         </div>
       </div>
+
     </section>
   );
 }
@@ -70,10 +65,10 @@ function TotalChip({
 }) {
   return (
     <div className="flex items-center gap-1.5 px-3 py-2">
-      <span className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
+      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </span>
-      <span className="font-mono text-xs font-semibold text-umbra-moonlight">
+      <span className="font-display text-xs font-bold text-white">
         {value ?? <UnavailableValue />}
       </span>
     </div>

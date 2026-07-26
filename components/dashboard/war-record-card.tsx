@@ -12,15 +12,17 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
 
   return (
     <section
-      className="lunar-card lunar-hover flex h-full flex-col p-5"
+      className="glass flex flex-col rounded-2xl p-5"
       aria-labelledby="war-record-title"
     >
-      <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-        All-time record
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+          All-time record
+        </p>
+      </div>
       <h3
         id="war-record-title"
-        className="mt-1 font-display text-lg text-umbra-moonlight"
+        className="mt-1 font-display text-lg text-umbra-lilac"
       >
         War record
       </h3>
@@ -34,16 +36,16 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
       </div>
 
       {/* Win rate — centered, prominent */}
-      <div className="lunar-tile mt-3 flex flex-1 items-center justify-center !p-3">
+      <div className="mt-3 flex flex-1 items-center justify-center rounded-lg bg-white/[.03] p-3">
         <div className="text-center">
-          <p className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
+          <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
             Win rate
           </p>
-          <p className="mt-1 font-display text-3xl font-bold text-umbra-moonlight">
+          <p className="mt-1 font-display text-3xl font-bold text-white">
             {winRatePct ?? <UnavailableValue />}
           </p>
           {record.winRate === null && (
-            <p className="mt-1 text-label text-umbra-faint">
+            <p className="mt-1 text-label text-umbra-muted">
               Requires W/T/L from API
             </p>
           )}
@@ -72,8 +74,8 @@ function Stat({
           : "text-umbra-muted";
 
   return (
-    <div className="lunar-tile !p-2.5 text-center">
-      <p className="font-mono text-micro uppercase tracking-wider text-umbra-faint">
+    <div className="rounded-lg bg-white/[.03] p-2.5 text-center">
+      <p className="font-mono text-micro uppercase tracking-wider text-umbra-muted">
         {label}
       </p>
       <p className={`mt-1 font-display text-lg font-bold ${color}`}>

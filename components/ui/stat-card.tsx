@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
 
-/**
- * StatCard — a lunar-tile stat block.
- *
- * L2 tile surface with a glowing icon, big mono value, and an optional trend
- * line. Hovers brighten the border + add a soft violet wash.
- */
 export function StatCard({
   label,
   value,
@@ -23,25 +17,19 @@ export function StatCard({
     trendTone === "muted"
       ? "text-umbra-muted"
       : trendTone === "warning"
-        ? "text-amber-300"
-        : "text-emerald-300";
+        ? "text-amber-400"
+        : "text-emerald-400";
 
   return (
-    <div className="lunar-tile group">
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-label font-medium uppercase tracking-[0.14em] text-umbra-faint">
+    <div className="glass rounded-2xl p-5">
+      <div className="flex items-center justify-between text-umbra-muted">
+        <span className="text-xs font-semibold uppercase tracking-wider">
           {label}
         </span>
-        {icon && (
-          <span className="text-umbra-purple transition-transform duration-200 group-hover:scale-110">
-            {icon}
-          </span>
-        )}
+        {icon}
       </div>
-      <div className="mt-2 font-mono text-2xl font-semibold text-umbra-moonlight">
-        {value}
-      </div>
-      {trend && <p className={`mt-1.5 font-mono text-label ${trendColor}`}>{trend}</p>}
+      <div className="mt-3 text-3xl font-bold text-white">{value}</div>
+      {trend && <p className={`mt-2 text-xs ${trendColor}`}>{trend}</p>}
     </div>
   );
 }

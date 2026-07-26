@@ -18,12 +18,6 @@
 export const CHART_COLORS = {
   /** Primary accent — bars, lines, dots, active series. */
   purple: "#B678FF",
-  /** Deep accent — secondary series, gradients. */
-  violet: "#7552DF",
-  /** Info accent — secondary series, contrasts. */
-  info: "#7FB8FF",
-  /** Brightest — headings inside charts. */
-  moonlight: "#F2EEFF",
   /** Primary text — tooltip body, item labels. */
   lilac: "#EEE5FF",
   /** Muted text — axis ticks, tooltip labels. Mirrors umbra.muted. */
@@ -32,8 +26,6 @@ export const CHART_COLORS = {
   surface: "#12101C",
   /** Border — tooltip border. Mirrors umbra.line at full opacity. */
   border: "rgba(190, 151, 255, 0.15)",
-  /** Grid — chart gridlines, very faint. */
-  grid: "rgba(190, 151, 255, 0.08)",
 } as const;
 
 // ── Shared Recharts style objects ────────────────────────────────────────

@@ -3,14 +3,14 @@
 /**
  * RecordCard — the shared card design for every Hall of Fame leaderboard.
  *
- * Celestial Observatory redesign: a prestigious `.glass` trophy-case card with
- * `lunar-hover`. The award icon sits in a glowing circular badge that blooms
- * to `shadow-glow` on hover. Each ranked row pairs a holder name
- * (`text-umbra-lilac`) with a large mono record value (`text-umbra-moonlight`).
+ * Moved from components/dashboard/hall-of-fame-card.tsx and generalized so it
+ * works for both the cached all-time awards AND the live-computed records
+ * (war + capital). The visual design is unchanged: a fixed-height (350px)
+ * glass card with a colored header band (icon + title + subtitle) and a
+ * scrollable ranked list. Rank 1/2/3 get the gradient badge treatment;
+ * rank 1 shows a 👑.
  *
- * Rank 1 wears a crown, ranks 2/3 take silver/bronze accents. The card stays
- * clickable end-to-end — every row opens the shared MemberDetailSheet via
- * onMemberClick. A "View all" modal exposes the full leaderboard.
+ * Each row is clickable → opens the shared MemberDetailSheet via onMemberClick.
  */
 
 import { useState } from "react";
@@ -53,28 +53,21 @@ export function RecordCard({
   return (
     <>
       <div
-        className={`glass lunar-hover group flex h-[350px] flex-col overflow-hidden rounded-2xl ${gridClass}`}
+        className={`flex flex-col rounded-2xl border border-umbra-line bg-umbra-surface/40 shadow-lg backdrop-blur-md overflow-hidden h-[350px] ${gridClass}`}
       >
-        {/* Category header — circular glowing award badge + title */}
-        <div className="flex shrink-0 items-center gap-3 border-b border-umbra-line-soft px-5 py-4">
-          <span
-            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-umbra-line bg-umbra-purple/[.06] ${meta.color} transition-shadow duration-220 group-hover:shadow-glow`}
-            aria-hidden
-          >
-            <span className="[&>svg]:h-5 [&>svg]:w-5">{meta.icon}</span>
-          </span>
-          <div className="min-w-0">
-            <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-faint">
-              {meta.subtitle}
-            </p>
-            <h3 className="truncate font-display text-lg text-umbra-moonlight">
-              {meta.title}
-            </h3>
+        {/* Category header */}
+        <div className={`flex flex-col items-center justify-center border-b border-umbra-line/50 px-5 py-4 text-center ${meta.accent} bg-opacity-20 shrink-0 min-h-[90px]`}>
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-muted">
+            {meta.subtitle}
+          </p>
+          <div className={`mt-1.5 flex items-center justify-center gap-2 ${meta.color}`}>
+            {meta.icon}
+            <h3 className="font-display text-lg">{meta.title}</h3>
           </div>
         </div>
 
         {/* Ranked rows */}
-        <div className="scrollbar-none flex-1 overflow-y-auto p-3">
+        <div className="p-3 flex-1 overflow-y-auto scrollbar-none">
           {entries.length === 0 ? (
             <EmptyLeaderboard />
           ) : (
@@ -91,9 +84,8 @@ export function RecordCard({
               </div>
               {entries.length > TOP_N && (
                 <button
-                  type="button"
                   onClick={() => setViewAll(true)}
-                  className="focus-ring mt-2 flex w-full items-center justify-center rounded-r-md border border-umbra-line bg-umbra-surface/30 py-2.5 font-mono text-2xs font-semibold uppercase tracking-wider text-umbra-muted transition hover:border-umbra-line-bright hover:text-umbra-lilac"
+                  className="mt-2 flex w-full items-center justify-center rounded-lg border border-umbra-line/50 bg-white/[.03] py-2.5 text-xs font-medium text-umbra-muted transition-colors hover:bg-white/[.04] hover:text-umbra-lilac"
                 >
                   View all {entries.length} rankings
                 </button>
@@ -110,45 +102,40 @@ export function RecordCard({
           onClose={() => setViewAll(false)}
           maxWidth="max-w-lg"
         >
-          <div className="flex flex-col">
-            <div className="flex items-center justify-between gap-3 border-b border-umbra-line-soft pb-4">
+          <div className="flex flex-col max-h-[85vh] bg-umbra-ink border border-umbra-line rounded-2xl overflow-hidden shadow-2xl">
+            <div className={`flex items-center justify-between border-b border-umbra-line/50 px-5 py-4 ${meta.accent} bg-opacity-20`}>
               <div className="flex items-center gap-3">
-                <span
-                  className={`flex h-10 w-10 items-center justify-center rounded-full border border-umbra-line bg-umbra-purple/[.06] ${meta.color}`}
-                  aria-hidden
-                >
-                  <span className="[&>svg]:h-5 [&>svg]:w-5">{meta.icon}</span>
-                </span>
+                <div className={meta.color}>{meta.icon}</div>
                 <div>
-                  <p className="font-mono text-label font-semibold uppercase tracking-[.16em] text-umbra-faint">
+                  <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-muted/80">
                     {meta.subtitle}
                   </p>
-                  <h3 className={`font-display text-lg ${meta.color}`}>
+                  <h3 className={`font-display text-lg font-semibold ${meta.color}`}>
                     {meta.title}
                   </h3>
                 </div>
               </div>
               <button
-                type="button"
                 onClick={() => setViewAll(false)}
-                className="focus-ring btn-icon"
-                aria-label="Close"
+                className="rounded-full p-2 text-umbra-muted transition-colors hover:bg-umbra-purple/10 hover:text-white"
               >
                 <IconX className="h-5 w-5" />
               </button>
             </div>
-            <div className="mt-4 flex max-h-[60vh] flex-col gap-2 overflow-y-auto pr-1">
-              {entries.map((entry, i) => (
-                <RankRow
-                  key={`${entry.playerTag}-${i}`}
-                  entry={entry}
-                  meta={meta}
-                  onClick={() => {
-                    setViewAll(false);
-                    onMemberClick?.(entry.playerTag);
-                  }}
-                />
-              ))}
+            <div className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-umbra-line scrollbar-track-transparent">
+              <div className="flex flex-col gap-2">
+                {entries.map((entry, i) => (
+                  <RankRow
+                    key={`${entry.playerTag}-${i}`}
+                    entry={entry}
+                    meta={meta}
+                    onClick={() => {
+                      setViewAll(false);
+                      onMemberClick?.(entry.playerTag);
+                    }}
+                  />
+                ))}
+              </div>
             </div>
           </div>
         </Modal>
@@ -167,41 +154,42 @@ function RankRow({
   onClick?: () => void;
 }) {
   const rank = entry.rank ?? 0;
-  let rankBadge = "text-umbra-faint";
+  let rankColor = "text-umbra-muted";
+  let badgeStyle = "bg-white/[.03] border border-white/5";
 
   if (rank === 1) {
-    rankBadge = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
+    rankColor = "text-amber-300 drop-shadow-[0_0_8px_rgba(252,211,77,0.5)]";
+    badgeStyle = "bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/20";
   } else if (rank === 2) {
-    rankBadge = "text-slate-300";
+    rankColor = "text-slate-300";
+    badgeStyle = "bg-gradient-to-r from-slate-400/10 to-transparent border border-slate-400/20";
   } else if (rank === 3) {
-    rankBadge = "text-orange-400";
+    rankColor = "text-orange-400";
+    badgeStyle = "bg-gradient-to-r from-orange-500/10 to-transparent border border-orange-500/20";
   }
 
   return (
     <button
-      type="button"
       onClick={onClick}
-      className="focus-ring flex w-full items-center gap-3 rounded-r-md border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:border-umbra-line-bright hover:bg-umbra-purple/[.06]"
+      className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 transition-colors hover:bg-white/[.04] focus-ring text-left ${badgeStyle}`}
     >
-      <span className={`w-6 shrink-0 text-center font-mono text-xs font-bold ${rankBadge}`}>
-        {rank === 1 ? "♛" : rank > 0 ? `#${rank}` : ""}
+      <span className={`w-5 shrink-0 text-center font-mono text-xs font-bold ${rankColor}`}>
+        {rank === 1 ? "👑" : rank > 0 ? `#${rank}` : ""}
       </span>
-      <div className="flex min-w-0 flex-1 items-baseline justify-between gap-2">
-        <div className="flex min-w-0 flex-col">
-          <span className="truncate text-sm text-umbra-lilac">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center justify-between gap-1">
+          <span className="truncate font-semibold text-xs text-white/90">
             {entry.name}
           </span>
-          {entry.metaLabel && entry.metaLabel !== "Since tracking began" && (
-            <span className="truncate font-mono text-micro text-umbra-faint">
-              {entry.metaLabel}
-            </span>
-          )}
+          <span className={`shrink-0 font-mono text-xs font-bold ${rank <= 3 ? meta.color : "text-umbra-lilac/70"}`}>
+            {entry.valueLabel}
+          </span>
         </div>
-        <span
-          className={`shrink-0 font-mono text-base font-semibold ${rank <= 3 ? meta.color : "text-umbra-moonlight"}`}
-        >
-          {entry.valueLabel}
-        </span>
+        {entry.metaLabel && entry.metaLabel !== "Since tracking began" && (
+          <span className="font-mono text-micro text-umbra-muted truncate">
+            {entry.metaLabel}
+          </span>
+        )}
       </div>
     </button>
   );
@@ -209,8 +197,8 @@ function RankRow({
 
 function EmptyLeaderboard() {
   return (
-    <div className="flex h-full items-center justify-center py-8 text-center">
-      <p className="font-mono text-label text-umbra-faint">
+    <div className="py-8 text-center flex items-center justify-center h-full">
+      <p className="font-mono text-label text-umbra-muted/50">
         No records yet.
       </p>
     </div>
