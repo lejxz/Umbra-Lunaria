@@ -135,17 +135,17 @@ Cinzel, Inter, and JetBrains Mono are referenced in CSS variables but not loaded
 
 Each phase is small, focused, and independently verifiable. No phase changes more than ~10 files.
 
-### Phase 1: Font Loading
+### Phase 1: Font Loading ✅ COMPLETE
 
 **Goal:** Load Cinzel, Inter, and JetBrains Mono via `next/font` so they render properly (currently falling back to system fonts).
 
 **Files:** `app/layout.tsx`
 
 **Tasks:**
-- 1.1. Add `next/font/google` imports for Cinzel, Inter, and `next/font` for JetBrains Mono
-- 1.2. Apply font CSS variables to `<html>` or `<body>`
-- 1.3. Update `globals.css` `:root` to reference the `next/font` variable names
-- 1.4. Verify fonts render (browser check — Cinzel should be the display font, not Georgia)
+- [x] 1.1. Add `next/font/google` imports for Cinzel, Inter, and `next/font` for JetBrains Mono
+- [x] 1.2. Apply font CSS variables to `<html>` or `<body>`
+- [x] 1.3. Update `globals.css` `:root` to reference the `next/font` variable names
+- [x] 1.4. Verify fonts render (browser check — Cinzel should be the display font, not Georgia)
 
 **Verify:** typecheck, lint, browser visual check.
 
@@ -157,11 +157,13 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 
 **Files:** `app/globals.css`, `tailwind.config.ts`
 
+### Phase 2: CSS Standardization
+
 **Tasks:**
-- 2.1. Add `.tile` class to globals.css (`rounded-lg border border-white/[.04] bg-white/[.03] p-3`)
-- 2.2. Add `.hover-row` class (`transition hover:bg-white/[.04]`)
-- 2.3. Add `.hover-card` class (`transition hover:border-umbra-line/50`)
-- 2.4. Keep `.glass` unchanged (it's already the Level 1 standard)
+- [ ] 2.1. Add `.tile` class to globals.css (`rounded-lg border border-white/[.04] bg-white/[.03] p-3`)
+- [ ] 2.2. Add `.hover-row` class (`transition hover:bg-white/[.04]`)
+- [ ] 2.3. Add `.hover-card` class (`transition hover:border-umbra-line/50`)
+- [ ] 2.4. Keep `.glass` unchanged (it's already the Level 1 standard)
 
 **Verify:** typecheck, lint. No visual change yet — just adds utility classes.
 
@@ -174,12 +176,12 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 **Files:** All `components/**/*.tsx` (batch find-and-replace)
 
 **Tasks:**
-- 3.1. Replace `bg-white/[.035]` → `.tile` on stat boxes (keep existing padding if different)
-- 3.2. Replace `bg-white/[.02]` → `.tile` on small stat boxes
-- 3.3. Replace `bg-white/[.03]` → `.tile`
-- 3.4. Replace `bg-white/[.04]` → `.tile`
-- 3.5. Replace `bg-white/[.05]`, `.06`, `.07` → `bg-white/[.04]` (converge hover)
-- 3.6. Replace `bg-umbra-surface/40` (outside `.glass`) → `.glass` or remove if inside a `.glass`
+- [ ] 3.1. Replace `bg-white/[.035]` → `.tile` on stat boxes (keep existing padding if different)
+- [ ] 3.2. Replace `bg-white/[.02]` → `.tile` on small stat boxes
+- [ ] 3.3. Replace `bg-white/[.03]` → `.tile`
+- [ ] 3.4. Replace `bg-white/[.04]` → `.tile`
+- [ ] 3.5. Replace `bg-white/[.05]`, `.06`, `.07` → `bg-white/[.04]` (converge hover)
+- [ ] 3.6. Replace `bg-umbra-surface/40` (outside `.glass`) → `.glass` or remove if inside a `.glass`
 
 **Verify:** typecheck, lint, grep shows 0 old variants remain.
 
@@ -192,9 +194,9 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- 4.1. `sed` replace `rounded-xl` → `rounded-lg` across all components
-- 4.2. `sed` replace `rounded-md` → `rounded-lg` across all components
-- 4.3. Replace `rounded-[10px]` → `rounded-lg` in `navigation.tsx`
+- [ ] 4.1. `sed` replace `rounded-xl` → `rounded-lg` across all components
+- [ ] 4.2. `sed` replace `rounded-md` → `rounded-lg` across all components
+- [ ] 4.3. Replace `rounded-[10px]` → `rounded-lg` in `navigation.tsx`
 
 **Verify:** typecheck, lint, grep shows 0 `rounded-xl`, `rounded-md`, or `rounded-[10px]`.
 
@@ -207,10 +209,10 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- 5.1. Replace `hover:bg-white/[.035]`, `hover:bg-white/[.05]`, `hover:bg-white/[.06]`, `hover:bg-white/[.07]` → `hover:bg-white/[.04]`
-- 5.2. Replace `hover:bg-umbra-surface/50` → `hover:bg-umbra-purple/10`
-- 5.3. Replace `hover:bg-umbra-purple/20` → `hover:bg-umbra-purple/10`
-- 5.4. Keep `hover:bg-umbra-purple/10` as-is (already correct)
+- [ ] 5.1. Replace `hover:bg-white/[.035]`, `hover:bg-white/[.05]`, `hover:bg-white/[.06]`, `hover:bg-white/[.07]` → `hover:bg-white/[.04]`
+- [ ] 5.2. Replace `hover:bg-umbra-surface/50` → `hover:bg-umbra-purple/10`
+- [ ] 5.3. Replace `hover:bg-umbra-purple/20` → `hover:bg-umbra-purple/10`
+- [ ] 5.4. Keep `hover:bg-umbra-purple/10` as-is (already correct)
 
 **Verify:** typecheck, lint, grep shows only 2 hover bg values.
 
@@ -223,9 +225,9 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- 6.1. Audit each `text-sm` usage — if it's a card subtitle/description, change to `text-xs`
-- 6.2. If it's a nav label or a large body text, keep `text-sm`
-- 6.3. Add `tabular-nums` to all numeric stat values (`font-display text-lg` patterns)
+- [ ] 6.1. Audit each `text-sm` usage — if it's a card subtitle/description, change to `text-xs`
+- [ ] 6.2. If it's a nav label or a large body text, keep `text-sm`
+- [ ] 6.3. Add `tabular-nums` to all numeric stat values (`font-display text-lg` patterns)
 
 **Verify:** typecheck, lint, browser visual check.
 
@@ -238,10 +240,10 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- 7.1. Replace `border-umbra-purple/30` → `border-umbra-purple/40` (converge)
-- 7.2. Replace `border-umbra-purple/60` → `border-umbra-purple/50` (converge)
-- 7.3. Replace `border-umbra-line/40`, `border-umbra-line/30` → `border-umbra-line/50` (converge hover borders)
-- 7.4. Replace `shadow-md`, `shadow-sm` → `shadow-lg` (converge; cards use `shadow-2xl` via `.glass`)
+- [ ] 7.1. Replace `border-umbra-purple/30` → `border-umbra-purple/40` (converge)
+- [ ] 7.2. Replace `border-umbra-purple/60` → `border-umbra-purple/50` (converge)
+- [ ] 7.3. Replace `border-umbra-line/40`, `border-umbra-line/30` → `border-umbra-line/50` (converge hover borders)
+- [ ] 7.4. Replace `shadow-md`, `shadow-sm` → `shadow-lg` (converge; cards use `shadow-2xl` via `.glass`)
 
 **Verify:** typecheck, lint, grep shows only standard values.
 
@@ -254,10 +256,10 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 **Files:** All `components/**/*.tsx`
 
 **Tasks:**
-- 8.1. Replace `p-4` → `p-5` on card surfaces (Level 1 `.glass` elements)
-- 8.2. Replace `p-6` → `p-5` on card surfaces
-- 8.3. Replace `p-2` → `p-3` on inner tiles (Level 2)
-- 8.4. Keep `p-8` for empty/error states (they need more breathing room)
+- [ ] 8.1. Replace `p-4` → `p-5` on card surfaces (Level 1 `.glass` elements)
+- [ ] 8.2. Replace `p-6` → `p-5` on card surfaces
+- [ ] 8.3. Replace `p-2` → `p-3` on inner tiles (Level 2)
+- [ ] 8.4. Keep `p-8` for empty/error states (they need more breathing room)
 
 **Verify:** typecheck, lint, browser visual check.
 
@@ -281,16 +283,16 @@ the transition feels abrupt.
 **Files:** `components/navigation.tsx`
 
 **Tasks:**
-- 9.1. Replace `<img>` logo with `<Image>` component
-- 9.2. Replace `rounded-[10px]` → `rounded-lg` on nav items
-- 9.3. Standardize active state: `bg-umbra-purple/10 text-umbra-lilac` (already correct)
-- 9.4. Standardize inactive hover: `hover:bg-white/[.04]` (replace `hover:bg-white/5`)
-- 9.5. Add iOS safe-area padding (`pb-[env(safe-area-inset-bottom)]`) on mobile bottom bar
-- 9.6. **Fix the resize jank:** Change collapsed width from `lg:w-20` (80px) to `lg:w-16` (64px) — tighter, more standard icon-only width. The smaller delta (240→64 = 176px → 240→64 = 176px... same delta but tighter collapsed state looks more intentional).
-- 9.7. **Smooth the transition:** Change `transition-[width] duration-300 ease-in-out` to `transition-[width] duration-200 ease-out` — faster, less noticeable. The 300ms duration makes the resize feel slow and drawn-out; 200ms feels snappy.
-- 9.8. **Prevent content jump:** Add `transition-[margin] duration-200 ease-out` is NOT needed — the flex layout handles this automatically because the sidebar is `lg:sticky lg:shrink-0`. The content `<main>` has `flex-1` so it reflows smoothly. The perceived jank is from the 300ms duration + the large visual delta. Fixing 9.6 + 9.7 resolves it.
-- 9.9. **Smooth the logo/wordmark fade:** Change `transition-all duration-300` to `transition-all duration-200` on the logo area + nav labels — match the width transition speed.
-- 9.10. **Smooth the status footer fade:** Change `transition-opacity duration-300` to `transition-opacity duration-200`.
+- [ ] 9.1. Replace `<img>` logo with `<Image>` component
+- [ ] 9.2. Replace `rounded-[10px]` → `rounded-lg` on nav items
+- [ ] 9.3. Standardize active state: `bg-umbra-purple/10 text-umbra-lilac` (already correct)
+- [ ] 9.4. Standardize inactive hover: `hover:bg-white/[.04]` (replace `hover:bg-white/5`)
+- [ ] 9.5. Add iOS safe-area padding (`pb-[env(safe-area-inset-bottom)]`) on mobile bottom bar
+- [ ] 9.6. **Fix the resize jank:** Change collapsed width from `lg:w-20` (80px) to `lg:w-16` (64px) — tighter, more standard icon-only width. The smaller delta (240→64 = 176px → 240→64 = 176px... same delta but tighter collapsed state looks more intentional).
+- [ ] 9.7. **Smooth the transition:** Change `transition-[width] duration-300 ease-in-out` to `transition-[width] duration-200 ease-out` — faster, less noticeable. The 300ms duration makes the resize feel slow and drawn-out; 200ms feels snappy.
+- [ ] 9.8. **Prevent content jump:** Add `transition-[margin] duration-200 ease-out` is NOT needed — the flex layout handles this automatically because the sidebar is `lg:sticky lg:shrink-0`. The content `<main>` has `flex-1` so it reflows smoothly. The perceived jank is from the 300ms duration + the large visual delta. Fixing 9.6 + 9.7 resolves it.
+- [ ] 9.9. **Smooth the logo/wordmark fade:** Change `transition-all duration-300` to `transition-all duration-200` on the logo area + nav labels — match the width transition speed.
+- [ ] 9.10. **Smooth the status footer fade:** Change `transition-opacity duration-300` to `transition-opacity duration-200`.
 
 **Verify:** typecheck, lint, browser desktop — toggle collapse/expand 5×, verify no jarring jump.
 
@@ -303,11 +305,11 @@ the transition feels abrupt.
 **Files:** Various
 
 **Tasks:**
-- 10.1. Bump `umbra-muted` from `#A89CC4` → `#B0A4CC` (slightly lighter, better WCAG AA at small sizes)
-- 10.2. Add `tabular-nums` to all countdowns + stat values
-- 10.3. Add `truncate` + `title={name}` tooltip on all member name displays
-- 10.4. Add `even:bg-white/[.015]` alternating rows on dense leaderboards (HoF cards, clan log, contribution table)
-- 10.5. Standardize grid gaps: card grids → `gap-4`, tile grids → `gap-2`
+- [ ] 10.1. Bump `umbra-muted` from `#A89CC4` → `#B0A4CC` (slightly lighter, better WCAG AA at small sizes)
+- [ ] 10.2. Add `tabular-nums` to all countdowns + stat values
+- [ ] 10.3. Add `truncate` + `title={name}` tooltip on all member name displays
+- [ ] 10.4. Add `even:bg-white/[.015]` alternating rows on dense leaderboards (HoF cards, clan log, contribution table)
+- [ ] 10.5. Standardize grid gaps: card grids → `gap-4`, tile grids → `gap-2`
 
 **Verify:** typecheck, lint, browser visual check.
 
@@ -323,24 +325,24 @@ cards, charts, tabs, modals, and popups. Install framer-motion.
 **Tasks:**
 
 **Page transitions:**
-- 11.1. Install `framer-motion`
-- 11.2. Add page transition wrapper in `app/layout.tsx` — fade-in
+- [ ] 11.1. Install `framer-motion`
+- [ ] 11.2. Add page transition wrapper in `app/layout.tsx` — fade-in
   (`opacity: 0→1`, 200ms, `ease-out`) on route change. Use
   `usePathname()` as the `key` so the transition fires on every navigation.
-- 11.3. Add a subtle slide-up (`translateY: 8px → 0`, 200ms) combined
+- [ ] 11.3. Add a subtle slide-up (`translateY: 8px → 0`, 200ms) combined
   with the fade — so pages "rise into view" like moonlight.
 
 **Card mount:**
-- 11.4. Add card mount animation on `.glass` elements — fade + slight
+- [ ] 11.4. Add card mount animation on `.glass` elements — fade + slight
   translateY (`8px→0`, 200ms, staggered by 50ms per card so cards cascade
   in from top to bottom).
 
 **Card hover:**
-- 11.5. Add card hover: border brighten (`hover:border-umbra-line/50`) +
+- [ ] 11.5. Add card hover: border brighten (`hover:border-umbra-line/50`) +
   slight lift (`hover:-translate-y-px`, 150ms, `ease`).
 
 **Chart time-frame switching:**
-- 11.6. **Animate chart data transitions** when switching between 24h/7d/30d
+- [ ] 11.6. **Animate chart data transitions** when switching between 24h/7d/30d
   tabs. Currently the chart data swaps instantly with no animation — it
   feels jarring. Use Framer Motion's `<motion.div key={window}>` wrapper
   so the chart container fades + slides when the tab changes:
@@ -349,7 +351,7 @@ cards, charts, tabs, modals, and popups. Install framer-motion.
   - Apply to: `donation-chart.tsx`, `activity-analytics.tsx` chart area,
     `war-performance-chart.tsx`, `war-attack-distribution.tsx`,
     `roster-size-chart.tsx`
-- 11.7. **Animate the Recharts data change** itself — Recharts supports
+- [ ] 11.7. **Animate the Recharts data change** itself — Recharts supports
   `isAnimationActive={true}` + `animationDuration={300}` + `animationEasing="ease-out"`.
   Enable these on all `<LineChart>`, `<BarChart>`, `<AreaChart>`,
   `<PieChart>` components so the bars/lines animate to their new positions
@@ -357,26 +359,26 @@ cards, charts, tabs, modals, and popups. Install framer-motion.
   the chart visually morphs from one time-frame's data to another.
 
 **Tab switch:**
-- 11.8. Add `layoutId` underline slide on the `<Tabs>` component — the
+- [ ] 11.8. Add `layoutId` underline slide on the `<Tabs>` component — the
   active tab indicator slides horizontally between tabs instead of
   teleporting. Use Framer Motion `motion.layout`.
 
 **Modal/sheet open + close:**
-- 11.9. Add modal open: `scale: 0.96→1` + `opacity: 0→1` (150ms,
+- [ ] 11.9. Add modal open: `scale: 0.96→1` + `opacity: 0→1` (150ms,
   `ease-out`).
-- 11.10. Add modal close: `scale: 1→0.96` + `opacity: 1→0` (100ms,
+- [ ] 11.10. Add modal close: `scale: 1→0.96` + `opacity: 1→0` (100ms,
   `ease-in`).
-- 11.11. Apply to: `MemberDetailSheet`, `WarDetailSheet`, all `<Modal>`
+- [ ] 11.11. Apply to: `MemberDetailSheet`, `WarDetailSheet`, all `<Modal>`
   usages.
 
 **Popup/sheet content transitions:**
-- 11.12. When content inside a modal/sheet changes (e.g. loading → data,
+- [ ] 11.12. When content inside a modal/sheet changes (e.g. loading → data,
   or switching between sections), animate the content swap: old content
   fades out (100ms), new content fades in (150ms). Use `AnimatePresence`
   with `mode="wait"`.
 
 **Reduced motion:**
-- 11.13. Add `prefers-reduced-motion` guard — check `useReducedMotion()`.
+- [ ] 11.13. Add `prefers-reduced-motion` guard — check `useReducedMotion()`.
   If true: disable all transforms (translateY, scale), keep opacity
   transitions (they're not motion). Duration → 0ms.
 
@@ -391,11 +393,11 @@ reduced-motion.
 **Goal:** Final consistency sweep + full verification.
 
 **Tasks:**
-- 12.1. Grep audit: verify 0 remaining `rounded-xl`, `rounded-md`, `rounded-[10px]`, `bg-white/[.035]`, `bg-white/[.06]`, `bg-white/[.07]`, `hover:bg-white/[.05]`, `hover:bg-umbra-purple/20`
-- 12.2. Full typecheck + lint + test run
-- 12.3. Browser smoke test on all 5 pages (desktop + mobile)
-- 12.4. Keyboard navigation test
-- 12.5. Color contrast check (WCAG AA)
+- [ ] 12.1. Grep audit: verify 0 remaining `rounded-xl`, `rounded-md`, `rounded-[10px]`, `bg-white/[.035]`, `bg-white/[.06]`, `bg-white/[.07]`, `hover:bg-white/[.05]`, `hover:bg-umbra-purple/20`
+- [ ] 12.2. Full typecheck + lint + test run
+- [ ] 12.3. Browser smoke test on all 5 pages (desktop + mobile)
+- [ ] 12.4. Keyboard navigation test
+- [ ] 12.5. Color contrast check (WCAG AA)
 
 **Verify:** everything passes.
 
@@ -422,18 +424,18 @@ This plan does the opposite: **converge what already exists** into a consistent 
 
 | Phase | Goal | Files | Est. time |
 |---|---|---|---|
-| 1 | Font loading (next/font) | 1 | 15 min |
-| 2 | CSS utilities (.tile, .hover-row, .hover-card) | 2 | 10 min |
-| 3 | Background standardization (10 → 2) | ~15 | 25 min |
-| 4 | Radius standardization (5 → 3) | ~15 | 10 min |
-| 5 | Hover standardization (7 → 2) | ~15 | 15 min |
-| 6 | Text size standardization + tabular-nums | ~15 | 20 min |
-| 7 | Border + shadow standardization | ~15 | 15 min |
-| 8 | Padding standardization | ~15 | 15 min |
-| 9 | Navigation polish (resize fix + logo + safe-area) | 1 | 20 min |
-| 10 | Readability pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
-| 11 | Animations (pages, charts, tabs, modals, popups) | ~10 | 45 min |
-| 12 | Final verification | 0 | 15 min |
+| 1 | Font loading (next/font) | ✅ COMPLETE | 1 | 15 min |
+| 2 | CSS utilities | ⬜ TODO | (.tile, .hover-row, .hover-card) | 2 | 10 min |
+| 3 | Background | ⬜ TODO | standardization (10 → 2) | ~15 | 25 min |
+| 4 | Radius | ⬜ TODO | standardization (5 → 3) | ~15 | 10 min |
+| 5 | Hover | ⬜ TODO | standardization (7 → 2) | ~15 | 15 min |
+| 6 | Text | ⬜ TODO | size standardization + tabular-nums | ~15 | 20 min |
+| 7 | Border | ⬜ TODO | + shadow standardization | ~15 | 15 min |
+| 8 | Padding | ⬜ TODO | standardization | ~15 | 15 min |
+| 9 | Navigation | ⬜ TODO | polish (resize fix + logo + safe-area) | 1 | 20 min |
+| 10 | Readability | ⬜ TODO | pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
+| 11 | Animations | ⬜ TODO | (pages, charts, tabs, modals, popups) | ~10 | 45 min |
+| 12 | Final | ⬜ TODO | verification | 0 | 15 min |
 | **Total** | | | **~3.75 hours** |
 
 Each phase can be committed + pushed independently. If any phase causes issues, it can be reverted without affecting the others.
