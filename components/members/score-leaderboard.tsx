@@ -103,8 +103,11 @@ export function ScoreLeaderboard({
         ariaLabel="Full Activity Score Leaderboard"
         maxWidth="max-w-2xl"
       >
-        <div className="mb-6">
-          <h2 className="font-display text-xl text-umbra-lilac">
+        <div className="mb-5 border-b border-umbra-line/40 pb-4">
+          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
+            Member Activity Score
+          </p>
+          <h2 className="mt-1 font-display text-xl text-umbra-lilac">
             Full Activity Score Leaderboard
           </h2>
         </div>

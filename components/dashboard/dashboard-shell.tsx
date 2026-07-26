@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
@@ -18,7 +18,6 @@ import { WarPerformanceChart } from "./war-performance-chart";
 import { WarAttackDistributionChart } from "./war-attack-distribution";
 import { RosterSizeChart } from "./roster-size-chart";
 import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
-import { useServerClock } from "@/lib/time/use-server-clock";
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
@@ -31,12 +30,8 @@ import { useServerClock } from "@/lib/time/use-server-clock";
  */
 export function DashboardShell({
   data,
-  serverNow,
 }: {
   data: DashboardData;
-  /** Server's current time in ms — passed to the freshness footer so the
-   * "next update overdue" calculation is immune to client clock skew. */
-  serverNow: number;
 }) {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
 
@@ -212,152 +207,11 @@ export function DashboardShell({
         />
       </div>
 
-      {/* Compact data freshness footer with next-poll countdown */}
-      <FreshnessFooter
-        lastPoll={data.clan.lastPolledAt}
-        lastBatch={data.clan.lastDailyBatchAt}
-        trackingStart={data.trackingStart}
-        warSynced={data.warSummary.lastSyncedAt}
-        serverNow={serverNow}
-      />
-
-      {/* Footer */}
-      <footer className="mt-6 border-t border-umbra-line pt-4 text-center">
-        <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">
-          Umbra Lunaria · Clan Observatory · Single-clan deployment
-        </p>
-      </footer>
-
       {/* Member detail sheet — fetches full detail on click */}
       <MemberDetailSheet
         playerTag={selectedMember}
         onClose={() => setSelectedMember(null)}
       />
-    </div>
-  );
-}
-
-/**
- * Freshness footer with live countdown to the next expected poll.
- * The poll interval is 5 minutes (third-party cron-job service, every-5-min
- * schedule — see docs/concept/04). The countdown shows how long until the next
- * poll should fire.
- *
- * Clock-drift tolerant: uses the server's current time (passed as `serverNow`)
- * to compute the countdown, so a misconfigured client clock (e.g. a school lab
- * PC set to the wrong date) won't produce a false "overdue" badge. See
- * lib/time/use-server-clock.ts.
- */
-function FreshnessFooter({
-  lastPoll,
-  lastBatch,
-  trackingStart,
-  warSynced,
-  serverNow,
-}: {
-  lastPoll: Date | string | null;
-  lastBatch: Date | string | null;
-  trackingStart: Date | string | null;
-  warSynced: Date | string | null;
-  /** Server's current time in ms (from the server component at render time). */
-  serverNow: number;
-}) {
-  const POLL_INTERVAL_MINUTES = 5;
-  const { serverNow: getServerNow, mounted } = useServerClock(serverNow);
-  const [tick, setTick] = useState(0);
-
-  // Re-render every second for the countdown — the actual time comes from
-  // getServerNow(), not Date.now(), so it's drift-corrected.
-  useEffect(() => {
-    const timer = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  void tick; // forces re-render so `now` is recomputed each second
-
-  // Use the server-adjusted time for all calculations.
-  const now = mounted ? getServerNow() : serverNow;
-
-  // Calculate next poll time: last poll + 5 min
-  const lastPollDate = lastPoll ? new Date(lastPoll) : null;
-  const nextPollDate = lastPollDate
-    ? new Date(lastPollDate.getTime() + POLL_INTERVAL_MINUTES * 60 * 1000)
-    : null;
-  const msUntilNext = nextPollDate ? nextPollDate.getTime() - now : null;
-  const isOverdue = msUntilNext !== null && msUntilNext < 0;
-
-  // Auto-refresh the page 5 seconds after becoming overdue
-  const [reloading, setReloading] = useState(false);
-  useEffect(() => {
-    if (msUntilNext !== null && msUntilNext < -5000 && !reloading) {
-      // Prevent infinite reload loops if the cron is genuinely broken
-      const attemptKey = `reloaded_${lastPoll}`;
-      if (sessionStorage.getItem(attemptKey)) return;
-
-      setReloading(true);
-      sessionStorage.setItem(attemptKey, "true");
-      window.location.reload();
-    }
-  }, [msUntilNext, reloading, lastPoll]);
-
-  // Format countdown
-  const countdownText = (() => {
-    if (reloading) return "refreshing...";
-    if (msUntilNext === null) return "—";
-    if (isOverdue) return "overdue";
-    const totalSeconds = Math.floor(msUntilNext / 1000);
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  })();
-
-  const fmt = (d: Date | string | null) =>
-    d && mounted
-      ? new Date(d).toLocaleString("en-US", {
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          timeZone: "Asia/Manila",
-        })
-      : "—";
-
-  return (
-    <div className="mt-4 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 rounded-lg border border-umbra-line/50 bg-umbra-ink/30 px-4 py-3">
-      <Chip label="Last update" value={fmt(lastPoll)} />
-      <Chip label="Daily batch" value={fmt(lastBatch)} />
-      <Chip label="Tracking" value={fmt(trackingStart)} />
-      <Chip label="War synced" value={fmt(warSynced)} />
-      {/* Next poll countdown */}
-      <div className="flex items-center gap-1.5 border-l border-umbra-line/50 pl-5">
-        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
-          Next update
-        </span>
-        <span
-          className={`font-mono text-label font-bold ${
-            isOverdue
-              ? "text-amber-400"
-              : msUntilNext !== null && msUntilNext < 60000
-                ? "text-amber-400"
-                : "text-emerald-400"
-          }`}
-          suppressHydrationWarning
-        >
-          {mounted ? countdownText : "—"}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function Chip({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
-        {label}
-      </span>
-      <span className="font-mono text-label text-umbra-lilac" suppressHydrationWarning>
-        {value}
-      </span>
     </div>
   );
 }

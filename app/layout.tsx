@@ -3,6 +3,8 @@ import { Cinzel, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { PageTransition } from "@/components/ui/page-transition";
+import { Footer } from "@/components/layout/footer";
+import { getPollStatuses } from "@/lib/db/queries";
 import { cookies } from "next/headers";
 
 /**
@@ -54,6 +56,22 @@ export default async function RootLayout({
 }) {
   const cookieStore = await cookies();
   const isCollapsed = cookieStore.get("umbra_sidebar_collapsed")?.value === "true";
+
+  // Fetch poll statuses once per page render for the global freshness footer.
+  // Best-effort: if the DB is unreachable, render the footer with nulls so the
+  // page still loads (the footer shows "—" for every field).
+  let pollStatuses;
+  try {
+    pollStatuses = await getPollStatuses();
+  } catch {
+    pollStatuses = {
+      lastPoll: null,
+      lastBatch: null,
+      trackingStart: null,
+      warSynced: null,
+    };
+  }
+
   return (
     <html
       lang="en"
@@ -62,8 +80,11 @@ export default async function RootLayout({
       <body className="min-h-screen antialiased">
         <div className="min-h-screen lg:flex">
           <Navigation initialCollapsed={isCollapsed} />
-          <main className="min-w-0 flex-1 pb-20 lg:pb-0">
-            <PageTransition>{children}</PageTransition>
+          <main className="flex min-h-screen min-w-0 flex-1 flex-col pb-20 lg:pb-0">
+            <div className="flex-1">
+              <PageTransition>{children}</PageTransition>
+            </div>
+            <Footer statuses={pollStatuses} serverNow={Date.now()} />
           </main>
         </div>
       </body>

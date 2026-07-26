@@ -74,7 +74,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
   return (
     <div>
       {/* Header: league icon + name/tag + TH badge */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 border-b border-umbra-line/40 pb-4">
         {p.leagueTier?.iconUrls?.small && (
           <Image src={p.leagueTier.iconUrls.small} alt={p.leagueTier.name} width={56} height={56} className="h-14 w-14 shrink-0" unoptimized />
         )}

@@ -72,6 +72,48 @@ import { computeWindow, generateBuckets, isSameDayInClanTz } from "@/lib/time/wi
 const CLAN_TAG = clanConfig.clanTag;
 
 // ---------------------------------------------------------------------------
+// Poll-status (global footer)
+// ---------------------------------------------------------------------------
+
+/**
+ * Lightweight read for the global freshness footer — the four timestamps + the
+ * tracking-start epoch shown on every page. Runs two small queries (one clan
+ * row, one `min(last_synced_at)` over wars) so the footer doesn't pull the
+ * full dashboard query bundle. Returns `null` fields when there is no data.
+ */
+export type PollStatuses = {
+  lastPoll: Date | null;
+  lastBatch: Date | null;
+  trackingStart: Date | null;
+  warSynced: Date | null;
+};
+
+export async function getPollStatuses(): Promise<PollStatuses> {
+  const [clanRow] = await db
+    .select({
+      lastPolledAt: clans.lastPolledAt,
+      lastDailyBatchAt: clans.lastDailyBatchAt,
+    })
+    .from(clans)
+    .where(eq(clans.clanTag, CLAN_TAG))
+    .limit(1);
+
+  const [trackingRow] = await db
+    .select({
+      earliest: sql<Date>`min(${wars.lastSyncedAt})`,
+      latest: sql<Date>`max(${wars.lastSyncedAt})`,
+    })
+    .from(wars);
+
+  return {
+    lastPoll: clanRow?.lastPolledAt ?? null,
+    lastBatch: clanRow?.lastDailyBatchAt ?? null,
+    trackingStart: trackingRow?.earliest ?? null,
+    warSynced: trackingRow?.latest ?? null,
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Clan identity, war record, Capital summary
 // ---------------------------------------------------------------------------
 
