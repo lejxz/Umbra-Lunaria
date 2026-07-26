@@ -435,7 +435,12 @@ This plan does the opposite: **converge what already exists** into a consistent 
 | 9 | Navigation | ⬜ TODO | polish (resize fix + logo + safe-area) | 1 | 20 min |
 | 10 | Readability | ⬜ TODO | pass (contrast, tooltips, alternating rows) | ~10 | 20 min |
 | 11 | Animations | ⬜ TODO | (pages, charts, tabs, modals, popups) | ~10 | 45 min |
-| 12 | Final | ⬜ TODO | verification | 0 | 15 min |
+| 12 | Final | ⬜ TODO | verification (includes /strategy page) | 0 | 15 min |
 | **Total** | | | **~3.75 hours** |
+
+> **Note:** The `/strategy` page (War Strategy) was added after this plan was
+> written. All find-and-replace phases (3-8) apply to it automatically since
+> it uses the same `.glass`, `bg-white/[.015]`, and inline patterns as the
+> other pages. Phase 12 verification includes a smoke test of `/strategy`.
 
 Each phase can be committed + pushed independently. If any phase causes issues, it can be reverted without affecting the others.
