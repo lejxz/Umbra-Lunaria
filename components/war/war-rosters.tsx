@@ -33,9 +33,11 @@ import {
 export function WarRosters({
   currentWar,
   onMemberClick,
+  contained = true,
 }: {
   currentWar: CurrentWarDetail;
   onMemberClick: (playerTag: string) => void;
+  contained?: boolean;
 }) {
   const isPrep = currentWar.state === "preparation";
   // Battle/ended default to "attacks" (urgency matters mid-war); prep defaults
@@ -55,7 +57,7 @@ export function WarRosters({
   }
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-rosters-title">
+    <section className={contained ? "glass flex flex-col rounded-2xl p-5" : "flex flex-col"} aria-labelledby="war-rosters-title">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           {isPrep ? "Preparation · scout" : "War roster"}
@@ -184,7 +186,7 @@ function RosterColumn({
   opposingThByPos: Map<number, number>;
 }) {
   return (
-    <div className="glass flex flex-col rounded-lg">
+    <div className="data-container flex flex-col">
       <div className="flex items-center justify-between border-b border-umbra-line/40 px-3 py-2">
         <span
           className={`font-display text-sm ${tone === "opponent" ? "text-red-300/90" : "text-umbra-lilac"}`}
@@ -203,7 +205,7 @@ function RosterColumn({
             <thead className="data-thead">
               <tr>
                 <th className="w-8 data-th text-center font-medium">#</th>
-                <th className="data-th font-medium">Player</th>
+                <th className="data-th font-medium w-full">Player</th>
                 <th className="w-12 data-th font-medium">TH</th>
                 <th className="w-12 data-th font-medium text-center">Adv</th>
                 <th className="w-32 data-th text-right font-medium">
@@ -269,7 +271,7 @@ function RosterRow({
       </td>
 
       {/* Name */}
-      <td className="px-2 py-2 align-middle">
+      <td className="px-2 py-2 align-middle max-w-0 w-full">
         <div className="min-w-0 truncate text-xs text-umbra-lilac" title={m.name}>
           {m.name}
         </div>

@@ -17,14 +17,16 @@ export function WarAttackLog({
   attackLog,
   warState,
   onMemberClick,
+  contained = true,
 }: {
   attackLog: WarAttackLogEntry[];
   warState: "preparation" | "inWar" | "warEnded";
   onMemberClick: (playerTag: string) => void;
+  contained?: boolean;
 }) {
   if (warState === "preparation" || attackLog.length === 0) {
     return (
-      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-attacks-title">
+      <section className={contained ? "glass flex flex-col rounded-2xl p-5" : "flex flex-col"} aria-labelledby="war-attacks-title">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
         <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
         <div className="mt-4">
@@ -38,7 +40,7 @@ export function WarAttackLog({
   }
 
   return (
-    <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-attacks-title">
+    <section className={contained ? "glass flex flex-col rounded-2xl p-5" : "flex flex-col"} aria-labelledby="war-attacks-title">
       <div className="flex items-center justify-between">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">Attack log</p>
         <span className="text-2xs text-umbra-muted">{attackLog.length} attacks</span>
@@ -50,9 +52,9 @@ export function WarAttackLog({
           <thead className="data-thead">
             <tr>
               <th className="w-8 data-th text-center">#</th>
-              <th className="w-[35%] data-th text-right pr-4">Attacker</th>
-              <th className="w-10 data-th text-center px-0"></th>
-              <th className="w-[35%] data-th pl-4">Defender</th>
+              <th className="w-1/2 data-th text-right pr-4">Attacker</th>
+              <th className="w-8 data-th text-center px-0"></th>
+              <th className="w-1/2 data-th pl-4">Defender</th>
               <th className="w-12 data-th text-center">★</th>
               <th className="hidden w-16 data-th text-right sm:table-cell">Destr.</th>
               <th className="hidden w-16 data-th text-right sm:table-cell">Dur.</th>

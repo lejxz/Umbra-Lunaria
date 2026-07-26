@@ -109,7 +109,7 @@ function WarDetailContent({
   return (
     <div className="space-y-5">
       {/* ---- Header ---- */}
-      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="war-detail-title">
+      <section className="flex flex-col" aria-labelledby="war-detail-title">
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-umbra-line/40 pb-4">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
@@ -221,7 +221,7 @@ function WarDetailContent({
       </section>
 
       {/* ---- Analysis panel ---- */}
-      <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="analysis-title">
+      <section className="flex flex-col" aria-labelledby="analysis-title">
         <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
           Analysis
         </p>
@@ -296,6 +296,7 @@ function WarDetailContent({
       <div>
         <WarRosters
           currentWar={w}
+          contained={false}
           onMemberClick={() => {}} // Disabled in detail view as per original concept
         />
       </div>
@@ -305,6 +306,7 @@ function WarDetailContent({
         <WarAttackLog
           attackLog={attackLog}
           warState={w.state}
+          contained={false}
           onMemberClick={() => {}} // Disabled in detail view
         />
       </div>
