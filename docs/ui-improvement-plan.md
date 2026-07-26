@@ -151,7 +151,7 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 
 ---
 
-### Phase 2: CSS Standardization
+### Phase 2: CSS Standardization ✅ COMPLETE
 
 **Goal:** Converge the 10 bg-white variants + 7 hover variants + 5 radius variants + 10 border variants into the standardized rules in §2.
 
@@ -160,10 +160,10 @@ Each phase is small, focused, and independently verifiable. No phase changes mor
 ### Phase 2: CSS Standardization
 
 **Tasks:**
-- [ ] 2.1. Add `.tile` class to globals.css (`rounded-lg border border-white/[.04] bg-white/[.03] p-3`)
-- [ ] 2.2. Add `.hover-row` class (`transition hover:bg-white/[.04]`)
-- [ ] 2.3. Add `.hover-card` class (`transition hover:border-umbra-line/50`)
-- [ ] 2.4. Keep `.glass` unchanged (it's already the Level 1 standard)
+- [x] 2.1. Add `.tile` class to globals.css (`rounded-lg border border-white/[.04] bg-white/[.03] p-3`)
+- [x] 2.2. Add `.hover-row` class (`transition hover:bg-white/[.04]`)
+- [x] 2.3. Add `.hover-card` class (`transition hover:border-umbra-line/50`)
+- [x] 2.4. Keep `.glass` unchanged (it's already the Level 1 standard)
 
 **Verify:** typecheck, lint. No visual change yet — just adds utility classes.
 
@@ -425,7 +425,7 @@ This plan does the opposite: **converge what already exists** into a consistent 
 | Phase | Goal | Files | Est. time |
 |---|---|---|---|
 | 1 | Font loading (next/font) | ✅ COMPLETE | 1 | 15 min |
-| 2 | CSS utilities | ⬜ TODO | (.tile, .hover-row, .hover-card) | 2 | 10 min |
+| 2 | CSS utilities | ✅ COMPLETE | (.tile, .hover-row, .hover-card) | 2 | 10 min |
 | 3 | Background | ⬜ TODO | standardization (10 → 2) | ~15 | 25 min |
 | 4 | Radius | ⬜ TODO | standardization (5 → 3) | ~15 | 10 min |
 | 5 | Hover | ⬜ TODO | standardization (7 → 2) | ~15 | 15 min |

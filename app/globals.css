@@ -49,8 +49,20 @@ body > * {
 }
 
 @layer components {
+  /* Level 1 — card surface (the standard card wrapper). */
   .glass {
     @apply border border-umbra-line bg-umbra-surface/40 shadow-2xl backdrop-blur-md;
+  }
+  /* Level 2 — inner tile (stat box, row background inside a card). */
+  .tile {
+    @apply rounded-lg border border-white/[.04] bg-white/[.03];
+  }
+  /* Hover scale — only 2 values in the entire app. */
+  .hover-row {
+    @apply transition hover:bg-white/[.04];
+  }
+  .hover-card {
+    @apply transition hover:border-umbra-line/50;
   }
   .focus-ring {
     @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-umbra-purple focus-visible:ring-offset-2 focus-visible:ring-offset-umbra-ink;
