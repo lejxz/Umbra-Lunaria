@@ -14,7 +14,7 @@
 
 import { asc, desc, eq, sql, and, isNull, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { clans, capitalDistrictSnapshots, capitalRaidSeasons, capitalContributions, members } from "@/lib/db/schema";
+import { clans, capitalDistrictSnapshots, capitalRaidSeasons, capitalContributions, members, membershipEvents } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
 import { cocClient } from "@/lib/coc-client/client";
 import { parseCoCTime } from "@/lib/ingest/war-sync";
@@ -27,6 +27,7 @@ import type {
   RaidSeasonSummary,
   RaidContributionEntry,
   RaidContributionHistoryEntry,
+  ContributionLogEntry,
   RaidZeroAttackEntry,
   RaidParticipationSummary,
   RaidTimer,
@@ -326,12 +327,39 @@ export async function getRaidHistory(): Promise<RaidHistoryView | null> {
     raidWeekendMedals: r.raidWeekendMedals,
   }));
 
+  // ── Contribution log (from membership_events) ───────────────────────────
+  // Recent capital contribution deltas — logged during each batch poll when
+  // a member's lifetime clanCapitalContributions increases.
+  const logRows = await db
+    .select({
+      playerTag: membershipEvents.playerTag,
+      name: membershipEvents.nameAtEvent,
+      metadata: membershipEvents.metadata,
+      eventTime: membershipEvents.eventTime,
+    })
+    .from(membershipEvents)
+    .where(eq(membershipEvents.eventType, "capitalContribution"))
+    .orderBy(desc(membershipEvents.eventTime))
+    .limit(20);
+
+  const contributionLog: ContributionLogEntry[] = logRows.map((r) => {
+    const meta = r.metadata as { amount?: number; total?: number } | null;
+    return {
+      playerTag: r.playerTag,
+      name: r.name,
+      amount: meta?.amount ?? 0,
+      total: meta?.total ?? 0,
+      eventTime: r.eventTime,
+    };
+  });
+
   return {
     seasons: seasonSummaries,
     contributionLeaderboard,
     zeroAttackList,
     participation,
     contributionHistory,
+    contributionLog,
   };
 }
 

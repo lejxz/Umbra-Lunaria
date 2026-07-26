@@ -112,7 +112,16 @@ export interface RaidContributionHistoryEntry {
   raidWeekendMedals: number | null;
 }
 
-/** The full raid-history view model — summary + leaderboard + participation + history. */
+/** A single contribution log entry (from membership_events with eventType=capitalContribution). */
+export interface ContributionLogEntry {
+  playerTag: string;
+  name: string;
+  amount: number;
+  total: number;
+  eventTime: Date;
+}
+
+/** The full raid-history view model — summary + leaderboard + participation + history + log. */
 export interface RaidHistoryView {
   seasons: RaidSeasonSummary[];
   contributionLeaderboard: RaidContributionEntry[];
@@ -120,6 +129,8 @@ export interface RaidHistoryView {
   participation: RaidParticipationSummary;
   /** Per-member per-season contribution rows for the history table. */
   contributionHistory: RaidContributionHistoryEntry[];
+  /** Recent capital contribution log entries (from membership_events). */
+  contributionLog: ContributionLogEntry[];
 }
 
 // ---------------------------------------------------------------------------

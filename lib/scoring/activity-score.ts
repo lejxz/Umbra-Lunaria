@@ -100,10 +100,12 @@ export function computeActivityScore(
 ): Omit<MemberActivityScore, "rank"> {
   // --- Availability -------------------------------------------------------
   // Donations and activity are always available — their inputs are non-null.
-  // War is unavailable when opted out OR no tracked war data exists.
+  // War is available when the member has tracked war data (attacks allowed > 0),
+  // regardless of their current warPreference. An opted-out member who was in
+  // wars before should still see their war score — it reflects past
+  // performance, not future eligibility.
   // Capital is unavailable when no completed raid seasons are tracked.
   const warAvailable =
-    input.warPreference !== "out" &&
     input.warAttacksAllowed !== null &&
     input.warAttacksAllowed > 0;
   const capitalAvailable = input.capitalContribution !== null;

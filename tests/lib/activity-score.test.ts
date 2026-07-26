@@ -189,10 +189,32 @@ describe("computeActivityScore — capital unavailable re-normalizes to 35/25/25
   });
 });
 
-describe("computeActivityScore — warPreference 'out' excludes the war component", () => {
-  it("re-weights the remaining three components (35/25/15 over 75)", () => {
+describe("computeActivityScore — warPreference 'out' with war data still shows war score", () => {
+  // Changed: opted-out members who have war history should still see their war
+  // score — it reflects past performance, not future eligibility. The war
+  // component is only unavailable when there's no war data at all.
+  it("includes war when opted out but has attacks used/allowed", () => {
     const result = computeActivityScore(
-      baseInput({ warPreference: "out" }),
+      baseInput({
+        warPreference: "out",
+        warAttacksUsed: 4,
+        warAttacksAllowed: 8,
+      }),
+      baseMax(),
+      "30d",
+      trackingStart,
+      false,
+    );
+
+    const war = result.components.find((c) => c.name === "war");
+    expect(war?.available).toBe(true);
+    expect(war?.weight).toBeGreaterThan(0);
+    expect(war?.points).toBeGreaterThan(0);
+  });
+
+  it("excludes war when opted out AND has no war data (null attacks)", () => {
+    const result = computeActivityScore(
+      baseInput({ warPreference: "out", warAttacksUsed: null, warAttacksAllowed: null }),
       baseMax(),
       "30d",
       trackingStart,
@@ -216,28 +238,6 @@ describe("computeActivityScore — warPreference 'out' excludes the war componen
     // A member at the max on every available component still scores 100 —
     // the opt-out is informational, not a penalty (docs/concept/05 §5 rule 4).
     expect(result.totalScore).toBeCloseTo(100, 5);
-  });
-
-  it("still excludes war when the member had attacks used/allowed (no penalty)", () => {
-    // Member opted out mid-window but had some attacks recorded before.
-    const result = computeActivityScore(
-      baseInput({
-        warPreference: "out",
-        warAttacksUsed: 4,
-        warAttacksAllowed: 8,
-      }),
-      baseMax(),
-      "30d",
-      trackingStart,
-      false,
-    );
-
-    const war = result.components.find((c) => c.name === "war");
-    expect(war?.available).toBe(false);
-    expect(war?.weight).toBe(0);
-    expect(war?.points).toBe(0);
-    // rawValue still reflects the tracked attacks (transparency).
-    expect(war?.rawValue).toBe(4);
   });
 });
 

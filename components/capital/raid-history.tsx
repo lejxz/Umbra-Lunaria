@@ -5,6 +5,7 @@ import type {
   RaidHistoryView,
   RaidSeasonSummary,
   RaidContributionHistoryEntry,
+  ContributionLogEntry,
 } from "@/lib/view-models/capital";
 import {
   IconCapital,
@@ -200,6 +201,11 @@ export function RaidHistory({ history }: { history: RaidHistoryView }) {
           seasons={history.seasons}
         />
       )}
+
+      {/* ── Contribution log ────────────────────────────────────────────── */}
+      {history.contributionLog.length > 0 && (
+        <ContributionLog entries={history.contributionLog} />
+      )}
     </section>
   );
 }
@@ -392,6 +398,70 @@ function ContributionHistoryTable({
         <p className="mt-1 text-center text-xs text-umbra-muted">
           Showing top 15 of {memberRows.length} — click to expand all
         </p>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Contribution log — recent capital gold contributions
+// ---------------------------------------------------------------------------
+
+function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <div className="mt-5">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between rounded-lg border border-umbra-line bg-umbra-surface/30 px-3 py-2 text-left transition hover:bg-umbra-surface/50"
+        aria-expanded={open}
+      >
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+          Contribution log ({entries.length} recent)
+        </span>
+        {open ? (
+          <IconChevronUp className="h-4 w-4 text-umbra-muted" />
+        ) : (
+          <IconChevronDown className="h-4 w-4 text-umbra-muted" />
+        )}
+      </button>
+
+      {open && (
+        <ol className="mt-2 max-h-72 space-y-1 overflow-y-auto">
+          {entries.map((entry, i) => {
+            const timeLabel = entry.eventTime.toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              hour12: true,
+            });
+            return (
+              <li
+                key={`${entry.playerTag}-${i}`}
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 text-xs ${
+                  i % 2 === 0 ? "bg-white/[.015]" : ""
+                }`}
+              >
+                <span className="h-2 w-2 shrink-0 rounded-full bg-yellow-400/60" />
+                <span className="min-w-0 flex-1 truncate text-umbra-lilac">
+                  {entry.name}
+                </span>
+                <span className="shrink-0 font-mono font-semibold text-yellow-400">
+                  +{entry.amount.toLocaleString()}
+                </span>
+                <span className="shrink-0 font-mono text-umbra-muted/70">
+                  ({entry.total.toLocaleString()} total)
+                </span>
+                <span className="hidden shrink-0 font-mono text-umbra-muted/50 sm:block">
+                  {timeLabel}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
       )}
     </div>
   );

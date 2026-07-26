@@ -332,9 +332,17 @@ async function runDailyBatch(): Promise<string[]> {
 
   // ---- Full player profile per retained member ----
   const retained = await db
-    .select({ playerTag: members.playerTag })
+    .select({
+      playerTag: members.playerTag,
+      clanCapitalContributions: members.clanCapitalContributions,
+    })
     .from(members)
     .where(isNull(members.leftAt));
+
+  // Map of playerTag → old clanCapitalContributions (for delta computation).
+  const knownContribMap = new Map(
+    retained.map((r) => [r.playerTag, r.clanCapitalContributions ?? 0]),
+  );
 
   for (const { playerTag } of retained) {
     let player: CocPlayer;
@@ -368,6 +376,24 @@ async function runDailyBatch(): Promise<string[]> {
         lastDetailCaptureAt: capturedAt,
       })
       .where(eq(members.playerTag, playerTag));
+
+    // ---- Capital contribution delta log ----
+    // clanCapitalContributions is a lifetime total from the API. The delta
+    // between the previous value and the new value = the gold contributed
+    // since the last batch poll. Log it to membership_events so the capital
+    // page can show a contribution log.
+    const oldContrib = knownContribMap.get(playerTag) ?? 0;
+    const newContrib = player.clanCapitalContributions ?? 0;
+    const contribDelta = newContrib - oldContrib;
+    if (contribDelta > 0) {
+      await db.insert(membershipEvents).values({
+        playerTag,
+        nameAtEvent: player.name ?? playerTag,
+        eventType: "capitalContribution",
+        eventTime: capturedAt,
+        metadata: { amount: contribDelta, total: newContrib },
+      });
+    }
 
     // ---- unit_levels with pets filtered out of troops ----
     const { troops, pets } = splitTroopsAndPets(player.troops);

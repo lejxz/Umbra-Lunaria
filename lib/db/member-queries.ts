@@ -12,6 +12,7 @@ import {
   memberSnapshots,
   wars,
   warParticipants,
+  warAttacks,
   unitLevels,
   hallOfFameRecords,
 } from "@/lib/db/schema";
@@ -441,13 +442,30 @@ async function getWarDetail(playerTag: string) {
     starsEarned += wp.starsEarned;
   }
 
+  // Count 3-star attacks from the warAttacks table (was hardcoded to 0).
+  const warIds = wpRows.map((wp) => wp.warId);
+  let threeStarAttacks = 0;
+  if (warIds.length > 0) {
+    const threeStarRows = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(warAttacks)
+      .where(
+        and(
+          inArray(warAttacks.warId, warIds),
+          eq(warAttacks.attackerTag, playerTag),
+          eq(warAttacks.stars, 3),
+        ),
+      );
+    threeStarAttacks = threeStarRows[0]?.count ?? 0;
+  }
+
   const metrics = computeWarMetrics({
     warsTracked,
     warsMissed,
     totalAttacksUsed: attacksUsed,
     totalAttacksAllowed: attacksAllowed,
     totalStarsEarned: starsEarned,
-    threeStarAttacks: 0, // TODO: count from warAttacks
+    threeStarAttacks,
   });
 
   // Get recent wars
