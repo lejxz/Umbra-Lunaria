@@ -2,11 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-display: "Cinzel", Georgia, serif;
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
-}
+/* Font CSS variables (--font-display, --font-sans, --font-mono) are set by
+   next/font in app/layout.tsx via the `variable` option on each font. They
+   are applied to <html> as className. No :root definitions needed here —
+   next/font handles the variable injection. The fallbacks in the font
+   family declarations below (in tailwind.config.ts) handle the case where
+   the variable isn't set yet during SSR. */
 
 * {
   box-sizing: border-box;
@@ -24,7 +25,7 @@ body {
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: #eee5ff;
-  font-family: var(--font-sans);
+  font-family: var(--font-sans, "Inter"), system-ui, sans-serif;
   font-size: 14px;
   line-height: 1.6;
   position: relative;
