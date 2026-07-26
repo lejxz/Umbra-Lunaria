@@ -125,57 +125,49 @@ export function CwlLeagueView({
         </div>
       )}
 
-      {/* Standings table */}
-      <div className="mt-4">
-        <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple mb-2">
-          League standings
-        </p>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="text-left text-micro uppercase tracking-wider text-umbra-muted">
-                <th className="px-2 py-1.5 font-semibold">#</th>
-                <th className="px-2 py-1.5 font-semibold">Clan</th>
-                <th className="px-2 py-1.5 text-center font-semibold">W</th>
-                <th className="px-2 py-1.5 text-center font-semibold">L</th>
-                <th className="px-2 py-1.5 text-center font-semibold">T</th>
-                <th className="px-2 py-1.5 text-center font-semibold">★</th>
-                <th className="hidden px-2 py-1.5 text-right font-semibold sm:table-cell">Destr.</th>
+      <div className="mt-4 data-container">
+        <table className="w-full text-left">
+          <thead className="data-thead">
+            <tr>
+              <th className="w-8 data-th text-center">#</th>
+              <th className="data-th">Clan</th>
+              <th className="data-th text-center">W</th>
+              <th className="data-th text-center">L</th>
+              <th className="data-th text-center">T</th>
+              <th className="data-th text-center">★</th>
+              <th className="hidden data-th text-right sm:table-cell">Destr.</th>
+            </tr>
+          </thead>
+          <tbody className="data-tbody">
+            {season.standings.map((s, i) => (
+              <tr
+                key={s.tag}
+                className={`text-sm data-tr ${s.isOwnClan ? "bg-umbra-purple/5" : ""}`}
+              >
+                <td className="data-td text-center font-mono text-2xs text-umbra-muted">{i + 1}</td>
+                <td className="data-td">
+                  <div className="flex items-center gap-2">
+                    {s.badgeUrls?.small && (
+                      <div className="relative h-6 w-6">
+                        <Image src={s.badgeUrls.small} alt={`${s.name} badge`} fill className={`object-contain ${s.isOwnClan ? "" : "grayscale"}`} />
+                      </div>
+                    )}
+                    <span className={`truncate text-xs ${s.isOwnClan ? "text-umbra-lilac font-semibold" : "text-umbra-muted"}`}>
+                      {s.name}
+                    </span>
+                  </div>
+                </td>
+                <td className="data-td text-center font-mono text-emerald-400">{s.wins}</td>
+                <td className="data-td text-center font-mono text-red-400">{s.losses}</td>
+                <td className="data-td text-center font-mono text-amber-400">{s.ties}</td>
+                <td className="data-td text-center font-mono font-bold text-amber-400">{s.starsFor}</td>
+                <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted sm:table-cell">
+                  {s.destructionPercentage != null ? `${s.destructionPercentage}%` : "—"}
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y divide-umbra-line/40">
-              {season.standings.map((s, i) => (
-                <tr
-                  key={s.tag}
-                  className={`text-xs transition hover:bg-white/[.04] ${
-                    s.isOwnClan ? "bg-umbra-purple/5" : ""
-                  }`}
-                >
-                  <td className="px-2 py-1.5 font-mono text-micro text-umbra-muted">{i + 1}</td>
-                  <td className="px-2 py-1.5">
-                    <div className="flex items-center gap-1.5">
-                      {s.badgeUrls?.small && (
-                        <div className="relative h-5 w-5">
-                          <Image src={s.badgeUrls.small} alt={`${s.name} badge`} fill className={`object-contain ${s.isOwnClan ? "" : "grayscale"}`} />
-                        </div>
-                      )}
-                      <span className={`truncate ${s.isOwnClan ? "text-umbra-lilac font-semibold" : "text-umbra-muted"}`}>
-                        {s.name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-2 py-1.5 text-center font-mono text-emerald-400">{s.wins}</td>
-                  <td className="px-2 py-1.5 text-center font-mono text-red-400">{s.losses}</td>
-                  <td className="px-2 py-1.5 text-center font-mono text-amber-400">{s.ties}</td>
-                  <td className="px-2 py-1.5 text-center font-mono font-bold text-amber-400">{s.starsFor}</td>
-                  <td className="hidden px-2 py-1.5 text-right font-mono text-micro text-umbra-muted sm:table-cell">
-                    {s.destructionPercentage != null ? `${s.destructionPercentage}%` : "—"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Honest caveat about partial standings */}
