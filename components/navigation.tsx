@@ -15,7 +15,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   NavIconDashboard,
@@ -76,19 +75,17 @@ export function Navigation() {
         </button>
       )}
 
-      {/* Logo */}
-      <div className={`hidden border-b border-umbra-line lg:flex items-center overflow-hidden ${mounted ? "transition-all duration-200" : ""} ${isCollapsed ? "p-4 justify-center" : "p-5"}`}>
-        <Link href="/" className="flex items-center gap-3">
-          <Image
-            src="/assets/Logo.png"
-            alt="Umbra Lunaria"
-            width={40}
-            height={40}
-            className="h-10 w-10 shrink-0 rounded-full object-cover shadow-glow"
-            unoptimized
-          />
+      {/* Logo Area */}
+      <div className={`hidden border-b border-umbra-line lg:block relative overflow-hidden ${mounted ? "transition-all duration-200" : ""} ${isCollapsed ? "h-16" : "h-32"}`}>
+        {/* Background Image Container */}
+        <div 
+          className="absolute inset-0 bg-[url('/assets/Logo.png')] bg-cover bg-center opacity-40 mix-blend-screen pointer-events-none" 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-umbra-ink/90 pointer-events-none" />
+
+        <Link href="/" className="relative z-10 w-full h-full flex flex-col items-center justify-center p-4 focus-ring">
           <span
-            className={`font-display text-sm font-semibold tracking-[0.08em] text-umbra-lilac whitespace-nowrap ${mounted ? "transition-all duration-200" : ""} ${
+            className={`font-display font-semibold tracking-[0.1em] text-umbra-lilac whitespace-nowrap text-center text-lg drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] ${mounted ? "transition-all duration-200" : ""} ${
               isCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100 block"
             }`}
           >
@@ -101,7 +98,7 @@ export function Navigation() {
 
       {/* Nav links */}
       <nav
-        className="mx-auto flex max-w-md justify-around p-2 lg:block lg:max-w-none lg:space-y-1 lg:p-3"
+        className="mx-auto flex max-w-md w-full justify-around p-2 lg:block lg:max-w-none lg:space-y-2 lg:p-4"
         aria-label="Primary navigation"
       >
         {links.map(([icon, label, href]) => {
@@ -112,17 +109,17 @@ export function Navigation() {
               href={href}
               aria-current={active ? "page" : undefined}
               title={isCollapsed ? label : undefined}
-              className={`focus-ring flex flex-col items-center gap-1 rounded-lg border px-2 py-1.5 text-label lg:flex-row lg:gap-3 lg:py-2.5 lg:px-3 ${mounted ? "transition-all duration-200" : ""} ${
+              className={`focus-ring flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-label lg:flex-row lg:gap-4 lg:h-12 lg:py-0 ${mounted ? "transition-all duration-200" : ""} ${
                 active
-                  ? "border-umbra-line bg-umbra-purple/10 text-umbra-lilac"
-                  : "border-transparent text-umbra-muted hover:bg-white/[.04] hover:text-umbra-lilac"
-              } ${isCollapsed ? "lg:justify-center lg:px-0" : ""}`}
+                  ? "border-umbra-purple/40 bg-umbra-purple/10 text-umbra-lilac shadow-[0_0_15px_rgba(168,85,247,0.25)]"
+                  : "border-transparent text-umbra-muted hover:border-umbra-purple/40 hover:bg-white/[.02] hover:text-umbra-lilac hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md"
+              } ${isCollapsed ? "lg:justify-center lg:px-0" : "lg:justify-start lg:px-4"}`}
             >
-              <span className="w-5 h-5 shrink-0 leading-none text-umbra-purple">
+              <span className={`w-5 h-5 shrink-0 flex items-center justify-center leading-none ${active ? "text-umbra-lilac drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]" : "text-umbra-purple"}`}>
                 {icon}
               </span>
               <span
-                className={`whitespace-nowrap overflow-hidden ${mounted ? "transition-all duration-200" : ""} ${
+                className={`whitespace-nowrap overflow-hidden text-sm font-medium ${mounted ? "transition-all duration-200" : ""} ${
                   isCollapsed ? "lg:w-0 lg:opacity-0 lg:hidden" : "lg:w-auto lg:opacity-100 lg:block"
                 }`}
               >
