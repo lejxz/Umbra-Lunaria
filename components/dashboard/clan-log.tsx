@@ -22,7 +22,7 @@ export function ClanLogPanel({
 }) {
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5 h-[450px]"
+      className="glass flex flex-col rounded-2xl p-5 h-full"
       aria-labelledby="clan-log-title"
     >
       {/* Header */}

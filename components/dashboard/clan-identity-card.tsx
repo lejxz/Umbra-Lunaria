@@ -13,7 +13,7 @@ import { UnavailableValue } from "@/components/ui/state-primitives";
 export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
   return (
     <section
-      className="relative overflow-hidden rounded-2xl border border-umbra-line shadow-2xl"
+      className="relative overflow-hidden rounded-2xl border border-umbra-line/40 shadow-2xl transition-all duration-300 hover:border-umbra-purple/40 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)]"
       aria-labelledby="clan-identity-title"
     >
       {/* Background image */}

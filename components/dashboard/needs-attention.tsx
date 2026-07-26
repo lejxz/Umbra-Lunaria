@@ -31,7 +31,7 @@ export function AttentionPanel({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5 h-[350px]"
+      className="glass flex flex-col rounded-2xl p-5 h-full"
       aria-labelledby={`attention-title-${title.toLowerCase().replace(/\s+/g, "-")}`}
     >
       {/* Header */}

@@ -51,7 +51,7 @@ body > * {
 @layer components {
   /* Level 1 — card surface (the standard card wrapper). */
   .glass {
-    @apply border border-umbra-line bg-umbra-surface/40 shadow-2xl backdrop-blur-md;
+    @apply border border-umbra-line/40 bg-white/[.02] shadow-2xl backdrop-blur-md transition-all duration-300 hover:border-umbra-purple/40 hover:shadow-[0_0_15px_rgba(168,85,247,0.3)];
   }
   /* Level 2 — inner tile (stat box, row background inside a card). */
   .tile {
