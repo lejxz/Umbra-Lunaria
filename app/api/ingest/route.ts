@@ -658,6 +658,8 @@ const PET_NAMES = new Set<string>([
   "Phoenix",
   "Angry Jelly",
   "Sneezy",
+  "Spirit Fox",
+  "Greedy Raven",
 ]);
 
 /**

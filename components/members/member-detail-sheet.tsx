@@ -7,7 +7,7 @@ import { Badge, UnavailableValue } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/section-label";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import {
-  SUPER_TROOP_BASE,
+  isSuperTroop,
   resolveSuperTroopLevel,
 } from "@/lib/assets/super-troops";
 import { IconSwords } from "@/components/ui/icons";
@@ -412,24 +412,41 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   // Index troops by name so super troops can resolve their base troop's level.
   const troopByName = new Map(p.troops.map((t) => [t.name, t]));
 
-  const troops = p.troops
-    .filter((t) => !SIEGE_MACHINE_NAMES.has(t.name))
-    .map((t) => {
+  // Split troops into three groups: regular troops, super troops (boosted
+  // variants — shown with their base troop's level), and siege machines.
+  // Super troops get their own tab so they don't clutter the main troop grid.
+  const regularTroops: typeof p.troops = [];
+  const superTroops: typeof p.troops = [];
+  const siegeMachines: typeof p.troops = [];
+  for (const t of p.troops) {
+    if (SIEGE_MACHINE_NAMES.has(t.name)) {
+      siegeMachines.push(t);
+    } else if (isSuperTroop(t.name)) {
       const resolved = resolveSuperTroopLevel(t, troopByName);
-      return { ...t, level: resolved.level, maxLevel: resolved.maxLevel };
-    });
-  const siegeMachines = p.troops.filter((t) => SIEGE_MACHINE_NAMES.has(t.name));
+      superTroops.push({ ...t, level: resolved.level, maxLevel: resolved.maxLevel });
+    } else {
+      regularTroops.push(t);
+    }
+  }
 
   const categories = [
-    { 
-      id: "troops", 
-      label: "Troops & Siege", 
-      count: troops.length + siegeMachines.length,
+    {
+      id: "troops",
+      label: "Troops & Siege",
+      count: regularTroops.length + siegeMachines.length,
       groups: [
-        { title: "Troops", items: troops },
+        { title: "Troops", items: regularTroops },
         { title: "Siege Machines", items: siegeMachines }
-      ] 
+      ]
     },
+    ...(superTroops.length > 0
+      ? [{
+          id: "super",
+          label: "Super Troops",
+          count: superTroops.length,
+          groups: [{ title: "Super Troops (boosted)", items: superTroops }]
+        }]
+      : []),
     { 
       id: "heroes", 
       label: "Heroes & Equip", 
@@ -506,7 +523,7 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
                     name={item.name}
                     level={item.level}
                     maxLevel={item.maxLevel}
-                    isSuper={item.name in SUPER_TROOP_BASE}
+                    isSuper={isSuperTroop(item.name)}
                   />
                 ))}
               </div>
@@ -521,9 +538,10 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
 function ProgressionCard({ name, level, maxLevel, isSuper }: { name: string; level: number; maxLevel: number | null; isSuper?: boolean }) {
   const icon = getUnitIcon(name);
   const isMaxed = maxLevel !== null && level >= maxLevel;
-  const tooltip = isSuper
-    ? `${name} (super boost): base ${SUPER_TROOP_BASE[name]} level ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`
-    : `${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`;
+  // Short tooltip: "Super Valkyrie · 8/12" (super troops inherit the base
+  // troop's level — the "(boost)" suffix is the only hint needed).
+  const levelStr = isMaxed ? "MAX" : `${level}${maxLevel ? `/${maxLevel}` : ""}`;
+  const tooltip = isSuper ? `${name} · ${levelStr} (boost)` : `${name} · ${levelStr}`;
   return (
     <div className="group relative" title={tooltip}>
       <div className={`relative aspect-square w-full overflow-hidden rounded-lg border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>

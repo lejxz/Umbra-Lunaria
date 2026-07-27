@@ -90,6 +90,7 @@ export const unitIconMap: Record<string, string> = {
   "Super Minion": "/assets/unit-icons/Icon_HV_Super_Minion.png",
   "Super Yeti": "/assets/unit-icons/Icon_HV_Super_Yeti.png",
   "Super Ice Hound": "/assets/unit-icons/Icon_HV_Super_Ice_Hound.png",
+  "Ice Hound": "/assets/unit-icons/Icon_HV_Super_Ice_Hound.png",
   Lavaloon: "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
@@ -121,12 +122,21 @@ export const unitIconMap: Record<string, string> = {
   "Electrofire Wizard": "/assets/unit-icons/Icon_BB_Electrofire_Wizard.png",
 
   // -----------------------------------------------------------------------
-  // Heroes — not yet downloaded from the Fankit. Placeholder until added.
+  // Heroes (Home Village) — Fankit assets not yet downloaded. Placeholder.
   // -----------------------------------------------------------------------
   "Barbarian King": "/assets/unit-icons/placeholder.svg",
   "Archer Queen": "/assets/unit-icons/placeholder.svg",
   "Grand Warden": "/assets/unit-icons/placeholder.svg",
   "Royal Champion": "/assets/unit-icons/placeholder.svg",
+  "Minion Prince": "/assets/unit-icons/placeholder.svg",
+  "Dragon Duke": "/assets/unit-icons/placeholder.svg",
+  "Ruin Witch": "/assets/unit-icons/Icon_HV_Ruin_Witch.png",
+
+  // -----------------------------------------------------------------------
+  // Heroes (Builder Base) — Fankit assets not yet downloaded. Placeholder.
+  // -----------------------------------------------------------------------
+  "Battle Machine": "/assets/unit-icons/placeholder.svg",
+  "Battle Copter": "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
   // Elixir spells (Home Village) — not yet downloaded. Placeholder.
@@ -140,6 +150,9 @@ export const unitIconMap: Record<string, string> = {
   "Invisibility Spell": "/assets/unit-icons/placeholder.svg",
   "Recall Spell": "/assets/unit-icons/placeholder.svg",
   "Revive Spell": "/assets/unit-icons/placeholder.svg",
+  "Angry Spell": "/assets/unit-icons/placeholder.svg",
+  "Ice Block Spell": "/assets/unit-icons/placeholder.svg",
+  "Totem Spell": "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
   // Dark spells — not yet downloaded. Placeholder.
@@ -164,6 +177,8 @@ export const unitIconMap: Record<string, string> = {
   Diggy: "/assets/unit-icons/placeholder.svg",
   "Spirit Fox": "/assets/unit-icons/placeholder.svg",
   "Angry Jelly": "/assets/unit-icons/placeholder.svg",
+  "Sneezy": "/assets/unit-icons/placeholder.svg",
+  "Greedy Raven": "/assets/unit-icons/placeholder.svg",
 };
 
 const PLACEHOLDER = "/assets/unit-icons/placeholder.svg";
