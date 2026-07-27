@@ -29,14 +29,18 @@ describe("unitIconMap", () => {
     }
   });
 
-  it("downloaded troop icons use the Fankit Icon_HV_/Icon_BB_ naming convention", () => {
+  it("downloaded icons use the Fankit Icon_<Category>_<Name>.png convention", () => {
     // Every non-placeholder entry must point at a real Fankit PNG filename
-    // (Icon_HV_*.png or Icon_BB_*.png), not the old kebab-case placeholders.
+    // using one of the established category prefixes:
+    //   HV  — Home Village troops/heroes
+    //   BB  — Builder Base troops/heroes
+    //   HE  — Hero Equipment
+    //   HG  — Hero Gear (Dragon Duke attachments, etc.)
     for (const [name, path] of Object.entries(unitIconMap)) {
       if (path.endsWith("placeholder.svg")) continue;
       expect(
-        /^\/assets\/unit-icons\/Icon_(HV|BB)_.+\.png$/.test(path),
-        `${name} -> ${path} must match the Icon_<Village>_<Name>.png convention`,
+        /^\/assets\/unit-icons\/Icon_(HV|BB|HE|HG)_.+\.png$/.test(path),
+        `${name} -> ${path} must match the Icon_<Category>_<Name>.png convention`,
       ).toBe(true);
     }
   });
@@ -69,10 +73,8 @@ describe("getUnitIcon", () => {
   });
 
   it("returns the placeholder for units without a downloaded asset", () => {
-    // Heroes, spells, and pets haven't been downloaded from the Fankit yet.
-    expect(getUnitIcon("Barbarian King")).toBe(
-      "/assets/unit-icons/placeholder.svg",
-    );
+    // Spells and pets haven't been downloaded from the Fankit yet (heroes
+    // and hero equipment now have real PNGs).
     expect(getUnitIcon("Lightning Spell")).toBe(
       "/assets/unit-icons/placeholder.svg",
     );

@@ -122,21 +122,66 @@ export const unitIconMap: Record<string, string> = {
   "Electrofire Wizard": "/assets/unit-icons/Icon_BB_Electrofire_Wizard.png",
 
   // -----------------------------------------------------------------------
-  // Heroes (Home Village) — Fankit assets not yet downloaded. Placeholder.
+  // Heroes (Home Village)
   // -----------------------------------------------------------------------
-  "Barbarian King": "/assets/unit-icons/placeholder.svg",
-  "Archer Queen": "/assets/unit-icons/placeholder.svg",
-  "Grand Warden": "/assets/unit-icons/placeholder.svg",
-  "Royal Champion": "/assets/unit-icons/placeholder.svg",
-  "Minion Prince": "/assets/unit-icons/placeholder.svg",
-  "Dragon Duke": "/assets/unit-icons/placeholder.svg",
+  "Barbarian King": "/assets/unit-icons/Icon_HV_Hero_Barbarian_King.png",
+  "Archer Queen": "/assets/unit-icons/Icon_HV_Hero_Archer_Queen.png",
+  "Grand Warden": "/assets/unit-icons/Icon_HV_Hero_Grand_Warden.png",
+  "Royal Champion": "/assets/unit-icons/Icon_HV_Hero_Royal_Champion.png",
+  "Minion Prince": "/assets/unit-icons/Icon_HV_Hero_Minion_Prince.png",
+  "Dragon Duke": "/assets/unit-icons/Icon_HV_Hero_Dragon_Duke.png",
   "Ruin Witch": "/assets/unit-icons/Icon_HV_Ruin_Witch.png",
 
   // -----------------------------------------------------------------------
-  // Heroes (Builder Base) — Fankit assets not yet downloaded. Placeholder.
+  // Heroes (Builder Base)
   // -----------------------------------------------------------------------
-  "Battle Machine": "/assets/unit-icons/placeholder.svg",
-  "Battle Copter": "/assets/unit-icons/placeholder.svg",
+  "Battle Machine": "/assets/unit-icons/Icon_BB_Hero_Battle_Machine.png",
+  "Battle Copter": "/assets/unit-icons/Icon_BB_Hero_Battle_Copter.png",
+
+  // -----------------------------------------------------------------------
+  // Hero equipment (Home Village) — active equipment slots. The CoC API
+  // returns these in `heroEquipment[]` with a `name` field; the Fankit
+  // filenames use the hero prefix (AQ/BK/GW/RC/MP/BQ) + equipment name.
+  // -----------------------------------------------------------------------
+  "Archer Puppet": "/assets/unit-icons/Icon_HE_AQ_Archer_Puppet.png",
+  "Frozen Arrow": "/assets/unit-icons/Icon_HE_AQ_Frozen_Arrow.png",
+  "Giant Arrow": "/assets/unit-icons/Icon_HE_AQ_Giant_Arrow.png",
+  "Healer Puppet": "/assets/unit-icons/Icon_HE_AQ_Healer_Puppet.png",
+  "Invisibility Vial": "/assets/unit-icons/Icon_HE_AQ_Invisibility_Vial.png",
+  "Magic Mirror": "/assets/unit-icons/Icon_HE_AQ_Magic_Mirror.png",
+  "Monolith Arrow": "/assets/unit-icons/Icon_HE_AQ_MonolithArrow.png",
+  "Barbarian Puppet": "/assets/unit-icons/Icon_HE_BK_Barbarian_Puppet.png",
+  "Earthquake Boots": "/assets/unit-icons/Icon_HE_BK_Earthquake_Boots.png",
+  "Rage Vial": "/assets/unit-icons/Icon_HE_BK_Rage_Vial.png",
+  "Spiky Ball": "/assets/unit-icons/Icon_HE_BK_Spiky_Ball.png",
+  "Vampstache": "/assets/unit-icons/Icon_HE_BK_Vampstache.png",
+  "Giant Gauntlet": "/assets/unit-icons/Icon_HE_BQ_Giant_Gauntlet.png",
+  "Eternal Tome": "/assets/unit-icons/Icon_HE_GW_Eternal_Tome.png",
+  "Healing Tome": "/assets/unit-icons/Icon_HE_GW_Healing_Tome.png",
+  "Life Gem": "/assets/unit-icons/Icon_HE_GW_Life_Gem.png",
+  "Rage Gem": "/assets/unit-icons/Icon_HE_GW_Rage_Gem.png",
+  "Dark Orb": "/assets/unit-icons/Icon_HE_MP_DarkOrb.png",
+  "Henchmen Puppet": "/assets/unit-icons/Icon_HE_MP_Henchman.png",
+  "Metal Pants": "/assets/unit-icons/Icon_HE_MP_Iron_Pants.png",
+  "Electro Boots": "/assets/unit-icons/Icon_HE_RC_ElectroBoots.png",
+  "Frost Flake": "/assets/unit-icons/Icon_HE_RC_Frost_Flake.png",
+  "Haste Vial": "/assets/unit-icons/Icon_HE_RC_Haste_Vial.png",
+  "Hog Rider Puppet": "/assets/unit-icons/Icon_HE_RC_Hog_Rider_Doll.png",
+  "Royal Gem": "/assets/unit-icons/Icon_HE_RC_Royal_Gem.png",
+  "Seeking Shield": "/assets/unit-icons/Icon_HE_RC_Seeking_Shield.png",
+  // Hero gear (Dragon Duke double-cannon attachments) — HG_DD_* + HG_GW/MP/RC
+  "Electro Fangs": "/assets/unit-icons/Icon_HG_DD_Electro_Fangs.png",
+  "Fire Heart": "/assets/unit-icons/Icon_HG_DD_FireHeart.png",
+  "Flame Blower": "/assets/unit-icons/Icon_HG_DD_FlameBlower.png",
+  "Rocket Backpack": "/assets/unit-icons/Icon_HG_DD_Rocket_BackPack.png",
+  "Stun Blaster": "/assets/unit-icons/Icon_HG_DD_StunBlast.png",
+  "Lavaloon Puppet": "/assets/unit-icons/Icon_HG_GW_LavaloonPuppet.png",
+  "Meteor Staff": "/assets/unit-icons/Icon_HG_MP_MeteoriteSceptre.png",
+  "Rocket Spear": "/assets/unit-icons/Icon_HG_RoyalChampion_RocketSpear_Equipment_03.png",
+  // Equipment names seen in the DB without a matched Fankit file yet.
+  "Heroic Torch": "/assets/unit-icons/placeholder.svg",
+  "Noble Iron": "/assets/unit-icons/placeholder.svg",
+  "Snake Bracelet": "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
   // Elixir spells (Home Village) — not yet downloaded. Placeholder.

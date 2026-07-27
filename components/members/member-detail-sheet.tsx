@@ -6,10 +6,7 @@ import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/section-label";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
-import {
-  isSuperTroop,
-  resolveSuperTroopLevel,
-} from "@/lib/assets/super-troops";
+import { isSuperTroop } from "@/lib/assets/super-troops";
 import { IconSwords } from "@/components/ui/icons";
 import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
@@ -410,22 +407,20 @@ const SIEGE_MACHINE_NAMES = new Set([
 function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   const p = detail.progression;
 
-  // Index troops by name so super troops can resolve their base troop's level.
-  const troopByName = new Map(p.troops.map((t) => [t.name, t]));
-
-  // Split troops into three groups: regular troops, super troops (boosted
-  // variants — shown with their base troop's level), and siege machines.
-  // Super troops render as a sub-section within the Troops tab (before siege),
-  // not as a separate tab.
+  // Split troops into regular troops and siege machines. Super troops are
+  // EXCLUDED from the progression grid — the CoC API returns every super
+  // troop at level 1 for every player regardless of whether they've boosted
+  // it, so they don't represent researchable progression. The base troop's
+  // level (shown in the Troops section) is the real investment. See
+  // lib/assets/super-troops.ts.
   const regularTroops: typeof p.troops = [];
-  const superTroops: typeof p.troops = [];
   const siegeMachines: typeof p.troops = [];
   for (const t of p.troops) {
     if (SIEGE_MACHINE_NAMES.has(t.name)) {
       siegeMachines.push(t);
     } else if (isSuperTroop(t.name)) {
-      const resolved = resolveSuperTroopLevel(t, troopByName);
-      superTroops.push({ ...t, level: resolved.level, maxLevel: resolved.maxLevel });
+      // skip — not researchable progression
+      continue;
     } else {
       regularTroops.push(t);
     }
@@ -435,12 +430,9 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
     {
       id: "troops",
       label: "Troops & Siege",
-      count: regularTroops.length + superTroops.length + siegeMachines.length,
+      count: regularTroops.length + siegeMachines.length,
       groups: [
         { title: "Troops", items: regularTroops },
-        ...(superTroops.length > 0
-          ? [{ title: "Super Troops (boosted)", items: superTroops }]
-          : []),
         { title: "Siege Machines", items: siegeMachines },
       ],
     },
@@ -520,7 +512,6 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
                     name={item.name}
                     level={item.level}
                     maxLevel={item.maxLevel}
-                    isSuper={isSuperTroop(item.name)}
                   />
                 ))}
               </div>
@@ -532,13 +523,11 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   );
 }
 
-function ProgressionCard({ name, level, maxLevel, isSuper }: { name: string; level: number; maxLevel: number | null; isSuper?: boolean }) {
+function ProgressionCard({ name, level, maxLevel }: { name: string; level: number; maxLevel: number | null }) {
   const icon = getUnitIcon(name);
   const isMaxed = maxLevel !== null && level >= maxLevel;
-  // Short tooltip: "Super Valkyrie · 8/12" (super troops inherit the base
-  // troop's level — the "(boost)" suffix is the only hint needed).
   const levelStr = isMaxed ? "MAX" : `${level}${maxLevel ? `/${maxLevel}` : ""}`;
-  const tooltip = isSuper ? `${name} · ${levelStr} (boost)` : `${name} · ${levelStr}`;
+  const tooltip = `${name} · ${levelStr}`;
   return (
     <div className="group relative" title={tooltip}>
       <div className={`relative aspect-square w-full overflow-hidden rounded-lg border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
@@ -546,14 +535,6 @@ function ProgressionCard({ name, level, maxLevel, isSuper }: { name: string; lev
         <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
           {isMaxed ? "MAX" : level}
         </div>
-        {/* Super-troop boost indicator — a small violet dot top-right */}
-        {isSuper && (
-          <span
-            className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-umbra-purple"
-            style={{ boxShadow: "0 0 6px rgba(182,120,255,.7)" }}
-            aria-label="Super troop boost"
-          />
-        )}
       </div>
     </div>
   );
