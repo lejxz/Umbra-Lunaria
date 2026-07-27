@@ -394,7 +394,8 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
 
 const SIEGE_MACHINE_NAMES = new Set([
   "Wall Wrecker", "Battle Blimp", "Stone Slammer",
-  "Siege Barracks", "Log Launcher", "Flame Flinger", "Battle Drill"
+  "Siege Barracks", "Log Launcher", "Flame Flinger", "Battle Drill",
+  "Troop Launcher", "Sky Wagon",
 ]);
 
 /**
@@ -414,7 +415,8 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
 
   // Split troops into three groups: regular troops, super troops (boosted
   // variants — shown with their base troop's level), and siege machines.
-  // Super troops get their own tab so they don't clutter the main troop grid.
+  // Super troops render as a sub-section within the Troops tab (before siege),
+  // not as a separate tab.
   const regularTroops: typeof p.troops = [];
   const superTroops: typeof p.troops = [];
   const siegeMachines: typeof p.troops = [];
@@ -433,23 +435,18 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
     {
       id: "troops",
       label: "Troops & Siege",
-      count: regularTroops.length + siegeMachines.length,
+      count: regularTroops.length + superTroops.length + siegeMachines.length,
       groups: [
         { title: "Troops", items: regularTroops },
-        { title: "Siege Machines", items: siegeMachines }
-      ]
+        ...(superTroops.length > 0
+          ? [{ title: "Super Troops (boosted)", items: superTroops }]
+          : []),
+        { title: "Siege Machines", items: siegeMachines },
+      ],
     },
-    ...(superTroops.length > 0
-      ? [{
-          id: "super",
-          label: "Super Troops",
-          count: superTroops.length,
-          groups: [{ title: "Super Troops (boosted)", items: superTroops }]
-        }]
-      : []),
-    { 
-      id: "heroes", 
-      label: "Heroes & Equip", 
+    {
+      id: "heroes",
+      label: "Heroes & Equip",
       count: p.heroes.length + p.heroEquipment.length,
       groups: [
         { title: "Heroes", items: p.heroes },
