@@ -12,7 +12,7 @@
  * from a client component.
  */
 
-import { and, desc, eq, isNull, sql, inArray } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   hallOfFameRecords,
@@ -21,7 +21,6 @@ import {
   capitalContributions,
   capitalRaidSeasons,
   members,
-  membershipEvents,
 } from "@/lib/db/schema";
 import type {
   HallOfFamePageData,
@@ -441,26 +440,21 @@ async function computeFastestThreeStar(): Promise<LiveRecordCategory | null> {
 
 // ── Longest-tenured member ───────────────────────────────────────────────
 async function computeLongestTenure(): Promise<LiveRecordCategory | null> {
-  // Earliest join event among currently-retained members.
+  // Tenure = how long the tracker has observed this member. Uses
+  // members.joinedAt ("first observed by this tracker") rather than
+  // membership_events.eventType='join', because original members (present
+  // when tracking started) have no 'join' event — they were backfilled as
+  // existing members. members.joinedAt is set for every member (notNull),
+  // so this captures the full roster, not just post-tracking joiners.
   const rows = await db
     .select({
-      playerTag: membershipEvents.playerTag,
-      name: membershipEvents.nameAtEvent,
-      firstSeen: sql<Date>`min(${membershipEvents.eventTime})`,
+      playerTag: members.playerTag,
+      name: members.name,
+      firstSeen: members.joinedAt,
     })
-    .from(membershipEvents)
-    .where(
-      and(
-        eq(membershipEvents.eventType, "join"),
-        // Only count members still in the clan (not departed).
-        inArray(
-          membershipEvents.playerTag,
-          db.select({ playerTag: members.playerTag }).from(members).where(isNull(members.leftAt)),
-        ),
-      ),
-    )
-    .groupBy(membershipEvents.playerTag, membershipEvents.nameAtEvent)
-    .orderBy(sql`min(${membershipEvents.eventTime}) asc`)
+    .from(members)
+    .where(isNull(members.leftAt))
+    .orderBy(members.joinedAt)
     .limit(10);
 
   if (rows.length === 0) return null;
