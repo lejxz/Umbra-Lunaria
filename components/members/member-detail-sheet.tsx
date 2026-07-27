@@ -6,6 +6,10 @@ import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/section-label";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
+import {
+  SUPER_TROOP_BASE,
+  resolveSuperTroopLevel,
+} from "@/lib/assets/super-troops";
 import { IconSwords } from "@/components/ui/icons";
 import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
@@ -389,15 +393,32 @@ function RushedSection({ detail }: { detail: MemberDetailView }) {
 // ---------------------------------------------------------------------------
 
 const SIEGE_MACHINE_NAMES = new Set([
-  "Wall Wrecker", "Battle Blimp", "Stone Slammer", 
+  "Wall Wrecker", "Battle Blimp", "Stone Slammer",
   "Siege Barracks", "Log Launcher", "Flame Flinger", "Battle Drill"
 ]);
 
+/**
+ * Super troops → their base (lab-researched) troop. The CoC API reports every
+ * super troop at `level: 1` (a super troop is a temporary 1-week boost, not a
+ * separately researched unit), so "Super Valkyrie 1/12" is misleading. We
+ * resolve the super troop's display level/maxLevel from its base troop.
+ *
+ * The shared map + resolver live in lib/assets/super-troops.ts.
+ */
+
 function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   const p = detail.progression;
-  
-  const troops = p.troops.filter(t => !SIEGE_MACHINE_NAMES.has(t.name));
-  const siegeMachines = p.troops.filter(t => SIEGE_MACHINE_NAMES.has(t.name));
+
+  // Index troops by name so super troops can resolve their base troop's level.
+  const troopByName = new Map(p.troops.map((t) => [t.name, t]));
+
+  const troops = p.troops
+    .filter((t) => !SIEGE_MACHINE_NAMES.has(t.name))
+    .map((t) => {
+      const resolved = resolveSuperTroopLevel(t, troopByName);
+      return { ...t, level: resolved.level, maxLevel: resolved.maxLevel };
+    });
+  const siegeMachines = p.troops.filter((t) => SIEGE_MACHINE_NAMES.has(t.name));
 
   const categories = [
     { 
@@ -485,6 +506,7 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
                     name={item.name}
                     level={item.level}
                     maxLevel={item.maxLevel}
+                    isSuper={item.name in SUPER_TROOP_BASE}
                   />
                 ))}
               </div>
@@ -496,16 +518,27 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   );
 }
 
-function ProgressionCard({ name, level, maxLevel }: { name: string; level: number; maxLevel: number | null }) {
+function ProgressionCard({ name, level, maxLevel, isSuper }: { name: string; level: number; maxLevel: number | null; isSuper?: boolean }) {
   const icon = getUnitIcon(name);
   const isMaxed = maxLevel !== null && level >= maxLevel;
+  const tooltip = isSuper
+    ? `${name} (super boost): base ${SUPER_TROOP_BASE[name]} level ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`
+    : `${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`;
   return (
-    <div className="group relative" title={`${name}: ${level}${maxLevel ? `/${maxLevel}` : ""}${isMaxed ? " (MAX)" : ""}`}>
+    <div className="group relative" title={tooltip}>
       <div className={`relative aspect-square w-full overflow-hidden rounded-lg border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
         <Image src={icon} alt={name} fill className="object-contain p-1" unoptimized />
         <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
           {isMaxed ? "MAX" : level}
         </div>
+        {/* Super-troop boost indicator — a small violet dot top-right */}
+        {isSuper && (
+          <span
+            className="absolute right-0.5 top-0.5 h-1.5 w-1.5 rounded-full bg-umbra-purple"
+            style={{ boxShadow: "0 0 6px rgba(182,120,255,.7)" }}
+            aria-label="Super troop boost"
+          />
+        )}
       </div>
     </div>
   );

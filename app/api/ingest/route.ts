@@ -30,6 +30,7 @@ import {
   computeActivityFlags,
 } from "@/lib/ingest/membership";
 import { computeRushed } from "@/lib/scoring/rushed";
+import { resolveSuperTroopLevel } from "@/lib/assets/super-troops";
 
 /**
  * POST /api/ingest
@@ -435,14 +436,18 @@ async function runDailyBatch(): Promise<string[]> {
       });
 
     // Compute rushed percent and store on the members row.
+    // Super troops are always API level 1 (temporary 1-week boosts, not
+    // separately researched). Resolve their level from the base troop so they
+    // don't inflate the deficit. See lib/assets/super-troops.ts.
+    const homeTroopByName = new Map(homeTroops.map((t) => [t.name, t]));
+    const rushedTroops = homeTroops.map((t) => {
+      const resolved = resolveSuperTroopLevel(t, homeTroopByName);
+      return { name: t.name, level: resolved.level, maxLevel: resolved.maxLevel };
+    });
     const rushedResult = computeRushed([
       {
         category: "Troops",
-        items: homeTroops.map((t) => ({
-          name: t.name,
-          level: t.level,
-          maxLevel: t.maxLevel ?? null,
-        })),
+        items: rushedTroops,
       },
       {
         category: "Heroes",
