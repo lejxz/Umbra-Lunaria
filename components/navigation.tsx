@@ -90,7 +90,7 @@ export function Navigation({ initialCollapsed = false }: { initialCollapsed?: bo
 
       {/* Nav links */}
       <nav
-        className="mx-auto flex max-w-md w-full justify-around p-2 lg:block lg:max-w-none lg:space-y-2 lg:p-4"
+        className="mx-auto flex w-full justify-around gap-0.5 p-1 lg:block lg:max-w-none lg:space-y-2 lg:p-4"
         aria-label="Primary navigation"
       >
         {links.map(([icon, label, href]) => {
@@ -101,7 +101,7 @@ export function Navigation({ initialCollapsed = false }: { initialCollapsed?: bo
               href={href}
               aria-current={active ? "page" : undefined}
               title={isCollapsed ? label : undefined}
-              className={`focus-ring flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-lg border text-label lg:flex-row lg:gap-4 lg:h-12 lg:py-0 transition-all duration-200 ${
+              className={`focus-ring flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-lg border px-0.5 py-1.5 lg:flex-row lg:gap-4 lg:h-12 lg:py-0 transition-all duration-200 ${
                 active
                   ? "border-umbra-purple/40 bg-umbra-purple/10 text-umbra-lilac shadow-[0_0_15px_rgba(168,85,247,0.25)]"
                   : "border-transparent text-umbra-muted hover:border-umbra-purple/40 hover:bg-white/[.02] hover:text-umbra-lilac hover:shadow-[0_0_15px_rgba(168,85,247,0.4)] backdrop-blur-md"
@@ -111,7 +111,7 @@ export function Navigation({ initialCollapsed = false }: { initialCollapsed?: bo
                 {icon}
               </span>
               <span
-                className={`whitespace-nowrap overflow-hidden text-sm font-medium transition-all duration-200 ${
+                className={`overflow-hidden text-micro font-medium leading-tight transition-all duration-200 truncate lg:text-sm lg:whitespace-nowrap ${
                   isCollapsed ? "lg:w-0 lg:opacity-0 lg:hidden" : "lg:w-auto lg:opacity-100 lg:block"
                 }`}
               >

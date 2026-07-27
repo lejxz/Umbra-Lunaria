@@ -231,7 +231,15 @@ function ReviewRow({
   rank: number;
   onClick: () => void;
 }) {
-  const isActive = m.daysInactive === null || m.daysInactive < 4;
+  // Match the query layer's definition: active = last activity within 7 days.
+  // daysInactive === null means no tracked activity (cold start) — show as
+  // "Unknown" rather than falsely reporting "Active".
+  const status: "active" | "inactive" | "unknown" =
+    m.daysInactive === null
+      ? "unknown"
+      : m.daysInactive < 7
+        ? "active"
+        : "inactive";
 
   return (
     <tr
@@ -272,10 +280,14 @@ function ReviewRow({
       <td className="data-td text-right">
         <span
           className={`font-mono text-[0.6rem] uppercase tracking-wider ${
-            isActive ? "text-emerald-400" : "text-umbra-muted/50"
+            status === "active"
+              ? "text-emerald-400"
+              : status === "inactive"
+                ? "text-umbra-muted/50"
+                : "text-amber-400/70"
           }`}
         >
-          {isActive ? "Active" : "Inactive"}
+          {status === "active" ? "Active" : status === "inactive" ? "Inactive" : "Unknown"}
         </span>
       </td>
     </tr>

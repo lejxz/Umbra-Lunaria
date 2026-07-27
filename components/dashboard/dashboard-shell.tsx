@@ -79,7 +79,7 @@ export function DashboardShell({
           <h3 id="attack-dist-title" className="mt-1 font-display text-lg text-umbra-lilac">
             Star distribution
           </h3>
-          <div className="mt-3 flex-1">
+          <div className="mt-3 h-48 sm:h-56 lg:h-auto lg:flex-1">
             <WarAttackDistributionChart distribution={data.warAttackDistribution} />
           </div>
         </section>

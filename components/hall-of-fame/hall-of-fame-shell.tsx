@@ -263,7 +263,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       {allTimeCards.length > 0 && (
         <section className="mb-10">
           <SectionHeader title="All-Time Legends" />
-          <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {allTimeCards.map((card, i) => (
               <RecordCard
                 key={`alltime-${i}`}
@@ -280,7 +280,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       <section className="mb-10">
         <SectionHeader title="War Hall of Fame" />
         {warCards.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {warCards.map((card, i) => (
               <RecordCard
                 key={`war-${i}`}
@@ -304,7 +304,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       <section className="mb-10">
         <SectionHeader title="Capital Hall of Fame" />
         {capitalCards.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {capitalCards.map((card, i) => (
               <RecordCard
                 key={`capital-${i}`}
@@ -329,7 +329,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
       {tenureCards.length > 0 && (
         <section>
           <SectionHeader title="Tenure" />
-          <div className="grid grid-cols-1 gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {tenureCards.map((card, i) => (
               <RecordCard
                 key={`tenure-${i}`}
