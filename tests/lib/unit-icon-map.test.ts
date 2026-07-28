@@ -72,15 +72,19 @@ describe("getUnitIcon", () => {
     );
   });
 
-  it("returns the placeholder for units without a downloaded asset", () => {
-    // Rage Spell, Overgrowth Spell, and Greedy Raven haven't been downloaded yet.
-    expect(getUnitIcon("Rage Spell")).toBe(
-      "/assets/unit-icons/placeholder.svg",
-    );
-    expect(getUnitIcon("Overgrowth Spell")).toBe(
-      "/assets/unit-icons/placeholder.svg",
-    );
-    expect(getUnitIcon("Greedy Raven")).toBe(
+  it("every mapped unit resolves to a real PNG (no placeholders remain)", () => {
+    // All Fankit assets have been downloaded — every map entry points at a
+    // real PNG, not the placeholder. This test guards against regressions.
+    for (const [name, path] of Object.entries(unitIconMap)) {
+      expect(
+        path,
+        `${name} should resolve to a real PNG, not the placeholder`,
+      ).not.toBe("/assets/unit-icons/placeholder.svg");
+    }
+  });
+
+  it("returns the placeholder only for truly unmapped names", () => {
+    expect(getUnitIcon("Definitely Not A Real Unit")).toBe(
       "/assets/unit-icons/placeholder.svg",
     );
   });

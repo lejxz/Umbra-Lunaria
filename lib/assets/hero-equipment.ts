@@ -51,6 +51,7 @@ const EQUIPMENT_HERO: Record<string, HeroKey> = {
   "Rage Gem": "GW",
   Fireball: "GW",
   "Lavaloon Puppet": "GW",
+  "Heroic Torch": "GW",
 
   // Royal Champion
   "Electro Boots": "RC",
@@ -79,8 +80,7 @@ const EQUIPMENT_HERO: Record<string, HeroKey> = {
 
 /**
  * Resolve the owning hero for an equipment name.
- * Returns `null` for unrecognized equipment (e.g. "Heroic Torch" — not yet
- * in the Fankit, hero unknown).
+ * Returns `null` for unrecognized equipment (hero unknown).
  */
 export function heroForEquipment(name: string): HeroKey | null {
   return EQUIPMENT_HERO[name] ?? null;

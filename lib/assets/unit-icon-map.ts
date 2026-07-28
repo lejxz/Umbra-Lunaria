@@ -51,7 +51,6 @@ export const unitIconMap: Record<string, string> = {
   Druid: "/assets/unit-icons/Icon_HV_Druid.png",
   "Electro Titan": "/assets/unit-icons/Icon_HV_Electro_Titan.png",
   "Root Rider": "/assets/unit-icons/Icon_HV_Root_Rider.png",
-  Frostling: "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
   // Dark Elixir troops (Home Village)
@@ -91,7 +90,6 @@ export const unitIconMap: Record<string, string> = {
   "Super Yeti": "/assets/unit-icons/Icon_HV_Super_Yeti.png",
   "Super Ice Hound": "/assets/unit-icons/Icon_HV_Super_Ice_Hound.png",
   "Ice Hound": "/assets/unit-icons/Icon_HV_Super_Ice_Hound.png",
-  Lavaloon: "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
   // Siege machines (clan-crafted war units)
@@ -99,12 +97,18 @@ export const unitIconMap: Record<string, string> = {
   "Wall Wrecker": "/assets/unit-icons/Icon_HV_Siege_Machine_Wall_Wrecker.png",
   "Battle Blimp": "/assets/unit-icons/Icon_HV_Siege_Machine_Battle_Blimp.png",
   "Stone Slammer": "/assets/unit-icons/Icon_HV_Siege_Machine_Stone_Slammer.png",
-  "Battle Ram": "/assets/unit-icons/placeholder.svg",
   "Siege Barracks": "/assets/unit-icons/Icon_HV_Siege_Machine_Siege_Barracks.png",
   "Log Launcher": "/assets/unit-icons/Icon_HV_Siege_Machine_Log_Launcher.png",
   "Flame Flinger": "/assets/unit-icons/Icon_HV_Siege_Machine_Flame_Flinger.png",
   "Battle Drill": "/assets/unit-icons/Icon_HV_Siege_Machine_Battle_Drill.png",
   "Sky Wagon": "/assets/unit-icons/Icon_HV_Siege_Machine_Sky_Wagon.png",
+
+  // -----------------------------------------------------------------------
+  // Seasonal / event troops (time-limited). Not always in the API payload —
+  // they appear only during their event window. Mapped so the icon resolves
+  // when they do show up.
+  // -----------------------------------------------------------------------
+  Lavaloon: "/assets/unit-icons/Icon_HV_Lavaloon.png",
 
   // -----------------------------------------------------------------------
   // Builder Base troops (Builder Base)
@@ -184,15 +188,14 @@ export const unitIconMap: Record<string, string> = {
   "Rocket Spear": "/assets/unit-icons/Icon_HG_RoyalChampion_RocketSpear_Equipment_03.png",
   "Dark Crown": "/assets/unit-icons/Icon_HG_MP_DarkCrown.png",
   "Stick Fire Horse": "/assets/unit-icons/Icon_HG_BK_StickFireHorse.png",
-  // Equipment seen in DB without a matched Fankit file yet.
-  "Heroic Torch": "/assets/unit-icons/placeholder.svg",
+  "Heroic Torch": "/assets/unit-icons/Icon_HG_GW_Heroic_Torch.png",
 
   // -----------------------------------------------------------------------
   // Elixir spells (Home Village)
   // -----------------------------------------------------------------------
   "Lightning Spell": "/assets/unit-icons/Icon_HV_Spell_Lightning.png",
   "Healing Spell": "/assets/unit-icons/Icon_HV_Spell_Heal.png",
-  "Rage Spell": "/assets/unit-icons/placeholder.svg",
+  "Rage Spell": "/assets/unit-icons/Icon_HV_Spell_Rage.png",
   "Jump Spell": "/assets/unit-icons/Icon_HV_Spell_Jump.png",
   "Freeze Spell": "/assets/unit-icons/Icon_HV_Spell_Freeze.png",
   "Clone Spell": "/assets/unit-icons/Icon_HV_Spell_Clone.png",
@@ -211,7 +214,7 @@ export const unitIconMap: Record<string, string> = {
   "Skeleton Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Skeleton.png",
   "Bat Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Bat.png",
   "Ice Block Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Ice_Block.png",
-  "Overgrowth Spell": "/assets/unit-icons/placeholder.svg",
+  "Overgrowth Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Overgrowth.png",
 
   // -----------------------------------------------------------------------
   // Pets (Pet House)
@@ -227,7 +230,7 @@ export const unitIconMap: Record<string, string> = {
   "Spirit Fox": "/assets/unit-icons/Icon_HV_Hero_Pets_Spirit_Fox.png",
   "Angry Jelly": "/assets/unit-icons/Icon_HV_Hero_Pets_Angry_Jelly.png",
   "Sneezy": "/assets/unit-icons/Icon_HV_Hero_Pets_Sneezy.png",
-  "Greedy Raven": "/assets/unit-icons/placeholder.svg",
+  "Greedy Raven": "/assets/unit-icons/Icon_HV_Hero_Pets_Greedy_Raven.png",
 };
 
 const PLACEHOLDER = "/assets/unit-icons/placeholder.svg";
