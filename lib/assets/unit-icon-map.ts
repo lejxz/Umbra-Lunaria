@@ -155,21 +155,25 @@ export const unitIconMap: Record<string, string> = {
   "Rage Vial": "/assets/unit-icons/Icon_HE_BK_Rage_Vial.png",
   "Spiky Ball": "/assets/unit-icons/Icon_HE_BK_Spiky_Ball.png",
   "Vampstache": "/assets/unit-icons/Icon_HE_BK_Vampstache.png",
+  "Snake Bracelet": "/assets/unit-icons/Icon_HE_BK_Snake_Bracelet.png",
   "Giant Gauntlet": "/assets/unit-icons/Icon_HE_BQ_Giant_Gauntlet.png",
   "Eternal Tome": "/assets/unit-icons/Icon_HE_GW_Eternal_Tome.png",
   "Healing Tome": "/assets/unit-icons/Icon_HE_GW_Healing_Tome.png",
   "Life Gem": "/assets/unit-icons/Icon_HE_GW_Life_Gem.png",
   "Rage Gem": "/assets/unit-icons/Icon_HE_GW_Rage_Gem.png",
+  "Fireball": "/assets/unit-icons/Icon_HE_GW_Fireball.png",
   "Dark Orb": "/assets/unit-icons/Icon_HE_MP_DarkOrb.png",
   "Henchmen Puppet": "/assets/unit-icons/Icon_HE_MP_Henchman.png",
   "Metal Pants": "/assets/unit-icons/Icon_HE_MP_Iron_Pants.png",
+  "Noble Iron": "/assets/unit-icons/Icon_HE_MP_Noble_Iron.png",
   "Electro Boots": "/assets/unit-icons/Icon_HE_RC_ElectroBoots.png",
   "Frost Flake": "/assets/unit-icons/Icon_HE_RC_Frost_Flake.png",
   "Haste Vial": "/assets/unit-icons/Icon_HE_RC_Haste_Vial.png",
   "Hog Rider Puppet": "/assets/unit-icons/Icon_HE_RC_Hog_Rider_Doll.png",
   "Royal Gem": "/assets/unit-icons/Icon_HE_RC_Royal_Gem.png",
   "Seeking Shield": "/assets/unit-icons/Icon_HE_RC_Seeking_Shield.png",
-  // Hero gear (Dragon Duke double-cannon attachments) — HG_DD_* + HG_GW/MP/RC
+  "Action Figure": "/assets/unit-icons/Icon_HE_AQ_Action_Figure.png",
+  // Hero gear (Dragon Duke double-cannon attachments + other hero gear)
   "Electro Fangs": "/assets/unit-icons/Icon_HG_DD_Electro_Fangs.png",
   "Fire Heart": "/assets/unit-icons/Icon_HG_DD_FireHeart.png",
   "Flame Blower": "/assets/unit-icons/Icon_HG_DD_FlameBlower.png",
@@ -178,51 +182,51 @@ export const unitIconMap: Record<string, string> = {
   "Lavaloon Puppet": "/assets/unit-icons/Icon_HG_GW_LavaloonPuppet.png",
   "Meteor Staff": "/assets/unit-icons/Icon_HG_MP_MeteoriteSceptre.png",
   "Rocket Spear": "/assets/unit-icons/Icon_HG_RoyalChampion_RocketSpear_Equipment_03.png",
-  // Equipment names seen in the DB without a matched Fankit file yet.
+  "Dark Crown": "/assets/unit-icons/Icon_HG_MP_DarkCrown.png",
+  "Stick Fire Horse": "/assets/unit-icons/Icon_HG_BK_StickFireHorse.png",
+  // Equipment seen in DB without a matched Fankit file yet.
   "Heroic Torch": "/assets/unit-icons/placeholder.svg",
-  "Noble Iron": "/assets/unit-icons/placeholder.svg",
-  "Snake Bracelet": "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
-  // Elixir spells (Home Village) — not yet downloaded. Placeholder.
+  // Elixir spells (Home Village)
   // -----------------------------------------------------------------------
-  "Lightning Spell": "/assets/unit-icons/placeholder.svg",
-  "Healing Spell": "/assets/unit-icons/placeholder.svg",
+  "Lightning Spell": "/assets/unit-icons/Icon_HV_Spell_Lightning.png",
+  "Healing Spell": "/assets/unit-icons/Icon_HV_Spell_Heal.png",
   "Rage Spell": "/assets/unit-icons/placeholder.svg",
-  "Jump Spell": "/assets/unit-icons/placeholder.svg",
-  "Freeze Spell": "/assets/unit-icons/placeholder.svg",
-  "Clone Spell": "/assets/unit-icons/placeholder.svg",
-  "Invisibility Spell": "/assets/unit-icons/placeholder.svg",
-  "Recall Spell": "/assets/unit-icons/placeholder.svg",
-  "Revive Spell": "/assets/unit-icons/placeholder.svg",
-  "Angry Spell": "/assets/unit-icons/placeholder.svg",
-  "Ice Block Spell": "/assets/unit-icons/placeholder.svg",
-  "Totem Spell": "/assets/unit-icons/placeholder.svg",
+  "Jump Spell": "/assets/unit-icons/Icon_HV_Spell_Jump.png",
+  "Freeze Spell": "/assets/unit-icons/Icon_HV_Spell_Freeze.png",
+  "Clone Spell": "/assets/unit-icons/Icon_HV_Spell_Clone.png",
+  "Invisibility Spell": "/assets/unit-icons/Icon_HV_Spell_Invisibility.png",
+  "Recall Spell": "/assets/unit-icons/Icon_HV_Spell_Recall.png",
+  "Revive Spell": "/assets/unit-icons/Icon_HV_Spell_Revive.png",
+  "Angry Spell": "/assets/unit-icons/Icon_HV_Spell_Angry.png",
+  "Totem Spell": "/assets/unit-icons/Icon_HV_Spell_Totem.png",
 
   // -----------------------------------------------------------------------
-  // Dark spells — not yet downloaded. Placeholder.
+  // Dark spells
   // -----------------------------------------------------------------------
-  "Poison Spell": "/assets/unit-icons/placeholder.svg",
-  "Earthquake Spell": "/assets/unit-icons/placeholder.svg",
-  "Haste Spell": "/assets/unit-icons/placeholder.svg",
-  "Skeleton Spell": "/assets/unit-icons/placeholder.svg",
-  "Bat Spell": "/assets/unit-icons/placeholder.svg",
+  "Poison Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Poison.png",
+  "Earthquake Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Earthquake.png",
+  "Haste Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Haste.png",
+  "Skeleton Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Skeleton.png",
+  "Bat Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Bat.png",
+  "Ice Block Spell": "/assets/unit-icons/Icon_HV_Dark_Spell_Ice_Block.png",
   "Overgrowth Spell": "/assets/unit-icons/placeholder.svg",
 
   // -----------------------------------------------------------------------
-  // Pets — not yet downloaded. Placeholder.
+  // Pets (Pet House)
   // -----------------------------------------------------------------------
-  "L.A.S.S.I": "/assets/unit-icons/placeholder.svg",
-  "Mighty Yak": "/assets/unit-icons/placeholder.svg",
-  "Electro Owl": "/assets/unit-icons/placeholder.svg",
-  Unicorn: "/assets/unit-icons/placeholder.svg",
-  Frosty: "/assets/unit-icons/placeholder.svg",
-  "Poison Lizard": "/assets/unit-icons/placeholder.svg",
-  Phoenix: "/assets/unit-icons/placeholder.svg",
-  Diggy: "/assets/unit-icons/placeholder.svg",
-  "Spirit Fox": "/assets/unit-icons/placeholder.svg",
-  "Angry Jelly": "/assets/unit-icons/placeholder.svg",
-  "Sneezy": "/assets/unit-icons/placeholder.svg",
+  "L.A.S.S.I": "/assets/unit-icons/Icon_HV_Hero_Pets_LASSI.png",
+  "Mighty Yak": "/assets/unit-icons/Icon_HV_Hero_Pets_Mighty_Yak.png",
+  "Electro Owl": "/assets/unit-icons/Icon_HV_Hero_Pets_Electro_Owl.png",
+  Unicorn: "/assets/unit-icons/Icon_HV_Hero_Pets_Unicorn.png",
+  Frosty: "/assets/unit-icons/Icon_HV_Hero_Pets_Frosty.png",
+  "Poison Lizard": "/assets/unit-icons/Icon_HV_Hero_Pets_Poison_Lizard.png",
+  Phoenix: "/assets/unit-icons/Icon_HV_Hero_Pets_Phoenix.png",
+  Diggy: "/assets/unit-icons/Icon_HV_Hero_Pets_Diggy.png",
+  "Spirit Fox": "/assets/unit-icons/Icon_HV_Hero_Pets_Spirit_Fox.png",
+  "Angry Jelly": "/assets/unit-icons/Icon_HV_Hero_Pets_Angry_Jelly.png",
+  "Sneezy": "/assets/unit-icons/Icon_HV_Hero_Pets_Sneezy.png",
   "Greedy Raven": "/assets/unit-icons/placeholder.svg",
 };
 

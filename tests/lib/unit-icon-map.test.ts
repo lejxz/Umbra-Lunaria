@@ -73,12 +73,14 @@ describe("getUnitIcon", () => {
   });
 
   it("returns the placeholder for units without a downloaded asset", () => {
-    // Spells and pets haven't been downloaded from the Fankit yet (heroes
-    // and hero equipment now have real PNGs).
-    expect(getUnitIcon("Lightning Spell")).toBe(
+    // Rage Spell, Overgrowth Spell, and Greedy Raven haven't been downloaded yet.
+    expect(getUnitIcon("Rage Spell")).toBe(
       "/assets/unit-icons/placeholder.svg",
     );
-    expect(getUnitIcon("L.A.S.S.I")).toBe(
+    expect(getUnitIcon("Overgrowth Spell")).toBe(
+      "/assets/unit-icons/placeholder.svg",
+    );
+    expect(getUnitIcon("Greedy Raven")).toBe(
       "/assets/unit-icons/placeholder.svg",
     );
   });

@@ -7,6 +7,7 @@ import { Badge, UnavailableValue } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/section-label";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import { isSuperTroop } from "@/lib/assets/super-troops";
+import { heroForEquipment, HERO_LABEL, type HeroKey } from "@/lib/assets/hero-equipment";
 import { IconSwords } from "@/components/ui/icons";
 import { DonationChart } from "@/components/dashboard/donation-chart";
 import { useState } from "react";
@@ -396,13 +397,33 @@ const SIEGE_MACHINE_NAMES = new Set([
 ]);
 
 /**
- * Super troops → their base (lab-researched) troop. The CoC API reports every
- * super troop at `level: 1` (a super troop is a temporary 1-week boost, not a
- * separately researched unit), so "Super Valkyrie 1/12" is misleading. We
- * resolve the super troop's display level/maxLevel from its base troop.
- *
- * The shared map + resolver live in lib/assets/super-troops.ts.
+ * Group hero equipment by owning hero. Returns an array of { title, items }
+ * groups ordered by hero (AQ, BK, GW, RC, MP, DD), skipping heroes with no
+ * equipment. Unrecognized equipment (hero unknown) goes in "Other".
  */
+function groupEquipmentByHero(
+  equipment: MemberDetailView["progression"]["heroEquipment"],
+): Array<{ title: string; items: typeof equipment }> {
+  const buckets = new Map<HeroKey | "other", typeof equipment>();
+  for (const eq of equipment) {
+    const hero = heroForEquipment(eq.name);
+    const key: HeroKey | "other" = hero ?? "other";
+    if (!buckets.has(key)) buckets.set(key, []);
+    buckets.get(key)!.push(eq);
+  }
+  const order: Array<HeroKey | "other"> = ["AQ", "BK", "GW", "RC", "MP", "DD", "other"];
+  const result: Array<{ title: string; items: typeof equipment }> = [];
+  for (const key of order) {
+    const items = buckets.get(key);
+    if (items && items.length > 0) {
+      result.push({
+        title: key === "other" ? "Other" : HERO_LABEL[key],
+        items,
+      });
+    }
+  }
+  return result;
+}
 
 function ProgressionSection({ detail }: { detail: MemberDetailView }) {
   const p = detail.progression;
@@ -442,8 +463,8 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
       count: p.heroes.length + p.heroEquipment.length,
       groups: [
         { title: "Heroes", items: p.heroes },
-        { title: "Equipment", items: p.heroEquipment }
-      ] 
+        ...groupEquipmentByHero(p.heroEquipment),
+      ],
     },
     { 
       id: "spells", 
