@@ -295,7 +295,11 @@ function DonationsSection({ detail }: { detail: MemberDetailView }) {
         <DonationInline label="7d" given={d.given7d} received={d.received7d} />
         <DonationInline label="30d" given={d.given30d} received={d.received30d} />
       </div>
-      
+
+      {/* 30-day ratio summary — surfaces one-way donors (gives a lot, receives
+          little) and one-way receivers (takes a lot, gives little). */}
+      <DonationRatioSummary given={d.given30d} received={d.received30d} />
+
       {d.buckets.length > 0 && (
         <div className="mt-4">
           <p className="mb-2 font-mono text-label uppercase tracking-wider text-umbra-muted">30-day trend</p>
@@ -313,6 +317,61 @@ function DonationInline({ label, given, received }: { label: string; given: numb
       <div className="flex items-baseline gap-1.5">
         <span className="text-sm font-bold text-emerald-400">↑{given}</span>
         <span className="text-xs text-umbra-muted">↓{received}</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 30-day donation ratio summary — a compact bar + label that shows whether the
+ * member is a net donor, net receiver, or balanced. Surfaces one-way donors
+ * (generous but unsupported) and one-way receivers (take but don't give back).
+ */
+function DonationRatioSummary({ given, received }: { given: number; received: number }) {
+  const total = given + received;
+  if (total === 0) return null; // no donations either way — nothing to show
+
+  const givenPct = Math.round((given / total) * 100);
+  const receivedPct = 100 - givenPct;
+  const ratio = received > 0 ? given / received : null;
+
+  // Tone: emerald = net donor (gives more than receives), amber = balanced,
+  // rose = net receiver (receives more than gives).
+  const isNetDonor = given > received * 1.2;
+  const isNetReceiver = received > given * 1.2;
+  const tone = isNetDonor
+    ? { label: "Net donor", text: "text-emerald-400", bar: "from-emerald-500 to-emerald-400" }
+    : isNetReceiver
+      ? { label: "Net receiver", text: "text-rose-300", bar: "from-rose-500 to-rose-400" }
+      : { label: "Balanced", text: "text-amber-300", bar: "from-amber-500 to-amber-400" };
+
+  return (
+    <div className="mt-3 rounded-lg border border-umbra-line/50 bg-umbra-ink/40 px-4 py-2.5">
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+          30d balance
+        </span>
+        <span className={`font-mono text-label font-semibold uppercase tracking-wider ${tone.text}`}>
+          {tone.label}
+          {ratio !== null && (
+            <span className="ml-2 text-umbra-muted/70">· {ratio.toFixed(2)}:1</span>
+          )}
+        </span>
+      </div>
+      {/* Split bar: green (given) left, rose (received) right */}
+      <div className="flex h-1.5 w-full overflow-hidden rounded-full bg-white/[.06]">
+        <div
+          className={`h-full bg-gradient-to-r ${tone.bar} transition-all duration-500`}
+          style={{ width: `${givenPct}%` }}
+        />
+        <div
+          className="h-full bg-white/[.08] transition-all duration-500"
+          style={{ width: `${receivedPct}%` }}
+        />
+      </div>
+      <div className="mt-1 flex items-center justify-between font-mono text-2xs text-umbra-muted">
+        <span>↑ {given} given ({givenPct}%)</span>
+        <span>{receivedPct}% received ({received}) ↓</span>
       </div>
     </div>
   );
