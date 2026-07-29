@@ -165,8 +165,74 @@ export function CurrentWarCard({
               </div>
             </div>
           </div>
+
+          {/* Attack progress — attacks used / total allowed for both clans.
+              Only shown during battle day (inWar) when attacks matter. */}
+          {warSummary.state === "inWar" &&
+            warSummary.teamSize &&
+            warSummary.attacksPerMember &&
+            warSummary.ownAttacks !== null &&
+            warSummary.opponentAttacks !== null && (
+              <AttackProgress
+                ownAttacks={warSummary.ownAttacks}
+                opponentAttacks={warSummary.opponentAttacks}
+                total={warSummary.teamSize * warSummary.attacksPerMember}
+              />
+            )}
         </>
       )}
     </section>
+  );
+}
+
+/**
+ * Compact attack-progress bar — shows how many of the clan's allocated attacks
+ * have been used vs the opponent. A full bar means all attacks are spent; a
+ * low bar with time running out is the "needs attention" signal.
+ */
+function AttackProgress({
+  ownAttacks,
+  opponentAttacks,
+  total,
+}: {
+  ownAttacks: number;
+  opponentAttacks: number;
+  total: number;
+}) {
+  const ownPct = total > 0 ? Math.round((ownAttacks / total) * 100) : 0;
+  const oppPct = total > 0 ? Math.round((opponentAttacks / total) * 100) : 0;
+  return (
+    <div className="mt-4 border-t border-umbra-line/50 pt-3">
+      <div className="mb-2 flex items-center justify-between">
+        <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">
+          Attacks
+        </span>
+        <span className="font-mono text-label text-umbra-muted">
+          {ownAttacks}/{total} vs {opponentAttacks}/{total}
+        </span>
+      </div>
+      {/* Our attacks bar */}
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className="w-8 shrink-0 font-mono text-2xs uppercase text-umbra-lilac/70">Us</span>
+        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/[.06]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-umbra-violet to-umbra-purple transition-all duration-500"
+            style={{ width: `${ownPct}%` }}
+          />
+        </div>
+        <span className="w-8 shrink-0 text-right font-mono text-2xs font-semibold text-umbra-lilac">{ownPct}%</span>
+      </div>
+      {/* Enemy attacks bar */}
+      <div className="flex items-center gap-2">
+        <span className="w-8 shrink-0 font-mono text-2xs uppercase text-red-300/70">Them</span>
+        <div className="relative h-2 flex-1 overflow-hidden rounded-full bg-white/[.06]">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-red-500/60 to-red-400/80 transition-all duration-500"
+            style={{ width: `${oppPct}%` }}
+          />
+        </div>
+        <span className="w-8 shrink-0 text-right font-mono text-2xs font-semibold text-red-300/80">{oppPct}%</span>
+      </div>
+    </div>
   );
 }

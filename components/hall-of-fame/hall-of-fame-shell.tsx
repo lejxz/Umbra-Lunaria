@@ -35,10 +35,8 @@ import {
   IconCoins,
   IconEye,
   IconCrown,
-  IconClock,
   IconTrophy,
   IconZap,
-  IconUsers,
 } from "@/components/ui/icons";
 import type { HallOfFamePageData } from "@/lib/view-models/hall-of-fame";
 
@@ -110,20 +108,6 @@ const LIVE_META: Record<string, RecordMeta> = {
     color: "text-yellow-400",
     accent: "border-yellow-400/40 bg-yellow-400/5",
   },
-  "most-raid-medals": {
-    title: "Most Raid Medals",
-    subtitle: "All-time medals earned",
-    icon: <IconTrophy className="w-5 h-5" />,
-    color: "text-umbra-purple",
-    accent: "border-umbra-purple/40 bg-umbra-purple/5",
-  },
-  "most-bonus-attacks": {
-    title: "Most Bonus Attacks",
-    subtitle: "Bonus attacks earned",
-    icon: <IconZap className="w-5 h-5" />,
-    color: "text-teal-300",
-    accent: "border-teal-400/40 bg-teal-400/5",
-  },
   "raid-mvp": {
     title: "Raid MVP",
     subtitle: "Top looter — latest weekend",
@@ -131,26 +115,12 @@ const LIVE_META: Record<string, RecordMeta> = {
     color: "text-amber-300",
     accent: "border-amber-300/40 bg-amber-300/5",
   },
-  "most-seasons": {
-    title: "Most Seasons",
-    subtitle: "Most raid weekends attended",
-    icon: <IconUsers className="w-5 h-5" />,
-    color: "text-sky-300",
-    accent: "border-sky-400/40 bg-sky-400/5",
-  },
   "best-gold-per-attack": {
     title: "Best Gold/Attack",
     subtitle: "Most efficient looter",
     icon: <IconCoins className="w-5 h-5" />,
     color: "text-yellow-300",
     accent: "border-yellow-300/40 bg-yellow-300/5",
-  },
-  "longest-tenure": {
-    title: "Longest Tenured",
-    subtitle: "Members here the longest",
-    icon: <IconClock className="w-5 h-5" />,
-    color: "text-sky-300",
-    accent: "border-sky-400/40 bg-sky-400/5",
   },
 };
 
@@ -175,15 +145,8 @@ const WAR_ITEMS: SectionItem[] = [
 const CAPITAL_ITEMS: SectionItem[] = [
   { type: "cached", key: "capitalist" },
   { type: "live", key: "most-raid-gold" },
-  { type: "live", key: "most-raid-medals" },
-  { type: "live", key: "most-bonus-attacks" },
   { type: "live", key: "raid-mvp" },
-  { type: "live", key: "most-seasons" },
   { type: "live", key: "best-gold-per-attack" },
-];
-
-const TENURE_ITEMS: SectionItem[] = [
-  { type: "live", key: "longest-tenure" },
 ];
 
 export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
@@ -236,9 +199,8 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
   const allTimeCards = renderSection(ALL_TIME_ITEMS);
   const warCards = renderSection(WAR_ITEMS);
   const capitalCards = renderSection(CAPITAL_ITEMS);
-  const tenureCards = renderSection(TENURE_ITEMS);
 
-  const hasAny = allTimeCards.length > 0 || warCards.length > 0 || capitalCards.length > 0 || tenureCards.length > 0;
+  const hasAny = allTimeCards.length > 0 || warCards.length > 0 || capitalCards.length > 0;
 
   return (
     <PageScaffold section="Hall of Fame" title="Hall of Fame">
@@ -324,23 +286,6 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
           </div>
         )}
       </section>
-
-      {/* ── Section 4: Tenure ─────────────────────────────────────────── */}
-      {tenureCards.length > 0 && (
-        <section>
-          <SectionHeader title="Tenure" />
-          <div className="grid grid-cols-1 items-start gap-4 lg:gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {tenureCards.map((card, i) => (
-              <RecordCard
-                key={`tenure-${i}`}
-                meta={card.meta}
-                entries={card.entries}
-                onMemberClick={setSelectedMember}
-              />
-            ))}
-          </div>
-        </section>
-      )}
 
       {!hasAny && (
         <section className="glass rounded-2xl p-5">

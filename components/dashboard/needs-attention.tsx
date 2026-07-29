@@ -105,6 +105,9 @@ function AttentionGroup({
 
   return (
     <div>
+      <p className={`mb-2 font-mono text-label uppercase tracking-wider ${color}`}>
+        {label}
+      </p>
       <div className="space-y-1.5">
         {members.map((m) => (
           <button

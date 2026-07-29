@@ -67,7 +67,7 @@ import {
 // stability — callers should keep importing from @/lib/db/queries.
 export { getWarRecord } from "@/lib/scoring/war-record";
 import { getWarRecord } from "@/lib/scoring/war-record";
-import { computeWindow, generateBuckets, isSameDayInClanTz } from "@/lib/time/windows";
+import { computeWindow, generateBuckets } from "@/lib/time/windows";
 
 const CLAN_TAG = clanConfig.clanTag;
 
@@ -1331,18 +1331,25 @@ export async function getRosterSizeTrend(
   const since = new Date();
   since.setDate(since.getDate() - days);
 
+  // Bucket by calendar day in the CLAN TIMEZONE (not UTC). date_trunc's third
+  // argument (PG 13+) sets the timezone for the truncation — without it, day
+  // boundaries fall at midnight UTC (08:00 Manila), which misallocates raids
+  // that happen late in the evening Manila time to the wrong day.
+  const tz = clanConfig.timezone;
   const rows = await db
     .select({
-      day: sql<Date>`date_trunc('day', ${memberSnapshots.capturedAt})`,
+      day: sql<Date>`date_trunc('day', ${memberSnapshots.capturedAt}, ${tz})`,
       count: sql<number>`count(distinct ${memberSnapshots.playerTag})`,
     })
     .from(memberSnapshots)
     .where(gte(memberSnapshots.capturedAt, since))
-    .groupBy(sql`date_trunc('day', ${memberSnapshots.capturedAt})`)
-    .orderBy(sql`date_trunc('day', ${memberSnapshots.capturedAt})`);
+    .groupBy(sql`date_trunc('day', ${memberSnapshots.capturedAt}, ${tz})`)
+    .orderBy(sql`date_trunc('day', ${memberSnapshots.capturedAt}, ${tz})`);
 
   const points = rows.map((r) => ({
-    timestamp: r.day,
+    // date_trunc returns timestamptz; drizzle may hand back a string from raw
+    // SQL — normalize so chart code can safely call .getTime().
+    timestamp: r.day instanceof Date ? r.day : new Date(r.day as string),
     count: Number(r.count),
   }));
 

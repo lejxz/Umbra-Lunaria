@@ -12,7 +12,7 @@
  * from a client component.
  */
 
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   hallOfFameRecords,
@@ -123,36 +123,24 @@ async function getLastComputedAt(): Promise<Date | null> {
 async function getLiveRecords(): Promise<LiveRecordCategory[]> {
   const [
     raidGold,
-    raidMedals,
-    mostBonusAttacks,
     raidMvp,
-    mostSeasons,
     bestGoldPerAttack,
     perfectAttendance,
     fastestThreeStar,
-    longestTenure,
   ] = await Promise.all([
     safe("most raid gold", computeMostRaidGold()),
-    safe("most raid medals", computeMostRaidMedals()),
-    safe("most bonus attacks", computeMostBonusAttacks()),
     safe("raid MVP", computeRaidMvp()),
-    safe("most seasons", computeMostSeasons()),
     safe("best gold per attack", computeBestGoldPerAttack()),
     safe("perfect attendance", computePerfectAttendance()),
     safe("fastest 3-star", computeFastestThreeStar()),
-    safe("longest tenure", computeLongestTenure()),
   ]);
 
   return [
     raidGold,
-    raidMedals,
-    mostBonusAttacks,
     raidMvp,
-    mostSeasons,
     bestGoldPerAttack,
     perfectAttendance,
     fastestThreeStar,
-    longestTenure,
   ].filter((c): c is LiveRecordCategory => c !== null);
 }
 
@@ -192,67 +180,6 @@ async function computeMostRaidGold(): Promise<LiveRecordCategory | null> {
       name: r.name,
       value: r.total,
       valueLabel: `${r.total.toLocaleString()} gold`,
-    })),
-  };
-}
-
-// ── Most raid medals all-time ────────────────────────────────────────────
-async function computeMostRaidMedals(): Promise<LiveRecordCategory | null> {
-  const rows = await db
-    .select({
-      playerTag: capitalContributions.playerTag,
-      name: members.name,
-      total: sql<number>`coalesce(sum(coalesce(${capitalContributions.raidWeekendMedals}, 0)), 0)::int`,
-    })
-    .from(capitalContributions)
-    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
-    .groupBy(capitalContributions.playerTag, members.name)
-    .orderBy(desc(sql`sum(coalesce(${capitalContributions.raidWeekendMedals}, 0))`))
-    .limit(10);
-
-  if (rows.length === 0) return null;
-  return {
-    key: "most-raid-medals",
-    title: "Most Raid Medals",
-    description: "All-time raid-weekend medals earned (offensive + defensive rewards).",
-    icon: "trophy",
-    entries: rows.map((r) => ({
-      playerTag: r.playerTag,
-      name: r.name,
-      value: r.total,
-      valueLabel: `${r.total.toLocaleString()} 🏅`,
-    })),
-  };
-}
-
-// ── Most bonus attacks used ─────────────────────────────────────────────
-// Sum of bonusAttackLimit across all seasons — the players who consistently
-// earned + used bonus raid attacks (the most dedicated raiders).
-async function computeMostBonusAttacks(): Promise<LiveRecordCategory | null> {
-  const rows = await db
-    .select({
-      playerTag: capitalContributions.playerTag,
-      name: members.name,
-      total: sql<number>`coalesce(sum(coalesce(${capitalContributions.bonusAttackLimit}, 0)), 0)::int`,
-    })
-    .from(capitalContributions)
-    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
-    .groupBy(capitalContributions.playerTag, members.name)
-    .having(sql`coalesce(sum(coalesce(${capitalContributions.bonusAttackLimit}, 0)), 0) > 0`)
-    .orderBy(desc(sql`sum(coalesce(${capitalContributions.bonusAttackLimit}, 0))`))
-    .limit(10);
-
-  if (rows.length === 0) return null;
-  return {
-    key: "most-bonus-attacks",
-    title: "Most Bonus Attacks",
-    description: "Total bonus raid attacks earned across all weekends.",
-    icon: "zap",
-    entries: rows.map((r) => ({
-      playerTag: r.playerTag,
-      name: r.name,
-      value: r.total,
-      valueLabel: `${r.total} bonus attacks`,
     })),
   };
 }
@@ -300,37 +227,6 @@ async function computeRaidMvp(): Promise<LiveRecordCategory | null> {
       value: r.gold,
       valueLabel: `${r.gold.toLocaleString()} gold`,
       metaLabel: `${r.attacks} attacks`,
-    })),
-  };
-}
-
-// ── Most seasons participated ──────────────────────────────────────────
-// Count of distinct raid seasons each member contributed to — the loyal
-// raiders who show up every weekend.
-async function computeMostSeasons(): Promise<LiveRecordCategory | null> {
-  const rows = await db
-    .select({
-      playerTag: capitalContributions.playerTag,
-      name: members.name,
-      seasons: sql<number>`count(distinct ${capitalContributions.raidSeasonId})::int`,
-    })
-    .from(capitalContributions)
-    .innerJoin(members, eq(members.playerTag, capitalContributions.playerTag))
-    .groupBy(capitalContributions.playerTag, members.name)
-    .orderBy(desc(sql`count(distinct ${capitalContributions.raidSeasonId})`))
-    .limit(10);
-
-  if (rows.length === 0) return null;
-  return {
-    key: "most-seasons",
-    title: "Most Seasons",
-    description: "Most raid weekends attended.",
-    icon: "users",
-    entries: rows.map((r) => ({
-      playerTag: r.playerTag,
-      name: r.name,
-      value: r.seasons,
-      valueLabel: `${r.seasons} seasons`,
     })),
   };
 }
@@ -438,42 +334,3 @@ async function computeFastestThreeStar(): Promise<LiveRecordCategory | null> {
   };
 }
 
-// ── Longest-tenured member ───────────────────────────────────────────────
-async function computeLongestTenure(): Promise<LiveRecordCategory | null> {
-  // Tenure = how long the tracker has observed this member. Uses
-  // members.joinedAt ("first observed by this tracker") rather than
-  // membership_events.eventType='join', because original members (present
-  // when tracking started) have no 'join' event — they were backfilled as
-  // existing members. members.joinedAt is set for every member (notNull),
-  // so this captures the full roster, not just post-tracking joiners.
-  const rows = await db
-    .select({
-      playerTag: members.playerTag,
-      name: members.name,
-      firstSeen: members.joinedAt,
-    })
-    .from(members)
-    .where(isNull(members.leftAt))
-    .orderBy(members.joinedAt)
-    .limit(10);
-
-  if (rows.length === 0) return null;
-  const now = Date.now();
-  return {
-    key: "longest-tenure",
-    title: "Longest Tenured",
-    description: "Members who have been here the longest (by first-observed join).",
-    icon: "clock",
-    entries: rows.map((r) => {
-      const firstSeenDate = new Date(r.firstSeen);
-      const days = Math.floor((now - firstSeenDate.getTime()) / 86_400_000);
-      return {
-        playerTag: r.playerTag,
-        name: r.name,
-        value: days,
-        valueLabel: `${days} days`,
-        metaLabel: `since ${firstSeenDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-      };
-    }),
-  };
-}
