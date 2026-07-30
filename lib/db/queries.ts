@@ -1331,24 +1331,32 @@ export async function getRosterSizeTrend(
   const since = new Date();
   since.setDate(since.getDate() - days);
 
-  // Bucket by calendar day in the CLAN TIMEZONE (not UTC). date_trunc's third
-  // argument (PG 13+) sets the timezone for the truncation — without it, day
+  // Bucket by calendar day in the CLAN TIMEZONE (not UTC). Without this, day
   // boundaries fall at midnight UTC (08:00 Manila), which misallocates raids
   // that happen late in the evening Manila time to the wrong day.
-  const tz = clanConfig.timezone;
+  //
+  // `captured_at AT TIME ZONE 'Asia/Manila'` converts the timestamptz to a
+  // timestamp representing local Manila time, then date_trunc('day', ...)
+  // truncates to midnight Manila. The timezone is inlined as a raw SQL string
+  // literal (it's a hardcoded config value, not user input) — parameterized
+  // `AT TIME ZONE $1` and the 3-arg date_trunc form both fail on Supabase's
+  // PgBouncer pooler.
+  const tzLit = sql.raw(`'${clanConfig.timezone}'`);
+  const dayExpr = sql<Date>`date_trunc('day', ${memberSnapshots.capturedAt} AT TIME ZONE ${tzLit})`;
   const rows = await db
     .select({
-      day: sql<Date>`date_trunc('day', ${memberSnapshots.capturedAt}, ${tz})`,
+      day: dayExpr,
       count: sql<number>`count(distinct ${memberSnapshots.playerTag})`,
     })
     .from(memberSnapshots)
     .where(gte(memberSnapshots.capturedAt, since))
-    .groupBy(sql`date_trunc('day', ${memberSnapshots.capturedAt}, ${tz})`)
-    .orderBy(sql`date_trunc('day', ${memberSnapshots.capturedAt}, ${tz})`);
+    .groupBy(dayExpr)
+    .orderBy(dayExpr);
 
   const points = rows.map((r) => ({
-    // date_trunc returns timestamptz; drizzle may hand back a string from raw
-    // SQL — normalize so chart code can safely call .getTime().
+    // date_trunc over a timestamp (no tz) returns timestamp; drizzle may hand
+    // back a string from raw SQL — normalize so chart code can safely call
+    // .getTime().
     timestamp: r.day instanceof Date ? r.day : new Date(r.day as string),
     count: Number(r.count),
   }));
