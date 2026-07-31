@@ -12,7 +12,7 @@ import { getStrategyPage } from "@/lib/db/strategy-queries";
  *
  * See docs/concept/07-clan-war.md + the strategy page design.
  */
-export const revalidate = 300; // 5-min ISR
+export const revalidate = 600; // 10 min — strategy recomputes on poll but stale is fine
 
 export default async function StrategyPage() {
   let data;

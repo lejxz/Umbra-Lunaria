@@ -87,11 +87,16 @@ export async function POST(req: NextRequest) {
       errors: [...lightResult.errors, ...batchErrors],
       events: lightResult.events,
     };
-    revalidatePath("/", "layout");
+    // EGRESS OPTIMIZATION (docs log 110): only revalidate the dashboard page,
+    // not the entire layout. Other pages (members, war, capital, hall-of-fame)
+    // have their own ISR windows and don't need to re-render on every 5-min
+    // poll — that was causing every page to re-run its DB queries on every
+    // poll, driving the egress spike.
+    revalidatePath("/");
     return NextResponse.json(result);
   }
 
-  revalidatePath("/", "layout");
+  revalidatePath("/");
   return NextResponse.json({
     ...lightResult,
     batch: isBatch,

@@ -13,7 +13,7 @@ import { getCapitalPage } from "@/lib/db/capital-queries";
  * the data's natural freshness window. The live raid timer is fetched
  * inside getCapitalPage() and benefits from the same ISR cache.
  */
-export const revalidate = 300;
+export const revalidate = 3600; // 1 hr — capital changes weekly
 
 export default async function CapitalPage() {
   let data;

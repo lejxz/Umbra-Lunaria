@@ -288,23 +288,11 @@ export async function getDonationLeaderboard(
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
-  // Fetch ALL snapshots up to `to` (no gte(from)) so calculateDonationWindow
-  // can find the baseline snapshot just before the window start.
-  const snapshots = await db
-    .select({
-      playerTag: memberSnapshots.playerTag,
-      capturedAt: memberSnapshots.capturedAt,
-      donations: memberSnapshots.donations,
-      donationsReceived: memberSnapshots.donationsReceived,
-    })
-    .from(memberSnapshots)
-    .where(
-      and(
-        inArray(memberSnapshots.playerTag, tags),
-        lte(memberSnapshots.capturedAt, win.to),
-      ),
-    )
-    .orderBy(memberSnapshots.capturedAt);
+  // EGRESS OPTIMIZATION: fetch only (a) the last snapshot before the window
+  // start (baseline for the first delta) + (b) snapshots within the window.
+  // The old query fetched ALL history up to win.to (~14,000 rows); this fetches
+  // ~200 rows (7 members × ~28 polls in 24h). See docs log 110.
+  const snapshots = await fetchBoundedSnapshots(tags, win);
 
   const memberMap = new Map(retainedMembers.map((m) => [m.playerTag, m]));
 
@@ -387,23 +375,9 @@ export async function getDonationTimeline(
 
   const tags = retainedMembers.map((m) => m.playerTag);
 
-  // Fetch ALL snapshots in the window PLUS the last snapshot before the window
-  // started (as a baseline for the first bucket's delta).
-  const snapshots = await db
-    .select({
-      playerTag: memberSnapshots.playerTag,
-      capturedAt: memberSnapshots.capturedAt,
-      donations: memberSnapshots.donations,
-      donationsReceived: memberSnapshots.donationsReceived,
-    })
-    .from(memberSnapshots)
-    .where(
-      and(
-        inArray(memberSnapshots.playerTag, tags),
-        lte(memberSnapshots.capturedAt, win.to),
-      ),
-    )
-    .orderBy(memberSnapshots.capturedAt);
+  // EGRESS OPTIMIZATION (docs log 110): fetch baseline + in-window only,
+  // not all history. See fetchBoundedSnapshots.
+  const snapshots = await fetchBoundedSnapshots(tags, win);
 
   // For each bucket, compute the reset-aware donation DELTA (not the raw
   // cumulative counter). The delta is the sum of per-pair differences for
@@ -1257,6 +1231,76 @@ function emptyClan(): DashboardClan {
     lastPolledAt: null,
     lastDailyBatchAt: null,
   };
+}
+
+/**
+ * Fetch only the snapshots needed for a windowed donation/activity calculation:
+ * the last snapshot before the window start (baseline for the first delta) +
+ * all snapshots within [from, to].
+ *
+ * EGRESS OPTIMIZATION (docs log 110): the old pattern fetched ALL snapshots
+ * up to `win.to` (no lower bound) — ~14,000 rows per query × 6 queries per
+ * dashboard render. This fetches ~200 rows per query (7 members × ~28 polls
+ * in 24h), a ~95% reduction.
+ *
+ * Uses DISTINCT ON (player_tag) to grab one baseline row per member (the
+ * latest snapshot strictly before the window start), then UNIONs with the
+ * in-window rows.
+ */
+async function fetchBoundedSnapshots(
+  tags: string[],
+  win: { from: Date; to: Date },
+) {
+  // Baseline: last snapshot per member before the window start. Uses
+  // DISTINCT ON via raw SQL (drizzle's .distinctOn() API varies by version).
+  const baselines = await db.execute<{
+    player_tag: string;
+    captured_at: Date;
+    donations: number;
+    donations_received: number;
+    activity_flag: boolean;
+    login_day_flag: boolean;
+  }>(sql`
+    SELECT DISTINCT ON (player_tag)
+      player_tag, captured_at, donations, donations_received,
+      activity_flag, login_day_flag
+    FROM member_snapshots
+    WHERE player_tag = ANY(${sql.raw(`ARRAY[${tags.map((t) => `'${t}'`).join(",")}]::text[]`)})
+      AND captured_at < ${win.from}
+    ORDER BY player_tag, captured_at DESC
+  `);
+
+  // In-window snapshots.
+  const inWindow = await db
+    .select({
+      playerTag: memberSnapshots.playerTag,
+      capturedAt: memberSnapshots.capturedAt,
+      donations: memberSnapshots.donations,
+      donationsReceived: memberSnapshots.donationsReceived,
+      activityFlag: memberSnapshots.activityFlag,
+      loginDayFlag: memberSnapshots.loginDayFlag,
+    })
+    .from(memberSnapshots)
+    .where(
+      and(
+        inArray(memberSnapshots.playerTag, tags),
+        gte(memberSnapshots.capturedAt, win.from),
+        lte(memberSnapshots.capturedAt, win.to),
+      ),
+    )
+    .orderBy(memberSnapshots.capturedAt);
+
+  // Normalize baseline rows (snake_case → camelCase) to match inWindow shape.
+  const baselineRows = (baselines.rows ?? baselines).map((r) => ({
+    playerTag: r.player_tag,
+    capturedAt: r.captured_at instanceof Date ? r.captured_at : new Date(r.captured_at),
+    donations: r.donations,
+    donationsReceived: r.donations_received,
+    activityFlag: r.activity_flag,
+    loginDayFlag: r.login_day_flag,
+  }));
+
+  return [...baselineRows, ...inWindow];
 }
 
 function emptyDonationTotals(

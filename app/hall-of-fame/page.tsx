@@ -19,7 +19,7 @@ import { getHallOfFamePage } from "@/lib/db/hall-of-fame-queries";
  *
  * See docs/concept/05-dashboard.md §"Hall of Fame" + docs/concept/12.
  */
-export const revalidate = 300;
+export const revalidate = 3600; // 1 hr — records change daily at most
 
 export default async function HallOfFamePage() {
   let data;
