@@ -13,7 +13,7 @@ import type { MemberDetailView } from "@/lib/view-models/members";
  * ISR caching: revalidates every 300s (5 min). Member detail sheets are
  * fetched client-side on click (not cached) — only the roster list is cached.
  */
-export const revalidate = 600; // 10 min — roster changes slowly
+export const revalidate = 3600; // 1 hr — roster/TH/role only change on the daily batch
 
 export default async function MembersPage() {
   let roster;
