@@ -20,7 +20,7 @@ import { ErrorState } from "@/components/ui/state-primitives";
  * See docs/concept/05-dashboard.md for the full specification and
  * docs/concept/12 Step 1.2 for the implementation plan.
  */
-export const revalidate = 300; // 5 min — matches poll cadence
+export const revalidate = 900; // 15 min — egress optimization (docs log 111)
 
 export default async function DashboardPage() {
   let data;

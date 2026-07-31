@@ -10,6 +10,7 @@
  */
 
 import { and, desc, eq, gte, inArray, isNull, lte, ne, sql } from "drizzle-orm";
+import { cache } from "react";
 import { db } from "@/lib/db";
 import {
   clans,
@@ -212,24 +213,9 @@ export async function getDonationTotals(
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
-  // Fetch ALL snapshots up to `to` (no gte(from)) so calculateDonationWindow
-  // can find the baseline snapshot just before the window start. The function
-  // internally filters to the window — we just need the baseline available.
-  const snapshots = await db
-    .select({
-      playerTag: memberSnapshots.playerTag,
-      capturedAt: memberSnapshots.capturedAt,
-      donations: memberSnapshots.donations,
-      donationsReceived: memberSnapshots.donationsReceived,
-    })
-    .from(memberSnapshots)
-    .where(
-      and(
-        inArray(memberSnapshots.playerTag, tags),
-        lte(memberSnapshots.capturedAt, win.to),
-      ),
-    )
-    .orderBy(memberSnapshots.capturedAt);
+  // EGRESS OPTIMIZATION (docs log 110/111): fetch baseline + in-window only,
+  // not all history. See fetchBoundedSnapshots.
+  const snapshots = await fetchBoundedSnapshots(tags, win);
 
   // Group by member
   const byMember = new Map<string, DonationSnapshot[]>();
@@ -1176,7 +1162,9 @@ export async function getDashboard(): Promise<DashboardData> {
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function getRetainedMembers() {
+// EGRESS OPTIMIZATION (docs log 111): wrap in React.cache() so the 6+ calls
+// per dashboard render deduplicate to 1 DB query per render pass.
+const getRetainedMembers = cache(async () => {
   return db
     .select({
       playerTag: members.playerTag,
@@ -1192,15 +1180,17 @@ async function getRetainedMembers() {
     })
     .from(members)
     .where(isNull(members.leftAt));
-}
+});
 
-async function getTrackingStart(): Promise<Date | null> {
+// EGRESS OPTIMIZATION (docs log 111): wrap in React.cache() so the 9+ calls
+// per dashboard render deduplicate to 1 DB query per render pass.
+const getTrackingStart = cache(async (): Promise<Date | null> => {
   const [row] = await db
     .select({ minDate: sql<string>`min(${memberSnapshots.capturedAt})` })
     .from(memberSnapshots);
   if (!row?.minDate) return null;
   return new Date(row.minDate);
-}
+});
 
 function emptyClan(): DashboardClan {
   return {
