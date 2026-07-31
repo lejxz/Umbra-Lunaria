@@ -78,7 +78,7 @@ function ProfileSection({ detail }: { detail: MemberDetailView }) {
       {/* Header: league icon + name/tag + TH badge */}
       <div className="flex items-center gap-4 border-b border-umbra-line/40 pb-4">
         {p.leagueTier?.iconUrls?.small && (
-          <Image src={p.leagueTier.iconUrls.small} alt={p.leagueTier.name} width={56} height={56} className="h-14 w-14 shrink-0" unoptimized />
+          <Image src={p.leagueTier.iconUrls.small} alt={p.leagueTier.name} width={56} height={56} className="h-14 w-14 shrink-0" />
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
@@ -611,7 +611,7 @@ function ProgressionCard({ name, level, maxLevel }: { name: string; level: numbe
   return (
     <div className="group relative" title={tooltip}>
       <div className={`relative aspect-square w-full overflow-hidden rounded-lg border ${isMaxed ? "border-amber-400/50 bg-amber-400/5 shadow-[0_0_8px_rgba(251,191,36,0.15)]" : "border-umbra-line bg-umbra-ink/60"}`}>
-        <Image src={icon} alt={name} fill className="object-contain p-1" unoptimized />
+        <Image src={icon} alt={name} fill className="object-contain p-1" />
         <div className={`absolute bottom-0 left-0 rounded-tr-md px-1.5 py-0.5 font-mono text-2xs font-bold leading-none ${isMaxed ? "bg-amber-400 text-umbra-ink" : "bg-umbra-ink/95 text-umbra-lilac"}`}>
           {isMaxed ? "MAX" : level}
         </div>

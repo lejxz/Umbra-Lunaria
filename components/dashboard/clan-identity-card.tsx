@@ -23,7 +23,6 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
         fill
         className="object-cover"
         priority
-        unoptimized
       />
 
       {/* Dark gradient overlay for readability */}
@@ -44,7 +43,6 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
                   width={104}
                   height={104}
                   className="h-26 w-26 object-contain drop-shadow-lg"
-                  unoptimized
                 />
               ) : (
                 <div className="flex h-24 w-24 items-center justify-center rounded-lg border border-umbra-line bg-umbra-elevated/50">
@@ -118,7 +116,6 @@ export function ClanIdentityCard({ clan }: { clan: DashboardClan }) {
                       width={12}
                       height={12}
                       className="h-3 w-3"
-                      unoptimized
                     />
                   )}
                   <span className="drop-shadow-lg text-white">{label.name}</span>

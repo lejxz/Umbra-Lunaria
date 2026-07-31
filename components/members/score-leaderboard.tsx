@@ -171,7 +171,6 @@ function TruePodiumCard({
             width={20}
             height={20}
             className="h-[20px] w-[20px] shrink-0 drop-shadow-lg"
-            unoptimized
           />
         )}
         <div className="w-full px-1">
@@ -246,7 +245,6 @@ function LeaderboardRow({
             width={24}
             height={24}
             className="h-[24px] w-[24px] shrink-0"
-            unoptimized
           />
         )}
         <div className="min-w-0 text-left">

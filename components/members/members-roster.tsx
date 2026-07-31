@@ -232,7 +232,6 @@ export function MembersRoster({
                             width={28}
                             height={28}
                             className="h-7 w-7 shrink-0"
-                            unoptimized
                           />
                         )}
                         <div className="min-w-0">
@@ -311,7 +310,6 @@ export function MembersRoster({
                     width={36}
                     height={36}
                     className="h-9 w-9 shrink-0"
-                    unoptimized
                   />
                 )}
                 <div className="min-w-0 flex-1">

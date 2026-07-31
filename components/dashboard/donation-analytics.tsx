@@ -141,7 +141,6 @@ export function DonationAnalytics({
                           width={18}
                           height={18}
                           className="h-[18px] w-[18px] shrink-0"
-                          unoptimized
                         />
                       )}
                       <span className="truncate text-xs font-medium text-umbra-lilac">
