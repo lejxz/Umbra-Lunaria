@@ -10,7 +10,8 @@
  */
 
 import { and, desc, eq, gte, inArray, isNull, lte, ne, sql } from "drizzle-orm";
-import { cache } from "react";
+import { cache as reactCache } from "react";
+import { withCache } from "@/lib/cache";
 import { db } from "@/lib/db";
 import {
   clans,
@@ -90,28 +91,33 @@ export type PollStatuses = {
 };
 
 export async function getPollStatuses(): Promise<PollStatuses> {
-  const [clanRow] = await db
-    .select({
-      lastPolledAt: clans.lastPolledAt,
-      lastDailyBatchAt: clans.lastDailyBatchAt,
-    })
-    .from(clans)
-    .where(eq(clans.clanTag, CLAN_TAG))
-    .limit(1);
+  // EGRESS OPTIMIZATION (docs log 115): cache for 60s so the layout footer
+  // doesn't re-query on every page revalidation. The data changes at most
+  // every 5 min (poll cadence), so 60s staleness is invisible.
+  return withCache("pollStatuses", async () => {
+    const [clanRow] = await db
+      .select({
+        lastPolledAt: clans.lastPolledAt,
+        lastDailyBatchAt: clans.lastDailyBatchAt,
+      })
+      .from(clans)
+      .where(eq(clans.clanTag, CLAN_TAG))
+      .limit(1);
 
-  const [trackingRow] = await db
-    .select({
-      earliest: sql<Date>`min(${wars.lastSyncedAt})`,
-      latest: sql<Date>`max(${wars.lastSyncedAt})`,
-    })
-    .from(wars);
+    const [trackingRow] = await db
+      .select({
+        earliest: sql<Date>`min(${wars.lastSyncedAt})`,
+        latest: sql<Date>`max(${wars.lastSyncedAt})`,
+      })
+      .from(wars);
 
-  return {
-    lastPoll: clanRow?.lastPolledAt ?? null,
-    lastBatch: clanRow?.lastDailyBatchAt ?? null,
-    trackingStart: trackingRow?.earliest ?? null,
-    warSynced: trackingRow?.latest ?? null,
-  };
+    return {
+      lastPoll: clanRow?.lastPolledAt ?? null,
+      lastBatch: clanRow?.lastDailyBatchAt ?? null,
+      trackingStart: trackingRow?.earliest ?? null,
+      warSynced: trackingRow?.latest ?? null,
+    };
+  }, 60_000);
 }
 
 // ---------------------------------------------------------------------------
@@ -1164,7 +1170,7 @@ export async function getDashboard(): Promise<DashboardData> {
 
 // EGRESS OPTIMIZATION (docs log 111): wrap in React.cache() so the 6+ calls
 // per dashboard render deduplicate to 1 DB query per render pass.
-const getRetainedMembers = cache(async () => {
+const getRetainedMembers = reactCache(async () => {
   return db
     .select({
       playerTag: members.playerTag,
@@ -1184,7 +1190,7 @@ const getRetainedMembers = cache(async () => {
 
 // EGRESS OPTIMIZATION (docs log 111): wrap in React.cache() so the 9+ calls
 // per dashboard render deduplicate to 1 DB query per render pass.
-const getTrackingStart = cache(async (): Promise<Date | null> => {
+const getTrackingStart = reactCache(async (): Promise<Date | null> => {
   const [row] = await db
     .select({ minDate: sql<string>`min(${memberSnapshots.capturedAt})` })
     .from(memberSnapshots);

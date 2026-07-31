@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { bustAllCache } from "@/lib/cache";
 import { desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
@@ -87,16 +88,17 @@ export async function POST(req: NextRequest) {
       errors: [...lightResult.errors, ...batchErrors],
       events: lightResult.events,
     };
-    // EGRESS OPTIMIZATION (docs log 110): only revalidate the dashboard page,
-    // not the entire layout. Other pages (members, war, capital, hall-of-fame)
-    // have their own ISR windows and don't need to re-render on every 5-min
-    // poll — that was causing every page to re-run its DB queries on every
-    // poll, driving the egress spike.
+    // EGRESS OPTIMIZATION (docs log 110/115): only revalidate on the daily
+    // batch, not on every 5-min light poll. The dashboard's 15-min ISR handles
+    // freshness between batches. Revalidating on every poll defeated the ISR
+    // and caused 288 dashboard renders/day instead of 96.
     revalidatePath("/");
+    bustAllCache();
     return NextResponse.json(result);
   }
 
-  revalidatePath("/");
+  // Light poll: no revalidatePath — the ISR timers handle page freshness.
+  // The DB is updated; pages will pick up the new data on their next ISR tick.
   return NextResponse.json({
     ...lightResult,
     batch: isBatch,
@@ -350,14 +352,19 @@ async function runDailyBatch(): Promise<string[]> {
     retained.map((r) => [r.playerTag, r.clanCapitalContributions ?? 0]),
   );
 
-  for (const { playerTag } of retained) {
+  // EGRESS OPTIMIZATION (docs log 115): process player detail fetches in
+  // parallel chunks of 5 instead of sequentially. The CoC API allows
+  // concurrent requests; this speeds up the batch from ~50s (sequential) to
+  // ~10s (5-wide parallel) for a 50-member clan.
+  const CONCURRENCY = 5;
+  const processPlayer = async (playerTag: string): Promise<void> => {
     let player: CocPlayer;
     try {
       player = await cocClient.getPlayer(playerTag);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       errors.push(`player fetch failed for ${playerTag}: ${msg}`);
-      continue;
+      return;
     }
 
     await db
@@ -384,10 +391,6 @@ async function runDailyBatch(): Promise<string[]> {
       .where(eq(members.playerTag, playerTag));
 
     // ---- Capital contribution delta log ----
-    // clanCapitalContributions is a lifetime total from the API. The delta
-    // between the previous value and the new value = the gold contributed
-    // since the last batch poll. Log it to membership_events so the capital
-    // page can show a contribution log.
     const oldContrib = knownContribMap.get(playerTag) ?? 0;
     const newContrib = player.clanCapitalContributions ?? 0;
     const contribDelta = newContrib - oldContrib;
@@ -440,57 +443,29 @@ async function runDailyBatch(): Promise<string[]> {
         },
       });
 
-    // Compute rushed percent and store on the members row.
-    // Super troops are always API level 1 (temporary 1-week boosts, not
-    // separately researched). Resolve their level from the base troop so they
-    // don't inflate the deficit. See lib/assets/super-troops.ts.
+    // Compute rushed percent — super troops resolved from base (docs log 101).
     const homeTroopByName = new Map(homeTroops.map((t) => [t.name, t]));
     const rushedTroops = homeTroops.map((t) => {
       const resolved = resolveSuperTroopLevel(t, homeTroopByName);
       return { name: t.name, level: resolved.level, maxLevel: resolved.maxLevel };
     });
     const rushedResult = computeRushed([
-      {
-        category: "Troops",
-        items: rushedTroops,
-      },
-      {
-        category: "Heroes",
-        items: homeHeroes.map((h) => ({
-          name: h.name,
-          level: h.level,
-          maxLevel: h.maxLevel ?? null,
-        })),
-      },
-      {
-        category: "Equipment",
-        items: (player.heroEquipment ?? []).map((e) => ({
-          name: e.name,
-          level: e.level,
-          maxLevel: e.maxLevel ?? null,
-        })),
-      },
-      {
-        category: "Spells",
-        items: player.spells.map((s) => ({
-          name: s.name,
-          level: s.level,
-          maxLevel: s.maxLevel ?? null,
-        })),
-      },
-      {
-        category: "Pets",
-        items: pets.map((p) => ({
-          name: p.name,
-          level: p.level,
-          maxLevel: p.maxLevel ?? null,
-        })),
-      },
+      { category: "Troops", items: rushedTroops },
+      { category: "Heroes", items: homeHeroes.map((h) => ({ name: h.name, level: h.level, maxLevel: h.maxLevel ?? null })) },
+      { category: "Equipment", items: (player.heroEquipment ?? []).map((e) => ({ name: e.name, level: e.level, maxLevel: e.maxLevel ?? null })) },
+      { category: "Spells", items: player.spells.map((s) => ({ name: s.name, level: s.level, maxLevel: s.maxLevel ?? null })) },
+      { category: "Pets", items: pets.map((p) => ({ name: p.name, level: p.level, maxLevel: p.maxLevel ?? null })) },
     ]);
     await db
       .update(members)
       .set({ rushedPercent: rushedResult.overallPercent })
       .where(eq(members.playerTag, playerTag));
+  };
+
+  // Process in chunks of CONCURRENCY to limit parallel CoC API calls.
+  for (let i = 0; i < retained.length; i += CONCURRENCY) {
+    const chunk = retained.slice(i, i + CONCURRENCY);
+    await Promise.all(chunk.map((r) => processPlayer(r.playerTag)));
   }
 
   // ---- Checkpoint computation (before HoF + before purge) ----
