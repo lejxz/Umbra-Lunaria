@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
@@ -8,16 +9,50 @@ import { WarRecordCard } from "./war-record-card";
 import { Badge } from "@/components/ui/badge";
 import { CurrentWarCard } from "./current-war-card";
 import { CapitalSummaryCard } from "./capital-summary-card";
-import { DonationAnalytics } from "./donation-analytics";
-import { ActivityAnalytics } from "./activity-analytics";
 import { AttentionPanel } from "./needs-attention";
 import { ClanLogPanel } from "./clan-log";
 import { NavSummaries } from "./nav-summaries";
-import { MemberDetailSheet } from "./member-detail-sheet";
-import { WarPerformanceChart } from "./war-performance-chart";
-import { WarAttackDistributionChart } from "./war-attack-distribution";
-import { RosterSizeChart } from "./roster-size-chart";
 import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
+
+// EGRESS + BUNDLE OPTIMIZATION (docs log 114): lazy-load chart components and
+// the member-detail sheet so recharts (~400 KB gzipped) is split into a
+// separate chunk and only loaded when the charts render or a member is opened,
+// not on the initial dashboard JS bundle. The loading fallbacks keep the
+// layout stable (no CLS) while the chunk streams in.
+const DonationAnalytics = dynamic(() => import("./donation-analytics").then(m => m.DonationAnalytics), {
+  loading: () => <ChartSkeleton />,
+});
+const ActivityAnalytics = dynamic(() => import("./activity-analytics").then(m => m.ActivityAnalytics), {
+  loading: () => <ChartSkeleton />,
+});
+const WarPerformanceChart = dynamic(() => import("./war-performance-chart").then(m => m.WarPerformanceChart), {
+  loading: () => <ChartSkeleton />,
+});
+const WarAttackDistributionChart = dynamic(() => import("./war-attack-distribution").then(m => m.WarAttackDistributionChart), {
+  loading: () => <ChartSkeleton />,
+});
+const RosterSizeChart = dynamic(() => import("./roster-size-chart").then(m => m.RosterSizeChart), {
+  loading: () => <ChartSkeleton />,
+});
+// MemberDetailSheet is only opened on click — lazy-load so its full UI
+// (progression cards, achievements, DonationChart) doesn't bloat the initial
+// dashboard bundle.
+const MemberDetailSheet = dynamic(() => import("./member-detail-sheet").then(m => m.MemberDetailSheet), {
+  ssr: false,
+});
+
+/** Placeholder that matches the chart card height to prevent layout shift. */
+function ChartSkeleton() {
+  return (
+    <div className="glass flex flex-col rounded-2xl p-5" style={{ minHeight: 200 }}>
+      <div className="h-3 w-24 animate-pulse rounded bg-white/5" />
+      <div className="mt-2 h-4 w-32 animate-pulse rounded bg-white/5" />
+      <div className="mt-6 flex flex-1 items-center justify-center">
+        <div className="h-3 w-3 animate-pulse rounded-full bg-umbra-purple/30" />
+      </div>
+    </div>
+  );
+}
 
 /**
  * Dashboard shell — the client-side composition root for the dashboard.
