@@ -44,11 +44,12 @@ export async function POST() {
   cachedAt = now;
   cachedResult = result;
 
-  // Revalidate the war page (and dashboard layout) so a successful refresh is
-  // reflected on the next render without a hard reload.
+  // Revalidate ONLY the war page — not the entire layout. The layout-level
+  // bust was causing ALL pages to re-render on every war refresh click,
+  // driving egress. The dashboard's own ISR will pick up war changes on its
+  // 15-min cycle. (docs log 116)
   if (result.ok) {
     revalidatePath("/war", "page");
-    revalidatePath("/", "layout");
   }
 
   return NextResponse.json({

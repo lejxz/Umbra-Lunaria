@@ -197,9 +197,9 @@ export async function GET(req: NextRequest) {
     // Monitoring is best-effort — don't fail the purge if the size query fails.
   }
 
-  // Bust the ISR cache so the dashboard/members/capital pages reflect the
-  // pruned data on the next page view (not up to 15 min later).
-  revalidatePath("/", "layout");
+  // Bust only the dashboard page — not the entire layout. The purge runs daily
+  // and other pages have 1-hr ISR which is fine for pruned data. (docs log 116)
+  revalidatePath("/");
 
   return NextResponse.json({ ok: true, ...result });
 }

@@ -11,7 +11,13 @@ import { getWarCenter, getWarClanIdentity } from "@/lib/db/war-queries";
  * Supercell directly"). The client shell owns the member-detail-sheet state and
  * the refresh control. Stale-capture, private-war-log, no-active-war, and
  * refresh-error states are rendered inline by the section components.
+ *
+ * ISR: 5 min — war state is time-sensitive during active wars, but rendering
+ * on every visit (no ISR) was the #1 egress driver (~300 MB/day). The refresh
+ * button busts this cache on demand.
  */
+export const revalidate = 300;
+
 export default async function WarPage() {
   let data;
   try {
