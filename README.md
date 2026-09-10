@@ -1,6 +1,6 @@
 # Umbra Lunaria
 
-A dedicated dashboard for a single Clash of Clans clan — member activity, war tracking, Clan Capital, and war-roster planning — built to run on Vercel.
+A dedicated dashboard for a single Clash of Clans clan — member activity, war tracking, Clan Capital, and war-roster planning.
 
 This is a single-clan tool. It is configured once, for one clan tag, and used by that clan's leadership and members.
 
