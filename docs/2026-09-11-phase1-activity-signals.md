@@ -50,6 +50,7 @@
 - Migration 0011 was applied to production **before** the code push (Vercel's `drizzle-kit migrate` build step will see it already applied and skip it — belt and braces ordering).
 - The backfill ran against production before deploy; the pre-deploy light polls continued writing old-logic flags (no conflict — the backfill only touched historical rows, and its targets were already-observed attack days).
 - `scripts/backfill-war-activity.ts` reads `DATABASE_URL` from the environment only — no credentials in the repo. It is a one-shot: keep it for new deployments (fresh databases have no history to heal, so it's a no-op there) and for audits.
+- **Post-deploy smoke test (verified):** the Vercel deploy landed between the 08:50Z and 08:55Z polls — the 08:50 poll (old code) wrote `exp_level = null`, the 08:55 poll (new code) wrote real XP levels for all 7 members; poll cadence unchanged (84 snapshots/hour = 12 polls × 7 members). The war-evidence path activates on the next war day (no active war at deploy time).
 
 ## Follow-ups (not this phase)
 
