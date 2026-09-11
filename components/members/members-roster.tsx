@@ -1,31 +1,42 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import type {
   MemberRoster,
   MemberSortField,
   SortDirection,
 } from "@/lib/view-models/members";
 import { Badge, EmptyState, Select, Toggle } from "@/components/ui";
-import { MemberDetailSheet } from "./member-detail-sheet";
 import type { MemberDetailView } from "@/lib/view-models/members";
+
+// fix (docs/2026-09-11-priority-fixes.md, bundle): the detail sheet (with its
+// DonationChart → recharts dependency) is only rendered on click — lazy-load
+// it so it doesn't ship in /members' initial bundle (same pattern as
+// dashboard-shell.tsx).
+const MemberDetailSheet = dynamic(
+  () => import("./member-detail-sheet").then((m) => m.MemberDetailSheet),
+  { ssr: false },
+);
 
 /**
  * Members roster — client component with sorting, filtering, and member
  * detail sheet. See docs/concept/06-members.md.
  *
- * Design: clean card-based layout with a filter bar, desktop table, and
- * mobile cards. Readable spacing, clear visual hierarchy.
+ * fix A-3 + B-8 (docs/2026-09-11-priority-fixes.md): member details are no
+ * longer embedded server-side for the whole roster (the page used to run a
+ * ~50× getMemberDetail fan-out per render). They are fetched on click from
+ * GET /api/members/[tag] — the same pattern as the dashboard's popup — with
+ * an AbortController + per-session memo so rapid clicks can't race and
+ * reopening a member doesn't refetch.
  */
 export function MembersRoster({
   roster,
-  memberDetails,
   selectedTag,
   onMemberClick,
 }: {
   roster: MemberRoster;
-  memberDetails: Record<string, MemberDetailView>;
   selectedTag?: string | null;
   onMemberClick?: (tag: string | null) => void;
 }) {
@@ -39,6 +50,63 @@ export function MembersRoster({
 
   const activeSelectedTag = selectedTag !== undefined ? selectedTag : internalSelectedTag;
   const handleMemberClick = onMemberClick ?? setInternalSelectedTag;
+
+  // ── Detail fetching (fix A-3/B-8) ──
+  const [selectedDetail, setSelectedDetail] = useState<MemberDetailView | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const detailCacheRef = useRef(new Map<string, MemberDetailView>());
+
+  useEffect(() => {
+    if (!activeSelectedTag) {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setSelectedDetail(null);
+      setDetailError(null);
+      setDetailLoading(false);
+      return;
+    }
+
+    const cached = detailCacheRef.current.get(activeSelectedTag);
+    if (cached) {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setSelectedDetail(cached);
+      setDetailError(null);
+      setDetailLoading(false);
+      return;
+    }
+
+    // Abort any in-flight fetch so a slow response for member A can never
+    // land under member B's sheet (ordering guard for rapid clicks).
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setDetailLoading(true);
+    setDetailError(null);
+    fetch(`/api/members/${encodeURIComponent(activeSelectedTag)}`, {
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: MemberDetailView) => {
+        if (controller.signal.aborted) return;
+        detailCacheRef.current.set(activeSelectedTag, data);
+        setSelectedDetail(data);
+        setDetailLoading(false);
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        setDetailError(err instanceof Error ? err.message : String(err));
+        setDetailLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [activeSelectedTag]);
 
   const sorted = useMemo(() => {
     let result = [...roster.entries];
@@ -101,8 +169,6 @@ export function MembersRoster({
 
     return result;
   }, [roster.entries, sortField, sortDir, filterRole, filterWarPref, filterActiveOnly, searchQuery]);
-
-  const selectedDetail = activeSelectedTag ? memberDetails[activeSelectedTag] : null;
 
   return (
     <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="members-title">
@@ -337,7 +403,18 @@ export function MembersRoster({
         </>
       )}
 
-      {/* Member detail sheet */}
+      {/* Member detail sheet (fetched on click — fix A-3) */}
+      {activeSelectedTag && detailError && (
+        <div className="mt-4 rounded-lg border border-red-400/30 bg-red-400/5 px-4 py-3 text-sm text-red-300">
+          Failed to load member: {detailError}
+        </div>
+      )}
+      {activeSelectedTag && detailLoading && !selectedDetail && (
+        <div className="mt-4 flex items-center justify-center gap-3 rounded-lg border border-umbra-line bg-white/[.02] px-4 py-6">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-umbra-purple border-t-transparent" />
+          <span className="text-sm text-umbra-muted">Loading member…</span>
+        </div>
+      )}
       {activeSelectedTag && selectedDetail && (
         <MemberDetailSheet
           detail={selectedDetail}
@@ -377,6 +454,23 @@ export function formatRole(role: string): string {
 
 
 
+/**
+ * fix B-3 (hydration): "today" in the clan timezone is computed AFTER mount
+ * (null during SSR + hydration) so the server HTML and first client render
+ * always agree. Calling `new Date().toLocaleDateString()` during render made
+ * the active-today dot flip colors across Manila midnight between SSR and
+ * hydration — a guaranteed DOM mismatch for users in other timezones.
+ */
+function useClanTodayStr(): string | null {
+  const [today, setToday] = useState<string | null>(null);
+  useEffect(() => {
+    setToday(
+      new Date().toLocaleDateString("en-US", { timeZone: "Asia/Manila" }),
+    );
+  }, []);
+  return today;
+}
+
 function ActivityIndicator({
   isActive,
   lastActive,
@@ -384,13 +478,13 @@ function ActivityIndicator({
   isActive: boolean;
   lastActive: Date | null;
 }) {
-  const isRecent = (() => {
-    if (!lastActive) return false;
-    const todayStr = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
-    const lastActiveStr = lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
-    return todayStr === lastActiveStr;
-  })();
-  
+  const todayStr = useClanTodayStr();
+  const isRecent =
+    todayStr !== null &&
+    lastActive !== null &&
+    lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" }) ===
+      todayStr;
+
   const colorClass = isActive
     ? isRecent
       ? "bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"
@@ -420,12 +514,12 @@ function ActivityDot({
   isActive: boolean;
   lastActive: Date | null;
 }) {
-  const isRecent = (() => {
-    if (!lastActive) return false;
-    const todayStr = new Date().toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
-    const lastActiveStr = lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" });
-    return todayStr === lastActiveStr;
-  })();
+  const todayStr = useClanTodayStr();
+  const isRecent =
+    todayStr !== null &&
+    lastActive !== null &&
+    lastActive.toLocaleDateString("en-US", { timeZone: "Asia/Manila" }) ===
+      todayStr;
 
   const colorClass = isActive
     ? isRecent

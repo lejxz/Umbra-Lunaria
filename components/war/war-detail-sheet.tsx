@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Modal } from "@/components/ui/modal";
 import { SectionLabel } from "@/components/ui/section-label";
 import type { WarDetailView } from "@/lib/view-models/war";
@@ -27,6 +27,10 @@ import { WarAttackLog } from "./war-attack-log";
  * The sheet is read-only and public (docs/concept/01). Own-clan members are not
  * clickable here (the sheet is already a modal over the war page); the shared
  * member sheet can be opened from the main roster instead.
+ *
+ * fix B-8 (docs/2026-09-11-priority-fixes.md): the fetch uses an
+ * AbortController + memo so rapid clicks on war A then B can't race, and
+ * reopening a war doesn't refetch.
  */
 export function WarDetailSheet({
   warId,
@@ -42,28 +46,53 @@ export function WarDetailSheet({
   const [data, setData] = useState<WarDetailView | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const cacheRef = useRef(new Map<number, WarDetailView>());
 
   useEffect(() => {
     if (warId === null) {
+      abortRef.current?.abort();
+      abortRef.current = null;
       setData(null);
       setError(null);
+      setLoading(false);
       return;
     }
+
+    const cached = cacheRef.current.get(warId);
+    if (cached) {
+      abortRef.current?.abort();
+      abortRef.current = null;
+      setData(cached);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
-    fetch(`/api/war/${warId}`)
+    fetch(`/api/war/${warId}`, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
       .then((d: WarDetailView) => {
+        if (controller.signal.aborted) return;
+        cacheRef.current.set(warId, d);
         setData(d);
         setLoading(false);
       })
       .catch((err) => {
+        if (controller.signal.aborted) return;
         setError(err instanceof Error ? err.message : "Failed to load war");
         setLoading(false);
       });
+
+    return () => controller.abort();
   }, [warId]);
 
   return (

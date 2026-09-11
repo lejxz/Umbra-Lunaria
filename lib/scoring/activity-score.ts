@@ -122,7 +122,10 @@ export function computeActivityScore(
     warAvailable &&
     input.warAttacksUsed !== null &&
     input.warAttacksAllowed !== null
-      ? input.warAttacksUsed / input.warAttacksAllowed
+      ? // fix B-4: clamp to [0, 1] — CWL roster quirks can report
+        // attacksUsed > attacksAllowed, which pushed the war component past
+        // its weight cap and could lift totalScore above the 100 scale.
+        Math.min(1, Math.max(0, input.warAttacksUsed / input.warAttacksAllowed))
       : 0;
   const capitalNormalized =
     capitalAvailable && clanMaxValues.maxCapitalContribution > 0

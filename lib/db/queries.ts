@@ -532,6 +532,26 @@ export async function getMemberActivityScore(
   windowKind: ScoreWindow = "30d",
   now: Date = new Date(),
 ): Promise<ActivityScoreLeaderboard> {
+  // fix A-3 (docs/2026-09-11-priority-fixes.md): this is the only full-roster,
+  // multi-table query that was neither request-deduped nor TTL-cached. It runs
+  // 3× per dashboard render (fine) but used to run ~51× per members-page
+  // render via the per-member getMemberDetail fan-out, and once per member
+  // detail fetch (getDonationDetail). The 5-minute TTL matches the light-poll
+  // cadence — the data cannot change faster than that anyway. Note: the
+  // `now` param intentionally does NOT participate in the cache key; a
+  // cached entry can lag `now` by at most the TTL, which is bounded by the
+  // same 5-minute data freshness the poll loop enforces.
+  return withCache(
+    `activityScore:${windowKind}`,
+    () => computeMemberActivityScore(windowKind, now),
+    5 * 60 * 1000,
+  );
+}
+
+async function computeMemberActivityScore(
+  windowKind: ScoreWindow,
+  now: Date,
+): Promise<ActivityScoreLeaderboard> {
   const win = computeWindow(windowKind, now);
   const trackingStart = await getTrackingStart();
   const minWars = clanConfig.minWarsForConfidentRanking;
@@ -738,28 +758,38 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
   const latestActivity = new Map<string, Date>();
 
   if (tags.length > 0) {
-    const recentSnaps = await db
-      .select({
-        playerTag: memberSnapshots.playerTag,
-        capturedAt: memberSnapshots.capturedAt,
-        activityFlag: memberSnapshots.activityFlag,
-      })
-      .from(memberSnapshots)
-      .where(inArray(memberSnapshots.playerTag, tags))
-      .orderBy(memberSnapshots.playerTag, desc(memberSnapshots.capturedAt));
-
-    for (const s of recentSnaps) {
-      if (!latestActivity.has(s.playerTag) && s.activityFlag) {
-        latestActivity.set(s.playerTag, s.capturedAt);
+    // fix B-10: DISTINCT ON returns exactly one activity-flagged row per
+    // member from Postgres instead of scanning the entire snapshot history
+    // into JS (the set grows forever — daily last-of-day snapshots are
+    // retained by design). Same pattern as fetchBoundedSnapshots.
+    const result = await db.execute<{ player_tag: string; captured_at: Date }>(
+      sql`
+        SELECT DISTINCT ON (player_tag)
+          player_tag, captured_at
+        FROM member_snapshots
+        WHERE player_tag = ANY(${sql.param(tags)}::text[])
+          AND activity_flag = true
+        ORDER BY player_tag, captured_at DESC
+      `,
+    );
+    for (const r of result.rows ?? result) {
+      if (!latestActivity.has(r.player_tag)) {
+        const capturedAt =
+          r.captured_at instanceof Date
+            ? r.captured_at
+            : new Date(r.captured_at);
+        latestActivity.set(r.player_tag, capturedAt);
       }
     }
   }
 
-  // Get current war participants with attacks remaining
+  // Get current war participants with attacks remaining.
+  // involvesOwnClan filter (fix A-4): other clans' CWL wars never count as
+  // "the current war" for the needs-attention queue.
   const [currentWar] = await db
     .select()
     .from(wars)
-    .where(ne(wars.state, "warEnded"))
+    .where(and(ne(wars.state, "warEnded"), eq(wars.involvesOwnClan, true)))
     .orderBy(desc(wars.id))
     .limit(1);
 
@@ -948,11 +978,18 @@ export async function getClanLog(
 // ---------------------------------------------------------------------------
 
 export async function getDashboardWarSummary(): Promise<WarSummaryView> {
-  // First try to get the active war (preparation or inWar)
+  // First try to get the active war (preparation or inWar).
+  // involvesOwnClan filter (fix A-4): during CWL the table also holds other
+  // clans' active wars — never surface one of those as OUR current war.
   const [activeWar] = await db
     .select()
     .from(wars)
-    .where(inArray(wars.state, ["preparation", "inWar"]))
+    .where(
+      and(
+        inArray(wars.state, ["preparation", "inWar"]),
+        eq(wars.involvesOwnClan, true),
+      ),
+    )
     .orderBy(desc(wars.startTime))
     .limit(1);
 
@@ -961,7 +998,7 @@ export async function getDashboardWarSummary(): Promise<WarSummaryView> {
     ? await db
         .select()
         .from(wars)
-        .where(eq(wars.state, "warEnded"))
+        .where(and(eq(wars.state, "warEnded"), eq(wars.involvesOwnClan, true)))
         .orderBy(desc(wars.endTime))
         .limit(1)
     : [null];
@@ -1249,6 +1286,12 @@ async function fetchBoundedSnapshots(
 ) {
   // Baseline: last snapshot per member before the window start. Uses
   // DISTINCT ON via raw SQL (drizzle's .distinctOn() API varies by version).
+  // fix (docs/2026-09-11, §6.3 security): the tag array used to be string-
+  // interpolated into sql.raw — tags currently originate from the DB/CoC API
+  // (alphanumeric) so it wasn't exploitable, but it was injection-shaped and
+  // one refactor away from being fed user input. It is now a single bound
+  // parameter (sql.param → $1::text[]), same parameterization style as
+  // getLatestActivity / getNeedsAttention.
   const baselines = await db.execute<{
     player_tag: string;
     captured_at: Date;
@@ -1261,7 +1304,7 @@ async function fetchBoundedSnapshots(
       player_tag, captured_at, donations, donations_received,
       activity_flag, login_day_flag
     FROM member_snapshots
-    WHERE player_tag = ANY(${sql.raw(`ARRAY[${tags.map((t) => `'${t}'`).join(",")}]::text[]`)})
+    WHERE player_tag = ANY(${sql.param(tags)}::text[])
       AND captured_at < ${win.from}
     ORDER BY player_tag, captured_at DESC
   `);
@@ -1339,7 +1382,9 @@ export async function getWarPerformanceTrend(
       result: wars.result,
     })
     .from(wars)
-    .where(eq(wars.state, "warEnded"))
+    // fix A-4: exclude other clans' CWL wars — their ownStars/opponentStars
+    // are foreign-clan numbers and would pollute our performance chart.
+    .where(and(eq(wars.state, "warEnded"), eq(wars.involvesOwnClan, true)))
     .orderBy(desc(wars.endTime))
     .limit(limit);
 

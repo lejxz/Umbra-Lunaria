@@ -24,8 +24,8 @@
  */
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { PageScaffold } from "@/components/page-scaffold";
-import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
 import { RecordCard, type RecordMeta, type RecordEntry } from "./record-card";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -39,6 +39,17 @@ import {
   IconZap,
 } from "@/components/ui/icons";
 import type { HallOfFamePageData } from "@/lib/view-models/hall-of-fame";
+
+// fix (docs/2026-09-11-priority-fixes.md, bundle): member detail sheet is
+// click-only — lazy-load so recharts + the 732-line detail UI don't ship in
+// /hall-of-fame's initial bundle (same pattern as dashboard-shell.tsx).
+const MemberDetailSheet = dynamic(
+  () =>
+    import("@/components/dashboard/member-detail-sheet").then(
+      (m) => m.MemberDetailSheet,
+    ),
+  { ssr: false },
+);
 
 // ---------------------------------------------------------------------------
 // Metadata for the cached all-time awards (same design as the dashboard).

@@ -194,26 +194,29 @@ async function getLatestActivity(tags: string[]) {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-  // Get the most recent ACTIVE snapshot per member
-  const snapshots = await db
-    .select({
-      playerTag: memberSnapshots.playerTag,
-      capturedAt: memberSnapshots.capturedAt,
-    })
-    .from(memberSnapshots)
-    .where(
-      and(
-        inArray(memberSnapshots.playerTag, tags),
-        eq(memberSnapshots.activityFlag, true)
-      )
-    )
-    .orderBy(desc(memberSnapshots.capturedAt));
-
-  for (const s of snapshots) {
-    if (map.has(s.playerTag)) continue; // Already have the latest active snapshot
-    map.set(s.playerTag, {
-      lastActiveAt: s.capturedAt,
-      isActive: s.capturedAt >= sevenDaysAgo,
+  // Get the most recent ACTIVE snapshot per member.
+  // fix B-10: DISTINCT ON returns exactly one row per member from Postgres
+  // instead of fetching the entire activity-flagged snapshot history into JS
+  // (which grows linearly forever — ~36k rows after two years of retained
+  // last-of-day snapshots). Same pattern as fetchBoundedSnapshots.
+  const result = await db.execute<{
+    player_tag: string;
+    captured_at: Date;
+  }>(sql`
+    SELECT DISTINCT ON (player_tag)
+      player_tag, captured_at
+    FROM member_snapshots
+    WHERE player_tag = ANY(${sql.param(tags)}::text[])
+      AND activity_flag = true
+    ORDER BY player_tag, captured_at DESC
+  `);
+  const rows = result.rows ?? result;
+  for (const r of rows) {
+    const capturedAt =
+      r.captured_at instanceof Date ? r.captured_at : new Date(r.captured_at);
+    map.set(r.player_tag, {
+      lastActiveAt: capturedAt,
+      isActive: capturedAt >= sevenDaysAgo,
     });
   }
 
@@ -505,11 +508,13 @@ async function getWarDetail(playerTag: string) {
     }
   }
 
-  // Current war status
+  // Current war status.
+  // involvesOwnClan filter (fix A-4): other clans' CWL wars must never be
+  // treated as our current war here.
   const [currentWar] = await db
     .select()
     .from(wars)
-    .where(sql`${wars.state} != 'warEnded'`)
+    .where(and(sql`${wars.state} != 'warEnded'`, eq(wars.involvesOwnClan, true)))
     .orderBy(desc(wars.id))
     .limit(1);
 

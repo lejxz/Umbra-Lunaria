@@ -8,10 +8,11 @@ import { getCapitalPage } from "@/lib/db/capital-queries";
  * timeline, raid-weekend countdown timer, and raid-weekend history.
  * See docs/concept/08.
  *
- * ISR caching: revalidates every 300s (5 min). Capital data changes slowly
- * (district levels take days to upgrade), so a 5-min cache is well within
- * the data's natural freshness window. The live raid timer is fetched
- * inside getCapitalPage() and benefits from the same ISR cache.
+ * ISR caching: the exported revalidate is 1h (capital changes weekly). Note
+ * that the raid timer's fetch inside getCapitalPage() uses its own
+ * `revalidate: 300`, and Next takes the minimum fetch-level revalidate as
+ * the route's effective period — so this page effectively revalidates at
+ * 5 min while the timer is the only live-updating section.
  */
 export const revalidate = 3600; // 1 hr — capital changes weekly
 

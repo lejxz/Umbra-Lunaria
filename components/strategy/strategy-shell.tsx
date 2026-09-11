@@ -13,11 +13,22 @@
  */
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { PageScaffold } from "@/components/page-scaffold";
-import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconSwords, IconUsers } from "@/components/ui/icons";
 import type { StrategyPageData, SuggestedParticipant, ReviewMember } from "@/lib/view-models/strategy";
+
+// fix (docs/2026-09-11-priority-fixes.md, bundle): member detail sheet is
+// click-only — lazy-load so recharts + the 732-line detail UI don't ship in
+// /strategy's initial bundle (same pattern as dashboard-shell.tsx).
+const MemberDetailSheet = dynamic(
+  () =>
+    import("@/components/dashboard/member-detail-sheet").then(
+      (m) => m.MemberDetailSheet,
+    ),
+  { ssr: false },
+);
 
 export function StrategyShell({ data }: { data: StrategyPageData }) {
   const [selectedMember, setSelectedMember] = useState<string | null>(null);

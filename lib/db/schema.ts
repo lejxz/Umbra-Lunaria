@@ -231,6 +231,18 @@ export const wars = pgTable(
       withTimezone: true,
     }),
     lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+    // ── CWL identity (fix A-4, docs/2026-09-11-priority-fixes.md) ──
+    // Tag of the clan on the "own" side of this war row. For regular wars and
+    // our own CWL matches this is our clan tag; for other clans' CWL wars
+    // (synced as lightweight standings rows) it's the first clan's tag. Null
+    // on rows written before this column existed (pre-fix CWL rows), where only
+    // involvesOwnClan can be derived retroactively.
+    ownClanTag: text("own_clan_tag"),
+    // Whether this war involves OUR clan. Other clans' CWL wars must never be
+    // selected as "the current war" or shown in our history — before this
+    // column existed they polluted active-war/summary/history queries during
+    // CWL rounds. Backfilled by migration 0010 from (war_type, war_snapshot).
+    involvesOwnClan: boolean("involves_own_clan").notNull().default(true),
     // Full CocCurrentWar snapshot (both clans, rosters, attacks). Stored so the
     // War Center can render the opponent roster and a names-attached attack log
     // — opponent members are NOT in `members` (war_participants has a FK to it),

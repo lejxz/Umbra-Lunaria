@@ -89,10 +89,16 @@ export function WarHero({
       : currentWar.endTime;
 
   // Stale-capture heuristic: an active war not synced in the last hour.
+  // fix B-3 (hydration): use the server-rendered clock (the `serverNow` prop)
+  // instead of Date.now() — calling Date.now() during render produced a
+  // DOM mismatch whenever the hour boundary was crossed between SSR and
+  // hydration, flipping this banner after mount.
   const stale =
     isWarActive &&
     currentWar.lastSyncedAt &&
-    Date.now() - new Date(currentWar.lastSyncedAt).getTime() > 60 * 60 * 1000;
+    (serverNow ?? Date.now()) -
+      new Date(currentWar.lastSyncedAt).getTime() >
+      60 * 60 * 1000;
 
   // Star progress for the VS bar.
   const ownStars = currentWar.clan.stars;
@@ -141,8 +147,8 @@ export function WarHero({
       {/* Stale-capture notice */}
       {stale && (
         <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-2xs text-amber-400">
-          This capture is over an hour old — it may not reflect the live war state. Use
-          Refresh to update.
+          This capture is over an hour old — it may not reflect the live war
+          state. The next scheduled sync will refresh it.
         </p>
       )}
 

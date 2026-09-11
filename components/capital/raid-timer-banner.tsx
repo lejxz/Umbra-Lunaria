@@ -37,11 +37,15 @@ export function RaidTimerBanner({
   const label = isInProgress ? "Ends in" : "Starts in";
 
   // Format the target time for the "ends/starts at" label.
+  // fix B-3 (hydration): timeZone pinned to the clan timezone — without it,
+  // SSR formatted the label in UTC while the browser formatted it in the
+  // visitor's local timezone, guaranteeing a text mismatch for non-UTC users.
   const atLabel = target.toLocaleString("en-US", {
     weekday: "short",
     hour: "numeric",
     minute: "2-digit",
     hour12: true,
+    timeZone: "Asia/Manila",
   });
 
   // Accent color: amber for "in progress", purple for "next raid".

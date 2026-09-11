@@ -5,7 +5,6 @@ import { Navigation } from "@/components/navigation";
 import { PageTransition } from "@/components/ui/page-transition";
 import { Footer } from "@/components/layout/footer";
 import { getPollStatuses } from "@/lib/db/queries";
-import { cookies } from "next/headers";
 
 /**
  * Font loading via next/font — ensures the custom fonts (Cinzel, Inter,
@@ -54,8 +53,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const cookieStore = await cookies();
-  const isCollapsed = cookieStore.get("umbra_sidebar_collapsed")?.value === "true";
+  // NOTE (ISR fix, docs/2026-09-11-priority-fixes.md):
+  // The sidebar collapse state used to be read here via `await cookies()`.
+  // That call is a dynamic API — it opted the ENTIRE route tree into dynamic
+  // rendering, silently disabling ISR on all six pages (every `export const
+  // revalidate` was dead code and every pageview hit the DB).
+  // The sidebar now restores its state from localStorage on mount
+  // (components/navigation.tsx) and this layout stays fully static-friendly.
 
   // Fetch poll statuses once per page render for the global freshness footer.
   // Best-effort: if the DB is unreachable, render the footer with nulls so the
@@ -79,7 +83,7 @@ export default async function RootLayout({
     >
       <body className="min-h-screen antialiased">
         <div className="min-h-screen lg:flex">
-          <Navigation initialCollapsed={isCollapsed} />
+          <Navigation />
           <main className="flex min-h-screen min-w-0 flex-1 flex-col pb-20 lg:pb-0">
             <div className="flex-1">
               <PageTransition>{children}</PageTransition>

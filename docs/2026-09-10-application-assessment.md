@@ -1,5 +1,7 @@
 # Umbra Lunaria — Application Assessment
 
+> **Follow-up (2026-09-11):** the P0 items (A-1 through A-4) plus B-1, B-3 and a P2 batch from this assessment were implemented and verified — see [`2026-09-11-priority-fixes.md`](./2026-09-11-priority-fixes.md) for the change log and build/test evidence. The Deferred section there tracks what remains.
+
 **Date:** 2026-09-10
 **Scope:** Full-stack review of the production application (ingest pipeline, database layer, query layer, UI, tests, deployment) — ~70 components, 15 server modules, 13 test files, 10 migrations.
 **Method:** Complete source read + two focused sub-reviews (frontend, tests/scoring) with every critical claim re-verified by hand, plus a **live production build** (`next build`) to confirm rendering modes and bundle sizes, and a full test-suite run.

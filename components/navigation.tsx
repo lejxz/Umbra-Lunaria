@@ -13,7 +13,7 @@
  * - Inactive hover: hover:bg-white/[.04] (standardized in Phase 5)
  */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -36,15 +36,27 @@ const links = [
   [<NavIconHallOfFame key="hof" />, "Hall of Fame", "/hall-of-fame"],
 ] as const;
 
-export function Navigation({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
+const SIDEBAR_STORAGE_KEY = "umbra_sidebar_collapsed";
+
+export function Navigation() {
   const pathname = usePathname();
-  const [isCollapsed, setIsCollapsed] = useState(initialCollapsed);
+  // Start expanded (matches the server-rendered HTML) and restore the user's
+  // persisted preference from localStorage after mount. This must NOT be read
+  // during render on the server — the old approach read a cookie in the root
+  // layout via `await cookies()`, which forced every route into dynamic
+  // rendering and disabled ISR app-wide (see docs/2026-09-11-priority-fixes.md).
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true") {
+      setIsCollapsed(true);
+    }
+  }, []);
 
   const toggleCollapse = () => {
     const next = !isCollapsed;
     setIsCollapsed(next);
-    document.cookie = `umbra_sidebar_collapsed=${next}; path=/; max-age=31536000`;
-    localStorage.setItem("umbra_sidebar_collapsed", String(next));
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
   };
 
   return (

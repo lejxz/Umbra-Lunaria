@@ -24,7 +24,7 @@ import {
   capitalRaidSeasons,
   hallOfFameRecords,
 } from "@/lib/db/schema";
-import { isSameDayInClanTz } from "@/lib/time/windows";
+import { isSameDayInClanTz, startOfDayInClanTz } from "@/lib/time/windows";
 
 export type AwardKey =
   | "philanthropist"
@@ -42,6 +42,23 @@ interface RecordCandidate {
   valueLabel: string;
   periodLabel: string | null;
   achievedAt: Date;
+}
+
+/**
+ * fix B-1 (docs/2026-09-11-priority-fixes.md): signed difference in CLAN-
+ * TIMEZONE calendar days between two instants (b − a). The old streak loop
+ * compared raw UTC milliseconds with a 1.5-day tolerance — a Mon 23:55
+ * Manila login followed by Wed 00:05 Manila counted as consecutive despite
+ * Tuesday being missed, and two logins either side of Manila midnight could
+ * collapse into one day. A calendar-day comparison in the clan timezone is
+ * the correct continuity test (0 = same day, 1 = adjacent day).
+ */
+function diffCalendarDaysInClanTz(a: Date, b: Date): number {
+  const aStart = startOfDayInClanTz(a);
+  const bStart = startOfDayInClanTz(b);
+  // Manila has no DST, so local midnights are exact 24h multiples; Math.round
+  // guards against any timezone with historical offset shifts.
+  return Math.round((bStart.getTime() - aStart.getTime()) / 86_400_000);
 }
 
 export async function checkHallOfFameRecords(): Promise<string[]> {
@@ -159,10 +176,19 @@ export async function checkHallOfFameRecords(): Promise<string[]> {
         const last = uniqueDays[uniqueDays.length - 1];
         if (!last || !isSameDayInClanTz(ts, last)) uniqueDays.push(ts);
       }
+      // fix B-1: streak continuity is measured in clan-timezone calendar days
+      // (not raw UTC-ms gaps) — see diffCalendarDaysInClanTz above.
       let streak = 1, maxStreak = 1;
       for (let i = 1; i < uniqueDays.length; i++) {
-        const diffDays = (uniqueDays[i]!.getTime() - uniqueDays[i - 1]!.getTime()) / 86400000;
-        if (diffDays <= 1.5) { streak++; maxStreak = Math.max(maxStreak, streak); } else { streak = 1; }
+        const diffDays = diffCalendarDaysInClanTz(uniqueDays[i - 1]!, uniqueDays[i]!);
+        if (diffDays === 1) {
+          streak++;
+          maxStreak = Math.max(maxStreak, streak);
+        } else {
+          // 0 is impossible after the same-day dedup above (defensive);
+          // anything ≥ 2 breaks the streak.
+          streak = 1;
+        }
       }
       dedicatedScores.push({ tag: m.playerTag, value: maxStreak });
     }
@@ -244,22 +270,27 @@ export async function checkHallOfFameRecords(): Promise<string[]> {
     return errors;
   }
 
-  // Wipe the table and re-insert the new Top 10 for all categories
+  // Wipe the table and re-insert the new Top N for all categories.
+  // fix (docs/2026-09-11, DB opt §6): the delete + insert now run in one
+  // transaction — a failure between the two used to leave the HoF empty
+  // until the next daily batch.
   try {
-    await db.delete(hallOfFameRecords);
-    if (candidates.length > 0) {
-      await db.insert(hallOfFameRecords).values(candidates.map((c) => ({
-        awardKey: c.awardKey,
-        rank: c.rank,
-        holderTag: c.holderTag,
-        holderName: c.holderName,
-        recordValue: c.recordValue,
-        valueLabel: c.valueLabel,
-        periodLabel: c.periodLabel,
-        achievedAt: c.achievedAt,
-        updatedAt: now,
-      })));
-    }
+    await db.transaction(async (tx) => {
+      await tx.delete(hallOfFameRecords);
+      if (candidates.length > 0) {
+        await tx.insert(hallOfFameRecords).values(candidates.map((c) => ({
+          awardKey: c.awardKey,
+          rank: c.rank,
+          holderTag: c.holderTag,
+          holderName: c.holderName,
+          recordValue: c.recordValue,
+          valueLabel: c.valueLabel,
+          periodLabel: c.periodLabel,
+          achievedAt: c.achievedAt,
+          updatedAt: now,
+        })));
+      }
+    });
   } catch (e) {
     errors.push(`hall-of-fame db insert error: ${e instanceof Error ? e.message : String(e)}`);
   }

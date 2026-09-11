@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import type { WarCenterData } from "@/lib/view-models/war";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { WarHero } from "./war-hero";
@@ -9,7 +10,18 @@ import { WarAttackLog } from "./war-attack-log";
 import { WarHistory } from "./war-history";
 import { WarDetailSheet } from "./war-detail-sheet";
 import { CwlLeagueView } from "./cwl-league-view";
-import { MemberDetailSheet } from "@/components/dashboard/member-detail-sheet";
+
+// fix (docs/2026-09-11-priority-fixes.md, bundle): the member detail sheet
+// (732-line UI + recharts via DonationChart) is only opened on click —
+// lazy-load it so it doesn't ship in /war's initial bundle (same pattern as
+// dashboard-shell.tsx).
+const MemberDetailSheet = dynamic(
+  () =>
+    import("@/components/dashboard/member-detail-sheet").then(
+      (m) => m.MemberDetailSheet,
+    ),
+  { ssr: false },
+);
 
 /**
  * War Center shell — the client-side composition root. Holds three pieces of

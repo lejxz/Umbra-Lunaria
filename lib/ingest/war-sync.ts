@@ -157,6 +157,11 @@ export async function syncCurrentWar(
     endTime: parseCoCTime(currentWar.endTime),
     preparationStartTime: parseCoCTime(currentWar.preparationStartTime),
     lastSyncedAt: capturedAt,
+    // CWL identity (fix A-4): this sync path only stores wars where OUR clan is
+    // the `clan` side (syncCwlWars normalizes CWL matches before calling this).
+    // Foreign CWL wars go through syncCwlOtherWar instead.
+    ownClanTag: currentWar.clan.tag,
+    involvesOwnClan: true,
     // Full snapshot for the War Center UI (both rosters + attack log).
     warSnapshot: currentWar as unknown as object,
   };
@@ -349,6 +354,9 @@ export async function backfillWarLog(
       endTime,
       state: "warEnded" as const,
       lastSyncedAt: new Date(),
+      // War-log entries are, by definition, OUR clan's wars (fix A-4).
+      ownClanTag: clanTag,
+      involvesOwnClan: true,
       // No roster detail available from the war log — leave snapshot null.
       // The history list still shows result/stars/destruction/date.
     };
@@ -503,6 +511,11 @@ async function syncCwlOtherWar(
     endTime,
     preparationStartTime: parseCoCTime(cwlWar.preparationStartTime),
     lastSyncedAt: capturedAt,
+    // CWL identity (fix A-4): this is ANOTHER clans' war — flag it so active-
+    // war/history queries never select it as ours, but keep the first clan's
+    // tag so getCwlSeason can compute full standings from both sides.
+    ownClanTag: cwlWar.clan.tag,
+    involvesOwnClan: false,
     // No snapshot — we don't need roster/attack detail for other clans' wars.
     warSnapshot: null,
   };

@@ -83,15 +83,16 @@ export async function computeCheckpoints(): Promise<void> {
   }
 
   // Compute + store per member.
+  // fix B-5 (docs/2026-09-11-priority-fixes.md): a member with ZERO snapshots
+  // used to have their cumulative_* columns overwritten to 0 — permanently
+  // clobbering lifetime totals on any snapshot-chain loss (manual truncate,
+  // restore, bug). Now such members keep their existing checkpoint values.
   for (const { playerTag } of retained) {
     const entry = byMember.get(playerTag);
-    const givenTotal = entry
-      ? calculateDonationDelta(entry.donations)
-      : 0;
-    const receivedTotal = entry
-      ? calculateDonationDelta(entry.donationsReceived)
-      : 0;
-    const loginDays = entry ? entry.loginDays.size : 0;
+    if (!entry) continue; // no snapshots observed — do NOT zero out checkpoints
+    const givenTotal = calculateDonationDelta(entry.donations);
+    const receivedTotal = calculateDonationDelta(entry.donationsReceived);
+    const loginDays = entry.loginDays.size;
 
     await db
       .update(members)

@@ -256,10 +256,13 @@ function ParticipationRate({ rate }: { rate: number | null }) {
 }
 
 function SeasonRow({ season }: { season: RaidSeasonSummary }) {
+  // fix B-3 (hydration): timeZone pinned so SSR and the browser format the
+  // same label (the browser would otherwise use the visitor's local zone).
   const dateLabel = season.startTime.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: "Asia/Manila",
   });
   return (
     <tr className="data-tr">
@@ -352,7 +355,7 @@ function ContributionHistoryTable({
                     key={s.seasonId}
                     className="data-th text-center font-mono uppercase tracking-wider text-umbra-muted whitespace-nowrap"
                   >
-                    {s.startTime.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    {s.startTime.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Manila" })}
                   </th>
                 ))}
                 <th className="data-th text-right font-mono uppercase tracking-wider text-umbra-purple">
@@ -439,6 +442,7 @@ function ContributionLog({ entries }: { entries: ContributionLogEntry[] }) {
               hour: "numeric",
               minute: "2-digit",
               hour12: true,
+              timeZone: "Asia/Manila",
             });
             return (
               <li

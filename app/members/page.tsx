@@ -1,17 +1,21 @@
-import { getMemberRoster, getMemberDetail } from "@/lib/db/member-queries";
+import { getMemberRoster } from "@/lib/db/member-queries";
 import { getMemberActivityScore } from "@/lib/db/queries";
 import { MembersShell } from "@/components/members/members-shell";
 import { PageScaffold } from "@/components/page-scaffold";
 import { ErrorState } from "@/components/ui/state-primitives";
-import type { MemberDetailView } from "@/lib/view-models/members";
 
 /**
  * Members page — Activity Score leaderboard + full clan roster with
  * sortable table, filters, and member detail sheet.
  * See docs/concept/06-members.md.
  *
- * ISR caching: revalidates every 300s (5 min). Member detail sheets are
- * fetched client-side on click (not cached) — only the roster list is cached.
+ * fix A-3 (docs/2026-09-11-priority-fixes.md): this page used to embed the
+ * full MemberDetailView for every roster member — a ~50× getMemberDetail
+ * fan-out where each call re-ran the full-roster activity-score computation
+ * (~51 full-roster scans, 300+ queries, multi-MB payload per render).
+ * Member details are now fetched on click via GET /api/members/[tag] —
+ * exactly the pattern the dashboard already uses — so the server render is
+ * just roster + one activity-score leaderboard (which is withCache'd).
  */
 export const revalidate = 3600; // 1 hr — roster/TH/role only change on the daily batch
 
@@ -32,21 +36,7 @@ export default async function MembersPage() {
     );
   }
 
-  // Fetch member details + activity score in parallel
-  const [detailEntries, activityScore] = await Promise.all([
-    Promise.all(
-      roster.entries.map(async (m) => {
-        const detail = await getMemberDetail(m.playerTag);
-        return [m.playerTag, detail] as const;
-      }),
-    ),
-    getMemberActivityScore("all"),
-  ]);
-
-  const memberDetails: Record<string, MemberDetailView> = {};
-  for (const [tag, detail] of detailEntries) {
-    if (detail) memberDetails[tag] = detail;
-  }
+  const activityScore = await getMemberActivityScore("all");
 
   return (
     <PageScaffold
@@ -55,7 +45,6 @@ export default async function MembersPage() {
     >
       <MembersShell
         roster={roster}
-        memberDetails={memberDetails}
         activityScore={activityScore}
       />
     </PageScaffold>
