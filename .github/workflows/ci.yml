@@ -37,3 +37,35 @@ jobs:
 
       - name: Test
         run: bun run test
+
+  # fix §8.2 (docs/2026-09-10 assessment): a `cookies()` call in the root
+  # layout once flipped every route to dynamic rendering and silently
+  # defeated the entire ISR/egress strategy (finding A-1). This job builds
+  # the app and asserts the route table so that class of regression can
+  # never land again. Pages render their error/empty states without a
+  # reachable DB (each page's try/catch handles it) — the dummy URL is only
+  # there so module-level pool creation doesn't throw.
+  route-modes:
+    name: Build + ISR route-mode assertion
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build
+        run: bunx next build 2>&1 | tee build.log
+        env:
+          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+
+      - name: Assert route modes
+        run: bash scripts/assert-route-modes.sh build.log

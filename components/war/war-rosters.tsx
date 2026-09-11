@@ -135,7 +135,7 @@ export function WarRosters({
         {mode === "base" ? (
           <>
             <span>
-              <span className="text-amber-400">★★★</span> base destroyed
+              <span className="text-amber-400" aria-hidden="true">★★★</span> base destroyed
             </span>
             <span>· = even / untouched</span>
           </>
@@ -145,7 +145,7 @@ export function WarRosters({
               <IconShieldOff className="h-3 w-3 text-red-400" /> no attacks used
             </span>
             <span>
-              <span className="text-amber-400">★★★</span> best attack
+              <span className="text-amber-400" aria-hidden="true">★★★</span> best attack
             </span>
           </>
         )}
@@ -324,11 +324,20 @@ function RosterRow({
     </>
   );
 
-  if (isOwn) {
+  if (isOwn && onClick) {
     return (
       <tr
         onClick={onClick}
-        className="group cursor-pointer transition hover:bg-umbra-purple/10"
+        tabIndex={0}
+        role="button"
+        aria-label={`Open details for ${m.name}`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onClick();
+          }
+        }}
+        className="group cursor-pointer transition hover:bg-umbra-purple/10 focus-ring"
       >
         {content}
       </tr>
@@ -489,7 +498,7 @@ function Stars({ value }: { value: number }) {
   return (
     <span className="inline-flex gap-px tracking-tight" aria-label={`${value} of 3 stars`}>
       {[0, 1, 2].map((i) => (
-        <span key={i} className={i < value ? "opacity-100" : "opacity-25"}>
+        <span key={i} aria-hidden="true" className={i < value ? "opacity-100" : "opacity-25"}>
           ★
         </span>
       ))}

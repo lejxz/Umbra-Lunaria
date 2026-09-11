@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, memo } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import type {
-  MemberRoster,
-  MemberSortField,
-  SortDirection,
+import {
+  formatRole,
+  type MemberRoster,
+  type MemberSortField,
+  type SortDirection,
+  type MemberRosterEntry,
 } from "@/lib/view-models/members";
 import { Badge, EmptyState, Select, Toggle } from "@/components/ui";
 import type { MemberDetailView } from "@/lib/view-models/members";
@@ -194,6 +196,7 @@ export function MembersRoster({
         <input
           type="text"
           placeholder="Search by name or #tag..."
+          aria-label="Search members by name or player tag"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="h-8 w-48 rounded-lg border border-umbra-line bg-umbra-ink/60 px-3 text-xs text-umbra-lilac placeholder-umbra-muted/50 focus:border-umbra-purple/50 focus:outline-none focus:ring-1 focus:ring-umbra-purple/50 transition"
@@ -201,6 +204,7 @@ export function MembersRoster({
         <Select
           value={filterRole}
           onChange={setFilterRole}
+          ariaLabel="Filter by role"
           options={[
             { value: "", label: "All roles" },
             { value: "leader", label: "Leader" },
@@ -212,6 +216,7 @@ export function MembersRoster({
         <Select
           value={filterWarPref}
           onChange={setFilterWarPref}
+          ariaLabel="Filter by war preference"
           options={[
             { value: "", label: "All war pref" },
             { value: "in", label: "In" },
@@ -235,6 +240,7 @@ export function MembersRoster({
         <Select
           value={sortField}
           onChange={(v) => setSortField(v as MemberSortField)}
+          ariaLabel="Sort members by"
           options={[
             { value: "clanRank", label: "Clan Rank" },
             { value: "name", label: "Name" },
@@ -279,83 +285,11 @@ export function MembersRoster({
               </thead>
               <tbody className="data-tbody">
                 {sorted.map((m) => (
-                  <tr
+                  <MemberRowDesktop
                     key={m.playerTag}
-                    onClick={() => handleMemberClick(m.playerTag)}
-                    className="cursor-pointer data-tr focus-ring"
-                  >
-                    {/* Rank */}
-                    <td className="data-td font-mono text-xs text-umbra-muted">
-                      {m.clanRank ?? "—"}
-                    </td>
-                    {/* Member — icon + name + tag + role */}
-                    <td className="data-td">
-                      <div className="flex items-center gap-3">
-                        {m.leagueTier?.iconUrls?.small && (
-                          <Image
-                            src={m.leagueTier.iconUrls.small}
-                            alt=""
-                            width={28}
-                            height={28}
-                            className="h-7 w-7 shrink-0"
-                          />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-umbra-lilac">{m.name}</p>
-                          <div className="flex items-center gap-1.5 font-mono text-2xs text-umbra-muted">
-                            {m.playerTag} · <span>{formatRole(m.role)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    {/* TH */}
-                    <td className="data-td">
-                      <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
-                        {m.townHallLevel ?? "—"}
-                      </span>
-                    </td>
-                    {/* Trophies */}
-                    <td className="data-td font-mono text-sm text-white">
-                      {m.trophies ?? "—"}
-                      {m.leagueTier?.name && (
-                        <span className="ml-1 text-label text-umbra-muted">
-                          {m.leagueTier.name}
-                        </span>
-                      )}
-                    </td>
-                    {/* Donations */}
-                    <td className="data-td">
-                      <div className="flex items-center gap-2 font-mono text-xs">
-                        <span className="text-emerald-400">↑{m.currentDonations ?? 0}</span>
-                        <span className="text-umbra-muted">↓{m.currentDonationsReceived ?? 0}</span>
-                      </div>
-                    </td>
-                    {/* Activity */}
-                    <td className="data-td">
-                      <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
-                    </td>
-                    {/* Wars — attended / tracked (X out of Y = how many you participated in) */}
-                    <td className="data-td font-mono text-xs text-white">
-                      {m.warsTracked > 0 ? (
-                        <span>
-                          <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
-                            {m.warsTracked - m.warsMissed}
-                          </span>
-                          <span className="text-umbra-muted">/{m.warsTracked}</span>
-                        </span>
-                      ) : (
-                        <span className="text-umbra-muted">—</span>
-                      )}
-                    </td>
-                    {/* War pref */}
-                    <td className="data-td">
-                      {m.warPreference && (
-                        <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
-                          {m.warPreference}
-                        </Badge>
-                      )}
-                    </td>
-                  </tr>
+                    member={m}
+                    onSelect={handleMemberClick}
+                  />
                 ))}
               </tbody>
             </table>
@@ -364,40 +298,11 @@ export function MembersRoster({
           {/* Mobile cards */}
           <div className="space-y-2 md:hidden">
             {sorted.map((m) => (
-              <button
+              <MemberRowMobile
                 key={m.playerTag}
-                onClick={() => handleMemberClick(m.playerTag)}
-                className="flex w-full items-center gap-3 rounded-lg border border-umbra-line bg-white/[.03] p-3 text-left transition hover:bg-white/[.04] focus-ring"
-              >
-                {m.leagueTier?.iconUrls?.small && (
-                  <Image
-                    src={m.leagueTier.iconUrls.small}
-                    alt=""
-                    width={36}
-                    height={36}
-                    className="h-9 w-9 shrink-0"
-                  />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium text-umbra-lilac">{m.name}</p>
-                    {/* Activity dot for compact view */}
-                    <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
-                  </div>
-                  <p className="font-mono text-label text-umbra-muted">
-                    TH{m.townHallLevel} · <span>{formatRole(m.role)}</span>
-                  </p>
-                  <p className="font-mono text-label text-umbra-muted">
-                    ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
-                    {m.warsTracked > 0 && ` · ${m.warsTracked - m.warsMissed}/${m.warsTracked} wars`}
-                  </p>
-                </div>
-                {m.warPreference && (
-                  <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
-                    {m.warPreference}
-                  </Badge>
-                )}
-              </button>
+                member={m}
+                onSelect={handleMemberClick}
+              />
             ))}
           </div>
         </>
@@ -439,19 +344,166 @@ function roleOrder(role: string): number {
   }
 }
 
-export function formatRole(role: string): string {
-  switch (role) {
-    case "leader":
-      return "Leader";
-    case "coLeader":
-      return "Co-Leader";
-    case "admin":
-      return "Elder";
-    default:
-      return "Member";
-  }
-}
+/**
+ * fix §5 + §6.6 (docs/2026-09-10 assessment): the roster rows are memoized —
+ * typing in the search box re-rendered ~50 rows × 2 markups on every keystroke;
+ * React.memo keeps row DOM stable when its props (member, handler) are
+ * unchanged. The desktop row is also fully keyboard-operable (Enter/Space open
+ * the member sheet) with an accessible name — previously it was click-only,
+ * which locked keyboard users out of member details entirely.
+ */
+const MemberRowDesktop = memo(function MemberRowDesktop({
+  member: m,
+  onSelect,
+}: {
+  member: MemberRosterEntry;
+  onSelect: (tag: string | null) => void;
+}) {
+  return (
+    <tr
+      tabIndex={0}
+      role="button"
+      aria-label={`Open details for ${m.name}`}
+      onClick={() => onSelect(m.playerTag)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(m.playerTag);
+        }
+      }}
+      className="cursor-pointer data-tr focus-ring"
+    >
+      {/* Rank */}
+      <td className="data-td font-mono text-xs text-umbra-muted">
+        {m.clanRank ?? "—"}
+      </td>
+      {/* Member — icon + name + tag + role */}
+      <td className="data-td">
+        <div className="flex items-center gap-3">
+          {m.leagueTier?.iconUrls?.small && (
+            <Image
+              src={m.leagueTier.iconUrls.small}
+              alt=""
+              width={28}
+              height={28}
+              className="h-7 w-7 shrink-0"
+            />
+          )}
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-umbra-lilac">{m.name}</p>
+            <div className="flex items-center gap-1.5 font-mono text-2xs text-umbra-muted">
+              {m.playerTag} · <span>{formatRole(m.role)}</span>
+            </div>
+          </div>
+        </div>
+      </td>
+      {/* TH */}
+      <td className="data-td">
+        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-lg bg-umbra-purple/15 px-1.5 font-mono text-sm font-bold text-umbra-purple">
+          {m.townHallLevel ?? "—"}
+        </span>
+      </td>
+      {/* Trophies */}
+      <td className="data-td font-mono text-sm text-white">
+        {m.trophies ?? "—"}
+        {m.leagueTier?.name && (
+          <span className="ml-1 text-label text-umbra-muted">
+            {m.leagueTier.name}
+          </span>
+        )}
+      </td>
+      {/* Donations */}
+      <td className="data-td">
+        <div className="flex items-center gap-2 font-mono text-xs">
+          <span className="text-emerald-400" aria-hidden="true">
+            ↑{m.currentDonations ?? 0}
+          </span>
+          <span className="text-umbra-muted" aria-hidden="true">
+            ↓{m.currentDonationsReceived ?? 0}
+          </span>
+          <span className="sr-only">
+            {m.currentDonations ?? 0} donated, {m.currentDonationsReceived ?? 0} received
+          </span>
+        </div>
+      </td>
+      {/* Activity */}
+      <td className="data-td">
+        <ActivityIndicator isActive={m.isActive} lastActive={m.lastActiveAt} />
+      </td>
+      {/* Wars — attended / tracked (X out of Y = how many you participated in) */}
+      <td className="data-td font-mono text-xs text-white">
+        {m.warsTracked > 0 ? (
+          <span>
+            <span className={m.warsMissed > 0 ? "text-amber-400" : "text-emerald-400"}>
+              {m.warsTracked - m.warsMissed}
+            </span>
+            <span className="text-umbra-muted">/{m.warsTracked}</span>
+          </span>
+        ) : (
+          <span className="text-umbra-muted">—</span>
+        )}
+      </td>
+      {/* War pref */}
+      <td className="data-td">
+        {m.warPreference && (
+          <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
+            {m.warPreference}
+          </Badge>
+        )}
+      </td>
+    </tr>
+  );
+});
 
+const MemberRowMobile = memo(function MemberRowMobile({
+  member: m,
+  onSelect,
+}: {
+  member: MemberRosterEntry;
+  onSelect: (tag: string | null) => void;
+}) {
+  return (
+    <button
+      onClick={() => onSelect(m.playerTag)}
+      aria-label={`Open details for ${m.name}`}
+      className="flex w-full items-center gap-3 rounded-lg border border-umbra-line bg-white/[.03] p-3 text-left transition hover:bg-white/[.04] focus-ring"
+    >
+      {m.leagueTier?.iconUrls?.small && (
+        <Image
+          src={m.leagueTier.iconUrls.small}
+          alt=""
+          width={36}
+          height={36}
+          className="h-9 w-9 shrink-0"
+        />
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-sm font-medium text-umbra-lilac">{m.name}</p>
+          {/* Activity dot for compact view */}
+          <ActivityDot isActive={m.isActive} lastActive={m.lastActiveAt} />
+        </div>
+        <p className="font-mono text-label text-umbra-muted">
+          TH{m.townHallLevel} · <span>{formatRole(m.role)}</span>
+        </p>
+        <p className="font-mono text-label text-umbra-muted">
+          <span aria-hidden="true">
+            ↑{m.currentDonations ?? 0} ↓{m.currentDonationsReceived ?? 0}
+          </span>
+          <span className="sr-only">
+            {m.currentDonations ?? 0} donated, {m.currentDonationsReceived ?? 0} received
+          </span>
+          {m.warsTracked > 0 && ` · ${m.warsTracked - m.warsMissed}/${m.warsTracked} wars`}
+        </p>
+      </div>
+      {m.warPreference && (
+        <Badge tone={m.warPreference === "in" ? "success" : "muted"}>
+          {m.warPreference}
+        </Badge>
+      )}
+    </button>
+  );
+});
 
 
 /**

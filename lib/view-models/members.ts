@@ -222,3 +222,24 @@ export interface MemberDetailView {
     unsleeping: { rank: number; valueLabel: string } | null;
   };
 }
+
+/**
+ * Human label for a CoC role value ("admin" is displayed as "Elder" — the
+ * in-game name for that role).
+ *
+ * fix (docs/2026-09-10 assessment §6.4): was duplicated in members-roster.tsx
+ * and member-detail-sheet.tsx; now a single shared definition in the
+ * view-model layer both already import from.
+ */
+export function formatRole(role: string): string {
+  switch (role) {
+    case "leader":
+      return "Leader";
+    case "coLeader":
+      return "Co-Leader";
+    case "admin":
+      return "Elder";
+    default:
+      return "Member";
+  }
+}

@@ -5,17 +5,21 @@ import {
   formatInTimezone,
   startOfDayInClanTz,
   isSameDayInClanTz,
+  clanTzDayKey,
+  diffCalendarDaysInClanTz,
 } from "@/lib/time/windows";
 
 /**
  * Tests for the timezone-aware window functions in lib/time/windows.ts
  * (docs/concept/04-activity-tracking-and-polling.md):
  *
- *   - computeWindow: subtracts 24h / 7d / 30d from `now` to build a TimeWindow.
+ *   - computeWindow: exact, clan-tz-anchored windows (fix B-6 — the 24h window
+ *     is exactly 24h ending at the top of the current hour; 7d/30d windows
+ *     start at clan-timezone midnight).
  *   - generateBuckets: 24 hourly buckets for "24h", N daily buckets for "7d"/"30d".
  *   - formatInTimezone: Intl-based formatting in the clan timezone.
- *   - startOfDayInClanTz: returns the UTC instant of midnight in the clan TZ.
- *   - isSameDayInClanTz: compares two instants by clan-TZ calendar day.
+ *   - startOfDayInClanTz / isSameDayInClanTz / clanTzDayKey /
+ *     diffCalendarDaysInClanTz: clan-calendar-day primitives.
  *
  * Manila ("Asia/Manila") is UTC+8 year-round (no DST), which makes the
  * expected values deterministic.
@@ -25,63 +29,123 @@ const MANILA_TZ = "Asia/Manila";
 const MS_PER_HOUR = 60 * 60 * 1000;
 const MS_PER_DAY = 24 * MS_PER_HOUR;
 
-// Tolerance for "approximately N ms". The implementation uses
-// setUTCHours/setUTCDate which is exact, but the brief asks for a "few
-// seconds" tolerance so the tests survive minor future rewrites.
-const FEW_SECONDS_MS = 5_000;
-
 // ---------------------------------------------------------------------------
-// computeWindow
+// computeWindow — "24h"
 // ---------------------------------------------------------------------------
 
-describe("computeWindow", () => {
-  const now = new Date("2026-01-15T12:00:00Z");
+describe("computeWindow — 24h (fix B-6)", () => {
+  it("spans EXACTLY 24 hours, even for an off-the-hour `now`", () => {
+    // 12:34:56 UTC — the old bug stretched this window to 24h34m56s.
+    const win = computeWindow("24h", new Date("2026-01-15T12:34:56Z"));
+    expect(win.to.getTime() - win.from.getTime()).toBe(MS_PER_DAY);
+  });
 
-  it("24h window spans ~24 hours (within a few seconds of 86_400_000ms)", () => {
+  it("boundaries land on the top of the hour (clean axis labels)", () => {
+    const now = new Date("2026-01-15T12:34:56Z");
     const win = computeWindow("24h", now);
-    const diff = win.to.getTime() - win.from.getTime();
+    for (const bound of [win.from, win.to]) {
+      expect(bound.getUTCMinutes()).toBe(0);
+      expect(bound.getUTCSeconds()).toBe(0);
+      expect(bound.getUTCMilliseconds()).toBe(0);
+    }
+  });
 
-    expect(diff).toBeGreaterThanOrEqual(MS_PER_DAY - FEW_SECONDS_MS);
-    expect(diff).toBeLessThanOrEqual(MS_PER_DAY + FEW_SECONDS_MS);
-    expect(win.kind).toBe("24h");
+  it("`to` is the next hour boundary — the current partial hour is the in-progress bucket", () => {
+    const now = new Date("2026-01-15T12:34:56Z");
+    const win = computeWindow("24h", now);
+    expect(win.to.toISOString()).toBe("2026-01-15T13:00:00.000Z");
+    expect(win.from.toISOString()).toBe("2026-01-14T13:00:00.000Z");
+  });
+
+  it("an on-the-hour `now` keeps to === now", () => {
+    const now = new Date("2026-01-15T12:00:00Z");
+    const win = computeWindow("24h", now);
     expect(win.to).toEqual(now);
+    expect(win.from.toISOString()).toBe("2026-01-14T12:00:00.000Z");
   });
 
-  it("7d window spans ~7 days", () => {
+  it("no hourly bucket stretches beyond 1h (was up to ~2h pre-fix)", () => {
+    const now = new Date("2026-01-15T12:59:59Z");
+    const win = computeWindow("24h", now);
+    const buckets = generateBuckets(win, MANILA_TZ);
+    expect(buckets).toHaveLength(24);
+    // First 23 buckets are exactly 1h apart; the last bucket ends at win.to
+    // (the next hour boundary), so it covers at most 1 in-progress hour.
+    for (let i = 1; i < buckets.length; i++) {
+      expect(
+        buckets[i]!.timestamp.getTime() - buckets[i - 1]!.timestamp.getTime(),
+      ).toBe(MS_PER_HOUR);
+    }
+    expect(win.to.getTime() - buckets[23]!.timestamp.getTime()).toBe(MS_PER_HOUR);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeWindow — "7d" / "30d" (clan-midnight anchoring, fix B-6)
+// ---------------------------------------------------------------------------
+
+describe("computeWindow — 7d/30d (clan-midnight anchor, fix B-6)", () => {
+  it("7d window starts at clan-timezone midnight, 6 days back", () => {
+    // 12:00 UTC Jan 15 = 20:00 Manila Jan 15. Today's Manila midnight =
+    // Jan 14 16:00 UTC. Six days further back = Jan 8 16:00 UTC.
+    const now = new Date("2026-01-15T12:00:00Z");
     const win = computeWindow("7d", now);
-    const diff = win.to.getTime() - win.from.getTime();
-    const expected = 7 * MS_PER_DAY;
-
-    expect(diff).toBeGreaterThanOrEqual(expected - FEW_SECONDS_MS);
-    expect(diff).toBeLessThanOrEqual(expected + FEW_SECONDS_MS);
-    expect(win.kind).toBe("7d");
+    expect(win.from.toISOString()).toBe("2026-01-08T16:00:00.000Z");
+    expect(win.to).toEqual(now);
+    // `from` is exactly a Manila midnight.
+    expect(win.from.getTime()).toBe(startOfDayInClanTz(win.from).getTime());
   });
 
-  it("30d window spans ~30 days", () => {
-    const win = computeWindow("30d", now);
-    const diff = win.to.getTime() - win.from.getTime();
-    const expected = 30 * MS_PER_DAY;
+  it("7d window span is between 6 and 7 days (6 full days + today so far)", () => {
+    const now = new Date("2026-01-15T12:00:00Z");
+    const span = computeWindow("7d", now).to.getTime() - computeWindow("7d", now).from.getTime();
+    expect(span).toBeGreaterThanOrEqual(6 * MS_PER_DAY);
+    expect(span).toBeLessThanOrEqual(7 * MS_PER_DAY);
+  });
 
-    expect(diff).toBeGreaterThanOrEqual(expected - FEW_SECONDS_MS);
-    expect(diff).toBeLessThanOrEqual(expected + FEW_SECONDS_MS);
-    expect(win.kind).toBe("30d");
+  it("donations after Manila midnight land in TODAY's bucket, not yesterday's", () => {
+    // The pre-fix window anchored at "now - 7d" (12:00 UTC), so a donation at
+    // 01:00 Manila (17:00 UTC the previous day) fell into the previous day's
+    // bucket even though it happened "today" in clan time.
+    const now = new Date("2026-01-15T12:00:00Z");
+    const win = computeWindow("7d", now);
+    const buckets = generateBuckets(win, MANILA_TZ);
+    expect(buckets).toHaveLength(7);
+    // Every bucket starts exactly at a Manila midnight…
+    for (const b of buckets) {
+      expect(b.timestamp.getTime()).toBe(startOfDayInClanTz(b.timestamp).getTime());
+    }
+    // …and the last bucket IS today's Manila midnight.
+    expect(buckets[6]!.timestamp.getTime()).toBe(startOfDayInClanTz(now).getTime());
+  });
+
+  it("30d window starts at clan midnight, 29 days back, with 30 midnight buckets", () => {
+    const now = new Date("2026-01-15T12:00:00Z");
+    const win = computeWindow("30d", now);
+    expect(win.from.toISOString()).toBe("2025-12-16T16:00:00.000Z");
+    const buckets = generateBuckets(win, MANILA_TZ);
+    expect(buckets).toHaveLength(30);
+    for (const b of buckets) {
+      expect(b.timestamp.getTime()).toBe(startOfDayInClanTz(b.timestamp).getTime());
+    }
   });
 
   it("does not mutate the caller's `now` Date", () => {
     const nowCopy = new Date("2026-01-15T12:00:00Z");
     computeWindow("24h", nowCopy);
-    // The original instant should be unchanged.
+    computeWindow("7d", nowCopy);
+    computeWindow("30d", nowCopy);
     expect(nowCopy.toISOString()).toBe("2026-01-15T12:00:00.000Z");
   });
 });
 
 // ---------------------------------------------------------------------------
-// generateBuckets
+// generateBuckets — labels
 // ---------------------------------------------------------------------------
 
-describe("generateBuckets", () => {
+describe("generateBuckets — labels", () => {
   it("24h window yields exactly 24 buckets with HH:mm labels", () => {
-    const win = computeWindow("24h", new Date("2026-01-15T12:00:00Z"));
+    const win = computeWindow("24h", new Date("2026-01-15T12:34:56Z"));
     const buckets = generateBuckets(win, MANILA_TZ);
 
     expect(buckets).toHaveLength(24);
@@ -103,37 +167,13 @@ describe("generateBuckets", () => {
     }
   });
 
-  it("30d window yields exactly 30 buckets", () => {
+  it("30d window yields exactly 30 buckets with MMM d labels", () => {
     const win = computeWindow("30d", new Date("2026-01-15T12:00:00Z"));
     const buckets = generateBuckets(win, MANILA_TZ);
 
     expect(buckets).toHaveLength(30);
-    // 30d labels are dates like "Jan 1", "Jan 2" — not weekday names, so
-    // the chart axis doesn't look like it's only showing 7 days.
     for (const b of buckets) {
-      // Should match "MMM d" format: 3-letter month + space + day number
       expect(b.label).toMatch(/^[A-Z][a-z]{2} \d{1,2}$/);
-    }
-    // First bucket should be around Jan 16 (16 days before Jan 15 is Dec 30,
-    // but 30 days before Jan 15 is Dec 16 — the label should contain a
-    // valid month abbreviation).
-    expect(buckets[0]?.label).toMatch(/^[A-Z][a-z]{2}/);
-  });
-
-  it("24h bucket timestamps are 1 hour apart and span the window", () => {
-    const now = new Date("2026-01-15T12:00:00Z");
-    const win = computeWindow("24h", now);
-    const buckets = generateBuckets(win, MANILA_TZ);
-
-    // First bucket aligns with the window `from`.
-    expect(buckets[0]?.timestamp.getTime()).toBe(win.from.getTime());
-    // Each subsequent bucket is exactly 1 hour later.
-    for (let i = 1; i < buckets.length; i++) {
-      const prev = buckets[i - 1]?.timestamp.getTime();
-      const curr = buckets[i]?.timestamp.getTime();
-      expect(prev).toBeDefined();
-      expect(curr).toBeDefined();
-      expect((curr as number) - (prev as number)).toBe(MS_PER_HOUR);
     }
   });
 });
@@ -200,7 +240,7 @@ describe("startOfDayInClanTz", () => {
 });
 
 // ---------------------------------------------------------------------------
-// isSameDayInClanTz
+// isSameDayInClanTz / clanTzDayKey (fix B-7)
 // ---------------------------------------------------------------------------
 
 describe("isSameDayInClanTz", () => {
@@ -224,12 +264,47 @@ describe("isSameDayInClanTz", () => {
     const a = new Date("2026-06-15T12:34:56Z");
     expect(isSameDayInClanTz(a, a)).toBe(true);
   });
+});
 
-  it("returns false when the two instants are on different Manila months", () => {
-    // a = Jan 31 23:00 Manila (Jan 31 15:00 UTC).
-    // b = Feb 01 01:00 Manila (Jan 31 17:00 UTC).
-    const a = new Date("2026-01-31T15:00:00Z");
-    const b = new Date("2026-01-31T17:00:00Z");
-    expect(isSameDayInClanTz(a, b)).toBe(false);
+describe("clanTzDayKey (fix B-7)", () => {
+  it("keys by the Manila calendar day, not the UTC date slice", () => {
+    // 2026-01-15T17:00:00Z = Jan 16, 01:00 Manila → key must be Jan 16.
+    expect(clanTzDayKey(new Date("2026-01-15T17:00:00Z"))).toBe("2026-01-16");
+    // 2026-01-15T15:59:00Z = Jan 15, 23:59 Manila → key must be Jan 15.
+    expect(clanTzDayKey(new Date("2026-01-15T15:59:00Z"))).toBe("2026-01-15");
+  });
+
+  it("agrees with isSameDayInClanTz and the UTC slice only when the day matches", () => {
+    // Same Manila day, different UTC dates: 15:00 UTC Jan 15 (23:00 Manila)
+    // and 17:00 UTC Jan 15 (01:00 Manila Jan 16) differ in clan day.
+    const a = new Date("2026-01-15T15:00:00Z");
+    const b = new Date("2026-01-15T17:00:00Z");
+    expect(clanTzDayKey(a) === clanTzDayKey(b)).toBe(isSameDayInClanTz(a, b));
+    expect(clanTzDayKey(a) === clanTzDayKey(b)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// diffCalendarDaysInClanTz
+// ---------------------------------------------------------------------------
+
+describe("diffCalendarDaysInClanTz", () => {
+  it("returns 1 for adjacent Manila calendar days (the streak continuity test)", () => {
+    // Mon 23:55 Manila → Tue 00:05 Manila (10 min apart in UTC).
+    const a = new Date("2026-01-12T15:55:00Z"); // Mon 23:55 Manila
+    const b = new Date("2026-01-12T16:05:00Z"); // Tue 00:05 Manila
+    expect(diffCalendarDaysInClanTz(a, b)).toBe(1);
+  });
+
+  it("returns 2 when a full Manila day is missed", () => {
+    const a = new Date("2026-01-12T15:55:00Z"); // Mon 23:55 Manila
+    const b = new Date("2026-01-13T16:05:00Z"); // Wed 00:05 Manila
+    expect(diffCalendarDaysInClanTz(a, b)).toBe(2);
+  });
+
+  it("returns 0 for the same Manila day", () => {
+    const a = new Date("2026-01-15T00:00:00Z");
+    const b = new Date("2026-01-15T15:00:00Z");
+    expect(diffCalendarDaysInClanTz(a, b)).toBe(0);
   });
 });

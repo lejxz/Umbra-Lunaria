@@ -28,13 +28,11 @@ import {
   ArrowDown,
   ChevronRight,
   ChevronLeft,
-  Check,
   Building2,
   LayoutGrid,
   Users,
   ClipboardList,
   Activity,
-  TrendingUp,
   Gift,
   Flame,
   Coins,
@@ -43,12 +41,6 @@ import {
   Zap,
   HeartHandshake,
   Crown,
-  GripVertical,
-  Plus,
-  Trash2,
-  Save,
-  Filter,
-  Search,
   type LucideProps,
 } from "lucide-react";
 
@@ -99,7 +91,6 @@ export const IconArrowUp = (props: LucideProps) => <ArrowUp {...props} />;
 export const IconArrowDown = (props: LucideProps) => <ArrowDown {...props} />;
 export const IconChevronRight = (props: LucideProps) => <ChevronRight {...props} />;
 export const IconChevronLeft = (props: LucideProps) => <ChevronLeft {...props} />;
-export const IconCheck = (props: LucideProps) => <Check {...props} />;
 
 // ---------------------------------------------------------------------------
 // Capital
@@ -128,19 +119,7 @@ export const IconZap = (props: LucideProps) => <Zap {...props} />;
 export const IconCrown = (props: LucideProps) => <Crown {...props} />;
 
 // ---------------------------------------------------------------------------
-// Charts & analytics
+// Roster / members
 // ---------------------------------------------------------------------------
 
-export const IconTrendingUp = (props: LucideProps) => <TrendingUp {...props} />;
-
-// ---------------------------------------------------------------------------
-// Planning — roster builder interactions
-// ---------------------------------------------------------------------------
-
-export const IconGrip = (props: LucideProps) => <GripVertical {...props} />;
-export const IconPlus = (props: LucideProps) => <Plus {...props} />;
-export const IconTrash = (props: LucideProps) => <Trash2 {...props} />;
-export const IconSave = (props: LucideProps) => <Save {...props} />;
-export const IconFilter = (props: LucideProps) => <Filter {...props} />;
-export const IconSearch = (props: LucideProps) => <Search {...props} />;
 export const IconUsers = (props: LucideProps) => <Users {...props} />;

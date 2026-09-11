@@ -57,19 +57,31 @@ function parseEnvFile(filePath: string): Record<string, string> {
  * falls back to the `.env` value when the env value is missing or is the
  * sandbox's SQLite `file:` default. Throws if no usable URL can be found.
  *
+ * fix (docs/2026-09-10 assessment §6.1): the `.env` fallback is dev-tool
+ * logic — in production (Vercel) the env var is always injected and no
+ * `.env` file ships in the bundle. The fallback is now gated to
+ * non-production callers unless they explicitly opt in (drizzle.config.ts —
+ * a dev tool that also runs during local `bun run build`, where Next sets
+ * NODE_ENV=production but the developer still relies on `.env`).
+ *
  * Also strips `sslmode` and Supabase-specific `supa` query params from the
  * returned URL so that pg-connection-string never applies strict
  * sslmode=require/verify-full semantics. Callers that need SSL pass
  * `ssl: { rejectUnauthorized: false }` explicitly in their pool config.
  */
-export function resolveDatabaseUrl(): string {
+export function resolveDatabaseUrl(
+  options: { allowEnvFile?: boolean } = {},
+): string {
+  const allowEnvFile = options.allowEnvFile ?? process.env.NODE_ENV !== "production";
   const env = process.env.DATABASE_URL;
   if (env && !isSandboxSqliteDefault(env)) {
     return sanitizeDbUrl(env);
   }
-  const fromFile = parseEnvFile(resolve(process.cwd(), ".env"))["DATABASE_URL"];
-  if (fromFile && !isSandboxSqliteDefault(fromFile)) {
-    return sanitizeDbUrl(fromFile);
+  if (allowEnvFile) {
+    const fromFile = parseEnvFile(resolve(process.cwd(), ".env"))["DATABASE_URL"];
+    if (fromFile && !isSandboxSqliteDefault(fromFile)) {
+      return sanitizeDbUrl(fromFile);
+    }
   }
   if (env) return sanitizeDbUrl(env); // last resort — let the caller surface the bad URL
   throw new Error(

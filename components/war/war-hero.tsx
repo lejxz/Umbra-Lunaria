@@ -66,8 +66,8 @@ export function WarHero({
                 </span>
                 <ResultBadge result={lastResult.result} />
               </div>
-              <p className="mt-1 font-mono text-2xs text-umbra-muted">
-                ★{lastResult.ownStars ?? "—"}–{lastResult.opponentStars ?? "—"}
+              <p className="mt-1 font-mono text-2xs text-umbra-muted" aria-label={`Stars ${lastResult.ownStars ?? "—"} to ${lastResult.opponentStars ?? "—"}`}>
+                <span aria-hidden="true">★{lastResult.ownStars ?? "—"}–{lastResult.opponentStars ?? "—"}</span>
                 {lastResult.ownDestructionPercentage != null &&
                   ` · ${lastResult.ownDestructionPercentage}%`}
                 {lastResult.endTime && (
@@ -234,9 +234,9 @@ export function WarHero({
       {maxPossibleStars != null && maxPossibleStars > 0 && (
         <div className="mt-8 px-4 sm:px-8">
           <div className="mb-2 flex items-center justify-between font-mono text-xs font-semibold text-umbra-muted">
-            <span className="drop-shadow-lg text-amber-400/90">★ {ownStars}</span>
+            <span className="drop-shadow-lg text-amber-400/90" aria-label={`${ownStars} stars`}><span aria-hidden="true">★ </span>{ownStars}</span>
             <span className="text-2xs uppercase tracking-widest text-umbra-muted/50">{maxPossibleStars} Max</span>
-            <span className="drop-shadow-lg text-red-400/90">{oppStars} ★</span>
+            <span className="drop-shadow-lg text-red-400/90" aria-label={`${oppStars} stars`}>{oppStars}<span aria-hidden="true"> ★</span></span>
           </div>
           <div className="relative flex h-3 overflow-hidden rounded-full border border-white/5 bg-black/40 shadow-inner shadow-black/50">
             <div className="absolute inset-x-0 top-0 h-px bg-white/5" />
@@ -321,8 +321,8 @@ export function WarClanColumn({
       )}
       <div className="mt-2 flex w-full flex-col items-center gap-1">
         <div className="flex items-baseline justify-center gap-1.5 rounded-lg bg-white/[.04] px-3 py-1.5">
-          <span className="font-display text-xl font-bold text-amber-400 leading-none tracking-tight">
-            ★{stars}
+          <span className="font-display text-xl font-bold text-amber-400 leading-none tracking-tight" aria-label={`${stars} stars`}>
+            <span aria-hidden="true">★</span>{stars}
           </span>
           <span className="font-mono text-2xs font-medium text-umbra-muted">
             {destruction}%

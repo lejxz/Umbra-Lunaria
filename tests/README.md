@@ -43,6 +43,7 @@ donation reset handling, wrong analysis math) without needing a database.
 |---|---|---|
 | `tests/ingest/membership.test.ts` | join / leave / rejoin / refresh decisions, retention purge-date, activity flags, failed-poll caveat | Step 1.0.D (line 90) |
 | `tests/ingest/war-identity.test.ts` | CWL + regular war identity matching, idempotency across state transitions | Step 1.0.D (line 90) |
+| `tests/ingest/purge-retention.test.ts` | purge retention rule — reset-day donation-delta preservation incl. a 300-trial randomized fuzz over the app's window shapes | — |
 | `tests/war/war-snapshot.test.ts` | snapshot parsing (null/missing clans, cold start, attacks), analysis (3★ rate, avg stars, no-attack count, best attack), history mapping | Step 1.1.C (line 130) |
 | `tests/lib/donation-reset-sequences.test.ts` | realistic 24h/7d/30d seeded sequences with weekly resets, cold start | Step 1.2.C (line 162) |
 | `tests/lib/donation-delta.test.ts` | basic reset-aware delta logic | Step 1.1.B |
@@ -50,8 +51,9 @@ donation reset handling, wrong analysis math) without needing a database.
 | `tests/lib/win-rate.test.ts` | war win-rate "never fake a zero" | Step 1.1.B |
 | `tests/lib/queries-logic.test.ts` | war-record view-model assembly | Step 1.1.C |
 | `tests/lib/activity-score.test.ts` | Member Activity Score computation | Step 1.1.B |
-| `tests/lib/windows.test.ts` | time-window boundary computation | Step 1.1.B |
-| `tests/lib/unit-icon-map.test.ts` | unit-name-to-asset mapping | Step 1.0.B |
+| `tests/lib/windows.test.ts` | time-window boundary computation — exact 24h windows, clan-midnight anchoring for 7d/30d, day-key primitives | Step 1.1.B |
+| `tests/lib/login-streak.test.ts` | HoF "dedicated" streak — Manila-midnight boundary cases (the extracted B-1 regression suite) | — |
+| `tests/lib/unit-icon-map.test.ts` | unit-name-to-asset mapping + on-disk existence of every mapped asset | Step 1.0.B |
 
 ## What's NOT tested (and why)
 
@@ -78,8 +80,9 @@ bun run test          # run all tests once
 bun run test:watch    # watch mode
 ```
 
-Tests run in Node (no browser, no DB). They're fast (<1s total) because
+Tests run in Node (no browser, no DB). They're fast (<3s total) because
 they're pure-logic. No environment variables beyond what Vitest needs.
+Current state: 15 files, 176 tests, all passing.
 
 ## Failed-poll safety (docs/concept/04 #3)
 

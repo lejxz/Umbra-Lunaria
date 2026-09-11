@@ -1,6 +1,6 @@
 # Umbra Lunaria — Application Assessment
 
-> **Follow-up (2026-09-11):** the P0 items (A-1 through A-4) plus B-1, B-3 and a P2 batch from this assessment were implemented and verified — see [`2026-09-11-priority-fixes.md`](./2026-09-11-priority-fixes.md) for the change log and build/test evidence. The Deferred section there tracks what remains.
+> **Follow-up (2026-09-11):** the P0 items (A-1 through A-4) plus B-1, B-3 and a P2 batch from this assessment were implemented and verified — see [`2026-09-11-priority-fixes.md`](./2026-09-11-priority-fixes.md). **A second pass then implemented the rest of the deferred list** (B-2, B-6/B-7, DB opts 3/5/7/10, the CI route-mode gate, extracted streak + purge-retention tests, a11y, dead-code cleanup) — see [`2026-09-11-remaining-issues.md`](./2026-09-11-remaining-issues.md). Only feature additions (§7) and the Docker-based integration suite remain open.
 
 **Date:** 2026-09-10
 **Scope:** Full-stack review of the production application (ingest pipeline, database layer, query layer, UI, tests, deployment) — ~70 components, 15 server modules, 13 test files, 10 migrations.

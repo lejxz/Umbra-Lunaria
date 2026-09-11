@@ -253,19 +253,19 @@ function WarDetailContent({
       <section className="flex flex-col" aria-labelledby="analysis-title">
         <SectionLabel>Performance breakdown</SectionLabel>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <StatCard
+          <ComparisonStatCard
             label="3★ rate"
             own={analysis.ownThreeStarRate}
             opp={analysis.opponentThreeStarRate}
             format="percent"
           />
-          <StatCard
+          <ComparisonStatCard
             label="Avg stars"
             own={analysis.ownAverageStars}
             opp={analysis.opponentAverageStars}
             format="stars"
           />
-          <StatCard
+          <ComparisonStatCard
             label="Attacks used"
             own={analysis.ownAttacksUsed}
             opp={analysis.opponentAttacksUsed}
@@ -273,7 +273,7 @@ function WarDetailContent({
             oppTotal={analysis.opponentAttacksTotal}
             format="fraction"
           />
-          <StatCard
+          <ComparisonStatCard
             label="No-attack"
             own={analysis.ownNoAttackMembers}
             opp={analysis.opponentNoAttackMembers}
@@ -364,7 +364,7 @@ function resultFromStars(w: WarDetailView["detail"]): "win" | "loss" | "tie" | n
 
 
 
-function StatCard({
+function ComparisonStatCard({
   label,
   own,
   opp,

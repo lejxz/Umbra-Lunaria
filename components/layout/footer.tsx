@@ -9,7 +9,12 @@
  *
  * Shows: last poll, daily batch, tracking start, war synced, and a live
  * countdown to the next expected 5-minute poll. Clock-drift tolerant via
- * useServerClock. Auto-refreshes the page once when a poll becomes overdue.
+ * useServerClock.
+ *
+ * fix B-12: the footer used to force a `window.location.reload()` when a poll
+ * looked overdue. Under ISR (restored by fix A-1) a reload just re-serves the
+ * same cached HTML — a wasted reload that could even loop on a slow poll. The
+ * overdue state is now display-only; the ISR timers refresh the data.
  */
 
 import { useEffect, useState } from "react";
@@ -52,20 +57,7 @@ export function Footer({
   const msUntilNext = nextPollDate ? nextPollDate.getTime() - now : null;
   const isOverdue = msUntilNext !== null && msUntilNext < 0;
 
-  // Auto-refresh once when >5s overdue (guards against loops via sessionStorage).
-  const [reloading, setReloading] = useState(false);
-  useEffect(() => {
-    if (msUntilNext !== null && msUntilNext < -5000 && !reloading) {
-      const attemptKey = `reloaded_${lastPoll}`;
-      if (sessionStorage.getItem(attemptKey)) return;
-      setReloading(true);
-      sessionStorage.setItem(attemptKey, "true");
-      window.location.reload();
-    }
-  }, [msUntilNext, reloading, lastPoll]);
-
   const countdownText = (() => {
-    if (reloading) return "refreshing...";
     if (msUntilNext === null) return "—";
     if (isOverdue) return "overdue";
     const totalSeconds = Math.floor(msUntilNext / 1000);

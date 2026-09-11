@@ -1,7 +1,10 @@
 import { defineConfig } from "drizzle-kit";
 import { resolveDatabaseUrl } from "./lib/env";
 
-const url = resolveDatabaseUrl();
+// Dev tooling: allowEnvFile keeps the .env fallback available during local
+// `bun run build` (Next sets NODE_ENV=production there, but the developer
+// still relies on .env — see lib/env.ts).
+const url = resolveDatabaseUrl({ allowEnvFile: true });
 
 export default defineConfig({
   schema: "./lib/db/schema.ts",

@@ -31,6 +31,18 @@ body {
   position: relative;
 }
 
+/* fix (docs/2026-09-10 assessment §5): iOS Safari silently ignores
+   `background-attachment: fixed` on body in some versions and emulates it
+   with visible repaint jank in others. Scroll-attach the background there —
+   the deep background color keeps the visual transition invisible. The
+   supports-query only matches iOS Safari (-webkit-touch-callout is
+   unavailable in every other engine). */
+@supports (-webkit-touch-callout: none) {
+  body {
+    background-attachment: scroll;
+  }
+}
+
 /* Subtle dark overlay on top of the background image so content is readable
    but the background is barely visible at ~5% opacity. */
 body::before {

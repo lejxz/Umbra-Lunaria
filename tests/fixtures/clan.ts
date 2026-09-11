@@ -9,7 +9,6 @@ import type {
   CocClan,
   CocClanMember,
   CocPlayer,
-  CocCurrentWar,
 } from "@/lib/coc-client/client";
 
 export const fixtureMembers: CocClanMember[] = [
@@ -148,58 +147,4 @@ export const fixturePlayer: CocPlayer = {
     { name: "Gold Grab", stars: 3, value: 2000000000, target: 100000000 },
     { name: "War Hero", stars: 3, value: 1889, target: 1000 },
   ],
-};
-
-export const fixtureCurrentWar: CocCurrentWar = {
-  state: "inWar",
-  teamSize: 5,
-  attacksPerMember: 2,
-  startTime: "2026-07-20T10:00:00.000Z",
-  endTime: "2026-07-21T10:00:00.000Z",
-  clan: {
-    tag: "#2JPCYP98L",
-    name: "Umbra Lunaria",
-    stars: 7,
-    destructionPercentage: 65,
-    attacks: 6,
-    members: [
-      {
-        tag: "#YPCC8QYU2",
-        name: "Yeon",
-        townhallLevel: 17,
-        mapPosition: 1,
-        attacks: [
-          {
-            attackerTag: "#YPCC8QYU2",
-            defenderTag: "#OPPONENT1",
-            stars: 3,
-            destructionPercentage: 100,
-            order: 1,
-          },
-        ],
-      },
-      {
-        tag: "#L8YYY8CGY",
-        name: "KnieieGurow",
-        townhallLevel: 16,
-        mapPosition: 2,
-        attacks: [],
-      },
-    ],
-  },
-  opponent: {
-    tag: "#OPPONENTCLAN",
-    name: "Opponent Clan",
-    stars: 5,
-    destructionPercentage: 40,
-    attacks: 8,
-    members: [
-      {
-        tag: "#OPPONENT1",
-        name: "Opponent Leader",
-        townhallLevel: 17,
-        mapPosition: 1,
-      },
-    ],
-  },
 };

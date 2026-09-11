@@ -14,13 +14,7 @@ export { Select } from "./select";
 export { Toggle } from "./toggle";
 export { Tabs } from "./tabs";
 export { TimeAgo } from "./time-ago";
-export { Modal, Sheet } from "./modal";
-export {
-  DataTable,
-  type Column,
-  type DataTableProps,
-  type SortState,
-} from "./data-table";
+export { Modal } from "./modal";
 export {
   MetricState,
   LoadingState,

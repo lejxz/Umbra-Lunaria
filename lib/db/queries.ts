@@ -1279,8 +1279,47 @@ function emptyClan(): DashboardClan {
  * Uses DISTINCT ON (player_tag) to grab one baseline row per member (the
  * latest snapshot strictly before the window start), then UNIONs with the
  * in-window rows.
+ *
+ * fix §4.3 (docs/2026-09-10 assessment DB opt 3): request-deduped via
+ * React.cache keyed by primitives. The dashboard calls this 9× per render
+ * (3 donation functions × 3 windows) with IDENTICAL windows (all callers
+ * pass the same `lastPolledAt` as `now`), so the dedup collapses it to 3
+ * queries — one per window. React.cache compares args by identity, so the
+ * key is a string + epoch millis, not the tags array / Date objects.
  */
+const fetchBoundedSnapshotsCached = reactCache(
+  async (
+    tagsKey: string,
+    fromMs: number,
+    toMs: number,
+  ): Promise<
+    Array<{
+      playerTag: string;
+      capturedAt: Date;
+      donations: number;
+      donationsReceived: number;
+      activityFlag: boolean;
+      loginDayFlag: boolean;
+    }>
+  > => {
+    const tags = tagsKey.split(",");
+    const win = { from: new Date(fromMs), to: new Date(toMs) };
+    return fetchBoundedSnapshotsUncached(tags, win);
+  },
+);
+
 async function fetchBoundedSnapshots(
+  tags: string[],
+  win: { from: Date; to: Date },
+) {
+  return fetchBoundedSnapshotsCached(
+    [...tags].sort().join(","),
+    win.from.getTime(),
+    win.to.getTime(),
+  );
+}
+
+async function fetchBoundedSnapshotsUncached(
   tags: string[],
   win: { from: Date; to: Date },
 ) {

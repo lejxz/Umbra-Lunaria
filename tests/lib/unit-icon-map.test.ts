@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import {
   unitIconMap,
   getUnitIcon,
@@ -41,6 +43,21 @@ describe("unitIconMap", () => {
       expect(
         /^\/assets\/unit-icons\/Icon_(HV|BB|HE|HG)_.+\.png$/.test(path),
         `${name} -> ${path} must match the Icon_<Category>_<Name>.png convention`,
+      ).toBe(true);
+    }
+  });
+
+  // fix (docs/2026-09-10 assessment §8.5): the map previously only pinned
+  // path STRINGS — a renamed/moved asset would pass tests and 404 in the
+  // browser. Now every non-placeholder entry must exist on disk in public/.
+  it("every mapped asset exists on disk under public/", () => {
+    const publicDir = join(process.cwd(), "public");
+    for (const [name, path] of Object.entries(unitIconMap)) {
+      if (path.endsWith("placeholder.svg")) continue;
+      const onDisk = join(publicDir, path);
+      expect(
+        existsSync(onDisk),
+        `${name} -> ${path} — mapped file missing from public/`,
       ).toBe(true);
     }
   });

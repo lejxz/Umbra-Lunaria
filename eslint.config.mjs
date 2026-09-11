@@ -40,14 +40,14 @@ const eslintConfig = [
   },
   // Extend Next.js core-web-vitals + TypeScript rules.
   ...compat.extends("next/core-web-vitals", "next/typescript"),
-  {
-    rules: {
-      // The Modal/Sheet portal components use a mount-guard setState in an
-      // effect to synchronize with the DOM (createPortal needs document).
-      // This is a legitimate external-sync use, not a cascading render.
-      "react-hooks/set-state-in-effect": "off",
-    },
-  },
+  // fix (docs/2026-09-10 assessment §6.5): `react-hooks/set-state-in-effect`
+  // used to be disabled GLOBALLY to silence one legitimate mount-guard
+  // pattern (portals need `document`, so they setState after mount). Global
+  // disables hide real cascading-render bugs everywhere else, so the override
+  // is removed. With the current eslint-plugin-react-hooks the repo lints
+  // clean with the rule active; if it ever fires on the intentional
+  // mount-guard in components/ui/modal.tsx (`useMounted`), scope an inline
+  // eslint-disable comment there instead of re-adding a global off.
 ];
 
 export default eslintConfig;

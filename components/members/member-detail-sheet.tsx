@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import type { MemberDetailView } from "@/lib/view-models/members";
+import { formatRole, type MemberDetailView } from "@/lib/view-models/members";
 import { Modal } from "@/components/ui/modal";
 import { Badge, UnavailableValue } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/section-label";
@@ -716,17 +716,4 @@ function HallOfFameSection({ detail }: { detail: MemberDetailView }) {
       </div>
     </div>
   );
-}
-
-function formatRole(role: string): string {
-  switch (role) {
-    case "leader":
-      return "Leader";
-    case "coLeader":
-      return "Co-Leader";
-    case "admin":
-      return "Elder";
-    default:
-      return "Member";
-  }
 }

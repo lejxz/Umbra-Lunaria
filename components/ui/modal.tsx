@@ -9,16 +9,21 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { IconX } from "@/components/ui/icons";
 
 /**
- * Modal & Sheet — shared overlay primitives. See docs/concept/10-mobile-support.md
+ * Modal — shared overlay primitive. See docs/concept/10-mobile-support.md
  * §Accessibility (3): focus must be trapped inside an open dialog and restored
  * to the triggering control on close.
  *
  * The modal has a FIXED header (title + close button) and a single scrollable
  * content area below it — no double scrollbars.
+ *
+ * fix (docs/2026-09-10 assessment §5): the unused `Sheet` export was removed —
+ * it was the only framer-motion dependency in this file, and the Modal itself
+ * animates with CSS + rAF. Every page pays for the modal in its initial
+ * bundle, so framer-motion no longer ships through this path (it remains in
+ * page-transition.tsx, which is the only genuine consumer).
  */
 
 const FOCUSABLE_SELECTOR =
@@ -177,77 +182,6 @@ export function Modal({
         <div className="overflow-y-auto p-6">{children}</div>
       </div>
     </div>,
-    document.body,
-  );
-}
-
-export function Sheet({
-  open,
-  onClose,
-  children,
-  ariaLabelledBy,
-  ariaDescribedBy,
-  ariaLabel,
-  maxWidth = "max-w-lg",
-}: CommonProps) {
-  const mounted = useMounted();
-  const panelRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = useReducedMotion();
-
-  useScrollLock(open && mounted);
-  const { onKeyDown } = useFocusTrap(open && mounted, panelRef, onClose);
-
-  if (!mounted) return null;
-
-  return createPortal(
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm"
-          role="presentation"
-          onClick={onClose}
-          onKeyDown={onKeyDown}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-        >
-          <motion.div
-            ref={panelRef}
-            className={`glass absolute inset-x-0 bottom-0 flex max-h-[90vh] flex-col overflow-hidden rounded-t-2xl sm:inset-y-0 sm:left-auto sm:w-full ${maxWidth} sm:rounded-none sm:rounded-l-2xl`}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby={ariaLabelledBy}
-            aria-describedby={ariaDescribedBy}
-            aria-label={ariaLabel}
-            tabIndex={-1}
-            onClick={(event) => event.stopPropagation()}
-            initial={{
-              opacity: 0,
-              scale: prefersReducedMotion ? 1 : 0.96,
-              y: prefersReducedMotion ? 0 : 20,
-            }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{
-              opacity: 0,
-              scale: prefersReducedMotion ? 1 : 0.96,
-              y: prefersReducedMotion ? 0 : 20,
-            }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-          >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="focus-ring absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full border border-umbra-line bg-umbra-surface/80 text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
-        >
-          <IconX className="h-5 w-5" aria-hidden="true" />
-        </button>
-        <div className="overflow-y-auto p-6">{children}</div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>,
     document.body,
   );
 }

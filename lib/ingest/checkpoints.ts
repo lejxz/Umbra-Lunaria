@@ -9,10 +9,11 @@
  * Server-only: imports @/lib/db.
  */
 
-import { eq, inArray, sql } from "drizzle-orm";
+import { inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { members, memberSnapshots } from "@/lib/db/schema";
 import { calculateDonationDelta } from "@/lib/scoring/donations";
+import { clanTzDayKey } from "@/lib/time/windows";
 
 /**
  * Compute and store cumulative checkpoints for all retained members.
@@ -73,34 +74,52 @@ export async function computeCheckpoints(): Promise<void> {
       donations: s.donationsReceived,
     });
     if (s.loginDayFlag) {
-      // Use date string (YYYY-MM-DD in UTC) as the dedup key. This is
-      // approximate — the concept spec says login days should be in the clan
-      // timezone. For checkpoint purposes (a single integer), the exact
-      // timezone boundary doesn't materially affect the count.
-      entry.loginDays.add(s.capturedAt.toISOString().slice(0, 10));
+      // fix B-7: dedupe by CLAN-TIMEZONE calendar day (the same definition the
+      // HoF "dedicated" streak uses). The old UTC date slice over/under-
+      // counted boundary logins (±8h around Manila midnight) relative to the
+      // streak's own day definition.
+      entry.loginDays.add(clanTzDayKey(s.capturedAt));
     }
     byMember.set(s.playerTag, entry);
   }
 
-  // Compute + store per member.
+  // Compute + store for all members with snapshots in ONE statement.
   // fix B-5 (docs/2026-09-11-priority-fixes.md): a member with ZERO snapshots
-  // used to have their cumulative_* columns overwritten to 0 — permanently
-  // clobbering lifetime totals on any snapshot-chain loss (manual truncate,
-  // restore, bug). Now such members keep their existing checkpoint values.
-  for (const { playerTag } of retained) {
-    const entry = byMember.get(playerTag);
-    if (!entry) continue; // no snapshots observed — do NOT zero out checkpoints
-    const givenTotal = calculateDonationDelta(entry.donations);
-    const receivedTotal = calculateDonationDelta(entry.donationsReceived);
-    const loginDays = entry.loginDays.size;
+  // is skipped — their cumulative_* columns must NOT be overwritten to 0
+  // (snapshot-chain loss must not clobber lifetime totals).
+  // fix §4.7 (docs/2026-09-10 assessment): the per-member UPDATE loop was N
+  // sequential non-atomic statements — a mid-loop failure left half the
+  // roster stale while the purge that depends on checkpoints proceeded. One
+  // UPDATE … FROM (VALUES …) inside a transaction is atomic and 1 round-trip.
+  const updates = retained
+    .map(({ playerTag }) => {
+      const entry = byMember.get(playerTag);
+      if (!entry) return null; // no snapshots observed — do NOT zero out checkpoints
+      return {
+        tag: playerTag,
+        given: calculateDonationDelta(entry.donations),
+        received: calculateDonationDelta(entry.donationsReceived),
+        loginDays: entry.loginDays.size,
+      };
+    })
+    .filter((u): u is { tag: string; given: number; received: number; loginDays: number } => u !== null);
 
-    await db
-      .update(members)
-      .set({
-        cumulativeDonationsGiven: givenTotal,
-        cumulativeDonationsReceived: receivedTotal,
-        cumulativeLoginDays: loginDays,
-      })
-      .where(eq(members.playerTag, playerTag));
-  }
+  if (updates.length === 0) return;
+
+  const rows = updates.map(
+    (u) =>
+      sql`(${u.tag}::text, ${u.given}::integer, ${u.received}::integer, ${u.loginDays}::integer)`,
+  );
+
+  await db.transaction(async (tx) => {
+    await tx.execute(sql`
+      UPDATE members AS m
+      SET
+        cumulative_donations_given = v.given,
+        cumulative_donations_received = v.received,
+        cumulative_login_days = v.login_days
+      FROM (VALUES ${sql.join(rows, sql`, `)}) AS v(tag, given, received, login_days)
+      WHERE m.player_tag = v.tag
+    `);
+  });
 }

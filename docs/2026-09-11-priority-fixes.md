@@ -102,6 +102,11 @@
 
 ## Deferred (tracked, not in this pass)
 
+> **Update (2026-09-11, second pass):** items 1–4 below were subsequently
+> implemented and verified — see
+> [`2026-09-11-remaining-issues.md`](./2026-09-11-remaining-issues.md) for
+> the change log and evidence (kept here for the historical record).
+
 1. **B-2 reset-day donation retention** in the purge route — needs a data-model decision (keep last-pre-reset snapshot, or persist daily donation-delta summaries at batch time).
 2. **§4.5 batch ingest writes** — collapsing the light poll's ~150 sequential round-trips into multi-row inserts/updates; worth doing with a disposable-Postgres integration harness.
 3. **§8 CI route-mode assertion** — grep the `next build` output for the six `○ (Static)` lines to prevent an A-1 regression; add the extracted streak algorithm test.

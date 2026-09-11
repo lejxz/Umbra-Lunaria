@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { bustAllCache } from "@/lib/cache";
-import { desc, eq, isNull } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   clans,
@@ -175,12 +175,6 @@ async function runLightPoll(): Promise<IngestResult> {
           joinedAt: capturedAt,
           ...memberRefreshFields(live),
         });
-      await db.insert(membershipEvents).values({
-        playerTag: op.tag,
-        nameAtEvent: op.name,
-        eventType: "join",
-        eventTime: capturedAt,
-      });
     } else if (op.type === "rejoin") {
       const live = liveMap.get(op.tag)!;
       await db
@@ -191,65 +185,174 @@ async function runLightPoll(): Promise<IngestResult> {
           purgeAt: null,
         })
         .where(eq(members.playerTag, op.tag));
-      await db.insert(membershipEvents).values({
-        playerTag: op.tag,
-        nameAtEvent: op.name,
-        eventType: "rejoin",
-        eventTime: capturedAt,
-      });
     } else if (op.type === "leave") {
       await db
         .update(members)
         .set({ leftAt: capturedAt, purgeAt: op.purgeAt })
         .where(eq(members.playerTag, op.tag));
-      await db.insert(membershipEvents).values({
-        playerTag: op.tag,
-        nameAtEvent: op.name,
-        eventType: "leave",
-        eventTime: capturedAt,
-      });
     }
-    // "refresh" operations need no membership-event row; the member
-    // refresh + snapshot happen in the live-member loop below.
   }
 
-  // ---- Refresh retained members + insert activity snapshots ----
-  for (const liveMember of liveMembers) {
-    const known = knownMembers.find((k) => k.playerTag === liveMember.tag);
-    if (known && !known.leftAt) {
-      // Detect TH upgrade
-      if (
-        known.townHallLevel !== null &&
-        liveMember.townHallLevel > known.townHallLevel
-      ) {
-        await db.insert(membershipEvents).values({
-          playerTag: liveMember.tag,
-          nameAtEvent: liveMember.name,
-          eventType: "thUpgrade",
-          eventTime: capturedAt,
-          metadata: {
-            oldTH: known.townHallLevel,
-            newTH: liveMember.townHallLevel,
-          },
-        });
-      }
-      // Detect rename
-      if (known.name !== liveMember.name) {
-        await db.insert(membershipEvents).values({
-          playerTag: liveMember.tag,
-          nameAtEvent: liveMember.name,
-          eventType: "rename",
-          eventTime: capturedAt,
-          metadata: { oldName: known.name, newName: liveMember.name },
-        });
-      }
-      await db
-        .update(members)
-        .set(memberRefreshFields(liveMember))
-        .where(eq(members.playerTag, liveMember.tag));
+  // Membership events for the ops above — one multi-row insert (joins and
+  // leaves are rare, so this stays tiny). "refresh" ops emit no event row.
+  const eventOps = operations.filter(
+    (op): op is typeof op & { type: "join" | "rejoin" | "leave" } =>
+      op.type === "join" || op.type === "rejoin" || op.type === "leave",
+  );
+  if (eventOps.length > 0) {
+    await db.insert(membershipEvents).values(
+      eventOps.map((op) => ({
+        playerTag: op.tag,
+        nameAtEvent: op.name,
+        eventType: op.type,
+        eventTime: capturedAt,
+      })),
+    );
+  }
+
+  // ---- Refresh retained members + insert activity snapshots (batched) ----
+  // fix §4.5 (docs/2026-09-10 assessment DB opt 5): this used to be a
+  // per-member loop — ~50 sequential prior-snapshot SELECTs + ~50 snapshot
+  // INSERTs + up to ~50 member UPDATEs ≈ 150 round-trips per 5-minute poll
+  // against a serverless pooler. It is now: 1 prior-snapshot query
+  // (DISTINCT ON), 1 multi-row snapshot INSERT, 1 UPDATE…FROM (VALUES), and
+  // 1 multi-row insert for the (rare) TH-upgrade/rename events ≈ 4 round-trips.
+  const knownMap = new Map(knownMembers.map((k) => [k.playerTag, k]));
+
+  // (a) Latest prior snapshot per live member — one DISTINCT ON query
+  // instead of one `ORDER BY … LIMIT 1` per member.
+  const liveTags = liveMembers.map((m) => m.tag);
+  const priorByTag = new Map<
+    string,
+    Pick<
+      typeof memberSnapshots.$inferSelect,
+      "donations" | "donationsReceived" | "trophies" | "builderBaseTrophies"
+    >
+  >();
+  if (liveTags.length > 0) {
+    const priorRows = await db.execute<{
+      player_tag: string;
+      donations: number;
+      donations_received: number;
+      trophies: number;
+      builder_base_trophies: number | null;
+    }>(sql`
+      SELECT DISTINCT ON (player_tag)
+        player_tag, donations, donations_received, trophies, builder_base_trophies
+      FROM member_snapshots
+      WHERE player_tag = ANY(${sql.param(liveTags)}::text[])
+      ORDER BY player_tag, captured_at DESC
+    `);
+    for (const r of priorRows.rows ?? priorRows) {
+      priorByTag.set(r.player_tag, {
+        donations: r.donations,
+        donationsReceived: r.donations_received,
+        trophies: r.trophies,
+        builderBaseTrophies: r.builder_base_trophies,
+      });
     }
-    // Reset-aware activity snapshot (uses computeActivityFlags).
-    await insertMemberSnapshot(liveMember, capturedAt);
+  }
+
+  // (b) Reset-aware activity snapshots — flags computed in bulk from the
+  // prior map (same pure `computeActivityFlags` as before), inserted in ONE
+  // multi-row statement.
+  const snapshotRows = liveMembers.map((liveMember) => {
+    const prior = priorByTag.get(liveMember.tag) ?? null;
+    const { activityFlag, loginDayFlag } = computeActivityFlags(
+      {
+        donations: liveMember.donations,
+        donationsReceived: liveMember.donationsReceived,
+        trophies: liveMember.trophies,
+        builderBaseTrophies: liveMember.builderBaseTrophies ?? null,
+      },
+      prior
+        ? {
+            donations: prior.donations,
+            donationsReceived: prior.donationsReceived,
+            trophies: prior.trophies,
+            builderBaseTrophies: prior.builderBaseTrophies,
+          }
+        : null,
+    );
+    return {
+      playerTag: liveMember.tag,
+      capturedAt,
+      donations: liveMember.donations,
+      donationsReceived: liveMember.donationsReceived,
+      trophies: liveMember.trophies,
+      builderBaseTrophies: liveMember.builderBaseTrophies ?? null,
+      activityFlag,
+      loginDayFlag,
+    };
+  });
+  if (snapshotRows.length > 0) {
+    await db.insert(memberSnapshots).values(snapshotRows);
+  }
+
+  // (c) Refresh fields for already-known retained members — one
+  // UPDATE … FROM (VALUES …) join instead of N sequential UPDATEs. Joins and
+  // rejoins were already refreshed by their ops above.
+  const refreshTargets = liveMembers.filter((m) => {
+    const known = knownMap.get(m.tag);
+    return known && !known.leftAt;
+  });
+  if (refreshTargets.length > 0) {
+    const refreshRows = refreshTargets.map(
+      (m) =>
+        sql`(${m.tag}::text, ${m.name}::text, ${m.role}::text, ${m.townHallLevel}::integer, ${m.expLevel ?? null}::integer, ${m.trophies}::integer, ${m.league ? JSON.stringify(m.league) : null}::jsonb, ${m.leagueTier ? JSON.stringify(m.leagueTier) : null}::jsonb, ${m.clanRank ?? null}::integer, ${m.previousClanRank ?? null}::integer, ${m.builderBaseTrophies ?? null}::integer, ${m.donations}::integer, ${m.donationsReceived}::integer)`,
+    );
+    await db.execute(sql`
+      UPDATE members AS mem
+      SET
+        name = v.name,
+        role = v.role,
+        town_hall_level = v.town_hall_level,
+        exp_level = v.exp_level,
+        trophies = v.trophies,
+        league = v.league,
+        league_tier = v.league_tier,
+        clan_rank = v.clan_rank,
+        previous_clan_rank = v.previous_clan_rank,
+        builder_base_trophies = v.builder_base_trophies,
+        current_donations = v.current_donations,
+        current_donations_received = v.current_donations_received
+      FROM (VALUES ${sql.join(refreshRows, sql`, `)}) AS v(tag, name, role, town_hall_level, exp_level, trophies, league, league_tier, clan_rank, previous_clan_rank, builder_base_trophies, current_donations, current_donations_received)
+      WHERE mem.player_tag = v.tag
+    `);
+  }
+
+  // (d) TH-upgrade + rename events (rare) — detected in bulk, one insert.
+  const lifecycleEvents: Array<typeof membershipEvents.$inferInsert> = [];
+  for (const liveMember of liveMembers) {
+    const known = knownMap.get(liveMember.tag);
+    if (!known || known.leftAt) continue;
+    if (
+      known.townHallLevel !== null &&
+      liveMember.townHallLevel > known.townHallLevel
+    ) {
+      lifecycleEvents.push({
+        playerTag: liveMember.tag,
+        nameAtEvent: liveMember.name,
+        eventType: "thUpgrade",
+        eventTime: capturedAt,
+        metadata: {
+          oldTH: known.townHallLevel,
+          newTH: liveMember.townHallLevel,
+        },
+      });
+    }
+    if (known.name !== liveMember.name) {
+      lifecycleEvents.push({
+        playerTag: liveMember.tag,
+        nameAtEvent: liveMember.name,
+        eventType: "rename",
+        eventTime: capturedAt,
+        metadata: { oldName: known.name, newName: liveMember.name },
+      });
+    }
+  }
+  if (lifecycleEvents.length > 0) {
+    await db.insert(membershipEvents).values(lifecycleEvents);
   }
 
   // ---- War sync (best-effort — failure does not invalidate the poll) ----
@@ -516,53 +619,6 @@ function memberRefreshFields(m: CocClanMember) {
     currentDonations: m.donations,
     currentDonationsReceived: m.donationsReceived,
   };
-}
-
-/**
- * Insert a member_snapshots row with reset-aware activity flags.
- *
- * Activity evidence (per docs/concept/04): a member is active for this interval
- * if donations given/received increased OR trophies/Builder Base trophies
- * changed. Estimated login evidence requires a donation-counter increase;
- * a weekly counter reset alone never counts as a login.
- */
-async function insertMemberSnapshot(m: CocClanMember, capturedAt: Date) {
-  const [lastSnap] = await db
-    .select()
-    .from(memberSnapshots)
-    .where(eq(memberSnapshots.playerTag, m.tag))
-    .orderBy(desc(memberSnapshots.capturedAt))
-    .limit(1);
-
-  // Activity-flag logic extracted to the pure `computeActivityFlags` function
-  // (lib/ingest/membership.ts) so it can be unit-tested without a DB.
-  const { activityFlag, loginDayFlag } = computeActivityFlags(
-    {
-      donations: m.donations,
-      donationsReceived: m.donationsReceived,
-      trophies: m.trophies,
-      builderBaseTrophies: m.builderBaseTrophies ?? null,
-    },
-    lastSnap
-      ? {
-          donations: lastSnap.donations,
-          donationsReceived: lastSnap.donationsReceived,
-          trophies: lastSnap.trophies,
-          builderBaseTrophies: lastSnap.builderBaseTrophies,
-        }
-      : null,
-  );
-
-  await db.insert(memberSnapshots).values({
-    playerTag: m.tag,
-    capturedAt,
-    donations: m.donations,
-    donationsReceived: m.donationsReceived,
-    trophies: m.trophies,
-    builderBaseTrophies: m.builderBaseTrophies ?? null,
-    activityFlag,
-    loginDayFlag,
-  });
 }
 
 /**

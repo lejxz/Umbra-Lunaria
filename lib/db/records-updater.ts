@@ -24,7 +24,7 @@ import {
   capitalRaidSeasons,
   hallOfFameRecords,
 } from "@/lib/db/schema";
-import { isSameDayInClanTz, startOfDayInClanTz } from "@/lib/time/windows";
+import { longestClanTzDayStreak } from "@/lib/scoring/login-streak";
 
 export type AwardKey =
   | "philanthropist"
@@ -42,23 +42,6 @@ interface RecordCandidate {
   valueLabel: string;
   periodLabel: string | null;
   achievedAt: Date;
-}
-
-/**
- * fix B-1 (docs/2026-09-11-priority-fixes.md): signed difference in CLAN-
- * TIMEZONE calendar days between two instants (b − a). The old streak loop
- * compared raw UTC milliseconds with a 1.5-day tolerance — a Mon 23:55
- * Manila login followed by Wed 00:05 Manila counted as consecutive despite
- * Tuesday being missed, and two logins either side of Manila midnight could
- * collapse into one day. A calendar-day comparison in the clan timezone is
- * the correct continuity test (0 = same day, 1 = adjacent day).
- */
-function diffCalendarDaysInClanTz(a: Date, b: Date): number {
-  const aStart = startOfDayInClanTz(a);
-  const bStart = startOfDayInClanTz(b);
-  // Manila has no DST, so local midnights are exact 24h multiples; Math.round
-  // guards against any timezone with historical offset shifts.
-  return Math.round((bStart.getTime() - aStart.getTime()) / 86_400_000);
 }
 
 export async function checkHallOfFameRecords(): Promise<string[]> {
@@ -171,26 +154,11 @@ export async function checkHallOfFameRecords(): Promise<string[]> {
         }
         continue;
       }
-      const uniqueDays: Date[] = [];
-      for (const ts of memberLogins) {
-        const last = uniqueDays[uniqueDays.length - 1];
-        if (!last || !isSameDayInClanTz(ts, last)) uniqueDays.push(ts);
-      }
-      // fix B-1: streak continuity is measured in clan-timezone calendar days
-      // (not raw UTC-ms gaps) — see diffCalendarDaysInClanTz above.
-      let streak = 1, maxStreak = 1;
-      for (let i = 1; i < uniqueDays.length; i++) {
-        const diffDays = diffCalendarDaysInClanTz(uniqueDays[i - 1]!, uniqueDays[i]!);
-        if (diffDays === 1) {
-          streak++;
-          maxStreak = Math.max(maxStreak, streak);
-        } else {
-          // 0 is impossible after the same-day dedup above (defensive);
-          // anything ≥ 2 breaks the streak.
-          streak = 1;
-        }
-      }
-      dedicatedScores.push({ tag: m.playerTag, value: maxStreak });
+      // fix B-1 + §8.1: the streak algorithm now lives in the pure, tested
+      // lib/scoring/login-streak.ts (clan-timezone calendar-day continuity,
+      // same-day dedup inside) instead of being embedded in this DB-coupled
+      // function.
+      dedicatedScores.push({ tag: m.playerTag, value: longestClanTzDayStreak(memberLogins) });
     }
     dedicatedScores.sort((a, b) => b.value - a.value);
     

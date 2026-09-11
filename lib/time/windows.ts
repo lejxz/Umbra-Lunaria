@@ -21,32 +21,47 @@ export interface TimeWindow {
 }
 
 /**
- * Compute a time window ending at `now` (defaults to the current instant).
- * The boundary is wall-clock in the clan timezone — e.g. "last 24 hours" for
- * a 09:30 Manila call is 09:30 yesterday → 09:30 today in Manila, not the
- * raw UTC 24h offset.
+ * Compute a time window for analytics.
+ *
+ * fix B-6 (docs/2026-09-10 assessment §3): window boundaries are now exact
+ * and anchored to the spec in docs/concept/04 ("Time-window boundaries are
+ * calculated in the clan timezone, then queried as UTC timestamps"):
+ *
+ *   - "24h" — exactly 24 complete hourly buckets ending at the top of the
+ *     current hour. `to` is the NEXT hour boundary, so the current partial
+ *     hour appears as the in-progress bucket. Previously `from` snapped to
+ *     the hour while `to` kept its minutes/seconds — windows ran up to
+ *     24h59m59s and the last hourly bucket stretched to ~2h.
+ *   - "7d"/"30d" — the last N calendar days in the CLAN TIMEZONE (6/29 full
+ *     days + today so far). Previously buckets were anchored at "now minus
+ * N days", so donations between Manila midnight and the anchor hour landed
+ *     in the previous day's bucket and bucket labels drifted from their
+ *     contents.
  */
 export function computeWindow(kind: WindowKind, now: Date = new Date()): TimeWindow {
-  const to = now;
-  const from = new Date(to);
-
   switch (kind) {
-    case "24h":
-      from.setUTCHours(from.getUTCHours() - 24);
-      from.setUTCMinutes(0, 0, 0); // Snap to the top of the hour for clean axis labels
-      break;
-    case "7d":
-      from.setUTCDate(from.getUTCDate() - 7);
-      break;
-    case "30d":
-      from.setUTCDate(from.getUTCDate() - 30);
-      break;
+    case "24h": {
+      const to = snapUpToHour(now);
+      return { from: new Date(to.getTime() - 24 * 3_600_000), to, kind };
+    }
+    case "7d": {
+      const todayStart = startOfDayInClanTz(now);
+      return { from: new Date(todayStart.getTime() - 6 * 86_400_000), to: now, kind };
+    }
+    case "30d": {
+      const todayStart = startOfDayInClanTz(now);
+      return { from: new Date(todayStart.getTime() - 29 * 86_400_000), to: now, kind };
+    }
     case "all":
-      from.setTime(0); // Epoch start
-      break;
+      return { from: new Date(0), to: now, kind };
   }
+}
 
-  return { from, to, kind };
+/** Round an instant UP to the top of the current hour (UTC hours are exact
+ *  hour boundaries in UTC+8 Manila too, so this also yields clean local labels). */
+function snapUpToHour(date: Date): Date {
+  const ms = date.getTime();
+  return new Date(Math.ceil(ms / 3_600_000) * 3_600_000);
 }
 
 /**
@@ -198,20 +213,43 @@ function getTzOffsetMs(date: Date, timezone: string): number {
  * Check if two dates fall on the same calendar day in the clan timezone.
  */
 export function isSameDayInClanTz(a: Date, b: Date): boolean {
-  const aParts = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone: clanConfig.timezone,
-  }).formatToParts(a);
-  const bParts = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone: clanConfig.timezone,
-  }).formatToParts(b);
+  return clanTzDayKey(a) === clanTzDayKey(b);
+}
 
-  const aKey = `${aParts.find((p) => p.type === "year")?.value}-${aParts.find((p) => p.type === "month")?.value}-${aParts.find((p) => p.type === "day")?.value}`;
-  const bKey = `${bParts.find((p) => p.type === "year")?.value}-${bParts.find((p) => p.type === "month")?.value}-${bParts.find((p) => p.type === "day")?.value}`;
-  return aKey === bKey;
+/**
+ * Signed difference in CLAN-TIMEZONE calendar days between two instants
+ * (b − a). 0 = same day, 1 = adjacent day, negative = b before a. Extracted
+ * from records-updater.ts (fix B-1) so the streak algorithm
+ * (lib/scoring/login-streak.ts) and its tests can share the definition.
+ */
+export function diffCalendarDaysInClanTz(a: Date, b: Date): number {
+  const aStart = startOfDayInClanTz(a);
+  const bStart = startOfDayInClanTz(b);
+  // Manila has no DST, so local midnights are exact 24h multiples; Math.round
+  // guards against any timezone with historical offset shifts.
+  return Math.round((bStart.getTime() - aStart.getTime()) / 86_400_000);
+}
+
+/**
+ * Stable day key ("YYYY-MM-DD") for an instant in the clan timezone.
+ *
+ * fix B-7: the checkpoint computation used to dedupe login days by the UTC
+ * date slice (self-acknowledged "approximate"), while the HoF streak uses
+ * clan-timezone calendar days — boundary logins (±8h around Manila midnight)
+ * over- or under-counted `cumulativeLoginDays` by a day versus the streak's
+ * own definition. A shared stable key makes both count identically.
+ */
+export function clanTzDayKey(
+  date: Date,
+  timezone: string = clanConfig.timezone,
+): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    timeZone: timezone,
+  }).formatToParts(date);
+  const get = (type: string) =>
+    parts.find((p) => p.type === type)?.value ?? "0000";
+  return `${get("year")}-${get("month")}-${get("day")}`;
 }

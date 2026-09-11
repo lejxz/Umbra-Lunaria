@@ -8,6 +8,7 @@ import {
   unitLevels,
 } from "@/lib/db/schema";
 import { computeCheckpoints } from "@/lib/ingest/checkpoints";
+import { clanConfig } from "@/config/clan.config";
 
 /**
  * GET /api/cron/purge
@@ -30,10 +31,22 @@ import { computeCheckpoints } from "@/lib/ingest/checkpoints";
  *    snapshots + unit levels. membership_events kept (immutable log).
  *
  * 2. Intra-day snapshot pruning: for snapshots older than 7 days, keep only
- *    the LAST snapshot per member per calendar day. The other ~47 intra-day
- *    snapshots have no analytical value after 7 days. The LAST snapshot has
- *    the highest donation counter (preserving the delta chain) and the most
- *    accurate activity/login flags.
+ *    a minimal delta-chain-preserving set per member per calendar day: the
+ *    LAST snapshot of the day, plus the rows adjacent to every intra-day
+ *    donation-counter DECREASE (the local peak before the drop + the first
+ *    snapshot after it — per counter: donations and donations_received).
+ *
+ *    fix B-2 (docs/2026-09-10 assessment §3): keeping only the last snapshot
+ *    permanently lost pre-reset donations on weekly-reset days. If the reset
+ *    landed mid-day (counter 200 → reset → 5), the surviving pair was
+ *    (prev-day 200 → end-of-day 5) and the ~200 pre-reset donations vanished
+ *    from every future 30d window and per-day bucket. Keeping the reset
+ *    boundary rows makes the reset-aware delta chain (lib/scoring/donations.ts)
+ *    compute the exact same total as the un-pruned chain — for ANY number of
+ *    resets per day and resets that land between one day's last poll and the
+ *    next day's first (verified by a randomized fuzz test against the pure
+ *    model in lib/ingest/purge-retention.ts). On members/days with no drops
+ *    the kept set is exactly {end-of-day}, identical to the old retention.
  *
  * 3. Capital district snapshot pruning: delete snapshots older than 90 days.
  *    The upgrade timeline derives from diffs — old raw snapshots aren't needed
@@ -99,22 +112,52 @@ export async function GET(req: NextRequest) {
   }
   result.purgedMembers = toPurge.length;
 
-  // ── 2. Intra-day snapshot pruning (keep LAST per member per day, >7 days old) ──
-  // Deletes all snapshots older than 7 days EXCEPT the last one per member
-  // per calendar day. The last snapshot has the highest donation counter
-  // (preserving the reset-aware delta chain) and the most accurate flags.
+  // ── 2. Intra-day snapshot pruning (delta-chain-preserving, >7 days old) ──
+  // Keeps, per member: the first snapshot of the chain, the LAST snapshot of
+  // each CLAN-TIMEZONE day (day markers aligned with the Manila-midnight
+  // display buckets from fix B-6), and the local-peak + first-post-drop
+  // snapshots around every donation-counter decrease. Drop detection
+  // partitions by MEMBER ONLY (not per day) — a reset can land between one
+  // day's last poll and the next day's first poll, and those boundary rows
+  // must survive just like intra-day ones. The rule is the SQL translation of
+  // the pure, fuzz-tested model in lib/ingest/purge-retention.ts.
+  //
+  // The timezone is inlined as a raw literal (a hardcoded config constant,
+  // not user input) because parameterized `AT TIME ZONE $1` fails on
+  // Supabase's PgBouncer pooler — same tradeoff as getRosterSizeTrend.
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const tzLiteral = sql.raw(`'${clanConfig.timezone}'`);
 
   const prunedSnaps = await db.execute(sql`
     DELETE FROM member_snapshots
     WHERE captured_at < ${sevenDaysAgo}
       AND id NOT IN (
-        SELECT DISTINCT ON (player_tag, date_trunc('day', captured_at))
-          id
-        FROM member_snapshots
-        WHERE captured_at < ${sevenDaysAgo}
-        ORDER BY player_tag, date_trunc('day', captured_at), captured_at DESC
+        SELECT id FROM (
+          SELECT id, donations, donations_received,
+            lag(donations) OVER member_w AS prev_donations,
+            lag(donations_received) OVER member_w AS prev_received,
+            lead(donations) OVER member_w AS next_donations,
+            lead(donations_received) OVER member_w AS next_received,
+            row_number() OVER member_w AS rn_member,
+            row_number() OVER day_w AS rn_day
+          FROM member_snapshots
+          WHERE captured_at < ${sevenDaysAgo}
+          WINDOW
+            member_w AS (PARTITION BY player_tag ORDER BY captured_at, id),
+            day_w AS (
+              PARTITION BY player_tag,
+                date_trunc('day', captured_at AT TIME ZONE ${tzLiteral})
+              ORDER BY captured_at DESC, id DESC
+            )
+        ) chain
+        WHERE rn_member = 1
+           OR rn_day = 1
+           OR next_donations IS NULL
+           OR next_donations < donations
+           OR next_received < donations_received
+           OR prev_donations > donations
+           OR prev_received > donations_received
       )
   `);
   result.prunedSnapshots = prunedSnaps.rowCount ?? 0;

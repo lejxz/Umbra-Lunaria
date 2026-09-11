@@ -234,24 +234,28 @@ async function getWarParticipationSummary(tags: string[]) {
     }
   >();
 
-  // Get all war participants for these tags
-  const wpRows = await db
-    .select()
+  // fix §4.10 (docs/2026-09-10 assessment DB opt 10): aggregate in SQL with a
+  // GROUP BY instead of loading every war_participants row into JS — one row
+  // per member instead of one row per (member, war) ever tracked.
+  const rows = await db
+    .select({
+      playerTag: warParticipants.playerTag,
+      warsTracked: sql<number>`count(*)::int`,
+      warsMissed: sql<number>`sum(case when ${warParticipants.missed} then 1 else 0 end)::int`,
+      attacksUsed: sql<number>`coalesce(sum(${warParticipants.attacksUsed}), 0)::int`,
+      attacksAllowed: sql<number>`coalesce(sum(${warParticipants.attacksAllowed}), 0)::int`,
+    })
     .from(warParticipants)
-    .where(inArray(warParticipants.playerTag, tags));
+    .where(inArray(warParticipants.playerTag, tags))
+    .groupBy(warParticipants.playerTag);
 
-  for (const wp of wpRows) {
-    const existing = map.get(wp.playerTag) ?? {
-      warsTracked: 0,
-      warsMissed: 0,
-      attacksUsed: 0,
-      attacksAllowed: 0,
-    };
-    existing.warsTracked += 1;
-    if (wp.missed) existing.warsMissed += 1;
-    existing.attacksUsed += wp.attacksUsed;
-    existing.attacksAllowed += wp.attacksAllowed;
-    map.set(wp.playerTag, existing);
+  for (const r of rows) {
+    map.set(r.playerTag, {
+      warsTracked: r.warsTracked,
+      warsMissed: r.warsMissed,
+      attacksUsed: r.attacksUsed,
+      attacksAllowed: r.attacksAllowed,
+    });
   }
 
   return map;
@@ -471,6 +475,10 @@ async function getWarDetail(playerTag: string) {
   });
 
   // Get recent wars
+  // fix §4.10 (docs/2026-09-10 assessment DB opt 10): one inArray fetch for
+  // all recent war rows instead of a per-war SELECT inside the loop
+  // (10 sequential round-trips → 1).
+  const recentWp = wpRows.slice(-10).reverse();
   const recentWars: Array<{
     warId: number;
     opponentName: string | null;
@@ -482,8 +490,8 @@ async function getWarDetail(playerTag: string) {
     endTime: Date | null;
   }> = [];
 
-  for (const wp of wpRows.slice(-10).reverse()) {
-    const [war] = await db
+  if (recentWp.length > 0) {
+    const warRows = await db
       .select({
         id: wars.id,
         opponentName: wars.opponentName,
@@ -491,20 +499,26 @@ async function getWarDetail(playerTag: string) {
         endTime: wars.endTime,
       })
       .from(wars)
-      .where(eq(wars.id, wp.warId))
-      .limit(1);
+      .where(inArray(
+        wars.id,
+        recentWp.map((wp) => wp.warId),
+      ));
+    const warById = new Map(warRows.map((w) => [w.id, w]));
 
-    if (war) {
-      recentWars.push({
-        warId: war.id,
-        opponentName: war.opponentName,
-        result: war.result,
-        attacksUsed: wp.attacksUsed,
-        attacksAllowed: wp.attacksAllowed,
-        starsEarned: wp.starsEarned,
-        missed: wp.missed,
-        endTime: war.endTime,
-      });
+    for (const wp of recentWp) {
+      const war = warById.get(wp.warId);
+      if (war) {
+        recentWars.push({
+          warId: war.id,
+          opponentName: war.opponentName,
+          result: war.result,
+          attacksUsed: wp.attacksUsed,
+          attacksAllowed: wp.attacksAllowed,
+          starsEarned: wp.starsEarned,
+          missed: wp.missed,
+          endTime: war.endTime,
+        });
+      }
     }
   }
 
