@@ -27,7 +27,16 @@
  *   3. every LOCAL PEAK — the last snapshot before the counter drops
  *      (reset boundary, upper side), and
  *   4. every POST-DROP snapshot — the first snapshot after the drop
- *      (reset boundary, lower side).
+ *      (reset boundary, lower side),
+ *   5. every row with `activity_flag` OR `login_day_flag` set (Phase 1:
+ *      activity evidence is event-based — a war attack, donation, or XP
+ *      gain observed at ONE intra-day snapshot — and without this rule the
+ *      evidence would vanish from the 30-day heatmap/streak once the day
+ *      ages past the 7-day pruning horizon, leaving the EOD marker that
+ *      compares against the previous poll and is flagged false. Same
+ *      worst-case cost bound as above: a fully-active member retains their
+ *      whole day, which is exactly what "this member was active all day"
+ *      means.)
  *
  * Drop detection partitions by MEMBER ONLY (not per day): a reset can land
  * between one day's last poll and the next day's first poll, and the
@@ -57,6 +66,9 @@ export interface PurgeSnapshot {
   capturedAt: Date;
   donations: number;
   donationsReceived: number;
+  /** Phase 1: flagged snapshots are always retained (see rule 5 above). */
+  activityFlag?: boolean;
+  loginDayFlag?: boolean;
 }
 
 /**
@@ -105,6 +117,13 @@ export function selectRetainedSnapshotIds(
       }
       // 1. Day marker: the last snapshot of this clan-timezone day.
       if (lastOfDay.get(clanTzDayKey(curr.capturedAt)) === curr) {
+        retained.add(curr.id);
+        continue;
+      }
+      // 5. Phase 1: activity evidence survives pruning — a flagged snapshot
+      // is the only durable record of an event (war attack, donation, XP
+      // gain) observed at that instant.
+      if (curr.activityFlag || curr.loginDayFlag) {
         retained.add(curr.id);
         continue;
       }

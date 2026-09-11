@@ -259,3 +259,142 @@ describe("computeActivityFlags — Builder Base trophies", () => {
     expect(flags.activityFlag).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// computeActivityFlags — war attack evidence (Phase 1 activity signals)
+// ---------------------------------------------------------------------------
+
+describe("computeActivityFlags — war attack evidence", () => {
+  const prev: PriorSnapshot = {
+    donations: 100,
+    donationsReceived: 50,
+    trophies: 3000,
+    builderBaseTrophies: 2000,
+    expLevel: 150,
+  };
+  // The clan-roster counters a war-only member produces: nothing moves —
+  // they neither donate nor request, and don't touch trophies.
+  const staticCounters = {
+    donations: 100,
+    donationsReceived: 50,
+    trophies: 3000,
+    builderBaseTrophies: 2000,
+    expLevel: 150,
+  };
+
+  it("flags activity AND login when the only evidence is a war attack", () => {
+    // The owner-reported blind spot: no donation movement, no trophy
+    // movement — but the member attacked in war this interval. Performing a
+    // war attack is unambiguous login evidence, so BOTH flags must be set.
+    const flags = computeActivityFlags(staticCounters, prev, 1);
+    expect(flags.activityFlag).toBe(true);
+    expect(flags.loginDayFlag).toBe(true);
+  });
+
+  it("flags both on a first-ever snapshot when war evidence exists", () => {
+    // War attacks are exact, event-based evidence — unlike the cumulative
+    // counters they need no baseline, so a brand-new member (or a fresh
+    // database's first poll, which runs war sync before snapshots) still
+    // gets flagged when the war sync just recorded their attack.
+    const flags = computeActivityFlags(
+      { donations: 10, donationsReceived: 0, trophies: 2000 },
+      null,
+      2,
+    );
+    expect(flags.activityFlag).toBe(true);
+    expect(flags.loginDayFlag).toBe(true);
+  });
+
+  it("multi-attack intervals behave identically to single attacks (flags are boolean)", () => {
+    // A member using both attacks inside one 5-minute poll window — same
+    // outcome as one attack; the count only feeds a > 0 check.
+    const flags = computeActivityFlags(staticCounters, prev, 2);
+    expect(flags.activityFlag).toBe(true);
+    expect(flags.loginDayFlag).toBe(true);
+  });
+
+  it("CWL attacks count identically — the evidence query spans all war types", () => {
+    // The war-evidence query in the ingest route reads war_attacks with no
+    // war_type filter, so CWL attacks flow into the same count. At the pure
+    // function boundary this means: same count → same flags, regardless of
+    // which war type produced the evidence.
+    const regularOnly = computeActivityFlags(staticCounters, prev, 1);
+    const cwlOnly = computeActivityFlags(staticCounters, prev, 1);
+    expect(regularOnly).toEqual(cwlOnly);
+    expect(regularOnly.activityFlag).toBe(true);
+  });
+
+  it("default warAttacksInInterval = 0 keeps the legacy first-poll baseline", () => {
+    const flags = computeActivityFlags(
+      { donations: 10, donationsReceived: 0, trophies: 2000 },
+      null,
+    );
+    expect(flags.activityFlag).toBe(false);
+    expect(flags.loginDayFlag).toBe(false);
+  });
+
+  it("a weekly donation reset alongside a war attack still counts as a login", () => {
+    // Donations dropped 100 → 4 (reset) — reset alone is NOT a login — but
+    // the member attacked in war, so the interval is login evidence via the
+    // war signal.
+    const flags = computeActivityFlags(
+      { ...staticCounters, donations: 4 },
+      prev,
+      1,
+    );
+    expect(flags.loginDayFlag).toBe(true);
+    expect(flags.activityFlag).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeActivityFlags — XP level evidence (Phase 1 activity signals)
+// ---------------------------------------------------------------------------
+
+describe("computeActivityFlags — XP level", () => {
+  const prev: PriorSnapshot = {
+    donations: 100,
+    donationsReceived: 50,
+    trophies: 3000,
+    builderBaseTrophies: 2000,
+    expLevel: 150,
+  };
+
+  it("flags activity (not login) when only expLevel increased", () => {
+    // XP rises from war attacks, multiplayer, donations, obstacle removal —
+    // all gameplay — but like trophies it is treated as progress evidence,
+    // not unambiguous login evidence.
+    const flags = computeActivityFlags(
+      { ...prev, expLevel: 151 },
+      prev,
+    );
+    expect(flags.activityFlag).toBe(true);
+    expect(flags.loginDayFlag).toBe(false);
+  });
+
+  it("does not flag when expLevel is unchanged", () => {
+    const flags = computeActivityFlags(
+      { ...prev, expLevel: 150 },
+      prev,
+    );
+    expect(flags.activityFlag).toBe(false);
+    expect(flags.loginDayFlag).toBe(false);
+  });
+
+  it("does not flag when expLevel is null in current or prior", () => {
+    // Column is new (migration 0011) — all historical priors are null until
+    // the first post-migration snapshot lands and becomes the baseline.
+    expect(
+      computeActivityFlags({ ...prev, expLevel: null }, prev).activityFlag,
+    ).toBe(false);
+    expect(
+      computeActivityFlags({ ...prev }, { ...prev, expLevel: null }).activityFlag,
+    ).toBe(false);
+  });
+
+  it("XP evidence combines with war evidence without changing login semantics", () => {
+    const flags = computeActivityFlags({ ...prev, expLevel: 160 }, prev, 1);
+    expect(flags.activityFlag).toBe(true);
+    expect(flags.loginDayFlag).toBe(true); // via the war attack, not the XP
+  });
+});

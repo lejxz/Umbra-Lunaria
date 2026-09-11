@@ -25,6 +25,7 @@ function snap(
   isoTime: string,
   donations: number,
   donationsReceived: number,
+  flags?: { activityFlag?: boolean; loginDayFlag?: boolean },
 ): PurgeSnapshot {
   return {
     id: nextId++,
@@ -32,6 +33,8 @@ function snap(
     capturedAt: new Date(isoTime),
     donations,
     donationsReceived,
+    activityFlag: flags?.activityFlag ?? false,
+    loginDayFlag: flags?.loginDayFlag ?? false,
   };
 }
 
@@ -72,6 +75,52 @@ describe("selectRetainedSnapshotIds — retention shape", () => {
     ];
     const kept = prune(snaps);
     expect(kept).toHaveLength(4); // first + one EOD per member
+  });
+});
+
+describe("selectRetainedSnapshotIds — Phase 1 activity evidence survives pruning", () => {
+  it("keeps intra-day snapshots flagged by war-attack evidence", () => {
+    // The core Phase 1 scenario: a war attack at ~05:00 Manila is observed
+    // by the 05:05 snapshot (both flags set); the donation counters never
+    // move, so without rule 5 the day's evidence would be pruned to its
+    // EOD marker — flagged false — and the heatmap day would go dark after
+    // the day ages past the 7-day pruning horizon.
+    const snaps = [
+      snap("#A", "2026-07-31T17:00:00Z", 10, 5), // chain first (Manila Aug 1)
+      snap("#A", "2026-07-31T21:05:00Z", 10, 5, { activityFlag: true, loginDayFlag: true }), // war attack observed
+      snap("#A", "2026-08-01T12:00:00Z", 10, 5), // Manila Aug 1 EOD — flags false
+      snap("#A", "2026-08-01T23:00:00Z", 10, 5), // Manila Aug 2
+      snap("#A", "2026-08-02T12:00:00Z", 10, 5), // Manila Aug 2 EOD
+    ];
+    const kept = prune(snaps);
+    expect(kept.map((s) => s.capturedAt.toISOString())).toEqual([
+      "2026-07-31T17:00:00.000Z", // chain first
+      "2026-07-31T21:05:00.000Z", // flagged — war evidence survives
+      "2026-08-01T12:00:00.000Z", // Aug 1 EOD
+      "2026-08-02T12:00:00.000Z", // Aug 2 EOD
+    ]);
+  });
+
+  it("keeps a snapshot carrying only the activity flag (trophy/XP evidence, not login)", () => {
+    const snaps = [
+      snap("#A", "2026-07-31T17:00:00Z", 10, 5),
+      snap("#A", "2026-07-31T20:00:00Z", 10, 5, { activityFlag: true }),
+      snap("#A", "2026-08-01T12:00:00Z", 10, 5),
+    ];
+    const kept = prune(snaps);
+    expect(kept).toHaveLength(3);
+  });
+
+  it("login-only flagged days survive too (donation logins mid-day)", () => {
+    const snaps = [
+      snap("#A", "2026-07-31T17:00:00Z", 10, 5),
+      snap("#A", "2026-07-31T22:00:00Z", 15, 8, { activityFlag: true, loginDayFlag: true }),
+      snap("#A", "2026-08-01T12:00:00Z", 15, 8),
+    ];
+    const kept = prune(snaps);
+    // The flagged row is ALSO not a donation-reset boundary (counters kept
+    // climbing to 15/8 and stay there) — only rule 5 preserves it.
+    expect(kept).toHaveLength(3);
   });
 });
 

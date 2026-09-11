@@ -45,6 +45,8 @@ This eliminates DB round-trips for regular page views entirely — only the sche
 6. Clear departure state for a rejoined player.
 7. If a war is in `preparation` or `inWar`, fetch and upsert current-war, participants, and attacks.
 
+Ordering note (Phase 1): step 7 actually runs BETWEEN the membership reconciliation and step 4's snapshot insert — war attacks must be on disk before the snapshot flags are computed, because the war evidence for this interval is read from `war_attacks.attacked_at` (see "War, XP and day-grain evidence"). It stays after the membership ops because `war_participants` has a foreign key to `members`.
+
 ## Daily-batch sequence
 
 1. Refresh the clan cache and its full identity/war/Capital fields.
@@ -79,14 +81,27 @@ A member is marked active for a poll interval when an observable state changed, 
 
 1. Donations given or received.
 2. Trophies or Builder Base trophies.
-3. A current Capital contribution value when it is observed.
-4. Other explicitly tracked player fields added in future migrations.
+3. XP level (rising — any gameplay produces XP).
+4. A war attack first recorded in the interval.
+5. Other explicitly tracked player fields added in future migrations.
 
 This is activity evidence, not online presence. The UI must never call it “online now.”
 
 ### Estimated login days
 
-A calendar day receives estimated login evidence when donations given or received increase during that day. A weekly counter reset alone does not count as a login. The view is labeled “estimated login activity,” presents dates rather than a fake streak, and is absent until enough snapshots exist.
+A calendar day receives estimated login evidence when donations given or received increase during that day, or when the member performs at least one war attack during that day. A weekly counter reset alone does not count as a login. The view is labeled “estimated login activity,” presents dates rather than a fake streak, and is absent until enough snapshots exist.
+
+## War, XP and day-grain evidence
+
+The original design judged activity only from clan-roster counters (donations, trophies), which made the tracker structurally blind to the war-first member — someone who neither donates nor requests but fights every war. Phase 1 (docs/2026-09-11-implementation-plan.md §1.5) closed that gap with three evidence classes:
+
+1. **War attacks — interval grain.** Every war attack is stored with the timestamp of the poll that first observed it (`war_attacks.attacked_at`, both regular and CWL wars). Each light poll reads, in one query, the attacks by live members in the half-open interval (that member's prior snapshot, now], and an attack in the interval sets BOTH flags — performing a war attack is unambiguous login evidence. Each attack is therefore counted exactly once, by the poll whose evidence window contains it. Attacks recorded by the manual war refresh button land in the next poll's window. A historical backfill (scripts/backfill-war-activity.ts) applied the same rule retroactively to recorded attacks: the first snapshot at/after the attack on the same clan-timezone day, plus that day's last snapshot, are flagged — healing the heatmap, streaks, and `cumulativeLoginDays` for pre-fix data.
+2. **XP level — interval grain.** `member_snapshots.exp_level` stores the roster's `expLevel` each poll; a strict increase is activity evidence (XP never decreases and every XP source is gameplay). Like trophies it does NOT count as login evidence on its own — only donation movement and war attacks do.
+3. **Day-grain evidence — retention.** Activity evidence must survive pruning: the daily purge keeps every snapshot carrying `activity_flag` or `login_day_flag`, in addition to the last-of-day marker, so a war day stays lit in the 30-day heatmap forever rather than fading when it ages past the 7-day pruning horizon.
+
+Score alignment (gap G3): the Activity Score's war component counts ALL wars involving the clan — regular AND Clan War League — selected via `wars.involves_own_clan`, the same definition the roster summary and member detail use. Before Phase 1 the score filtered to regular wars only, silently excluding every CWL attack during league months.
+
+Needs-attention alignment: the inactive queue judges "last seen" as the newest of any evidence source (flagged snapshot or raw war-attack timestamp), and its detail string names the evidence ("Last seen: war attack 2d ago · donation 9d ago") so leadership can distinguish a lapsed warrior from a lapsed donor.
 
 ## Cold starts, partial data, and failures
 

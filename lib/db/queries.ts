@@ -584,12 +584,19 @@ async function computeMemberActivityScore(
     .orderBy(memberSnapshots.capturedAt);
 
   // 2. War participation (tracked wars in the window)
+  // Phase 1 (gap G3): the war component now includes ALL wars involving the
+  // own clan — regular AND CWL — via `involvesOwnClan` (fix A-4's identity
+  // column), matching the roster summary and member-detail definitions of
+  // "wars tracked". The old `warType = 'regular'` filter silently excluded
+  // every CWL attack from the score during league months. Only own-clan
+  // wars have war_participants rows (the FK to members excludes foreign
+  // rosters), so no further filtering is needed.
   const warsInWindow = await db
     .select({ id: wars.id, endTime: wars.endTime })
     .from(wars)
     .where(
       and(
-        eq(wars.warType, "regular"),
+        eq(wars.involvesOwnClan, true),
         gte(wars.endTime, win.from),
         lte(wars.endTime, win.to),
       ),
@@ -742,6 +749,18 @@ async function computeMemberActivityScore(
 // Needs attention
 // ---------------------------------------------------------------------------
 
+/**
+ * Compact humanized age for needs-attention detail strings — "5h ago",
+ * "3d ago". Display-only; coarse by design (the queue needs at-a-glance
+ * recency, not precision).
+ */
+function relativeTimeAgo(date: Date, nowMs: number): string {
+  const hours = Math.floor((nowMs - date.getTime()) / 3_600_000);
+  if (hours < 1) return "just now";
+  if (hours < 24) return `${hours}h ago`;
+  return `${Math.floor(hours / 24)}d ago`;
+}
+
 export async function getNeedsAttention(): Promise<NeedsAttention> {
   const thresholdDays = 7; // TODO: make configurable via runtime_settings
   const threshold = new Date();
@@ -756,6 +775,11 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
   // Get the latest snapshot per member to determine last activity
   const tags = retainedMembers.map((m) => m.playerTag);
   const latestActivity = new Map<string, Date>();
+  // Phase 1 (step 1.7): latest donation-based login evidence per member —
+  // used for the evidence-aware detail strings ("Last seen: war attack 2d ago
+  // · donation 9d ago") so leadership can tell a lapsed warrior from a
+  // lapsed donor at a glance.
+  const latestDonation = new Map<string, Date>();
 
   if (tags.length > 0) {
     // fix B-10: DISTINCT ON returns exactly one activity-flagged row per
@@ -780,6 +804,50 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
             : new Date(r.captured_at);
         latestActivity.set(r.player_tag, capturedAt);
       }
+    }
+    const donationResult = await db.execute<{
+      player_tag: string;
+      captured_at: Date;
+    }>(
+      sql`
+        SELECT DISTINCT ON (player_tag)
+          player_tag, captured_at
+        FROM member_snapshots
+        WHERE player_tag = ANY(${sql.param(tags)}::text[])
+          AND login_day_flag = true
+        ORDER BY player_tag, captured_at DESC
+      `,
+    );
+    for (const r of donationResult.rows ?? donationResult) {
+      const capturedAt =
+        r.captured_at instanceof Date ? r.captured_at : new Date(r.captured_at);
+      latestDonation.set(r.player_tag, capturedAt);
+    }
+  }
+
+  // Phase 1 (step 1.7): latest war attack per retained member. War attacks
+  // are exact, timestamped login evidence — a member whose last tracked
+  // action was a war attack is judged "last seen" by that attack even when
+  // the flag backfill hasn't healed the snapshot history yet.
+  const latestWarAttack = new Map<string, Date>();
+  if (tags.length > 0) {
+    const warResult = await db.execute<{
+      attacker_tag: string;
+      attacked_at: Date;
+    }>(
+      sql`
+        SELECT DISTINCT ON (attacker_tag)
+          attacker_tag, attacked_at
+        FROM war_attacks
+        WHERE attacker_tag = ANY(${sql.param(tags)}::text[])
+          AND attacked_at IS NOT NULL
+        ORDER BY attacker_tag, attacked_at DESC
+      `,
+    );
+    for (const r of warResult.rows ?? warResult) {
+      const attackedAt =
+        r.attacked_at instanceof Date ? r.attacked_at : new Date(r.attacked_at);
+      latestWarAttack.set(r.attacker_tag, attackedAt);
     }
   }
 
@@ -807,15 +875,42 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
     }
   }
 
+  const nowMs = Date.now();
   for (const member of retainedMembers) {
     const lastActive = latestActivity.get(member.playerTag);
+    const lastWarAttack = latestWarAttack.get(member.playerTag);
+    // Effective last-seen = the newest of any evidence source. War attacks
+    // are compared directly so the queue stays honest even before a flag
+    // backfill runs (a member who attacked yesterday is NOT inactive).
+    const effectiveLastActive =
+      lastActive && lastWarAttack
+        ? new Date(Math.max(lastActive.getTime(), lastWarAttack.getTime()))
+        : (lastActive ?? lastWarAttack ?? null);
 
-    // Inactive check
-    if (!lastActive || lastActive < threshold) {
-      let detailStr = "No tracked activity yet";
-      if (lastActive) {
-        const days = Math.floor((Date.now() - lastActive.getTime()) / (1000 * 60 * 60 * 24));
+    // Inactive check — Phase 1: the threshold applies to the effective
+    // last-seen, and the detail string names the evidence sources so a
+    // "lapsed warrior" is distinguishable from a "lapsed donor".
+    if (!effectiveLastActive || effectiveLastActive < threshold) {
+      let detailStr: string;
+      const evidenceParts: string[] = [];
+      if (lastWarAttack) {
+        evidenceParts.push(`war attack ${relativeTimeAgo(lastWarAttack, nowMs)}`);
+      }
+      if (latestDonation.has(member.playerTag)) {
+        evidenceParts.push(
+          `donation ${relativeTimeAgo(latestDonation.get(member.playerTag)!, nowMs)}`,
+        );
+      }
+      if (evidenceParts.length > 0) {
+        detailStr = `Last seen: ${evidenceParts.join(" · ")}`;
+      } else if (effectiveLastActive) {
+        // Only trophy/XP-style evidence exists — keep the interval age.
+        const days = Math.floor(
+          (nowMs - effectiveLastActive.getTime()) / (1000 * 60 * 60 * 24),
+        );
         detailStr = `${days} days inactive`;
+      } else {
+        detailStr = "No tracked activity yet";
       }
       inactive.push({
         playerTag: member.playerTag,

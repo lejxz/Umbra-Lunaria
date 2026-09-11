@@ -111,6 +111,8 @@ export interface PriorSnapshot {
   donationsReceived: number;
   trophies: number;
   builderBaseTrophies: number | null;
+  /** XP level at the prior snapshot (Phase 1 signal; null before migration 0011 data exists). */
+  expLevel?: number | null;
 }
 
 /** Minimal current-member shape for activity flags. */
@@ -119,6 +121,7 @@ export interface CurrentMemberCounters {
   donationsReceived: number;
   trophies: number;
   builderBaseTrophies?: number | null;
+  expLevel?: number | null;
 }
 
 export interface ActivityFlags {
@@ -128,22 +131,44 @@ export interface ActivityFlags {
 
 /**
  * Derive the reset-aware activity + estimated-login flags for a member this
- * poll (docs/concept/04 "Activity and estimated login evidence").
+ * poll (docs/concept/04 "Activity and estimated login evidence" + "War, XP
+ * and day-grain evidence").
  *
  *   activityFlag  = donations given ↑ OR received ↑ OR trophies changed OR
- *                   Builder Base trophies changed.
- *   loginDayFlag  = donations given ↑ OR received ↑ (a counter reset alone
- *                   never counts as a login).
+ *                   Builder Base trophies changed OR XP level ↑ OR at least
+ *                   one war attack in the interval.
+ *   loginDayFlag  = donations given ↑ OR received ↑ OR at least one war
+ *                   attack in the interval. (A counter reset alone never
+ *                   counts as a login; trophy/XP movement is treated as
+ *                   attack/progress evidence, not unambiguous login
+ *                   evidence — only donation movement and performing a war
+ *                   attack require the player to be demonstrably playing.)
  *
- * When `lastSnapshot` is null (first-ever poll for this member), both flags
- * are false — the first sample is a baseline, not evidence of activity.
+ * `warAttacksInInterval` is the number of this member's war attacks first
+ * recorded in the half-open interval (prior snapshot, now] — the evidence
+ * query in the ingest route reads `war_attacks.attacked_at`, which the war
+ * sync stamps at poll time, so attacks from BOTH regular and CWL wars count
+ * (the query does not filter war type). Performing a war attack is
+ * unambiguous login evidence, so it sets BOTH flags — this closes the
+ * "doesn't donate or request but fights every war" blind spot.
+ *
+ * When `lastSnapshot` is null (first-ever poll for this member), the
+ * cumulative counters have no baseline — but war attacks are exact,
+ * event-based evidence, so they still count even on the first snapshot.
+ * The default `0` keeps the legacy baseline behavior for every caller that
+ * has no war evidence.
  */
 export function computeActivityFlags(
   current: CurrentMemberCounters,
   lastSnapshot: PriorSnapshot | null,
+  warAttacksInInterval = 0,
 ): ActivityFlags {
+  const warEvidence = warAttacksInInterval > 0;
   if (!lastSnapshot) {
-    return { activityFlag: false, loginDayFlag: false };
+    return {
+      activityFlag: warEvidence,
+      loginDayFlag: warEvidence,
+    };
   }
   const donationsIncreased = current.donations > lastSnapshot.donations;
   const receivedIncreased =
@@ -153,10 +178,22 @@ export function computeActivityFlags(
     current.builderBaseTrophies != null &&
     lastSnapshot.builderBaseTrophies != null &&
     current.builderBaseTrophies !== lastSnapshot.builderBaseTrophies;
+  // XP only ever rises, and every XP source (war attacks, multiplayer,
+  // donations, obstacle removal) requires gameplay — a strict increase is
+  // activity evidence. Null (column new / value absent) is not evidence.
+  const expLevelIncreased =
+    current.expLevel != null &&
+    lastSnapshot.expLevel != null &&
+    current.expLevel > lastSnapshot.expLevel;
 
   return {
     activityFlag:
-      donationsIncreased || receivedIncreased || trophiesChanged || bbTrophiesChanged,
-    loginDayFlag: donationsIncreased || receivedIncreased,
+      donationsIncreased ||
+      receivedIncreased ||
+      trophiesChanged ||
+      bbTrophiesChanged ||
+      expLevelIncreased ||
+      warEvidence,
+    loginDayFlag: donationsIncreased || receivedIncreased || warEvidence,
   };
 }

@@ -210,52 +210,132 @@ async function runLightPoll(): Promise<IngestResult> {
     );
   }
 
+  // ---- War sync (best-effort — failure does not invalidate the poll) ----
+  // PHASE 1 ORDERING (docs/2026-09-11-implementation-plan.md §1.5 step 1):
+  // war sync runs BEFORE the snapshot insert. War sync writes only
+  // wars / war_participants / war_attacks (no dependency on snapshots), and
+  // the snapshot flags below consume `war_attacks.attacked_at` as activity
+  // evidence — so the current poll's attacks must be on disk before the
+  // evidence query reads them. It must stay AFTER the membership ops above:
+  // war_participants has a FK to `members`, so a member who joined this poll
+  // and is on the war roster needs their member row to exist first.
+  let warSynced = false;
+  try {
+    const currentWar = await cocClient.getCurrentWar(clanTag);
+    if (
+      currentWar &&
+      currentWar.state !== "notInWar" &&
+      currentWar.clan &&
+      currentWar.opponent
+    ) {
+      await syncCurrentWar(currentWar, capturedAt);
+      warSynced = true;
+    } else {
+      // Regular endpoint says notInWar — the clan may be in Clan War League,
+      // which uses the league-group + war-tag endpoints instead.
+      const cwl = await syncCwlWars(clanTag, capturedAt);
+      if (cwl.synced > 0) warSynced = true;
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    errors.push(`war sync failed: ${msg}`);
+  }
+
   // ---- Refresh retained members + insert activity snapshots (batched) ----
   // fix §4.5 (docs/2026-09-10 assessment DB opt 5): this used to be a
   // per-member loop — ~50 sequential prior-snapshot SELECTs + ~50 snapshot
   // INSERTs + up to ~50 member UPDATEs ≈ 150 round-trips per 5-minute poll
   // against a serverless pooler. It is now: 1 prior-snapshot query
-  // (DISTINCT ON), 1 multi-row snapshot INSERT, 1 UPDATE…FROM (VALUES), and
-  // 1 multi-row insert for the (rare) TH-upgrade/rename events ≈ 4 round-trips.
+  // (DISTINCT ON), 1 war-evidence query, 1 multi-row snapshot INSERT, 1
+  // UPDATE…FROM (VALUES), and 1 multi-row insert for the (rare)
+  // TH-upgrade/rename events ≈ 5 round-trips.
   const knownMap = new Map(knownMembers.map((k) => [k.playerTag, k]));
 
   // (a) Latest prior snapshot per live member — one DISTINCT ON query
-  // instead of one `ORDER BY … LIMIT 1` per member.
+  // instead of one `ORDER BY … LIMIT 1` per member. Includes captured_at
+  // (the per-member war-evidence bound) and exp_level (Phase 1 signal).
   const liveTags = liveMembers.map((m) => m.tag);
   const priorByTag = new Map<
     string,
-    Pick<
-      typeof memberSnapshots.$inferSelect,
-      "donations" | "donationsReceived" | "trophies" | "builderBaseTrophies"
-    >
+    {
+      capturedAt: Date;
+      donations: number;
+      donationsReceived: number;
+      trophies: number;
+      builderBaseTrophies: number | null;
+      expLevel: number | null;
+    }
   >();
   if (liveTags.length > 0) {
     const priorRows = await db.execute<{
       player_tag: string;
+      captured_at: Date;
       donations: number;
       donations_received: number;
       trophies: number;
       builder_base_trophies: number | null;
+      exp_level: number | null;
     }>(sql`
       SELECT DISTINCT ON (player_tag)
-        player_tag, donations, donations_received, trophies, builder_base_trophies
+        player_tag, captured_at, donations, donations_received, trophies,
+        builder_base_trophies, exp_level
       FROM member_snapshots
       WHERE player_tag = ANY(${sql.param(liveTags)}::text[])
       ORDER BY player_tag, captured_at DESC
     `);
     for (const r of priorRows.rows ?? priorRows) {
       priorByTag.set(r.player_tag, {
+        capturedAt:
+          r.captured_at instanceof Date ? r.captured_at : new Date(r.captured_at),
         donations: r.donations,
         donationsReceived: r.donations_received,
         trophies: r.trophies,
         builderBaseTrophies: r.builder_base_trophies,
+        expLevel: r.exp_level,
       });
     }
   }
 
+  // (a2) War-attack evidence in the interval (Phase 1). One round-trip:
+  // every attack by a live member first recorded in (min prior, now].
+  // The global lower bound is the EARLIEST live member's prior snapshot;
+  // each member's own bound is their own prior snapshot (members without a
+  // prior — brand new or post-purge — use the global bound, so a fresh
+  // database's first poll still catches the war sync that just ran above).
+  // `attacked_at` is stamped by the war sync at the poll that first observed
+  // the attack (any war type — regular and CWL both count), so each attack
+  // is counted exactly once, by the poll whose evidence window contains it.
+  const warAttacksByTag = new Map<string, number>();
+  if (liveTags.length > 0) {
+    const priorTimes = [...priorByTag.values()].map((p) => p.capturedAt.getTime());
+    const globalLower = priorTimes.length > 0 ? Math.min(...priorTimes) : 0;
+    const evidenceRows = await db.execute<{
+      attacker_tag: string;
+      attacked_at: Date;
+    }>(sql`
+      SELECT attacker_tag, attacked_at
+      FROM war_attacks
+      WHERE attacker_tag = ANY(${sql.param(liveTags)}::text[])
+        AND attacked_at > ${new Date(globalLower)}
+        AND attacked_at <= ${capturedAt}
+    `);
+    for (const r of evidenceRows.rows ?? evidenceRows) {
+      const prior = priorByTag.get(r.attacker_tag);
+      const memberBound = prior ? prior.capturedAt.getTime() : globalLower;
+      const attackedAt =
+        r.attacked_at instanceof Date ? r.attacked_at : new Date(r.attacked_at);
+      if (attackedAt.getTime() > memberBound) {
+        warAttacksByTag.set(
+          r.attacker_tag,
+          (warAttacksByTag.get(r.attacker_tag) ?? 0) + 1,
+        );
+      }
+    }
+  }
+
   // (b) Reset-aware activity snapshots — flags computed in bulk from the
-  // prior map (same pure `computeActivityFlags` as before), inserted in ONE
-  // multi-row statement.
+  // prior map + war evidence (same pure `computeActivityFlags` as before,
+  // now with `warAttacksInInterval`), inserted in ONE multi-row statement.
   const snapshotRows = liveMembers.map((liveMember) => {
     const prior = priorByTag.get(liveMember.tag) ?? null;
     const { activityFlag, loginDayFlag } = computeActivityFlags(
@@ -264,6 +344,7 @@ async function runLightPoll(): Promise<IngestResult> {
         donationsReceived: liveMember.donationsReceived,
         trophies: liveMember.trophies,
         builderBaseTrophies: liveMember.builderBaseTrophies ?? null,
+        expLevel: liveMember.expLevel ?? null,
       },
       prior
         ? {
@@ -271,8 +352,10 @@ async function runLightPoll(): Promise<IngestResult> {
             donationsReceived: prior.donationsReceived,
             trophies: prior.trophies,
             builderBaseTrophies: prior.builderBaseTrophies,
+            expLevel: prior.expLevel,
           }
         : null,
+      warAttacksByTag.get(liveMember.tag) ?? 0,
     );
     return {
       playerTag: liveMember.tag,
@@ -281,6 +364,7 @@ async function runLightPoll(): Promise<IngestResult> {
       donationsReceived: liveMember.donationsReceived,
       trophies: liveMember.trophies,
       builderBaseTrophies: liveMember.builderBaseTrophies ?? null,
+      expLevel: liveMember.expLevel ?? null,
       activityFlag,
       loginDayFlag,
     };
@@ -353,29 +437,6 @@ async function runLightPoll(): Promise<IngestResult> {
   }
   if (lifecycleEvents.length > 0) {
     await db.insert(membershipEvents).values(lifecycleEvents);
-  }
-
-  // ---- War sync (best-effort — failure does not invalidate the poll) ----
-  let warSynced = false;
-  try {
-    const currentWar = await cocClient.getCurrentWar(clanTag);
-    if (
-      currentWar &&
-      currentWar.state !== "notInWar" &&
-      currentWar.clan &&
-      currentWar.opponent
-    ) {
-      await syncCurrentWar(currentWar, capturedAt);
-      warSynced = true;
-    } else {
-      // Regular endpoint says notInWar — the clan may be in Clan War League,
-      // which uses the league-group + war-tag endpoints instead.
-      const cwl = await syncCwlWars(clanTag, capturedAt);
-      if (cwl.synced > 0) warSynced = true;
-    }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    errors.push(`war sync failed: ${msg}`);
   }
 
   return {

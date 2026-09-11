@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-11
 **Inputs:** owner-selected feature list from [`2026-09-10-application-assessment.md`](./2026-09-10-application-assessment.md) §7 (items 1, 3, 5, 6, 8–12), the owner's priority question about activity tracking, and a read-only inspection of the production database (2026-09-11).
-**Status:** plan. Phase 6 (CI/CD) is implemented in this session; Phases 1–5 are specified here for execution in order.
+**Status:** Phase 6 (CI/CD) and Phase 1 (activity signals) are **implemented** — Phase 1 execution log: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md). Phases 2–5 are specified here for execution in order.
 
 ---
 
@@ -84,7 +84,9 @@ The Activity Score (`lib/scoring/activity-score.ts`) additionally has a **war co
 
 Ordering principle: the owner's priority (activity truth) first; then quick wins that are pure UI/settings; then the four analytics features (which share one new table and one new window kind); then the timeline; then PWA; CI/CD last as the owner specified. Each phase lists acceptance criteria — a phase is done when its criteria hold, not when its code is written.
 
-### Phase 1 — Activity signals overhaul (P0 · owner priority · effort M)
+### Phase 1 — Activity signals overhaul (P0 · owner priority · effort M) — **EXECUTED 2026-09-11**
+
+Execution record + verification against the acceptance criteria: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md). One amendment discovered during execution: the daily purge now also retains every snapshot carrying `activity_flag`/`login_day_flag` (retention rule 5) — without it, war-evidence days would fade from the 30-day heatmap once they age past the 7-day pruning horizon (acceptance (c) would decay over time). The backfill therefore flags BOTH the first snapshot at/after the attack AND that day's last-of-day marker (the pruning-proof row).
 
 | Step | Change | Files |
 |---|---|---|
@@ -173,3 +175,5 @@ Recommended execution order: **1 → 2.1 → 2.2 → 3.1 → 3.4 → 2.3 → 3.2
 2. This implementation plan.
 3. CI/CD overhaul (Phase 6) — job summaries, complete job-status report job, failure-log artifacts.
 4. Read-only DB inspection script (`scripts/investigate-db.mjs` outside the repo — not committed) — findings in §1.3.
+
+(Phase 1's execution — same day, separate session — is recorded in [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md).)

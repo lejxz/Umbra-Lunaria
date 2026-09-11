@@ -141,6 +141,11 @@ export const memberSnapshots = pgTable(
     donationsReceived: integer("donations_received").notNull(),
     trophies: integer("trophies").notNull(),
     builderBaseTrophies: integer("builder_base_trophies"),
+    // XP level at capture time (Phase 1 signal, migration 0011). Rises from
+    // any gameplay (war attacks, multiplayer, donations, obstacle removal) —
+    // diffed against the prior snapshot as interval-grain activity evidence.
+    // Null on all rows written before the column existed.
+    expLevel: integer("exp_level"),
     activityFlag: boolean("activity_flag").notNull().default(false),
     // Login-activity graph derivation — see docs/concept/04-activity-tracking-and-polling.md
     loginDayFlag: boolean("login_day_flag").notNull().default(false),
@@ -292,6 +297,10 @@ export const warAttacks = pgTable(
     ),
     index("war_attacks_war_id_idx").on(table.warId),
     index("war_attacks_attacker_tag_idx").on(table.attackerTag),
+    // Phase 1 activity signals: the per-poll war-evidence query selects
+    // attacks by (attacker_tag ∈ live roster, attacked_at in (prior, now]) —
+    // this index keeps it O(new attacks) and serves the one-shot backfill.
+    index("war_attacks_attacked_at_idx").on(table.attackedAt),
   ],
 );
 

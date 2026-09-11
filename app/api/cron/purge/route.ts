@@ -32,9 +32,11 @@ import { clanConfig } from "@/config/clan.config";
  *
  * 2. Intra-day snapshot pruning: for snapshots older than 7 days, keep only
  *    a minimal delta-chain-preserving set per member per calendar day: the
- *    LAST snapshot of the day, plus the rows adjacent to every intra-day
- *    donation-counter DECREASE (the local peak before the drop + the first
- *    snapshot after it — per counter: donations and donations_received).
+ *    LAST snapshot of the day, every snapshot carrying activity evidence
+ *    (activity_flag / login_day_flag — Phase 1), plus the rows adjacent to
+ *    every intra-day donation-counter DECREASE (the local peak before the
+ *    drop + the first snapshot after it — per counter: donations and
+ *    donations_received).
  *
  *    fix B-2 (docs/2026-09-10 assessment §3): keeping only the last snapshot
  *    permanently lost pre-reset donations on weekly-reset days. If the reset
@@ -62,10 +64,12 @@ import { clanConfig } from "@/config/clan.config";
  *   - war_participants: small, referenced by member war history.
  *   - hall_of_fame_records: 5 rows per award, overwritten not accumulated.
  *   - cwl_seasons: ~12/year, tiny.
- *   - Daily last-of-day snapshots: kept forever — they preserve the
- *     donation-delta chain and login-day flags. The checkpoint columns on
- *     members cover the lifetime totals that would have been computed from
- *     the deleted intra-day snapshots.
+ *   - Daily last-of-day snapshots AND activity-flagged snapshots: kept
+ *     forever — together they preserve the donation-delta chain AND the
+ *     day-grain activity evidence (war attacks, donations, XP gains) through
+ *     and beyond the 30-day heatmap window. The checkpoint columns on members
+ *     cover the lifetime totals that would have been computed from the
+ *     deleted intra-day snapshots.
  */
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
@@ -112,15 +116,18 @@ export async function GET(req: NextRequest) {
   }
   result.purgedMembers = toPurge.length;
 
-  // ── 2. Intra-day snapshot pruning (delta-chain-preserving, >7 days old) ──
+  // ── 2. Intra-day snapshot pruning (delta-chain + evidence preserving, >7 days old) ──
   // Keeps, per member: the first snapshot of the chain, the LAST snapshot of
   // each CLAN-TIMEZONE day (day markers aligned with the Manila-midnight
-  // display buckets from fix B-6), and the local-peak + first-post-drop
-  // snapshots around every donation-counter decrease. Drop detection
-  // partitions by MEMBER ONLY (not per day) — a reset can land between one
-  // day's last poll and the next day's first poll, and those boundary rows
-  // must survive just like intra-day ones. The rule is the SQL translation of
-  // the pure, fuzz-tested model in lib/ingest/purge-retention.ts.
+  // display buckets from fix B-6), every snapshot carrying activity evidence
+  // (Phase 1 — war/donation/XP flags must survive pruning or the heatmap and
+  // streaks lose war days as they age out of the unpruned window), and the
+  // local-peak + first-post-drop snapshots around every donation-counter
+  // decrease. Drop detection partitions by MEMBER ONLY (not per day) — a
+  // reset can land between one day's last poll and the next day's first poll,
+  // and those boundary rows must survive just like intra-day ones. The rule is
+  // the SQL translation of the pure, fuzz-tested model in
+  // lib/ingest/purge-retention.ts.
   //
   // The timezone is inlined as a raw literal (a hardcoded config constant,
   // not user input) because parameterized `AT TIME ZONE $1` fails on
@@ -135,6 +142,7 @@ export async function GET(req: NextRequest) {
       AND id NOT IN (
         SELECT id FROM (
           SELECT id, donations, donations_received,
+            activity_flag, login_day_flag,
             lag(donations) OVER member_w AS prev_donations,
             lag(donations_received) OVER member_w AS prev_received,
             lead(donations) OVER member_w AS next_donations,
@@ -153,6 +161,8 @@ export async function GET(req: NextRequest) {
         ) chain
         WHERE rn_member = 1
            OR rn_day = 1
+           OR activity_flag
+           OR login_day_flag
            OR next_donations IS NULL
            OR next_donations < donations
            OR next_received < donations_received
