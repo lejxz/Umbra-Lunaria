@@ -3,14 +3,14 @@
  *
  * The cloud sandbox injects `DATABASE_URL=file:/home/z/my-project/db/custom.db`
  * (a SQLite default for the Next.js starter) into every process it spawns,
- * which overrides the real Neon Postgres URL stored in `.env` (shell env wins
- * over .env in both Bun and Next.js). This module reads `.env` directly and
+ * which overrides the real Supabase Postgres URL stored in `.env` (shell env
+ * wins over .env in both Bun and Next.js). This module reads `.env` directly and
  * returns the real connection string whenever the injected value is the
  * sandbox SQLite default. Every other variable is left to normal Bun/Next.js
  * .env loading.
  *
  * Used by `lib/db/index.ts` (runtime queries) and `drizzle.config.ts`
- * (migrations) so both resolve to the same Neon database regardless of the
+ * (migrations) so both resolve to the same database regardless of the
  * sandbox injection. See docs/concept/11-config-specification.md.
  */
 

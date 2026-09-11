@@ -8,7 +8,7 @@ https://umbra-lunaria.vercel.app/
 
 ## Status
 
-**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~5 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the production Postgres database (Neon pooler in the current deployment; see `DATABASE_URL`). Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`docs/concept/12-Implemantation-plan-and-modularity.md`](./docs/concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`docs/concept/00-overview.md`](./docs/concept/00-overview.md).
+**Phase 0 complete. Phase 1 in progress.** The foundation is deployed and verified end-to-end: Next.js + TypeScript + Tailwind scaffold, Drizzle schema with auto-migrations, CoC API proxy client, ingestion pipeline (`/api/ingest` with light-poll + daily-batch), a third-party cron-job web service as the poller (every ~5 min + daily batch), Vercel Cron purge job, and all environment secrets — data is flowing into the production Postgres database (Supabase; see `DATABASE_URL`). Phase 1 (read-only core UI) is underway: dashboard, members, and war center are live; capital tracker is next. See [`docs/concept/12-Implemantation-plan-and-modularity.md`](./docs/concept/12-Implemantation-plan-and-modularity.md) for the step-by-step implementation plan. Full design docs are in [`/concept`](./concept), starting with [`docs/concept/00-overview.md`](./docs/concept/00-overview.md).
 
 ## Planned features
 
@@ -44,7 +44,7 @@ Full detail for each of these is in the corresponding file under [`/concept`](./
 - A Supercell ID / Clash of Clans developer account to create an API key.
 - A GitHub account (for the repo). The scheduled polling now runs on a **third-party cron-job web service** (e.g. cron-job.org) — see [`docs/concept/04-activity-tracking-and-polling.md`](./docs/concept/04-activity-tracking-and-polling.md).
 - A Vercel account, for hosting.
-- A Postgres database (the current deployment uses a Neon transaction pooler; Supabase also works).
+- A Postgres database (the current deployment uses a Supabase transaction pooler; any managed Postgres works).
 
 ## Setup checklist
 

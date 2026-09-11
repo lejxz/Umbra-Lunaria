@@ -12,7 +12,8 @@ import { ErrorState } from "@/components/ui/state-primitives";
  *
  * ISR caching (docs/concept/04 §"Page-view caching"): the page revalidates every
  * 300s (5 min, matching the poll cadence). Between revalidations, Vercel
- * serves the cached HTML from the edge — 0 DB queries, 0 Neon CU. Only the
+ * serves the cached HTML from the edge — 0 DB queries, 0 pooler
+ * connections. Only the
  * background revalidation triggers a DB hit. The war refresh button and the
  * ingest route both call revalidatePath("/") to bust the cache immediately
  * after a fresh capture.

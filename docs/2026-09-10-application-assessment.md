@@ -41,7 +41,7 @@ None of these are fatal, and all have contained fixes (§7 lays out a prioritize
 | Security | **B−** | Ingest/purge properly authed; refresh endpoint open by design; `sql.raw` interpolation smell; no security headers |
 | Testing | **B** | 150 solid pure-logic tests; zero coverage of routes, SQL, purge, and two scoring bugs live in untested code |
 | Accessibility | **B−** | Excellent modals/tabs/keyboard support; table rows and custom Select not keyboard/ARIA accessible |
-| DevOps & docs | **B+** | CI, cron design, README mostly excellent; docs drift (ISR comments, clan tag, Supabase vs Neon) |
+| DevOps & docs | **B+** | CI, cron design, README mostly excellent; docs drift (ISR comments, clan tag — both since corrected) |
 
 ---
 
@@ -147,7 +147,7 @@ The purge route's intra-day pruning (`app/api/cron/purge/route.ts:109-119`) keep
 `lib/db/member-queries.ts:198-210` fetches **all** activity-flagged snapshots for all members (no time bound) to find the latest one per member; `queries.ts:741-749` does the same for the whole snapshot set. Daily last-of-day snapshots are kept forever by design, so these scans grow linearly forever (50 members × ~730 rows ≈ 36.5k rows per render after two years). Both should be a SQL `DISTINCT ON (player_tag) … ORDER BY captured_at DESC` (the pattern `fetchBoundedSnapshots` already uses) — one row per member.
 
 ### B-11. Stale ISR values and docs drift — P3
-The header comment on 5 of 6 pages contradicts the exported `revalidate` (e.g. `app/members/page.tsx:13` says "300s (5 min)" + "detail sheets fetched client-side"; the export is 3600 and details are embedded server-side — both halves wrong). `/capital`'s *effective* ISR is 5 minutes, not the exported 3600: `getRaidTimer`'s fetch uses `revalidate: 300` and Next takes the minimum fetch revalidate as the route's period — contradicting the page's "1 hr — capital changes weekly" comment. Also: README says the clan tag is `#2Y8V8VGQ` while `config/clan.config.ts:17` has `#2JPCYP98L`; README + env docs describe Supabase while the deployment DATABASE_URL is a Neon pooler.
+The header comment on 5 of 6 pages contradicts the exported `revalidate` (e.g. `app/members/page.tsx:13` says "300s (5 min)" + "detail sheets fetched client-side"; the export is 3600 and details are embedded server-side — both halves wrong). `/capital`'s *effective* ISR is 5 minutes, not the exported 3600: `getRaidTimer`'s fetch uses `revalidate: 300` and Next takes the minimum fetch revalidate as the route's period — contradicting the page's "1 hr — capital changes weekly" comment. Also: README said the clan tag is `#2Y8V8VGQ` while `config/clan.config.ts:17` has `#2JPCYP98L` (since corrected).
 
 ### B-12. Footer auto-reload fights the cache — P3
 `components/layout/footer.tsx:57-65` triggers `window.location.reload()` when a poll looks overdue. Under ISR (once A-1 is fixed) this just re-serves the same cached HTML — a wasted reload. Related: `use-server-clock`'s drift correction is biased by the ISR cache age (serverNow is stale by up to the revalidation window), so countdowns run late by the cache age; fine while everything is dynamic, worth revisiting after A-1.
@@ -156,7 +156,7 @@ The header comment on 5 of 6 pages contradicts the exported `revalidate` (e.g. `
 
 ## 4. Database Optimizations
 
-1. **Fix the rendering mode first (A-1)** — it is a *database* optimization in disguise: while routes are dynamic, every pageview re-runs the query layer against Neon/Supabase; the 60s `withCache` on the footer only covers one query.
+1. **Fix the rendering mode first (A-1)** — it is a *database* optimization in disguise: while routes are dynamic, every pageview re-runs the query layer against the database; the 60s `withCache` on the footer only covers one query.
 2. **Cache or hoist `getMemberActivityScore`** — it is the only full-roster, multi-table query that is neither `reactCache`d (per-render) nor `withCache`d (TTL). It runs 3× per dashboard render (fine) but ~51× per members page render and once per strategy render. A `withCache(key = "activityScore:" + window, ttl = 5 min)` plus passing results into `getMemberDetail` collapses A-3.
 3. **De-duplicate `fetchBoundedSnapshots`** — the dashboard calls it 9× per render (3 donation functions × 3 windows) over overlapping ranges; a `reactCache` keyed by window would cut it to 3.
 4. **Bound the unbounded scans** (B-10) — convert two "fetch everything, find latest in JS" queries to `DISTINCT ON`.
@@ -193,7 +193,7 @@ The header comment on 5 of 6 pages contradicts the exported `revalidate` (e.g. `
 4. **Duplication to consolidate:** `formatRole` ×2, local `StatCard` ×2, podium rank-styling blocks ×3, the member-sheet selected-state logic re-implemented in 5 shells (extract `useMemberSheet()`), duplicate HoF scripts (`seed-hof.ts` ≡ `trigger-hof.ts`), dead `fixtureCurrentWar` fixture, `win-rate` tests pinned twice.
 5. **eslint:** `eslint.config.mjs:48` disables `react-hooks/set-state-in-effect` globally to silence one Modal pattern — scope the disable to that rule violation instead.
 6. **Accessibility:** desktop/mobile roster rows and war-roster rows use `<tr onClick>` with no `tabIndex`/`role`/Enter handler (keyboard users cannot open member details — ironic given the unused `DataTable` solves exactly this); the custom `Select` has no combobox ARIA or arrow-key navigation; the members search input has placeholder-only labeling; 👑/★ rank glyphs lack text alternatives.
-7. **Docs truth pass:** the ISR comments (B-11), README clan tag, Supabase-vs-Neon story, and `tests/README.md` (lists 11 of 13 test files) all need a sync with reality. The repo's own "stale comments are actively misleading" risk is the price of the otherwise excellent log discipline.
+7. **Docs truth pass:** the ISR comments (B-11), README clan tag, and `tests/README.md` (lists 11 of 13 test files) all need a sync with reality. The repo's own "stale comments are actively misleading" risk is the price of the otherwise excellent log discipline.
 8. **`db:push` npm alias points at the migrate script** — it never performs a schema push, which will confuse the next contributor trying to reconcile drift (exactly the situation migration 0002 is in).
 
 ---
@@ -249,7 +249,7 @@ The trust model is coherent: a read-only public dashboard with no user data beyo
 - ⚠️ No security headers / CSP (§6.2) — one config block.
 - ⚠️ `fetchBoundedSnapshots`'s `sql.raw` array construction (§6.3) — not currently exploitable, wrong pattern to normalize.
 - ✅ Secrets are consistently kept out of the repo (`.gitignore` covers `.env*`; the config file pattern is documented as non-secret).
-- 📝 Operational note from this review: the deployment's `DATABASE_URL` in the environment we were given points at a **Neon** pooler and its credentials were rejected (password auth failed) — while the README describes Supabase. Either the env var we received is stale or the docs are; worth reconciling, and if that credential is genuinely live anywhere, rotate it (as with any secret that has been shared in plaintext).
+- 📝 Operational note from this review (resolved 2026-09-11): the `DATABASE_URL` in the environment we were given pointed at a **Neon** pooler whose credentials were rejected — a stale credential. The deployment database is and has been **Supabase** (see [`2026-09-11-implementation-plan.md`](./2026-09-11-implementation-plan.md) §0). Rotate that Neon credential wherever it still exists, as with any secret that has been shared in plaintext.
 - 📝 `sslmode` stripping + `rejectUnauthorized: false` is the standard serverless compromise, but it does mean TLS without verification on the DB leg; a pinned CA bundle would close it.
 
 ---

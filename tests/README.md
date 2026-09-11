@@ -2,9 +2,11 @@
 
 This project uses a **mocked query boundary** approach (docs/concept/12 Step 1.0.A
 "DB-test strategy" — the "Option 1" pure-logic extraction approach) rather
-than an isolated test database. The rationale: Neon's free tier limits compute
-to 100 CU-hours, and a separate test branch consuming compute on every test
-run would risk the allowance. Instead, pure decision logic is extracted from
+than an isolated test database. The original rationale was Neon's free-tier
+compute limit (100 CU-hours — a separate test branch consuming compute on
+ every test run would risk the allowance); the approach was kept after the
+Supabase migration because it is fast, free, and keeps the blast radius of a
+test run at zero. Pure decision logic is extracted from
 DB-touching code into testable functions, and the thin DB I/O layer is
 verified by inspection + live manual verification.
 
@@ -62,7 +64,7 @@ is not unit-tested. This is the tradeoff of Option 1:
 
 - **SQL-shape regressions** (a wrong join, a NULL-handling bug) aren't caught
   by pure-logic tests. These are verified by:
-  - Live manual verification against the production Neon DB (Node scripts +
+  - Live manual verification against the production Supabase DB (Node scripts +
     Agent Browser).
   - The query functions' return types (TypeScript catches shape mismatches
   at compile time).
@@ -70,8 +72,8 @@ is not unit-tested. This is the tradeoff of Option 1:
   the schema definition + migration, not by tests.
 
 If SQL-shape regressions become a real risk, the upgrade path is to add a
-Neon branch test database (Option 2) — but that's deferred given the 100
-CU-hour free-tier limit.
+disposable test database (Option 2 — a Supabase staging project or a
+dockerized Postgres in CI; see the assessment §8.3) — still deferred.
 
 ## Running the tests
 

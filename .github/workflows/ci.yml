@@ -1,4 +1,12 @@
-# CI — runs typecheck, lint, and tests on every push + pull request.
+# CI — runs typecheck, lint, and tests on every push + pull request,
+# then a build + ISR route-mode assertion, then a status report.
+#
+# Reporting contract (docs/2026-09-11-implementation-plan.md §Phase 6):
+# every run must open to a complete job status — per-step summaries via
+# $GITHUB_STEP_SUMMARY (typecheck/lint/test results incl. a parsed test
+# table, and the asserted route table), raw-log artifacts on failure, and a
+# final `report` job that renders the full job matrix and fails the run if
+# any check failed.
 name: CI
 
 on:
@@ -30,13 +38,78 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Typecheck
-        run: bun run typecheck
+        id: typecheck
+        run: bun run typecheck 2>&1 | tee typecheck.log
 
       - name: Lint
-        run: bun run lint
+        id: lint
+        run: bun run lint 2>&1 | tee lint.log
 
+      # Default reporter for humans in the Actions log, JSON reporter for
+      # the summary table (vitest writes the JSON even when tests fail, so
+      # the summary below can list the failing specs).
       - name: Test
-        run: bun run test
+        id: test
+        run: >
+          bunx vitest run
+          --reporter=default --reporter=json --outputFile=test-results.json
+          2>&1 | tee test.log
+
+      - name: Quality summary
+        if: always()
+        run: |
+          mark() { [ "$1" = "success" ] && echo "✅" || echo "❌"; }
+
+          {
+            echo "### Quality — Typecheck + Lint + Test"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Typecheck (\`tsc --noEmit\`) | $(mark '${{ steps.typecheck.outcome }}') ${{ steps.typecheck.outcome }} |"
+            echo "| Lint (\`eslint .\`) | $(mark '${{ steps.lint.outcome }}') ${{ steps.lint.outcome }} |"
+            echo "| Test (\`vitest run\`) | $(mark '${{ steps.test.outcome }}') ${{ steps.test.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Test result table (only if the JSON was produced)
+          if [ -f test-results.json ]; then
+            node -e '
+              const fs = require("fs");
+              let r;
+              try { r = JSON.parse(fs.readFileSync("test-results.json", "utf8")); }
+              catch (e) { process.exit(0); }
+              const out = [];
+              out.push("", "**Tests:**", "", "| Test files | Tests | Passed | Failed | Skipped |", "|---:|---:|---:|---:|---:|");
+              const numFiles = Array.isArray(r.testResults) ? r.testResults.length : (r.numTotalTestSuites ?? "?");
+              out.push("| " + [numFiles, r.numTotalTests, r.numPassedTests, r.numFailedTests, r.numPendingTests].join(" | ") + " |");
+              const failures = [];
+              for (const suite of r.testResults ?? []) {
+                for (const a of suite.assertionResults ?? []) {
+                  if (a.status === "failed") failures.push(a.fullName ?? a.title ?? "unnamed");
+                }
+              }
+              if (failures.length > 0) {
+                out.push("", "**Failed (" + failures.length + "):**", "");
+                for (const f of failures.slice(0, 10)) out.push("- `" + f + "`");
+                if (failures.length > 10) out.push("- …and " + (failures.length - 10) + " more (artifact: quality-logs/test.log)");
+              }
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+            '
+          else
+            echo "_No test-results.json produced — the test step likely failed before the reporter ran (see artifact)._" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-logs
+          path: |
+            typecheck.log
+            lint.log
+            test.log
+            test-results.json
+          retention-days: 7
+          if-no-files-found: ignore
 
   # fix §8.2 (docs/2026-09-10 assessment): a `cookies()` call in the root
   # layout once flipped every route to dynamic rendering and silently
@@ -63,9 +136,105 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Build
+        id: build
         run: bunx next build 2>&1 | tee build.log
         env:
           DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 
       - name: Assert route modes
-        run: bash scripts/assert-route-modes.sh build.log
+        id: assert
+        run: bash scripts/assert-route-modes.sh build.log 2>&1 | tee route-modes.log
+
+      - name: Route-mode summary
+        if: always()
+        run: |
+          mark() { [ "$1" = "success" ] && echo "✅" || echo "❌"; }
+
+          {
+            echo "### Route modes — build + ISR assertion"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| \`next build\` | $(mark '${{ steps.build.outcome }}') ${{ steps.build.outcome }} |"
+            echo "| Route-mode assertion | $(mark '${{ steps.assert.outcome }}') ${{ steps.assert.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -f route-modes.log ]; then
+            {
+              echo ""
+              echo '```'
+              cat route-modes.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ -f build.log ]; then
+            {
+              echo ""
+              echo "_Build failed before the assertion ran — last 25 lines of the build log (full log in the artifact):_"
+              echo '```'
+              tail -n 25 build.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: route-modes-logs
+          path: |
+            build.log
+            route-modes.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # Final stage (docs/2026-09-11-implementation-plan.md §Phase 6): one
+  # always-run job that renders the complete job status when the run page is
+  # opened, and fails the run's overall conclusion if any check failed.
+  report:
+    name: CI status report
+    needs: [quality, route-modes]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - name: Render complete job status
+        run: |
+          quality='${{ needs.quality.result }}'
+          routes='${{ needs.route-modes.result }}'
+
+          mark() {
+            case "$1" in
+              success)   echo "✅" ;;
+              failure)   echo "❌" ;;
+              cancelled) echo "🚫" ;;
+              skipped)   echo "⏭️" ;;
+              *)         echo "❔" ;;
+            esac
+          }
+
+          verdict=success
+          [ "$quality" = "success" ] || verdict=failure
+          [ "$routes" = "success" ] || verdict=failure
+
+          {
+            echo "# CI — complete job status"
+            echo ""
+            echo "**Commit:** \`${{ github.sha }}\` on \`${{ github.ref_name }}\` (event: \`${{ github.event_name }}\`)"
+            echo ""
+            echo "| Job | Result |"
+            echo "|---|---|"
+            echo "| 1. Quality — Typecheck + Lint + Test | $(mark "$quality") $quality |"
+            echo "| 2. Route modes — Build + ISR assertion | $(mark "$routes") $routes |"
+            echo "| 3. CI status report | $(mark "$verdict") $verdict |"
+            echo ""
+            if [ "$verdict" = "success" ]; then
+              echo "**All checks passed.** Per-step details (test table, asserted route table) are in each job's summary; failed runs additionally attach raw-log artifacts."
+            else
+              echo "**CI failed.** Open the ❌ job above — its step summary contains the failure detail, and its raw logs are attached as artifacts (7-day retention)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # The report job itself must fail the run when any check failed —
+          # this is what makes the run-level conclusion a complete status.
+          [ "$verdict" = "success" ]

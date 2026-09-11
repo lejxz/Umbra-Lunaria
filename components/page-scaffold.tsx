@@ -60,7 +60,7 @@ export function ComingSoon({
       <div className="mt-8 grid gap-3 sm:grid-cols-3">
         <div className="rounded-lg bg-white/[.03] p-4">
           <p className="text-xs uppercase tracking-wider text-umbra-muted">Data source</p>
-          <p className="mt-2 text-sm text-umbra-lilac">Neon snapshots</p>
+          <p className="mt-2 text-sm text-umbra-lilac">Postgres snapshots</p>
         </div>
         <div className="rounded-lg bg-white/[.03] p-4">
           <p className="text-xs uppercase tracking-wider text-umbra-muted">Status</p>

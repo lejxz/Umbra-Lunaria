@@ -78,7 +78,7 @@
 | §5 bundle bloat | `war-shell`, `strategy-shell`, `hall-of-fame-shell`, `members-roster` | member-detail sheets lazy-loaded via `dynamic(..., { ssr: false })` exactly as `dashboard-shell.tsx` already did — 4 pages drop from ~245 kB to 113–128 kB First Load JS |
 | §6.2 security headers | `next.config.ts` | `poweredByHeader: false` + `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, and a moderate CSP (script-src keeps Next's required unsafes; every other class pinned to self + the CoC asset CDN) |
 | §6.3 `sql.raw` interpolation | `lib/db/queries.ts` (`fetchBoundedSnapshots`) | tag array now a bound parameter via `sql.param` + `= ANY($1::text[])` instead of string-interpolated `ARRAY[...]` (was not exploitable — tags come from the DB — but injection-shaped) |
-| B-11 docs drift | `README.md`, `app/capital/page.tsx`, `app/members/page.tsx` | README clan tag corrected to `#2JPCYP98L`, Supabase-only language updated to name the actual Neon pooler deployment, capital page ISR comment now explains the effective 5-min period, members page comment matches the new fetch-on-click reality |
+| B-11 docs drift | `README.md`, `app/capital/page.tsx`, `app/members/page.tsx` | README clan tag corrected to `#2JPCYP98L`, capital page ISR comment now explains the effective 5-min period, members page comment matches the new fetch-on-click reality (DB-provider language was corrected to Supabase in the 2026-09-11 follow-up — the "Neon deployment" claim came from a stale credential, see [`2026-09-11-implementation-plan.md`](./2026-09-11-implementation-plan.md) §0) |
 
 ---
 
@@ -97,7 +97,7 @@
    /api/war/[id], /api/war/refresh — dynamic, as designed)
 ```
 
-- The build ran against the `DATABASE_URL` from the deployment environment; the credentials were rejected by the provider (`password authentication failed`), so all pages prerendered their error/empty states — which each page's existing try/catch handles gracefully, and which still proves the rendering-mode flip. **Operational follow-up:** that Neon credential was shared in plaintext during the review and no longer authenticates — rotate it wherever it is still live, and reconcile the Vercel env var with the actual provider.
+- The build ran against the `DATABASE_URL` from the deployment environment; the credentials were rejected by the provider (`password authentication failed`) — that URL was a stale Neon credential, not the deployment database (Supabase; resolved 2026-09-11), so all pages prerendered their error/empty states — which each page's existing try/catch handles gracefully, and which still proves the rendering-mode flip. **Operational follow-up:** rotate that Neon credential wherever it still exists, as with any secret shared in plaintext.
 - Migration 0010 was not executed here (no reachable database); the deploy pipeline's `drizzle-kit migrate` applies it. Its statements are idempotent and the migrator's skip-if-older behavior for the re-journaled 0002 was verified against the installed drizzle-orm's `pg-core/dialect.cjs` migrate loop.
 
 ## Deferred (tracked, not in this pass)
