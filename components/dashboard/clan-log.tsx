@@ -1,6 +1,8 @@
+import Link from "next/link";
 import type { ClanLog as ClanLogData, ClanLogEntry } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { memberProfileHref } from "@/lib/member-links";
 import {
   IconUserPlus,
   IconUserMinus,
@@ -12,13 +14,15 @@ import {
  * Clan activity log. Renders a most-recent-first feed of joins, departures,
  * rejoins, TH upgrades, and renames with name, player tag, event type, and
  * timestamp. Purged members show a "data removed" state. See docs/concept/05-dashboard.md §8.
+ *
+ * Phase 2.1: non-purged rows deep-link into the member's profile sheet on
+ * /members (shareable URL, Back closes the sheet there) instead of opening
+ * a local popup on the dashboard.
  */
 export function ClanLogPanel({
   log,
-  onMemberClick,
 }: {
   log: ClanLogData;
-  onMemberClick?: (playerTag: string) => void;
 }) {
   return (
     <section
@@ -52,19 +56,8 @@ export function ClanLogPanel({
             const visuals = getEventVisuals(entry);
             const labelText = getBadgeLabel(entry);
 
-            return (
-              <button
-                key={entry.id}
-                onClick={() =>
-                  !entry.isPurged && onMemberClick?.(entry.playerTag)
-                }
-                disabled={entry.isPurged}
-                className={`flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition ${
-                  entry.isPurged
-                    ? "cursor-default opacity-60"
-                    : "hover:bg-white/[.04] focus-ring"
-                }`}
-              >
+            const rowBody = (
+              <>
                 <div className="flex min-w-0 items-center gap-2.5">
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20">
                     <visuals.Icon className={`h-[14px] w-[14px] ${visuals.color}`} />
@@ -85,7 +78,25 @@ export function ClanLogPanel({
                   </div>
                 </div>
                 <Badge tone={visuals.tone}>{labelText}</Badge>
-              </button>
+              </>
+            );
+
+            return entry.isPurged ? (
+              <div
+                key={entry.id}
+                aria-disabled="true"
+                className="flex w-full cursor-default items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left opacity-60"
+              >
+                {rowBody}
+              </div>
+            ) : (
+              <Link
+                key={entry.id}
+                href={memberProfileHref(entry.playerTag)}
+                className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
+              >
+                {rowBody}
+              </Link>
             );
           })}
         </div>

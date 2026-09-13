@@ -255,6 +255,17 @@ export const wars = pgTable(
     // Null for war-log backfill rows that predate tracking (no roster detail).
     // See docs/concept/07-clan-war.md + docs/concept/12 Step 1.4.A.
     warSnapshot: jsonb("war_snapshot"),
+    // ── War log v2 enrichment (Phase 2.3) ──
+    // Clan XP earned in this war, from the /warlog payload (clan.expEarned).
+    // Null when the source doesn't provide it: CWL rows, live-tracked wars
+    // synced via /currentwar (that endpoint has no expEarned — the daily
+    // warlog backfill fills it in once the war appears there), and pre-0012
+    // rows that the backfill hasn't touched yet.
+    expEarned: integer("exp_earned"),
+    // expEarned ÷ attacks used — derived at backfill time so history rows can
+    // render a per-attack quality chip without recomputing. Null whenever
+    // expEarned or the attack count is missing/zero.
+    expPerAttack: real("exp_per_attack"),
   },
   (table) => [
     // Unique identity prevents duplicate war rows on repeat polls.

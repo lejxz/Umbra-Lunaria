@@ -65,6 +65,33 @@ function snapUpToHour(date: Date): Date {
 }
 
 /**
+ * Compute a window covering the last `days` calendar days in the clan
+ * timezone ((days−1) full days + today so far) — the general form of the
+ * "7d"/"30d" cases above, extracted for Phase 2.2: the donation-ratio
+ * needs-attention category has a runtime-configurable windowDays (default
+ * 30), so it can't hard-code one of the four preset WindowKinds.
+ *
+ * `kind` carries the closest preset purely so generateBuckets() remains
+ * usable on the result; the donation-ratio category itself never buckets.
+ * Identical to computeWindow("30d") for days=30 and computeWindow("7d")
+ * for days=7 (tested in tests/lib/windows.test.ts).
+ */
+export function computeDayWindow(
+  days: number,
+  now: Date = new Date(),
+): TimeWindow {
+  const clamped = Math.max(1, Math.floor(days));
+  const todayStart = startOfDayInClanTz(now);
+  const kind: WindowKind =
+    clamped === 7 ? "7d" : clamped === 30 ? "30d" : clamped === 1 ? "24h" : "all";
+  return {
+    from: new Date(todayStart.getTime() - (clamped - 1) * 86_400_000),
+    to: now,
+    kind,
+  };
+}
+
+/**
  * Generate bucket timestamps for a time window.
  * - 24h → 24 hourly buckets
  * - 7d  → 7 daily buckets

@@ -1,19 +1,25 @@
+import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { IconClock, IconSwords, IconShieldOff } from "@/components/ui/icons";
+import { memberProfileHref } from "@/lib/member-links";
+import {
+  IconClock,
+  IconSwords,
+  IconShieldOff,
+  IconGift,
+} from "@/components/ui/icons";
 
 export function AttentionPanel({
   title,
   subtitle,
   groups,
-  onMemberClick,
 }: {
   title: string;
   subtitle: string;
   groups: Array<{
     label: string;
     tone: "warning" | "danger" | "muted";
-    icon: "clock" | "swords" | "shield";
+    icon: "clock" | "swords" | "shield" | "gift";
     members: Array<{
       playerTag: string;
       name: string;
@@ -23,7 +29,6 @@ export function AttentionPanel({
       detail: string | null;
     }>;
   }>;
-  onMemberClick?: (playerTag: string) => void;
 }) {
   const totalSignals = groups.reduce((acc, group) => acc + group.members.length, 0);
 
@@ -66,7 +71,6 @@ export function AttentionPanel({
                 tone={group.tone}
                 icon={group.icon}
                 members={group.members}
-                onMemberClick={onMemberClick}
               />
             );
           })}
@@ -81,11 +85,10 @@ function AttentionGroup({
   tone,
   icon,
   members,
-  onMemberClick,
 }: {
   label: string;
   tone: "warning" | "danger" | "muted";
-  icon: "clock" | "swords" | "shield";
+  icon: "clock" | "swords" | "shield" | "gift";
   members: Array<{
     playerTag: string;
     name: string;
@@ -94,7 +97,6 @@ function AttentionGroup({
     reason: string;
     detail: string | null;
   }>;
-  onMemberClick?: (playerTag: string) => void;
 }) {
   const color =
     tone === "warning"
@@ -110,9 +112,12 @@ function AttentionGroup({
       </p>
       <div className="space-y-1.5">
         {members.map((m) => (
-          <button
+          // Phase 2.1: rows deep-link into the member's profile sheet on
+          // /members instead of opening a local popup — the target page owns
+          // the full detail view, and the URL is shareable.
+          <Link
             key={m.playerTag}
-            onClick={() => onMemberClick?.(m.playerTag)}
+            href={memberProfileHref(m.playerTag)}
             className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
           >
             <div className="flex min-w-0 items-center gap-2.5">
@@ -120,6 +125,7 @@ function AttentionGroup({
                 {icon === "clock" && <IconClock className="h-4 w-4" />}
                 {icon === "swords" && <IconSwords className="h-4 w-4" />}
                 {icon === "shield" && <IconShieldOff className="h-4 w-4" />}
+                {icon === "gift" && <IconGift className="h-4 w-4" />}
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm text-umbra-lilac">{m.name}</p>
@@ -131,7 +137,7 @@ function AttentionGroup({
             {m.townHallLevel && (
               <Badge tone="brand">TH{m.townHallLevel}</Badge>
             )}
-          </button>
+          </Link>
         ))}
       </div>
     </div>

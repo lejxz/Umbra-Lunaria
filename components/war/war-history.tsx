@@ -6,7 +6,7 @@ import type { WarHistoryEntry } from "@/lib/view-models/war";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { TimeAgo } from "@/components/ui/time-ago";
-import { IconWarEmpty, IconChevronRight } from "@/components/ui/icons";
+import { IconWarEmpty, IconChevronRight, IconZap } from "@/components/ui/icons";
 
 /**
  * War history list — regular + CWL wars, most-recent first (docs/concept/07 §"War
@@ -158,6 +158,24 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
           <span className="text-2xs text-umbra-muted/70">
             {w.endTime ? <TimeAgo date={w.endTime} /> : <span className="text-amber-400">ongoing</span>}
           </span>
+          {/* War log v2 enrichment (Phase 2.3): clan XP earned. Null-safe —
+              rows without API XP (CWL, pre-enrichment) simply show nothing. */}
+          {w.expEarned != null && (
+            <span
+              className="inline-flex w-fit items-center gap-1 rounded bg-amber-400/10 px-1.5 py-0.5 font-mono text-2xs text-amber-400"
+              title={
+                w.expPerAttack != null
+                  ? `${w.expEarned} clan XP earned · ${w.expPerAttack.toFixed(1)} per attack`
+                  : `${w.expEarned} clan XP earned`
+              }
+            >
+              <IconZap className="h-3 w-3" aria-hidden />
+              {w.expEarned} XP
+              {w.expPerAttack != null && (
+                <span className="text-amber-400/60">· {w.expPerAttack.toFixed(1)}/atk</span>
+              )}
+            </span>
+          )}
         </div>
       </td>
 

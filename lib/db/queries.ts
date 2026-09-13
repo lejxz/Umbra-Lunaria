@@ -69,7 +69,14 @@ import {
 // stability — callers should keep importing from @/lib/db/queries.
 export { getWarRecord } from "@/lib/scoring/war-record";
 import { getWarRecord } from "@/lib/scoring/war-record";
-import { computeWindow, generateBuckets } from "@/lib/time/windows";
+import { computeWindow, computeDayWindow, generateBuckets } from "@/lib/time/windows";
+import { getRuntimeSetting } from "@/lib/db/runtime-settings";
+import {
+  DONATION_RATIO_SETTINGS_KEY,
+  parseDonationRatioSettings,
+  isBelowDonationRatio,
+  donationRatioDetail,
+} from "@/lib/scoring/donation-ratio";
 
 const CLAN_TAG = clanConfig.clanTag;
 
@@ -771,6 +778,49 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
   const inactive: NeedsAttentionMember[] = [];
   const attacksRemaining: NeedsAttentionMember[] = [];
   const warPreferenceOut: NeedsAttentionMember[] = [];
+  const belowDonationRatio: NeedsAttentionMember[] = [];
+
+  // Phase 2.2: donation-ratio category settings from runtime_settings
+  // (code defaults when the key is absent — the table has 0 rows today).
+  // Override with SQL (documented in lib/scoring/donation-ratio.ts):
+  //   INSERT INTO runtime_settings (key, value)
+  //   VALUES ('needsAttention.donationRatio', '{"enabled":true,"minRatio":0.5,...}')
+  //   ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value;
+  const donationRatioSettings = parseDonationRatioSettings(
+    await getRuntimeSetting(DONATION_RATIO_SETTINGS_KEY),
+  );
+  let donationRatioTotals: Map<string, { given: number; received: number }> =
+    new Map();
+  if (donationRatioSettings.enabled && retainedMembers.length > 0) {
+    // Reset-aware per-member totals over the configured window — same
+    // bounded-snapshot pattern as getDonationTotals (baseline + in-window
+    // only, withCache'd on (tags, from, to)).
+    const ratioWindow = computeDayWindow(donationRatioSettings.windowDays);
+    const ratioTags = retainedMembers.map((m) => m.playerTag);
+    const ratioSnapshots = await fetchBoundedSnapshots(ratioTags, ratioWindow);
+    const givenByMember = new Map<string, DonationSnapshot[]>();
+    const receivedByMember = new Map<string, DonationSnapshot[]>();
+    for (const s of ratioSnapshots) {
+      const given = givenByMember.get(s.playerTag) ?? [];
+      given.push({ capturedAt: s.capturedAt, donations: s.donations });
+      givenByMember.set(s.playerTag, given);
+      const received = receivedByMember.get(s.playerTag) ?? [];
+      received.push({ capturedAt: s.capturedAt, donations: s.donationsReceived });
+      receivedByMember.set(s.playerTag, received);
+    }
+    donationRatioTotals = new Map(
+      ratioTags.map((tag) => [
+        tag,
+        {
+          given: calculateDonationWindow(givenByMember.get(tag) ?? [], ratioWindow),
+          received: calculateDonationWindow(
+            receivedByMember.get(tag) ?? [],
+            ratioWindow,
+          ),
+        },
+      ]),
+    );
+  }
 
   // Get the latest snapshot per member to determine last activity
   const tags = retainedMembers.map((m) => m.playerTag);
@@ -953,7 +1003,34 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
         detail: "Informational — not an error",
       });
     }
+
+    // Phase 2.2: below donation ratio (heavy receiver, light giver over the
+    // configured window). Pure threshold decision in lib/scoring/donation-ratio.
+    const ratioTotals = donationRatioTotals.get(member.playerTag);
+    if (ratioTotals) {
+      if (isBelowDonationRatio(ratioTotals, donationRatioSettings)) {
+        belowDonationRatio.push({
+          playerTag: member.playerTag,
+          name: member.name,
+          role: member.role,
+          townHallLevel: member.townHallLevel,
+          reason: "Below donation ratio",
+          detail: donationRatioDetail(ratioTotals, donationRatioSettings),
+        });
+      }
+    }
   }
+
+  // Worst-first: the member giving back the smallest share of what they
+  // take sits at the top of the queue.
+  belowDonationRatio.sort((a, b) => {
+    const ratioOf = (entry: NeedsAttentionMember) => {
+      const totals = donationRatioTotals.get(entry.playerTag);
+      if (!totals || totals.received <= 0) return Number.POSITIVE_INFINITY;
+      return totals.given / totals.received;
+    };
+    return ratioOf(a) - ratioOf(b);
+  });
 
   // Rushed members (>60% rushed). Queried directly against the members table
   // (rushedPercent is computed during the daily batch and stored as a column)
@@ -986,6 +1063,13 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
     attacksRemaining,
     warPreferenceOut,
     rushed,
+    belowDonationRatio,
+    donationRatio: donationRatioSettings.enabled
+      ? {
+          minRatio: donationRatioSettings.minRatio,
+          windowDays: donationRatioSettings.windowDays,
+        }
+      : null,
     inactivityThresholdDays: thresholdDays,
   };
 }

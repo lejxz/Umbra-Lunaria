@@ -139,6 +139,8 @@ export async function getWarCenter(): Promise<WarCenterData> {
     attacksPerMember: wars.attacksPerMember,
     lastSyncedAt: wars.lastSyncedAt,
     hasSnapshot: sql<boolean>`${wars.warSnapshot} IS NOT NULL`,
+    expEarned: wars.expEarned,
+    expPerAttack: wars.expPerAttack,
   };
   const historyRows: HistoryProjection[] = warRow
     ? await db

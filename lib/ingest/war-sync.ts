@@ -357,6 +357,17 @@ export async function backfillWarLog(
       // War-log entries are, by definition, OUR clan's wars (fix A-4).
       ownClanTag: clanTag,
       involvesOwnClan: true,
+      // War log v2 enrichment (Phase 2.3): clan XP from the warlog payload.
+      // expEarned is only provided on the warlog (not /currentwar), so this
+      // backfill is the sole writer — live-tracked wars pick their XP up the
+      // first daily backfill after ending. Idempotent upsert: repeat runs
+      // write the same values. Null-safe by design (older API payloads and
+      // CWL rows leave both columns null).
+      expEarned: entry.clan.expEarned ?? null,
+      expPerAttack:
+        entry.clan.expEarned != null && entry.clan.attacks
+          ? entry.clan.expEarned / entry.clan.attacks
+          : null,
       // No roster detail available from the war log — leave snapshot null.
       // The history list still shows result/stars/destruction/date.
     };

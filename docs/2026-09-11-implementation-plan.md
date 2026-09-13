@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-11
 **Inputs:** owner-selected feature list from [`2026-09-10-application-assessment.md`](./2026-09-10-application-assessment.md) §7 (items 1, 3, 5, 6, 8–12), the owner's priority question about activity tracking, and a read-only inspection of the production database (2026-09-11).
-**Status:** Phase 6 (CI/CD) and Phase 1 (activity signals) are **implemented** — Phase 1 execution log: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md). Phases 2–5 are specified here for execution in order.
+**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), and Phase 2 (quick wins) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md). Phases 3–5 are specified here for execution in order.
 
 ---
 
@@ -101,7 +101,9 @@ Execution record + verification against the acceptance criteria: [`2026-09-11-ph
 
 **Acceptance:** (a) a member whose only action is a war attack shows Active on the roster within one poll; (b) the KnieieGurow-style case disappears from needs-attention after backfill; (c) heatmap shows war days; (d) activity-score component breakdowns for war-included members change ≤ the war component's weight; (e) `vitest run` green with new cases; (f) backfill verified idempotent (run twice → 0 changes second time).
 
-### Phase 2 — Quick wins (each independent · effort S)
+### Phase 2 — Quick wins (each independent · effort S) — **EXECUTED 2026-09-13**
+
+Execution record + verification against the acceptance criteria: [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md). One amendment discovered during execution: 2.1 reads `?tag=` from `window.location.search` in a mount effect instead of `useSearchParams` — the latter would force the static `/members` route dynamic, breaking the route-modes CI contract.
 
 **2.1 Deep-linkable member profiles (assessment F3).** `/members?tag=%23XXXX` opens the detail sheet on load; selecting a member updates the URL via `history.replaceState` (no navigation, no ISR invalidation); Back closes the sheet; needs-attention and clan-log rows link into it. The detail data path already exists (`GET /api/members/[tag]`). Files: `components/members/members-shell.tsx` (read `useSearchParams` on mount, `replaceState` on select), `components/dashboard/needs-attention.tsx`, `components/dashboard/clan-log.tsx` (link out). Acceptance: shareable URL opens the correct sheet; direct navigation works; no hydration warnings.
 

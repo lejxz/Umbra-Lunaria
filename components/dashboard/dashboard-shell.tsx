@@ -183,7 +183,9 @@ export function DashboardShell({
         </section>
       </div>
 
-      {/* Row 5: Needs Attention | Clan Log — 3 cols */}
+      {/* Row 5: Needs Attention | Opted Out | Clan Log — 3 cols.
+          Phase 2.1: attention-queue + clan-log rows deep-link to
+          /members?tag=… instead of opening a dashboard-local popup. */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <AttentionPanel
           title="Attention Queue"
@@ -207,8 +209,19 @@ export function DashboardShell({
               icon: "shield",
               members: data.needsAttention.rushed,
             },
+            // Phase 2.2: heavy receivers giving back too little — group is
+            // only rendered when the category is enabled in runtime_settings.
+            ...(data.needsAttention.donationRatio
+              ? [
+                  {
+                    label: `Low donation ratio (<${data.needsAttention.donationRatio.minRatio}× · ${data.needsAttention.donationRatio.windowDays}d)`,
+                    tone: "warning" as const,
+                    icon: "gift" as const,
+                    members: data.needsAttention.belowDonationRatio,
+                  },
+                ]
+              : []),
           ]}
-          onMemberClick={setSelectedMember}
         />
         <AttentionPanel
           title="Opted Out"
@@ -221,12 +234,8 @@ export function DashboardShell({
               members: data.needsAttention.warPreferenceOut,
             }
           ]}
-          onMemberClick={setSelectedMember}
         />
-        <ClanLogPanel
-          log={data.clanLog}
-          onMemberClick={setSelectedMember}
-        />
+        <ClanLogPanel log={data.clanLog} />
       </div>
 
       {/* Row 6: Hall of Fame — link to the dedicated page */}

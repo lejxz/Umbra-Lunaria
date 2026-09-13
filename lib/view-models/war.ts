@@ -108,6 +108,12 @@ export interface WarHistoryEntry {
   // True when a full snapshot exists (live-tracked) — the history row can open
   // a detail view. False for war-log backfill rows (no roster/attack detail).
   hasDetail: boolean;
+  // War log v2 enrichment (Phase 2.3): clan XP earned in this war (from the
+  // /warlog payload) and the derived per-attack value. Null when the source
+  // doesn't provide it (CWL rows, pre-enrichment backfill rows) — rendered
+  // null-safe by the history list.
+  expEarned: number | null;
+  expPerAttack: number | null;
   lastSyncedAt: Date | null;
 }
 

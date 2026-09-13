@@ -328,12 +328,17 @@ describe("toHistoryEntry — projection mapping", () => {
       attacksPerMember: 2,
       lastSyncedAt: new Date("2026-07-20T01:00:00Z"),
       hasSnapshot: true,
+      expEarned: 320,
+      expPerAttack: 5.33,
     };
     const entry = toHistoryEntry(proj);
     expect(entry.warId).toBe(42);
     expect(entry.hasDetail).toBe(true);
     expect(entry.result).toBe("win");
     expect(entry.opponentName).toBe("Enemy");
+    // Phase 2.3: XP enrichment maps through (history rows render XP chips).
+    expect(entry.expEarned).toBe(320);
+    expect(entry.expPerAttack).toBe(5.33);
   });
 
   it("maps a backfill row (no snapshot) with hasDetail=false", () => {
@@ -355,11 +360,16 @@ describe("toHistoryEntry — projection mapping", () => {
       attacksPerMember: null,
       lastSyncedAt: new Date("2026-07-22T00:00:00Z"),
       hasSnapshot: false,
+      expEarned: null,
+      expPerAttack: null,
     };
     const entry = toHistoryEntry(proj);
     expect(entry.hasDetail).toBe(false);
     expect(entry.result).toBe("tie");
     expect(entry.teamSize).toBeNull();
+    // Phase 2.3: null XP stays null (null-safe rendering — no fabricated 0).
+    expect(entry.expEarned).toBeNull();
+    expect(entry.expPerAttack).toBeNull();
   });
 });
 

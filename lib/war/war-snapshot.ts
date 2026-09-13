@@ -107,6 +107,8 @@ export interface HistoryProjection {
   attacksPerMember: number | null;
   lastSyncedAt: Date | null;
   hasSnapshot: boolean;
+  expEarned: number | null;
+  expPerAttack: number | null;
 }
 
 // ---------------------------------------------------------------------------
@@ -383,6 +385,8 @@ export function toHistoryEntry(row: HistoryProjection): WarHistoryEntry {
     startTime: row.startTime,
     attacksPerMember: row.attacksPerMember,
     hasDetail: row.hasSnapshot,
+    expEarned: row.expEarned,
+    expPerAttack: row.expPerAttack,
     lastSyncedAt: row.lastSyncedAt,
   };
 }

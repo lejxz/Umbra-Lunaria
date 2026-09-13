@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   computeWindow,
+  computeDayWindow,
   generateBuckets,
   formatInTimezone,
   startOfDayInClanTz,
@@ -306,5 +307,36 @@ describe("diffCalendarDaysInClanTz", () => {
     const a = new Date("2026-01-15T00:00:00Z");
     const b = new Date("2026-01-15T15:00:00Z");
     expect(diffCalendarDaysInClanTz(a, b)).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeDayWindow — Phase 2.2 (configurable-day window)
+// ---------------------------------------------------------------------------
+
+describe("computeDayWindow — configurable-day window (Phase 2.2)", () => {
+  it("matches computeWindow('30d') for days=30", () => {
+    const now = new Date("2026-09-13T09:30:00Z");
+    const byPreset = computeWindow("30d", now);
+    const byDays = computeDayWindow(30, now);
+    expect(byDays.from.getTime()).toBe(byPreset.from.getTime());
+    expect(byDays.to.getTime()).toBe(byPreset.to.getTime());
+  });
+
+  it("matches computeWindow('7d') for days=7", () => {
+    const now = new Date("2026-09-13T21:05:00Z");
+    const byPreset = computeWindow("7d", now);
+    const byDays = computeDayWindow(7, now);
+    expect(byDays.from.getTime()).toBe(byPreset.from.getTime());
+    expect(byDays.to.getTime()).toBe(byPreset.to.getTime());
+  });
+
+  it("spans (days−1) full clan-tz midnights plus today so far", () => {
+    // 2026-09-13T09:30Z = 17:30 Manila. 14-day window starts at Manila
+    // midnight 2026-08-31 (13 days back), i.e. 2026-08-30T16:00Z.
+    const now = new Date("2026-09-13T09:30:00Z");
+    const win = computeDayWindow(14, now);
+    expect(win.from.getTime()).toBe(new Date("2026-08-30T16:00:00Z").getTime());
+    expect(win.to.getTime()).toBe(now.getTime());
   });
 });

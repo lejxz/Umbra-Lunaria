@@ -85,6 +85,13 @@
       "when": 1785320000000,
       "tag": "0011_war_activity_signals",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1786998000000,
+      "tag": "0012_war_log_xp",
+      "breakpoints": true
     }
   ]
 }

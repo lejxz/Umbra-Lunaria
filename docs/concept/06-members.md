@@ -22,6 +22,10 @@ Each roster row or mobile card shows:
 
 Selecting a member opens the reusable member detail sheet. Desktop uses a centered modal; mobile uses a full-screen sheet.
 
+### Deep-linkable profiles (Phase 2.1)
+
+The selected member is part of the URL: `/members?tag=%23XXXXXXXX` opens that member's detail sheet on load, so a profile can be shared, bookmarked, and linked into from anywhere (dashboard attention-queue and clan-log rows do exactly that). Selecting a member pushes a new history entry with the tag; the browser Back button closes the sheet; switching members while a sheet is open replaces the entry instead of stacking one per click. The tag is validated against the roster on load — a stale or typo'd link lands on the plain roster rather than an error sheet. The query parameter is read via `window.location.search` after mount (not `useSearchParams`) to keep the route statically prerendered with ISR (`scripts/assert-route-modes.sh` guards this).
+
 ### Sort and filter contract
 
 Supported sorting:

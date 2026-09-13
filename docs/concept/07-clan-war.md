@@ -55,6 +55,8 @@ When no war is active, show the most recent completed war and a clear no-active-
 
 Show opponent, result, war size, stars, destruction, end date, and a link to a detail view. Historical backfill from `warlog` is permitted only while the clan’s `isWarLogPublic` value permits it.
 
+War-log rows also show the clan XP earned in that war when the API provides it (`clan.expEarned`, Phase 2.3): an XP chip with the derived per-attack value. The value is written by the daily warlog backfill (the only writer — `/currentwar` has no XP field), is null-safe everywhere, and stays null for CWL rows and payloads that predate the enrichment.
+
 If the war log is private or a historic record is unavailable, say so directly: history before tracking may be incomplete and new rich records build from captured current wars.
 
 ### Clan War League

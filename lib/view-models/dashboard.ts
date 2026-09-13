@@ -190,6 +190,14 @@ export interface NeedsAttention {
   attacksRemaining: NeedsAttentionMember[]; // in active war with attacks left
   warPreferenceOut: NeedsAttentionMember[]; // opted out of war
   rushed: NeedsAttentionMember[]; // rushed account (>60% rushed)
+  // Phase 2.2: received far more than given over the configured window
+  // (reset-aware totals, see lib/scoring/donation-ratio.ts). Sorted
+  // worst-first (lowest ratio first).
+  belowDonationRatio: NeedsAttentionMember[];
+  // Active donation-ratio settings (null when the category is disabled) so
+  // the UI can label the group with the live threshold and omit it entirely
+  // when off — instead of rendering an empty, confusing group.
+  donationRatio: { minRatio: number; windowDays: number } | null;
   inactivityThresholdDays: number;
 }
 

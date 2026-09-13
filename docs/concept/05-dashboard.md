@@ -80,8 +80,9 @@ Use separate, readable lists for:
 1. Members inactive beyond the administrator-configured threshold.
 2. Members in an active war with attacks remaining.
 3. Members whose war preference is `out`.
+4. Members below the donation ratio (Phase 2.2): received at least `receivedFloor` (default 200) troops over the configured window (default 30 days, reset-aware donation accounting) while giving back less than `minRatio` (default 0.5) of what they took. Request-light members under the floor are never flagged — flagging someone who received 20 troops is noise, not signal. The group is sorted worst-first (lowest given/received ratio at the top) and is absent entirely when the category is disabled. Settings live in `runtime_settings` under key `needsAttention.donationRatio` (JSONB: `{ enabled, minRatio, windowDays, receivedFloor }`), edited with SQL per the no-admin-UI design; code defaults apply when the key is absent.
 
-Every member item opens the same detail sheet. An opt-out is informational, not an error state.
+Every member item links to the member's profile on `/members` (Phase 2.1 — see `06-members.md` "Deep-linkable profiles"). An opt-out is informational, not an error state.
 
 ### 8. Hall of Fame
 
@@ -101,8 +102,8 @@ Each entry is clickable and opens the member detail sheet, same as every other m
 
 Render a most-recent-first feed of joins and departures with name, player tag, event type, and timestamp — sourced from `membership_events` (`03-data-model-and-database.md`), not the mutable `members` row directly. That distinction is what makes the click behavior below actually work: the event log is immutable and never pruned, so a "left 20 days ago" entry stays visible and correct even after the member's own row has been purged. A click opens:
 
-1. The normal member detail sheet for a retained player.
-2. A purpose-built "left on [date]; data removed under the retention policy" state for a purged player.
+1. The retained player's profile on `/members` via a `?tag=` deep link (Phase 2.1 — the members page owns the member detail sheet, and the resulting URL is shareable).
+2. A purpose-built "data removed under the retention policy" state for a purged player (no link — there is no profile to open).
 
 The default feed is the latest 20 events or 30 days, whichever is smaller.
 
