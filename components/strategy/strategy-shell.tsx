@@ -17,6 +17,7 @@ import dynamic from "next/dynamic";
 import { PageScaffold } from "@/components/page-scaffold";
 import { EmptyState } from "@/components/ui/empty-state";
 import { IconSwords, IconUsers } from "@/components/ui/icons";
+import { TargetingPanel } from "./targeting-panel";
 import type { StrategyPageData, SuggestedParticipant, ReviewMember } from "@/lib/view-models/strategy";
 
 // fix (docs/2026-09-11-priority-fixes.md, bundle): member detail sheet is
@@ -134,6 +135,14 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
           </div>
         )}
       </section>
+
+      {/* ── Section 3: Attack targeting intelligence (Phase 3.3) ─────── */}
+      {data.targeting && (
+        <TargetingPanel
+          targeting={data.targeting}
+          onMemberClick={(tag) => setSelectedMember(tag)}
+        />
+      )}
 
       {/* ── Shared member detail sheet ──────────────────────────────────── */}
       <MemberDetailSheet

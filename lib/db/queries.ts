@@ -36,6 +36,7 @@ import type {
   DonationLeaderboardEntry,
   DonationTimeline,
   DonationBucket,
+  CustomAnalyticsView,
   ActivityTimeline,
   ActivityBucket,
   ActivityScoreLeaderboard,
@@ -69,7 +70,7 @@ import {
 // stability — callers should keep importing from @/lib/db/queries.
 export { getWarRecord } from "@/lib/scoring/war-record";
 import { getWarRecord } from "@/lib/scoring/war-record";
-import { computeWindow, computeDayWindow, generateBuckets } from "@/lib/time/windows";
+import { computeWindow, computeDayWindow, computeCustomWindow, generateBuckets, type TimeWindow } from "@/lib/time/windows";
 import { getRuntimeSetting } from "@/lib/db/runtime-settings";
 import {
   DONATION_RATIO_SETTINGS_KEY,
@@ -218,11 +219,26 @@ export async function getDonationTotals(
   now: Date = new Date(),
 ): Promise<DonationTotals> {
   const win = computeWindow(windowKind, now);
+  return { window: windowKind, ...(await donationTotalsForWindow(win)) };
+}
+
+/** Window-generic core of getDonationTotals (Phase 3.2): accepts any
+ *  TimeWindow — the presets delegate here, and the custom date-range
+ *  analytics endpoint calls this with a validated clan-TZ-aligned window. */
+async function donationTotalsForWindow(
+  win: TimeWindow,
+): Promise<Omit<DonationTotals, "window">> {
   const trackingStart = await getTrackingStart();
 
   const retainedMembers = await getRetainedMembers();
   if (retainedMembers.length === 0) {
-    return emptyDonationTotals(windowKind, trackingStart);
+    return {
+      given: 0,
+      received: 0,
+      ratio: null,
+      trackingStart,
+      hasPartialData: false,
+    };
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
@@ -265,7 +281,6 @@ export async function getDonationTotals(
     trackingStart !== null && trackingStart > win.from;
 
   return {
-    window: windowKind,
     given,
     received,
     ratio: received > 0 ? given / received : null,
@@ -280,10 +295,19 @@ export async function getDonationLeaderboard(
   now: Date = new Date(),
 ): Promise<DonationLeaderboard> {
   const win = computeWindow(windowKind, now);
+  const core = await donationLeaderboardForWindow(win, limit);
+  return { window: windowKind, ...core };
+}
+
+/** Window-generic core of getDonationLeaderboard (Phase 3.2). */
+async function donationLeaderboardForWindow(
+  win: TimeWindow,
+  limit = 10,
+): Promise<Omit<DonationLeaderboard, "window">> {
   const retainedMembers = await getRetainedMembers();
 
   if (retainedMembers.length === 0) {
-    return { window: windowKind, topDonors: [], topReceivers: [] };
+    return { topDonors: [], topReceivers: [] };
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
@@ -356,7 +380,7 @@ export async function getDonationLeaderboard(
       rank: i + 1,
     }));
 
-  return { window: windowKind, topDonors, topReceivers };
+  return { topDonors, topReceivers };
 }
 
 export async function getDonationTimeline(
@@ -364,12 +388,22 @@ export async function getDonationTimeline(
   now: Date = new Date(),
 ): Promise<DonationTimeline> {
   const win = computeWindow(windowKind, now);
+  const core = await donationTimelineForWindow(win);
+  return { window: windowKind, ...core };
+}
+
+/** Window-generic core of getDonationTimeline (Phase 3.2). The reset-aware
+ *  per-bucket delta logic is unchanged — only the bucket generation became
+ *  window-aware (custom ranges get one bucket per calendar day). */
+async function donationTimelineForWindow(
+  win: TimeWindow,
+): Promise<Omit<DonationTimeline, "window">> {
   const buckets = generateBuckets(win);
   const trackingStart = await getTrackingStart();
 
   const retainedMembers = await getRetainedMembers();
   if (retainedMembers.length === 0) {
-    return { window: windowKind, buckets: [], hasPartialData: false };
+    return { buckets: [], hasPartialData: false };
   }
 
   const tags = retainedMembers.map((m) => m.playerTag);
@@ -451,10 +485,48 @@ export async function getDonationTimeline(
   });
 
   return {
-    window: windowKind,
     buckets: donationBuckets,
     hasPartialData: trackingStart !== null && trackingStart > win.from,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Custom date-range analytics (Phase 3.2 — F11)
+// ---------------------------------------------------------------------------
+
+/**
+ * Donation analytics over a user-chosen day range — the /api/analytics
+ * endpoint's query. `from`/`to` are "YYYY-MM-DD" clan-TZ day keys, validated
+ * by computeCustomWindow (strict ISO, from ≤ to, no future `to`, span ≤ 366
+ * days). Results are withCache'd per resolved day pair (5-min TTL) so the
+ * scan-every-day-pair abuse pattern from the implementation plan's risk table
+ * collapses to one query per pair per TTL window.
+ */
+export async function getCustomAnalytics(
+  from: string,
+  to: string,
+): Promise<
+  { ok: true; data: CustomAnalyticsView } | { ok: false; error: string }
+> {
+  const resolved = computeCustomWindow({ from, to });
+  if (!resolved.ok) return resolved;
+
+  const { window, fromDay, toDay, dayCount } = resolved;
+
+  const data = await withCache(
+    `analytics:${fromDay}:${toDay}`,
+    async (): Promise<CustomAnalyticsView> => {
+      const [totals, timeline, leaderboard] = await Promise.all([
+        donationTotalsForWindow(window),
+        donationTimelineForWindow(window),
+        donationLeaderboardForWindow(window),
+      ]);
+      return { from: fromDay, to: toDay, dayCount, totals, timeline, leaderboard };
+    },
+    5 * 60 * 1000,
+  );
+
+  return { ok: true, data };
 }
 
 // ---------------------------------------------------------------------------
@@ -1558,20 +1630,6 @@ async function fetchBoundedSnapshotsUncached(
   }));
 
   return [...baselineRows, ...inWindow];
-}
-
-function emptyDonationTotals(
-  window: DonationWindow,
-  trackingStart: Date | null,
-): DonationTotals {
-  return {
-    window,
-    given: 0,
-    received: 0,
-    ratio: null,
-    trackingStart,
-    hasPartialData: false,
-  };
 }
 
 // Re-export for backwards compat with any existing imports

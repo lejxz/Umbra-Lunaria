@@ -19,7 +19,11 @@ export function Tabs({
   label,
 }: {
   items: string[];
-  active: string;
+  /** Currently selected value. May be null/undefined when a sibling control
+ *  (e.g. the donation panel's custom date range, Phase 3.2) has taken over —
+ *  no tab renders selected, and the first tab keeps the roving tabindex
+ *  entry point so keyboard navigation still works. */
+  active?: string | null;
   onChange: (value: string) => void;
   label?: string;
 }) {
@@ -33,6 +37,10 @@ export function Tabs({
       onChange(items[clamped]!);
     }
   };
+
+  // With no active tab (custom range active), the first tab is the keyboard
+  // entry point — otherwise every tab would be tabIndex=-1 and unreachable.
+  const entryIndex = active == null || !items.includes(active) ? 0 : items.indexOf(active);
 
   const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
     switch (e.key) {
@@ -69,7 +77,7 @@ export function Tabs({
             ref={(el) => { tabRefs.current[index] = el; }}
             role="tab"
             aria-selected={selected}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={selected || index === entryIndex ? 0 : -1}
             className={`focus-ring rounded-lg px-3 py-2 text-xs font-semibold transition ${
               selected
                 ? "bg-umbra-purple/20 text-umbra-purple"

@@ -61,6 +61,7 @@ assert_static "/members" "1h"
 assert_static "/strategy" "1h"
 assert_static "/war" "5m"
 
+assert_dynamic "/api/analytics"
 assert_dynamic "/api/cron/purge"
 assert_dynamic "/api/ingest"
 assert_dynamic "/api/members/[tag]"

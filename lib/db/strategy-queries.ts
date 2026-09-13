@@ -17,21 +17,35 @@
  * their score is based on limited data.
  */
 
-import { and, eq, isNull, sql, inArray } from "drizzle-orm";
+import { and, desc, eq, isNull, sql, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   members,
   memberSnapshots,
   warParticipants,
   warAttacks,
+  wars,
 } from "@/lib/db/schema";
 import { clanConfig } from "@/config/clan.config";
 import type {
   StrategyPageData,
   SuggestedParticipant,
   ReviewMember,
+  TargetingIntelligence,
 } from "@/lib/view-models/strategy";
 import { getMemberActivityScore } from "@/lib/db/queries";
+import {
+  computeTargeting,
+  type TargetingAttack,
+} from "@/lib/scoring/targeting";
+import type { RawSnapshot } from "@/lib/war/war-snapshot";
+
+/** How many recent live-tracked wars feed the targeting analysis. Caps the
+ *  snapshot-parsing work and keeps the panel about “recent form”, not all
+ *  history (the full war-history list remains on the War page). */
+const TARGETING_WAR_LIMIT = 30;
+/** Members shown in the targeting table (most attacks first). */
+const TARGETING_MEMBER_LIMIT = 12;
 
 export async function getStrategyPage(): Promise<StrategyPageData> {
   // Fetch retained members with their key columns.
@@ -49,7 +63,7 @@ export async function getStrategyPage(): Promise<StrategyPageData> {
     .where(isNull(members.leftAt));
 
   if (retained.length === 0) {
-    return { suggested: [], review: [], totalMembers: 0 };
+    return { suggested: [], review: [], totalMembers: 0, targeting: null };
   }
 
   const tags = retained.map((m) => m.playerTag);
@@ -248,9 +262,118 @@ export async function getStrategyPage(): Promise<StrategyPageData> {
     return (b.daysInactive ?? 0) - (a.daysInactive ?? 0);
   });
 
+  // ---- Attack targeting intelligence (Phase 3.3 — F9) ----
+  const memberByTag = new Map(retained.map((m) => [m.playerTag, m]));
+  const targeting = await getTargetingIntelligence(tags, memberByTag);
+
   return {
     suggested,
     review,
     totalMembers: retained.length,
+    targeting,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Attack targeting intelligence (Phase 3.3 — F9)
+// ---------------------------------------------------------------------------
+
+/**
+ * Build the targeting analysis from the most recent live-tracked wars:
+ * war_attacks joined against each war's stored CocCurrentWar snapshot, where
+ * both TH levels are resolved (own side + opponent side both live in the
+ * snapshot). War-log backfilled wars carry no snapshot, so they never
+ * contribute — the panel states this honestly.
+ *
+ * Best-effort: a malformed/unparseable snapshot skips that war rather than
+ * failing the strategy page.
+ */
+async function getTargetingIntelligence(
+  tags: string[],
+  memberByTag: Map<
+    string,
+    { name: string; townHallLevel: number | null }
+  >,
+): Promise<TargetingIntelligence | null> {
+  // Recent snapshot-backed wars (bounded payload: ≤30 war rows).
+  const warRows = await db
+    .select({ id: wars.id, warSnapshot: wars.warSnapshot })
+    .from(wars)
+    .where(sql`${wars.warSnapshot} IS NOT NULL`)
+    .orderBy(desc(wars.endTime), desc(wars.id))
+    .limit(TARGETING_WAR_LIMIT);
+  if (warRows.length === 0) return null;
+
+  // Own-side attacks in those wars (war_attacks stores own-clan attackers
+  // only — opponent attacks live exclusively in the snapshot).
+  const warIds = warRows.map((w) => w.id);
+  const attackRows = await db
+    .select({
+      warId: warAttacks.warId,
+      attackerTag: warAttacks.attackerTag,
+      defenderTag: warAttacks.defenderTag,
+      stars: warAttacks.stars,
+      destructionPercentage: warAttacks.destructionPercentage,
+    })
+    .from(warAttacks)
+    .where(
+      and(
+        inArray(warAttacks.warId, warIds),
+        inArray(warAttacks.attackerTag, tags),
+      ),
+    );
+  if (attackRows.length === 0) return null;
+
+  // tag → TH per war, parsed once per snapshot (both clans' members).
+  const thByWar = new Map<number, Map<string, number>>();
+  for (const w of warRows) {
+    const snap = w.warSnapshot as RawSnapshot | null;
+    if (!snap?.clan || !snap.opponent) continue;
+    const th = new Map<string, number>();
+    for (const m of [...(snap.clan.members ?? []), ...(snap.opponent.members ?? [])]) {
+      if (m.tag && typeof m.townhallLevel === "number") {
+        th.set(m.tag, m.townhallLevel);
+      }
+    }
+    thByWar.set(w.id, th);
+  }
+
+  const attacks: TargetingAttack[] = [];
+  for (const a of attackRows) {
+    const th = thByWar.get(a.warId);
+    if (!th) continue;
+    const attackerTh = th.get(a.attackerTag);
+    const defenderTh = th.get(a.defenderTag);
+    if (attackerTh === undefined || defenderTh === undefined) continue;
+    attacks.push({
+      warId: a.warId,
+      attackerTag: a.attackerTag,
+      attackerTownhallLevel: attackerTh,
+      defenderTownhallLevel: defenderTh,
+      stars: a.stars,
+      destructionPercentage: a.destructionPercentage,
+    });
+  }
+  if (attacks.length === 0) return null;
+
+  const result = computeTargeting(attacks);
+
+  return {
+    coveredWars: warRows.length,
+    totalAttacks: result.totalAttacks,
+    aggregate: result.aggregate,
+    members: result.members
+      .slice(0, TARGETING_MEMBER_LIMIT)
+      .map((m) => ({
+        playerTag: m.playerTag,
+        name: memberByTag.get(m.playerTag)?.name ?? m.playerTag,
+        townHallLevel: memberByTag.get(m.playerTag)?.townHallLevel ?? null,
+        attacks: m.attacks,
+        avgStars: m.avgStars,
+        avgDestruction: m.avgDestruction,
+        threeStarRate: m.threeStarRate,
+        bestDelta: m.bestDelta,
+        worstDelta: m.worstDelta,
+      })),
   };
 }

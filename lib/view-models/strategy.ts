@@ -65,4 +65,47 @@ export interface StrategyPageData {
   suggested: SuggestedParticipant[];
   review: ReviewMember[];
   totalMembers: number;
+  /**
+   * Attack targeting intelligence (Phase 3.3 — F9): how the clan performs by
+   * THΔ (defender TH − attacker TH), clan-wide and per member. Null when no
+   * snapshot-backed war attacks exist yet (war-log backfilled wars carry no
+   * defender detail, so they never contribute here).
+   */
+  targeting: TargetingIntelligence | null;
+}
+
+// ---------------------------------------------------------------------------
+// Attack targeting intelligence (Phase 3.3 — F9)
+// ---------------------------------------------------------------------------
+
+export interface TargetingThBucket {
+  /** "-2" (attack ≥2 down), "-1", "0", "+1", "+2+" (attack ≥2 up). */
+  delta: string;
+  attacks: number;
+  avgStars: number | null;
+  avgDestruction: number | null;
+  threeStarRate: number | null;
+}
+
+export interface TargetingMember {
+  playerTag: string;
+  name: string;
+  townHallLevel: number | null;
+  attacks: number;
+  avgStars: number | null;
+  avgDestruction: number | null;
+  threeStarRate: number | null;
+  /** Δ bucket this member performs best in (avg stars; ≥2 attacks). */
+  bestDelta: string | null;
+  /** Δ bucket this member performs worst in (avg stars; ≥2 attacks). */
+  worstDelta: string | null;
+}
+
+export interface TargetingIntelligence {
+  /** Live-tracked (snapshot-backed) wars the analysis covers. */
+  coveredWars: number;
+  totalAttacks: number;
+  aggregate: TargetingThBucket[];
+  /** Sorted by attacks descending (query layer caps the list). */
+  members: TargetingMember[];
 }

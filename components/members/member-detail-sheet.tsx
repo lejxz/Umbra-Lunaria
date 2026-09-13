@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { formatRole, type MemberDetailView } from "@/lib/view-models/members";
 import { Modal } from "@/components/ui/modal";
-import { Badge, UnavailableValue } from "@/components/ui";
+import { Badge, Tabs, UnavailableValue } from "@/components/ui";
 import { SectionLabel } from "@/components/ui/section-label";
 import { getUnitIcon } from "@/lib/assets/unit-icon-map";
 import { isSuperTroop } from "@/lib/assets/super-troops";
@@ -58,6 +58,7 @@ export function MemberDetailContent({ detail }: { detail: MemberDetailView }) {
       
       <DonationsSection detail={detail} />
       <ActivityScoreSection detail={detail} />
+      <ProgressSection detail={detail} />
       <RushedSection detail={detail} />
       <ProgressionSection detail={detail} />
       <AchievementsSection detail={detail} />
@@ -406,6 +407,127 @@ function ActivityScoreSection({ detail }: { detail: MemberDetailView }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Section: Progress (window) — Phase 3.1 career deltas between snapshots
+// ---------------------------------------------------------------------------
+
+type ProgressWindowKey = "7d" | "30d" | "all";
+
+function ProgressSection({ detail }: { detail: MemberDetailView }) {
+  const [window, setWindow] = useState<ProgressWindowKey>("30d");
+  const p = detail.progress;
+  const w = p.windows[window];
+
+  // Cold tracker: no career snapshots exist yet (first daily batch pending).
+  if (!p.trackingStartedAt) {
+    return (
+      <div>
+        <div className="mb-2 flex items-center justify-between border-b border-umbra-line/50 pb-1">
+          <h3 className="font-display text-sm font-semibold text-umbra-lilac">Progress</h3>
+        </div>
+        <p className="text-xs text-umbra-muted">
+          No career snapshots recorded yet — the first daily batch creates the
+          baseline, and per-window deltas appear from the next one.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between border-b border-umbra-line/50 pb-1">
+        <h3 className="font-display text-sm font-semibold text-umbra-lilac">Progress</h3>
+        <Tabs
+          items={["7d", "30d", "all"]}
+          active={window}
+          onChange={(v) => setWindow(v as ProgressWindowKey)}
+          label="Progress window"
+        />
+      </div>
+
+      {w.partial && (
+        <p className="mb-2 rounded-lg bg-amber-400/10 px-3 py-1.5 text-2xs text-amber-400">
+          ⚠ Tracking started {fmtDate(p.trackingStartedAt, { month: "short", day: "numeric", year: "numeric" })} — deltas are measured from then; earlier gains aren&apos;t captured.
+        </p>
+      )}
+
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+        <DeltaStat label="War stars" value={w.warStars} accent="amber" />
+        <DeltaStat label="Attack wins" value={w.attackWins} accent="emerald" />
+        <DeltaStat label="Capital contrib" value={w.clanCapitalContributions} accent="purple" />
+        <DeltaStat label="XP levels" value={w.expLevels} />
+        <DeltaStat label="Defense wins" value={w.defenseWins} muted />
+      </div>
+
+      {w.achievements.length > 0 ? (
+        <div className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+          {w.achievements.slice(0, 8).map((a) => (
+            <div
+              key={a.name}
+              className="flex items-center justify-between rounded-lg border border-white/[.02] bg-white/[.03] px-3 py-1.5 text-xs"
+            >
+              <span className="truncate font-medium text-umbra-lilac/90" title={a.name}>
+                {a.name}
+              </span>
+              <span className="ml-3 shrink-0 font-mono font-semibold text-emerald-400">
+                +{a.delta.toLocaleString()}
+                <span className="ml-1 font-normal text-umbra-muted/70">
+                  {a.from.toLocaleString()} → {a.to.toLocaleString()}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-3 text-xs text-umbra-muted">
+          No achievement movement in this window.
+        </p>
+      )}
+
+      <p className="mt-2 text-2xs text-umbra-muted/50">
+        Baseline {fmtDate(w.baselineAt, { month: "short", day: "numeric", year: "numeric" })} · career
+        totals only move on gameplay (defense wins are passive, shown for completeness).
+      </p>
+    </div>
+  );
+}
+
+function DeltaStat({
+  label,
+  value,
+  accent,
+  muted,
+}: {
+  label: string;
+  value: number | null;
+  accent?: "emerald" | "amber" | "purple";
+  muted?: boolean;
+}) {
+  const colorClass = muted
+    ? "text-umbra-muted"
+    : accent === "emerald"
+      ? "text-emerald-400"
+      : accent === "amber"
+        ? "text-amber-400"
+        : accent === "purple"
+          ? "text-umbra-purple"
+          : "text-white";
+  return (
+    <div className="flex flex-col justify-center rounded-lg border border-white/[.02] bg-white/[.03] px-3 py-2">
+      <p className="font-mono text-label uppercase tracking-wider text-umbra-muted">{label}</p>
+      <p className={`mt-0.5 text-sm font-semibold ${colorClass}`}>
+        {value === null ? (
+          <UnavailableValue />
+        ) : value >= 0 ? (
+          `+${value.toLocaleString()}`
+        ) : (
+          value.toLocaleString()
+        )}
+      </p>
     </div>
   );
 }

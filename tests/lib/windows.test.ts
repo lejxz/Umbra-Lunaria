@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   computeWindow,
   computeDayWindow,
+  computeCustomWindow,
   generateBuckets,
   formatInTimezone,
   startOfDayInClanTz,
@@ -338,5 +339,104 @@ describe("computeDayWindow — configurable-day window (Phase 2.2)", () => {
     const win = computeDayWindow(14, now);
     expect(win.from.getTime()).toBe(new Date("2026-08-30T16:00:00Z").getTime());
     expect(win.to.getTime()).toBe(now.getTime());
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeCustomWindow + custom buckets — Phase 3.2 (F11 custom date ranges)
+// ---------------------------------------------------------------------------
+
+describe("computeCustomWindow — validation (Phase 3.2)", () => {
+  // Manila is UTC+8: 2026-09-13T02:00Z is 2026-09-13 10:00 in the clan TZ —
+  // "today" is 2026-09-13 throughout these fixtures.
+  const NOW = new Date("2026-09-13T02:00:00Z");
+
+  it("resolves a valid range to clan-TZ midnights (from inclusive, to full-day)", () => {
+    const result = computeCustomWindow({ from: "2026-07-01", to: "2026-07-31" }, NOW);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    // Manila midnight of Jul 1 = 2026-06-30T16:00Z; the day AFTER Jul 31
+    // midnight = 2026-07-31T16:00Z (exclusive end = full last day).
+    expect(result.window.from.getTime()).toBe(new Date("2026-06-30T16:00:00Z").getTime());
+    expect(result.window.to.getTime()).toBe(new Date("2026-07-31T16:00:00Z").getTime());
+    expect(result.window.kind).toBe("custom");
+    expect(result.dayCount).toBe(31);
+    expect(result.fromDay).toBe("2026-07-01");
+    expect(result.toDay).toBe("2026-07-31");
+  });
+
+  it("accepts today as `to`", () => {
+    const result = computeCustomWindow({ from: "2026-09-07", to: "2026-09-13" }, NOW);
+    expect(result.ok).toBe(true);
+  });
+
+  it("rejects a future `to` (clan-TZ day)", () => {
+    const result = computeCustomWindow({ from: "2026-09-01", to: "2026-09-14" }, NOW);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toMatch(/future/i);
+  });
+
+  it("rejects `from` after `to`", () => {
+    const result = computeCustomWindow({ from: "2026-08-05", to: "2026-08-01" }, NOW);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toMatch(/on or before/);
+  });
+
+  it("rejects non-ISO / malformed days", () => {
+    for (const bad of ["8/1/2026", "2026-8-01", "20260801", "abc", ""]) {
+      expect(computeCustomWindow({ from: bad, to: "2026-09-01" }, NOW).ok).toBe(false);
+      expect(computeCustomWindow({ from: "2026-09-01", to: bad }, NOW).ok).toBe(false);
+    }
+  });
+
+  it("rejects calendar dates that don't exist (2026-02-30)", () => {
+    expect(computeCustomWindow({ from: "2026-02-30", to: "2026-03-01" }, NOW).ok).toBe(false);
+  });
+
+  it("rejects ranges wider than 366 days", () => {
+    const result = computeCustomWindow({ from: "2024-01-01", to: "2026-09-01" }, NOW);
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error).toMatch(/too wide/i);
+  });
+
+  it("accepts exactly 366 days (leap year span)", () => {
+    // 2024-01-01..2024-12-31 is 366 days (leap year).
+    const result = computeCustomWindow({ from: "2024-01-01", to: "2024-12-31" }, NOW);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.dayCount).toBe(366);
+  });
+});
+
+describe("generateBuckets — custom windows (Phase 3.2)", () => {
+  it("produces one bucket per calendar day with date labels", () => {
+    const win = computeWindow("7d", new Date("2026-09-13T02:00:00Z"));
+    const custom = computeCustomWindow(
+      { from: "2026-09-07", to: "2026-09-13" },
+      new Date("2026-09-13T02:00:00Z"),
+    );
+    if (!custom.ok) throw new Error("fixture range invalid");
+    const buckets = generateBuckets(custom.window);
+    expect(buckets).toHaveLength(7);
+    // Labels are clan-TZ ("MMM d") and start on the `from` day.
+    expect(buckets[0]?.label).toBe("Sep 7");
+    expect(buckets[6]?.label).toBe("Sep 13");
+    // Same midnight anchoring as the equivalent preset window.
+    expect(buckets[0]?.timestamp.getTime()).toBe(
+      generateBuckets(win)[0]?.timestamp.getTime(),
+    );
+  });
+
+  it("spans a long range without truncation (leap-year span, 366 days)", () => {
+    const custom = computeCustomWindow(
+      { from: "2024-01-01", to: "2024-12-31" },
+      new Date("2026-09-13T02:00:00Z"),
+    );
+    if (!custom.ok) throw new Error("fixture range invalid");
+    const buckets = generateBuckets(custom.window);
+    expect(buckets.length).toBe(366);
   });
 });

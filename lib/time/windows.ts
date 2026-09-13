@@ -12,7 +12,14 @@
 
 import { clanConfig } from "@/config/clan.config";
 
-export type WindowKind = "24h" | "7d" | "30d" | "all";
+/** The four preset windows. `computeWindow` accepts these (and every
+ *  historical caller passes a subset — DonationWindow, ScoreWindow). */
+export type PresetWindowKind = "24h" | "7d" | "30d" | "all";
+
+/** Any window kind, including the Phase 3.2 user-chosen custom range.
+ *  `TimeWindow.kind` carries it; `computeCustomWindow` produces the custom
+ *  variant (with validated, clan-TZ-aligned boundaries). */
+export type WindowKind = PresetWindowKind | "custom";
 
 export interface TimeWindow {
   from: Date;
@@ -38,7 +45,10 @@ export interface TimeWindow {
  *     in the previous day's bucket and bucket labels drifted from their
  *     contents.
  */
-export function computeWindow(kind: WindowKind, now: Date = new Date()): TimeWindow {
+export function computeWindow(
+  kind: PresetWindowKind,
+  now: Date = new Date(),
+): TimeWindow {
   switch (kind) {
     case "24h": {
       const to = snapUpToHour(now);
@@ -55,6 +65,113 @@ export function computeWindow(kind: WindowKind, now: Date = new Date()): TimeWin
     case "all":
       return { from: new Date(0), to: now, kind };
   }
+}
+
+// ---------------------------------------------------------------------------
+// Custom date-range windows (Phase 3.2 — F11 "custom date-range analytics")
+// ---------------------------------------------------------------------------
+
+/** Max span a custom range may cover (days) — caps chart width and the
+ *  day-pair cache-key space. A full year covers every CWL/season use case. */
+export const CUSTOM_RANGE_MAX_DAYS = 366;
+
+const ISO_DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Parse a "YYYY-MM-DD" string into its clan-TZ midnight (UTC instant).
+ *  Returns null for malformed input or a date that doesn't exist on the
+ *  calendar (2026-02-30) — round-tripped through Date so the calendar
+ *  itself is the authority. */
+function parseIsoDayInClanTz(day: string): Date | null {
+  if (!ISO_DAY_RE.test(day)) return null;
+  const [y, m, d] = day.split("-").map(Number);
+  if (!y || !m || !d || m < 1 || m > 12 || d < 1 || d > 31) return null;
+  // Reject rollovers (e.g. 2026-02-30 → March 2).
+  if (
+    !Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d) ||
+    new Date(Date.UTC(y, m - 1, d)).getUTCDate() !== d
+  ) {
+    return null;
+  }
+  // Noon UTC falls on the same calendar date in every real timezone, so
+  // startOfDayInClanTz(noon) is exactly the requested day's clan-TZ midnight
+  // — reusing the same tested conversion the presets rely on.
+  const noonUtc = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  return startOfDayInClanTz(noonUtc);
+}
+
+export interface CustomRangeInput {
+  from: string; // "YYYY-MM-DD" (inclusive)
+  to: string; // "YYYY-MM-DD" (inclusive)
+}
+
+export type CustomWindowResult =
+  | {
+      ok: true;
+      window: TimeWindow;
+      /** Normalized day keys actually used (echoed for cache keys / UI). */
+      fromDay: string;
+      toDay: string;
+      /** Number of calendar days covered, inclusive. */
+      dayCount: number;
+    }
+  | { ok: false; error: string };
+
+/**
+ * Validate and resolve a user-supplied custom day range into a TimeWindow
+ * aligned to clan-timezone midnights (the same boundary discipline as the
+ * presets — docs/concept/04 "Time-window boundaries are calculated in the
+ * clan timezone, then queried as UTC timestamps").
+ *
+ * Rules (implementation-plan §3.2): strict ISO days only; `from` ≤ `to`;
+ * `to` must not be in the future (clan-TZ); span ≤ 366 days. The resulting
+ * window is [from-midnight, to-next-midnight) — the FULL last day, matching
+ * the 7d/30d presets' "today so far" semantics as closely as a closed range
+ * allows.
+ */
+export function computeCustomWindow(
+  input: CustomRangeInput,
+  now: Date = new Date(),
+): CustomWindowResult {
+  const { from, to } = input;
+
+  const fromDay = parseIsoDayInClanTz(from);
+  if (!fromDay) {
+    return { ok: false, error: "`from` must be a valid ISO day (YYYY-MM-DD)" };
+  }
+  const toDay = parseIsoDayInClanTz(to);
+  if (!toDay) {
+    return { ok: false, error: "`to` must be a valid ISO day (YYYY-MM-DD)" };
+  }
+
+  // `to` must not be in the future: the day AFTER `to` (the exclusive bound)
+  // must not be past the clan-TZ start of tomorrow.
+  const tomorrowStart = startOfDayInClanTz(now).getTime() + 86_400_000;
+  if (toDay.getTime() + 86_400_000 > tomorrowStart) {
+    return { ok: false, error: "`to` must not be in the future" };
+  }
+
+  const dayCount = Math.round((toDay.getTime() - fromDay.getTime()) / 86_400_000) + 1;
+  if (dayCount < 1) {
+    return { ok: false, error: "`from` must be on or before `to`" };
+  }
+  if (dayCount > CUSTOM_RANGE_MAX_DAYS) {
+    return {
+      ok: false,
+      error: `Range too wide — ${dayCount} days, max ${CUSTOM_RANGE_MAX_DAYS}`,
+    };
+  }
+
+  return {
+    ok: true,
+    window: {
+      from: fromDay,
+      to: new Date(toDay.getTime() + 86_400_000), // exclusive end = full last day
+      kind: "custom",
+    },
+    fromDay: from,
+    toDay: to,
+    dayCount,
+  };
 }
 
 /** Round an instant UP to the top of the current hour (UTC hours are exact
@@ -104,7 +221,7 @@ export function generateBuckets(
   window: TimeWindow,
   timezone: string = clanConfig.timezone,
 ): Array<{ label: string; timestamp: Date }> {
-  const { kind, from } = window;
+  const { kind, from, to } = window;
   const buckets: Array<{ label: string; timestamp: Date }> = [];
 
   if (kind === "24h") {
@@ -127,7 +244,7 @@ export function generateBuckets(
         timestamp: ts,
       });
     }
-  } else {
+  } else if (kind === "30d") {
     // 30-day buckets — labels like "Jul 1", "Jul 2" (dates, not weekdays,
     // so the axis doesn't look like it's only showing 7 days)
     for (let i = 0; i < 30; i++) {
@@ -136,6 +253,19 @@ export function generateBuckets(
       buckets.push({
         label: formatInTimezone(ts, timezone, "MMM d"),
         timestamp: ts,
+      });
+    }
+  } else {
+    // Custom windows (Phase 3.2): one bucket per calendar day in the range,
+    // labels like "Jul 1". The chart thins x-labels itself
+    // (interval="preserveStartEnd", minTickGap), so a 366-day range stays
+    // readable. The final (partial) day uses the window's `to` as its end.
+    const start = from.getTime();
+    const end = to.getTime();
+    for (let ts = start; ts < end; ts += 86_400_000) {
+      buckets.push({
+        label: formatInTimezone(new Date(ts), timezone, "MMM d"),
+        timestamp: new Date(ts),
       });
     }
   }

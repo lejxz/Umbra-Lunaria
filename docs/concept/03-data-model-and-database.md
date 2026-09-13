@@ -33,6 +33,11 @@ One row per currently retained player tag. It holds the latest display profile a
 
 ### `member_snapshots`
 
+One row per observed member per light poll (see the pruning rules below —
+intra-day rows only survive 7 days). Phase 1 (2026-09-11) added
+`exp_level` as interval-grain activity evidence; Phase 3.1 (2026-09-13) added
+the day-grain career evidence described next.
+
 One row per observed member per light poll. It contains the counters required to derive historical trends:
 
 1. Donations given and received.
@@ -42,6 +47,28 @@ One row per observed member per light poll. It contains the counters required to
 5. Capture timestamp.
 
 This table is the source for donation windows, activity timelines, estimated login days, and the activity component of Member Activity Score.
+
+### `member_career_snapshots` (Phase 3.1)
+
+One row per retained member per daily batch — the full career state
+(`war_stars`, `attack_wins`, `defense_wins`, `clan_capital_contributions`,
+`exp_level`, and the achievements JSONB) written BEFORE `members.career_stats`
+is overwritten. Two consumers:
+
+1. **Progress (window)** — the member detail sheet diffs the current career
+   state against the snapshot at/before the window start ("war stars +12
+   this month"). Null-safe by design: a window predating tracking shows a
+   "tracking started <date>" note, never fabricated zeros.
+2. **Day-grain activity evidence** — when career totals rose between two
+   captures, the batch flags that day's last `member_snapshots` row
+   (activity + login-day). Career totals only move on gameplay — the
+   deliberate exclusions are `defense_wins` (passive — rises when opponents
+   lose attacks against the village) and `exp_level` (already interval-grain
+   via `member_snapshots`).
+
+Retention: **kept forever, never pruned** — ~8 KB × members × 365 days
+(≈20 MB/year at the current roster). See "NOT pruned" below for the escape
+hatch.
 
 ### `unit_levels`
 
@@ -167,6 +194,7 @@ Checkpoints are computed:
 | `war_participants` | Small (~200/year), referenced by member war history (all-time). |
 | `hall_of_fame_records` | 5 rows per award, overwritten not accumulated. |
 | `cwl_seasons` | ~12/year, tiny. |
+| `member_career_snapshots` | ~8 KB × members per day (≈20 MB/year at the current roster) — the entire per-window Progress feature depends on history. Escape hatch if growth ever matters on the 500 MB tier: prune rows older than N years EXCEPT each member's earliest row (keeps the "all" window honest) and one row per ~90 days (keeps long-range windows approximate). |
 | Daily last-of-day snapshots | Kept forever — preserve the donation-delta chain and login-day flags. The checkpoint columns cover the lifetime totals. |
 
 ### Cron architecture

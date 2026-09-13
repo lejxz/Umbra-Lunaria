@@ -11,8 +11,11 @@ import { IconChevronRight } from "@/components/ui/icons";
  *   1. Season header (season name, state, our rank, captured time).
  *   2. Day-by-day round tabs (Day 1-7) — each tab shows our clan's opponent
  *      and result for that round.
- *   3. League standings table — all 8 clans ranked by stars, with W/L/T,
- *      stars for/against, destruction %.
+ *   3. League standings table — all 8 clans ranked by stars, with played,
+ *      W/L/T record, stars for/against (±), destruction %, and the current
+ *      promotion/relegation trajectory (Phase 3.4: rank 1 = promotion
+ *      candidate, bottom two = relegation risk — thresholds vary by league
+ *      tier, most leagues run two up / two down per Supercell's rules).
  *
  * Renders when `cwlSeason` is non-null (the clan is in CWL). The parent
  * (war-shell) conditionally shows this above the regular war hero.
@@ -26,6 +29,12 @@ export function CwlLeagueView({
 }) {
   const [activeRound, setActiveRound] = useState(0);
   const round: CwlRoundWar | undefined = season.rounds[activeRound];
+  const standingsCount = season.standings.length;
+
+  // Trajectory chips only make sense on a real league group (8 clans by
+  // design; guard small/partial tables so a 3-clan table never renders three
+  // "relegated" clans).
+  const showTrajectory = standingsCount >= 6;
 
   return (
     <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="cwl-title">
@@ -131,49 +140,88 @@ export function CwlLeagueView({
             <tr>
               <th className="w-8 data-th text-center">#</th>
               <th className="data-th">Clan</th>
+              <th className="data-th text-center">Pl</th>
               <th className="data-th text-center">W</th>
               <th className="data-th text-center">L</th>
-              <th className="data-th text-center">T</th>
-              <th className="data-th text-center">★</th>
+              <th className="hidden data-th text-center sm:table-cell">T</th>
+              <th className="data-th text-center">★±</th>
               <th className="hidden data-th text-right sm:table-cell">Destr.</th>
             </tr>
           </thead>
           <tbody className="data-tbody">
-            {season.standings.map((s, i) => (
-              <tr
-                key={s.tag}
-                className={`text-sm data-tr ${s.isOwnClan ? "bg-umbra-purple/5" : ""}`}
-              >
-                <td className="data-td text-center font-mono text-2xs text-umbra-muted">{i + 1}</td>
-                <td className="data-td">
-                  <div className="flex items-center gap-2">
-                    {s.badgeUrls?.small && (
-                      <div className="relative h-6 w-6">
-                        <Image src={s.badgeUrls.small} alt={`${s.name} badge`} fill className={`object-contain ${s.isOwnClan ? "" : "grayscale"}`} />
-                      </div>
-                    )}
-                    <span className={`truncate text-xs ${s.isOwnClan ? "text-umbra-lilac font-semibold" : "text-umbra-muted"}`}>
-                      {s.name}
+            {season.standings.map((s, i) => {
+              const isPromotion = showTrajectory && i === 0;
+              const isRelegation =
+                showTrajectory &&
+                (i === standingsCount - 1 || i === standingsCount - 2);
+              return (
+                <tr
+                  key={s.tag}
+                  className={`text-sm data-tr ${s.isOwnClan ? "bg-umbra-purple/5" : ""}`}
+                >
+                  <td className="data-td text-center font-mono text-2xs text-umbra-muted">
+                    <span className="inline-flex items-center gap-0.5">
+                      {i + 1}
+                      {isPromotion && (
+                        <span
+                          className="text-emerald-400"
+                          title="Promotion candidate — currently finishing 1st"
+                          aria-label="Promotion candidate"
+                        >
+                          ↑
+                        </span>
+                      )}
+                      {isRelegation && (
+                        <span
+                          className="text-red-400"
+                          title="Relegation risk — currently in the bottom two"
+                          aria-label="Relegation risk"
+                        >
+                          ↓
+                        </span>
+                      )}
                     </span>
-                  </div>
-                </td>
-                <td className="data-td text-center font-mono text-emerald-400">{s.wins}</td>
-                <td className="data-td text-center font-mono text-red-400">{s.losses}</td>
-                <td className="data-td text-center font-mono text-amber-400">{s.ties}</td>
-                <td className="data-td text-center font-mono font-bold text-amber-400">{s.starsFor}</td>
-                <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted sm:table-cell">
-                  {s.destructionPercentage != null ? `${s.destructionPercentage}%` : "—"}
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="data-td">
+                    <div className="flex items-center gap-2">
+                      {s.badgeUrls?.small && (
+                        <div className="relative h-6 w-6">
+                          <Image src={s.badgeUrls.small} alt={`${s.name} badge`} fill className={`object-contain ${s.isOwnClan ? "" : "grayscale"}`} />
+                        </div>
+                      )}
+                      <span className={`truncate text-xs ${s.isOwnClan ? "text-umbra-lilac font-semibold" : "text-umbra-muted"}`}>
+                        {s.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="data-td text-center font-mono text-2xs text-umbra-muted">{s.warsPlayed}</td>
+                  <td className="data-td text-center font-mono text-emerald-400">{s.wins}</td>
+                  <td className="data-td text-center font-mono text-red-400">{s.losses}</td>
+                  <td className="hidden data-td text-center font-mono text-amber-400 sm:table-cell">{s.ties}</td>
+                  <td className="data-td text-center font-mono font-bold text-amber-400">
+                    {s.starsFor - s.starsAgainst >= 0 ? "+" : ""}
+                    {s.starsFor - s.starsAgainst}
+                    <span className="ml-1 font-normal text-umbra-muted/60" title={`${s.starsFor} for / ${s.starsAgainst} against`}>
+                      ({s.starsFor}/{s.starsAgainst})
+                    </span>
+                  </td>
+                  <td className="hidden data-td text-right font-mono text-2xs text-umbra-muted sm:table-cell">
+                    {s.destructionPercentage != null ? `${s.destructionPercentage}%` : "—"}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
 
-      {/* Honest caveat about partial standings */}
+      {/* Honest caveat: standings scope + trajectory thresholds */}
       <p className="mt-3 text-2xs text-umbra-muted/50">
-        Standings reflect wars involving our clan. Other clans&apos; wars against each
-        other will appear once the full league-group ingestion is active during CWL season.
+        Standings aggregate every war in the league group — ours and other clans&apos;
+        (both sides of every round, synced each poll). ↑ marks the current
+        promotion candidate and ↓ the bottom-two relegation risk; exact
+        thresholds vary by league tier (most leagues run two up / two down), so
+        treat them as the live trajectory, not the final verdict.
       </p>
     </section>
   );

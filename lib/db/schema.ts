@@ -160,6 +160,43 @@ export const memberSnapshots = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// member_career_snapshots — one row per retained member per daily batch
+// (Phase 3.1, migration 0013). Written BEFORE members.career_stats is
+// overwritten, so diffs between captures yield per-window career progress
+// ("war stars +12 this month", per-achievement deltas) and mark day-grain
+// activity evidence the 5-minute poll cannot see (implementation-plan §1.5
+// item 7). Retention: keep all rows — see docs/concept/03 §"Retention and
+// pruning" for the escape hatch.
+// ---------------------------------------------------------------------------
+
+export const memberCareerSnapshots = pgTable(
+  "member_career_snapshots",
+  {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    playerTag: text("player_tag")
+      .notNull()
+      .references(() => members.playerTag),
+    capturedAt: timestamp("captured_at", { withTimezone: true }).notNull(),
+    // Career scalars as of this capture — the same fields the daily batch
+    // overwrites on `members`. Null-safe: absent API fields stay null.
+    warStars: integer("war_stars"),
+    attackWins: integer("attack_wins"),
+    defenseWins: integer("defense_wins"),
+    clanCapitalContributions: integer("clan_capital_contributions"),
+    expLevel: integer("exp_level"),
+    // Full achievements payload (same shape as members.career_stats:
+    // { achievements: [{ name, value, target?, stars?, village? }] }).
+    careerStats: jsonb("career_stats"),
+  },
+  (table) => [
+    index("member_career_snapshots_tag_captured_idx").on(
+      table.playerTag,
+      table.capturedAt,
+    ),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // membership_events — immutable record of observed joins, departures, and
 // rejoins. Survives profile purge so the clan log can still render
 // "left on [date]; data removed" for departed members.

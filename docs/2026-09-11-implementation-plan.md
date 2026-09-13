@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-11
 **Inputs:** owner-selected feature list from [`2026-09-10-application-assessment.md`](./2026-09-10-application-assessment.md) §7 (items 1, 3, 5, 6, 8–12), the owner's priority question about activity tracking, and a read-only inspection of the production database (2026-09-11).
-**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), and Phase 2 (quick wins) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md). Phases 3–5 are specified here for execution in order.
+**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), Phase 2 (quick wins), and Phase 3 (analytics features) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md), [`2026-09-13-phase3-analytics-features.md`](./2026-09-13-phase3-analytics-features.md). Phases 4–5 are specified here for execution in order.
 
 ---
 
@@ -111,7 +111,9 @@ Execution record + verification against the acceptance criteria: [`2026-09-13-ph
 
 **2.3 War log v2 enrichment (F6).** `wars.exp_earned` + `wars.exp_per_attack` columns (migration); `backfillWarLog` writes `expEarned` from the warlog payload (`CocWarLogEntry.clan.expEarned` — field already typed, `lib/coc-client/client.ts:277`); war-history rows gain XP chips. One-time enrichment = the daily backfill itself (idempotent upsert). Acceptance: history rows show XP where the API provides it; null-safe rendering; `next build` + route-modes gate green.
 
-### Phase 3 — Analytics features (effort M each, share infrastructure)
+### Phase 3 — Analytics features (effort M each, share infrastructure) — **EXECUTED 2026-09-13**
+
+Execution record + verification against the plan: [`2026-09-13-phase3-analytics-features.md`](./2026-09-13-phase3-analytics-features.md). Amendments discovered during execution: (a) the member Progress section computes all three windows server-side (tab switches cost zero fetches) rather than refetching per window; (b) the CWL promotion/relegation rule was verified against Supercell's official support page — "in most leagues, two Clans are promoted and two are demoted" — so the standings mark rank 1 ↑ / bottom two ↓ as trajectory with a variance caveat, not a final verdict; (c) `member_career_snapshots` also stores the career scalars (war stars, attack wins, …) alongside the achievements JSONB so diffs need no JSONB traversal for the headline numbers.
 
 **3.1 Achievement/career deltas over time (F8).** New table `member_career_snapshots (player_tag, captured_at, career_stats jsonb)` written by the daily batch *before* overwriting `members.career_stats`. Diffs between two captures yield "war stars +12 this month," "attack wins +34," per-achievement deltas. Member detail gains a "Progress (window)" section with a selectable window (7d/30d/all) diffing current vs snapshot-at-window-start; the same diff marks day-grain activity (Phase 1 §1.5 item 7). Retention: keep all (7 members × ~8 KB/day ≈ 20 MB/year — cheap); purge policy note added to concept 03. Query cost: one indexed per-member lookup.
 

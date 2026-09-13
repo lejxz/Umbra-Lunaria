@@ -193,6 +193,20 @@ export interface MemberDetailView {
     }>;
   };
 
+  // Progress (window) — Phase 3.1 career deltas between member_career_snapshots.
+  // All three windows are computed server-side (three indexed LIMIT-1 lookups)
+  // so the sheet can switch windows with no extra fetches. Null deltas mean
+  // the window predates tracking (no baseline snapshot) — the UI shows a
+  // "progress tracking started <date>" note instead of fabricated zeros.
+  progress: {
+    trackingStartedAt: Date | null;
+    windows: {
+      "7d": CareerProgressWindow;
+      "30d": CareerProgressWindow;
+      all: CareerProgressWindow;
+    };
+  };
+
   // Progression — API fact
   progression: {
     troops: Array<{ name: string; level: number; maxLevel: number | null }>;
@@ -221,6 +235,36 @@ export interface MemberDetailView {
     capitalist: { rank: number; valueLabel: string } | null;
     unsleeping: { rank: number; valueLabel: string } | null;
   };
+}
+
+/**
+ * Career progress over one window (Phase 3.1) — the diff between the current
+ * career state and the career snapshot at/before the window start.
+ */
+export interface CareerProgressWindow {
+  // Scalar deltas; null = no baseline snapshot exists for this window
+  // (window predates tracking — not the same as zero progress).
+  warStars: number | null;
+  attackWins: number | null;
+  defenseWins: number | null;
+  clanCapitalContributions: number | null;
+  expLevels: number | null;
+  // Achievements that rose over the window, sorted by delta descending.
+  achievements: Array<{
+    name: string;
+    delta: number;
+    from: number;
+    to: number;
+    target: number | null;
+  }>;
+  // True when every delta is zero and no achievement moved.
+  noChange: boolean;
+  // When the baseline snapshot was captured (ISO-safe Date; null before the
+  // first daily batch writes a snapshot).
+  baselineAt: Date | null;
+  // True when the window start predates tracking and the earliest available
+  // snapshot was used as the baseline — the window's true totals are larger.
+  partial: boolean;
 }
 
 /**

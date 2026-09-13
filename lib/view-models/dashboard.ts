@@ -119,6 +119,21 @@ export interface DonationTimeline {
 }
 
 // ---------------------------------------------------------------------------
+// Custom date-range analytics (Phase 3.2 — F11) — the /api/analytics response.
+// Same shapes as the preset donation analytics, minus the preset `window`
+// tag (replaced by the resolved day range).
+// ---------------------------------------------------------------------------
+
+export interface CustomAnalyticsView {
+  from: string; // "YYYY-MM-DD" (clan-TZ day keys, as requested & resolved)
+  to: string;
+  dayCount: number; // inclusive calendar days covered
+  totals: Omit<DonationTotals, "window">;
+  timeline: Omit<DonationTimeline, "window">;
+  leaderboard: Omit<DonationLeaderboard, "window">;
+}
+
+// ---------------------------------------------------------------------------
 // Activity timeline (tracked history)
 // ---------------------------------------------------------------------------
 

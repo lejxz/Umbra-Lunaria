@@ -10,6 +10,7 @@ import { db } from "@/lib/db";
 import {
   members,
   memberSnapshots,
+  memberCareerSnapshots,
   wars,
   warParticipants,
   warAttacks,
@@ -20,10 +21,12 @@ import type {
   MemberRosterEntry,
   MemberRoster,
   MemberDetailView,
+  CareerProgressWindow,
 } from "@/lib/view-models/members";
 import type { ClanBadgeUrls } from "@/lib/view-models/dashboard";
 import { computeWindow, generateBuckets } from "@/lib/time/windows";
 import { calculateDonationWindow } from "@/lib/scoring/donations";
+import { diffCareerProgress } from "@/lib/scoring/career-deltas";
 import { getMemberActivityScore } from "@/lib/db/queries";
 import { computeWarMetrics } from "@/lib/scoring/war-metrics";
 import { computeRushed } from "@/lib/scoring/rushed";
@@ -104,13 +107,14 @@ export async function getMemberDetail(
   if (!member) return null;
 
   // Fetch all the data in parallel
-  const [activityData, donationData, warData, progressionData, hofRecords] =
+  const [activityData, donationData, warData, progressionData, hofRecords, progress] =
     await Promise.all([
       getActivityDetail(member.playerTag),
       getDonationDetail(member.playerTag),
       getWarDetail(member.playerTag),
       getProgressionDetail(member.playerTag),
       db.select().from(hallOfFameRecords).where(eq(hallOfFameRecords.holderTag, member.playerTag)),
+      getCareerProgress(member),
     ]);
 
   const hofMap = hofRecords.reduce((acc, r) => {
@@ -170,12 +174,149 @@ export async function getMemberDetail(
     },
     progression: progressionData,
     rushed: computeRushedFromProgression(progressionData),
+    progress,
     hallOfFame: {
       philanthropist: hofMap.philanthropist ?? null,
       vanguard: hofMap.vanguard ?? null,
       dedicated: hofMap.dedicated ?? null,
       capitalist: hofMap.capitalist ?? null,
       unsleeping: hofMap.unsleeping ?? null,
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Career progress (Phase 3.1) — diffs member_career_snapshots against the
+// live members row for the "Progress (window)" section.
+// ---------------------------------------------------------------------------
+
+/** Convert a member_career_snapshots row (or the live members row) into the
+ *  pure module's CareerCapture shape. */
+function toCareerCapture(row: {
+  warStars: number | null;
+  attackWins: number | null;
+  defenseWins: number | null;
+  clanCapitalContributions: number | null;
+  expLevel: number | null;
+  careerStats: unknown;
+}): import("@/lib/scoring/career-deltas").CareerCapture {
+  const payload = row.careerStats as {
+    achievements?: Array<{
+      name: string;
+      value: number;
+      target?: number | null;
+    }>;
+  } | null;
+  return {
+    scalars: {
+      warStars: row.warStars,
+      attackWins: row.attackWins,
+      defenseWins: row.defenseWins,
+      clanCapitalContributions: row.clanCapitalContributions,
+      expLevel: row.expLevel,
+    },
+    achievements: (payload?.achievements ?? []).map((a) => ({
+      name: a.name,
+      value: a.value,
+    })),
+  };
+}
+
+/** The latest career snapshot at or before `from` — the window's baseline. */
+async function careerBaselineAtOrBefore(
+  playerTag: string,
+  from: Date,
+): Promise<typeof memberCareerSnapshots.$inferSelect | null> {
+  const [row] = await db
+    .select()
+    .from(memberCareerSnapshots)
+    .where(
+      and(
+        eq(memberCareerSnapshots.playerTag, playerTag),
+        lte(memberCareerSnapshots.capturedAt, from),
+      ),
+    )
+    .orderBy(desc(memberCareerSnapshots.capturedAt))
+    .limit(1);
+  return row ?? null;
+}
+
+/** The earliest career snapshot for the member ("all" window baseline). */
+async function earliestCareerSnapshot(
+  playerTag: string,
+): Promise<typeof memberCareerSnapshots.$inferSelect | null> {
+  const [row] = await db
+    .select()
+    .from(memberCareerSnapshots)
+    .where(eq(memberCareerSnapshots.playerTag, playerTag))
+    .orderBy(memberCareerSnapshots.capturedAt)
+    .limit(1);
+  return row ?? null;
+}
+
+function toProgressWindow(
+  baseline: typeof memberCareerSnapshots.$inferSelect | null,
+  current: import("@/lib/scoring/career-deltas").CareerCapture,
+  partial: boolean,
+): CareerProgressWindow {
+  const prev = baseline ? toCareerCapture(baseline) : null;
+  const diff = diffCareerProgress(prev, current);
+  return {
+    ...diff,
+    baselineAt: baseline?.capturedAt ?? null,
+    partial,
+  };
+}
+
+async function getCareerProgress(
+  member: typeof members.$inferSelect,
+): Promise<MemberDetailView["progress"]> {
+  const now = new Date();
+  const current = toCareerCapture(member);
+
+  // Earliest snapshot = the "all" baseline + the honest tracking-start date.
+  const earliest = await earliestCareerSnapshot(member.playerTag);
+  if (!earliest) {
+    // No snapshots yet — the first daily batch after deploy writes them.
+    const empty: CareerProgressWindow = {
+      warStars: null,
+      attackWins: null,
+      defenseWins: null,
+      clanCapitalContributions: null,
+      expLevels: null,
+      achievements: [],
+      noChange: true,
+      baselineAt: null,
+      partial: false,
+    };
+    return {
+      trackingStartedAt: null,
+      windows: { "7d": empty, "30d": { ...empty }, all: { ...empty } },
+    };
+  }
+
+  const win7 = computeWindow("7d", now);
+  const win30 = computeWindow("30d", now);
+
+  // Baselines for the two preset windows — the LAST snapshot at/before the
+  // window start. When tracking started inside the window (no snapshot that
+  // old), fall back to the earliest and flag the window partial.
+  const [base7Row, base30Row] = await Promise.all([
+    careerBaselineAtOrBefore(member.playerTag, win7.from),
+    careerBaselineAtOrBefore(member.playerTag, win30.from),
+  ]);
+
+  const base7 = base7Row ?? earliest;
+  const base30 = base30Row ?? earliest;
+
+  return {
+    trackingStartedAt: earliest.capturedAt,
+    windows: {
+      "7d": toProgressWindow(base7, current, base7Row === null),
+      "30d": toProgressWindow(base30, current, base30Row === null),
+      // "all" = the entire tracked history; the earliest snapshot is always
+      // the right baseline and the window is never partial.
+      all: toProgressWindow(earliest, current, false),
     },
   };
 }

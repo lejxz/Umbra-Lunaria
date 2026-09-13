@@ -7,6 +7,7 @@ import {
   clans,
   members,
   memberSnapshots,
+  memberCareerSnapshots,
   membershipEvents,
   unitLevels,
   capitalDistrictSnapshots,
@@ -32,6 +33,10 @@ import {
 } from "@/lib/ingest/membership";
 import { computeRushed } from "@/lib/scoring/rushed";
 import { resolveSuperTroopLevel } from "@/lib/assets/super-troops";
+import {
+  careerMoved,
+  type CareerCapture,
+} from "@/lib/scoring/career-deltas";
 
 /**
  * POST /api/ingest
@@ -516,6 +521,57 @@ async function runDailyBatch(): Promise<string[]> {
     retained.map((r) => [r.playerTag, r.clanCapitalContributions ?? 0]),
   );
 
+  // ---- Phase 3.1: latest career snapshot per member (the diff baseline) ----
+  // One DISTINCT ON round-trip. Read BEFORE the player loop so each fresh
+  // capture can be diffed against yesterday's, and so the snapshot insert
+  // below captures the pre-batch→post-batch progression correctly (the new
+  // row stores TODAY's freshly-fetched career state; members.career_stats is
+  // then overwritten with the same values).
+  const prevCareerByTag = new Map<
+    string,
+    {
+      scalars: CareerCapture["scalars"];
+      achievements: CareerCapture["achievements"];
+    }
+  >();
+  if (retained.length > 0) {
+    const prevRows = await db.execute<{
+      player_tag: string;
+      war_stars: number | null;
+      attack_wins: number | null;
+      defense_wins: number | null;
+      clan_capital_contributions: number | null;
+      exp_level: number | null;
+      career_stats: { achievements?: Array<{ name: string; value: number }> } | null;
+    }>(sql`
+      SELECT DISTINCT ON (player_tag)
+        player_tag, war_stars, attack_wins, defense_wins,
+        clan_capital_contributions, exp_level, career_stats
+      FROM member_career_snapshots
+      WHERE player_tag = ANY(${sql.param(retained.map((r) => r.playerTag))}::text[])
+      ORDER BY player_tag, captured_at DESC
+    `);
+    for (const r of prevRows.rows ?? prevRows) {
+      prevCareerByTag.set(r.player_tag, {
+        scalars: {
+          warStars: r.war_stars,
+          attackWins: r.attack_wins,
+          defenseWins: r.defense_wins,
+          clanCapitalContributions: r.clan_capital_contributions,
+          expLevel: r.exp_level,
+        },
+        achievements: (r.career_stats?.achievements ?? []).map((a) => ({
+          name: a.name,
+          value: a.value,
+        })),
+      });
+    }
+  }
+
+  // Members whose career totals moved this batch (day-grain activity
+  // evidence — see the marking UPDATE below the player loop).
+  const careerMovedTags: string[] = [];
+
   // EGRESS OPTIMIZATION (docs log 115): process player detail fetches in
   // parallel chunks of 5 instead of sequentially. The CoC API allows
   // concurrent requests; this speeds up the batch from ~50s (sequential) to
@@ -553,6 +609,42 @@ async function runDailyBatch(): Promise<string[]> {
         lastDetailCaptureAt: capturedAt,
       })
       .where(eq(members.playerTag, playerTag));
+
+    // ---- Phase 3.1: career snapshot (before anything else could clobber it,
+    // and regardless of whether totals moved — the row IS the history) ----
+    const careerAchievements = (player.achievements ?? []).map((a) => ({
+      name: a.name,
+      value: a.value,
+      target: a.target ?? null,
+      stars: a.stars ?? null,
+      village: a.village ?? null,
+    }));
+    const currentCapture: CareerCapture = {
+      scalars: {
+        warStars: player.warStars ?? null,
+        attackWins: player.attackWins ?? null,
+        defenseWins: player.defenseWins ?? null,
+        clanCapitalContributions: player.clanCapitalContributions ?? null,
+        expLevel: player.expLevel ?? null,
+      },
+      achievements: careerAchievements.map((a) => ({
+        name: a.name,
+        value: a.value,
+      })),
+    };
+    if (careerMoved(prevCareerByTag.get(playerTag) ?? null, currentCapture)) {
+      careerMovedTags.push(playerTag);
+    }
+    await db.insert(memberCareerSnapshots).values({
+      playerTag,
+      capturedAt,
+      warStars: currentCapture.scalars.warStars,
+      attackWins: currentCapture.scalars.attackWins,
+      defenseWins: currentCapture.scalars.defenseWins,
+      clanCapitalContributions: currentCapture.scalars.clanCapitalContributions,
+      expLevel: currentCapture.scalars.expLevel,
+      careerStats: { achievements: careerAchievements },
+    });
 
     // ---- Capital contribution delta log ----
     const oldContrib = knownContribMap.get(playerTag) ?? 0;
@@ -630,6 +722,41 @@ async function runDailyBatch(): Promise<string[]> {
   for (let i = 0; i < retained.length; i += CONCURRENCY) {
     const chunk = retained.slice(i, i + CONCURRENCY);
     await Promise.all(chunk.map((r) => processPlayer(r.playerTag)));
+  }
+
+  // ---- Phase 3.1: day-grain activity marking (implementation-plan §1.5 item 7) ----
+  // Career totals only move when the account played, but the 5-minute poll
+  // cannot see them (they're daily-grain). Members whose totals rose get the
+  // CURRENT clan-tz day's last snapshot flagged — exactly ONE snapshot per
+  // member/day, so the interval-rate activity-score component is not inflated
+  // (one flagged snapshot = the same weight as one war attack). The flagged
+  // row survives pruning by retention rule 5 (Phase 1): flagged snapshots are
+  // always retained, so the heatmap keeps the evidence forever.
+  //
+  // The batch runs right after this request's light poll, so the DISTINCT ON
+  // below picks the snapshot inserted minutes ago; polls later today insert
+  // newer (unflagged) rows, which is fine — the heatmap asks "any flagged
+  // snapshot in the day", not "the newest".
+  if (careerMovedTags.length > 0) {
+    try {
+      const { startOfDayInClanTz } = await import("@/lib/time/windows");
+      const dayStart = startOfDayInClanTz(capturedAt);
+      await db.execute(sql`
+        UPDATE member_snapshots AS ms
+        SET activity_flag = true, login_day_flag = true
+        WHERE ms.id IN (
+          SELECT DISTINCT ON (player_tag) id
+          FROM member_snapshots
+          WHERE player_tag = ANY(${sql.param(careerMovedTags)}::text[])
+            AND captured_at >= ${dayStart}
+            AND captured_at <= ${capturedAt}
+          ORDER BY player_tag, captured_at DESC
+        )
+      `);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      errors.push(`career day-grain marking failed: ${msg}`);
+    }
   }
 
   // ---- Checkpoint computation (before HoF + before purge) ----
