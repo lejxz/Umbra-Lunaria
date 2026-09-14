@@ -7,6 +7,9 @@ export interface ClanConfig {
   features: {
     clanCapital: boolean;
     builderBaseSummary: boolean;
+    /** PWA offline shell — see docs/2026-09-14-phase5-pwa-offline-shell.md.
+     * False = clients unregister the service worker on their next visit. */
+    pwa: boolean;
   };
 }
 
@@ -39,5 +42,6 @@ export const clanConfig = {
   features: {
     clanCapital: true,
     builderBaseSummary: true,
+    pwa: true,
   },
 } satisfies ClanConfig;

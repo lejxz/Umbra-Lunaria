@@ -59,6 +59,23 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: securityHeaders,
       },
+      {
+        // PWA shell (Phase 5): sw.js and the manifest must never be held
+        // by an immutable CDN cache — the browser's service-worker update
+        // check and manifest re-fetch must see current bytes. no-cache still
+        // permits disk caching, it only forces revalidation.
+        source: "/sw.js",
+        headers: [{ key: "Cache-Control", value: "no-cache" }],
+      },
+      {
+        source: "/manifest.webmanifest",
+        headers: [
+          { key: "Cache-Control", value: "no-cache" },
+          // Correct MIME type for install prompts on every host (Next serves
+        // it correctly already, but this pins it independent of host config).
+          { key: "Content-Type", value: "application/manifest+json" },
+        ],
+      },
     ];
   },
 };

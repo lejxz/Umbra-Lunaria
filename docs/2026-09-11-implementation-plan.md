@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-11
 **Inputs:** owner-selected feature list from [`2026-09-10-application-assessment.md`](./2026-09-10-application-assessment.md) §7 (items 1, 3, 5, 6, 8–12), the owner's priority question about activity tracking, and a read-only inspection of the production database (2026-09-11).
-**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), Phase 2 (quick wins), and Phase 3 (analytics features) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md), [`2026-09-13-phase3-analytics-features.md`](./2026-09-13-phase3-analytics-features.md). Phase 4 (clan history timeline) is **implemented 2026-09-14** — execution log: [`2026-09-14-phase4-clan-history-timeline.md`](./2026-09-14-phase4-clan-history-timeline.md). Phase 5 remains.
+**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), Phase 2 (quick wins), Phase 3 (analytics features), and Phase 4 (clan history timeline) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md), [`2026-09-13-phase3-analytics-features.md`](./2026-09-13-phase3-analytics-features.md), [`2026-09-14-phase4-clan-history-timeline.md`](./2026-09-14-phase4-clan-history-timeline.md). Phase 5 (PWA/offline shell) is **implemented 2026-09-14** — execution log: [`2026-09-14-phase5-pwa-offline-shell.md`](./2026-09-14-phase5-pwa-offline-shell.md). **All six phases of the roadmap are complete.**
 
 ---
 
@@ -129,7 +129,7 @@ Execution record + verification against the plan: [`2026-09-14-phase4-clan-histo
 
 `getMembershipTimeline(from, to)` — `membership_events` grouped by clan-TZ day × `event_type` (join/rejoin/leave/thUpgrade/rename), plus capitalContribution density. Render as a stacked bar/area chart (recharts, matching `chart-theme.ts`) under the dashboard clan log with event-type legend and a window select (30d/90d/all — reuses 3.2's custom window). Pure query + one component; no migration; immutable source is already the design guarantee.
 
-### Phase 5 — PWA/offline shell (F12 · effort M)
+### Phase 5 — PWA/offline shell (F12 · effort M) — **EXECUTED 2026-09-14**
 
 Prerequisite confirmed: ISR is live and gated by the CI route-modes job (A-1 fixed). Scope: `public/manifest.webmanifest` (name, `app/icon.png` + maskable variant, theme color), a hand-rolled `public/sw.js` (~60 lines — **no next-pwa dependency**, Next 15 compat risk not worth it for this app): precache an offline shell, stale-while-revalidate for `/_next/static`, network-first-with-cache-fallback for HTML, **never cache `/api/*`** in v1; registration via a small client component in the layout (guarded, versioned, with an unregister path for updates). iOS meta tags (`apple-touch-icon`, `apple-mobile-web-app-capable`) added to the layout head. Offline page states "offline — showing your last visit." Kill switch: `clanConfig.features.pwa` (config-file pattern, non-secret) so the SW can be disabled without a redeploy of behavior. Acceptance: Lighthouse PWA installable; airplane-mode load shows the shell; no stale-data trap beyond the documented "last visit" disclaimer; SW update flow verified (bump version → clients update within a day).
 

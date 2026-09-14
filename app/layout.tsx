@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cinzel, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/navigation";
 import { PageTransition } from "@/components/ui/page-transition";
 import { Footer } from "@/components/layout/footer";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker";
 import { getPollStatuses } from "@/lib/db/queries";
 
 /**
@@ -46,6 +47,35 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Umbra Lunaria",
   description: "Clan dashboard",
+  // PWA shell (docs/2026-09-11-implementation-plan.md Phase 5). The
+  // manifest + `app/apple-icon.png` file convention make the app
+  // installable; the SW itself is registered by
+  // components/pwa/service-worker.tsx and can be killed via
+  // clanConfig.features.pwa without touching this file.
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    // Generates <meta name="apple-mobile-web-app-capable" content="yes">
+    // plus the apple-mobile-web-app-title / status-bar-style metas. iOS
+    // ignores the manifest's display/theme fields, so these are required
+    // for the standalone look on iPhone/iPad.
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Umbra Lunaria",
+  },
+  // Next 15.5 emits the unprefixed <meta name="mobile-web-app-capable">
+  // from `capable: true` above; the explicitly apple-prefixed variant is
+  // still what older iOS Safari versions (and the Phase 5 plan) look for,
+  // so emit both — belt and braces, no conflict.
+  other: {
+    "apple-mobile-web-app-capable": "yes",
+  },
+};
+
+// themeColor lives in the viewport export per the Next 15 Metadata API
+// (it generates <meta name="theme-color"> — OS title-bar / task-switcher
+// tint on Android and standalone windows).
+export const viewport: Viewport = {
+  themeColor: "#090811",
 };
 
 export default async function RootLayout({
@@ -91,6 +121,9 @@ export default async function RootLayout({
             <Footer statuses={pollStatuses} serverNow={Date.now()} />
           </main>
         </div>
+        {/* PWA shell — registers /sw.js in production; kill switch in
+            clanConfig.features.pwa. Renders nothing. */}
+        <ServiceWorkerRegistration />
       </body>
     </html>
   );

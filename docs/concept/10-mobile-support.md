@@ -37,7 +37,7 @@ Umbra Lunaria is a responsive web app, not a separate native app. Most clan use 
 2. Load member progression grids and large charts only when their containing surface is opened or visible.
 3. Optimize local unit icons and use responsive image sizes for API-provided badges.
 4. Show cached capture time and resilient empty/error states when a data source is delayed.
-5. A PWA manifest and offline shell are optional later enhancements, not a requirement for the initial responsive product.
+5. A PWA manifest and offline shell shipped 2026-09-14 (Phase 5, see `docs/2026-09-14-phase5-pwa-offline-shell.md`): installable via `public/manifest.webmanifest`, hand-rolled `public/sw.js` (never caches `/api/*`; HTML is network-first; uncached routes fall back to the static `/offline` page), kill switch `features.pwa` in `config/clan.config.ts`.
 
 ## Verification
 

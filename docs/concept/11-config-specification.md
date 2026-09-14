@@ -58,7 +58,7 @@ INGEST_SECRET=
 | `memberRetentionDays` | `14` | Retained departed-member data duration. |
 | `pollIntervalMinutes` | `5` | Target light-poll cadence; the third-party cron-job service schedule must match it. |
 | `minWarsForConfidentRanking` | `3` | Threshold for a full-confidence Member Activity Score limited-data label. |
-| `features` | per feature | Enable/disable optional surfaces (Capital, Builder Base). |
+| `features` | per feature | Enable/disable optional surfaces (Capital, Builder Base). `pwa` additionally controls the offline shell: `false` makes clients unregister the service worker on their next visit. |
 
 Static config changes require review and redeploy. The clan tag is intentionally a single value, not an array.
 
