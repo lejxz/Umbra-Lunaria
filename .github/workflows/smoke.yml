@@ -1,0 +1,102 @@
+# Smoke — nightly deployment health check (docs/2026-09-14-ci-integration-
+# and-smoke.md). Verifies every page + the PWA shell assets on the deployed
+# URL (secrets.VERCEL_APP_URL) and writes a per-endpoint status table to the
+# run summary — same reporting contract as CI.
+#
+# Runs at 19:30 UTC daily (03:30 Asia/Manila — after the 02:00 purge, before
+# the day's activity picks up) and on demand via the Actions tab. When
+# VERCEL_APP_URL is not set the run exits neutral with a note instead of
+# failing every night.
+name: Smoke (deployment)
+
+on:
+  schedule:
+    - cron: "30 19 * * *" # 03:30 Asia/Manila
+  workflow_dispatch: {}
+
+jobs:
+  smoke:
+    name: Deployment smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Resolve base URL
+        id: url
+        env:
+          VERCEL_APP_URL: ${{ secrets.VERCEL_APP_URL }}
+        run: |
+          if [ -z "$VERCEL_APP_URL" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            base="$(printf '%s' "$VERCEL_APP_URL" | sed -e 's|^https\?://||' -e 's|/$||')"
+            echo "base=https://${base}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Smoke endpoints
+        if: steps.url.outputs.skip == 'false'
+        run: |
+          base="${{ steps.url.outputs.base }}"
+          results=""
+          failed=0
+
+          # check <path> <expect-http> [extra-grep:pattern:label]
+          check() {
+            local path="$1" expect="$2" extra="${3:-}"
+            local tmp code ok
+            tmp="$(mktemp)"
+            code="$(curl -sS -o "$tmp" -w "%{http_code}" --max-time 30 -L "$base$path" || echo 000)"
+            ok="yes"
+            [ "$code" = "$expect" ] || { ok="no"; failed=1; }
+            if [ "$ok" = "yes" ] && [ -n "$extra" ]; then
+              local pattern label
+              pattern="$(printf '%s' "$extra" | cut -d: -f2)"
+              label="$(printf '%s' "$extra" | cut -d: -f3)"
+              if ! grep -q "$pattern" "$tmp"; then
+                ok="no"; failed=1
+                results="${results}${path}|${code} (content: ${label} missing)|no\n"
+                rm -f "$tmp"
+                return
+              fi
+            fi
+            results="${results}${path}|${code}|${ok}\n"
+            rm -f "$tmp"
+          }
+
+          # Content pages — 200 + a content marker each.
+          check "/" 200 "grep:clan observatory:dashboard h1"
+          check "/members" 200 "grep:Members:members h1"
+          check "/war" 200 "grep:Clan war:war h1"
+          check "/capital" 200 "grep:Clan capital:capital h1"
+          check "/hall-of-fame" 200 "grep:Hall of Fame:hall-of-fame h1"
+          check "/strategy" 200 "grep:War Strategy:strategy h1"
+          check "/offline" 200 "grep:showing your last visit:offline shell"
+          # PWA shell assets (Phase 5) — headers matter as much as the code.
+          check "/manifest.webmanifest" 200 "grep:name:manifest body"
+          check "/sw.js" 200 "grep:umbra-lunaria:sw cache name"
+
+          {
+            echo "### Deployment smoke — $base"
+            echo ""
+            echo "| Endpoint | Status | OK |"
+            echo "|---|---|---|"
+            printf '%b' "$results"
+            echo ""
+            if [ "$failed" = "0" ]; then
+              echo "**Deployment healthy** — all pages serve, PWA shell intact."
+            else
+              echo "**Deployment unhealthy** — see the table above; re-run from the Actions tab after fixing."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$failed" = "1" ]; then exit 1; fi
+
+      - name: Skipped (no URL configured)
+        if: steps.url.outputs.skip != 'false'
+        run: |
+          {
+            echo "### Deployment smoke — skipped"
+            echo ""
+            echo "The \`VERCEL_APP_URL\` secret is not set on this repository, so there is no deployment URL to check. Add it (same value \`poll.yml\` uses) to enable the nightly smoke."
+          } >> "$GITHUB_STEP_SUMMARY"

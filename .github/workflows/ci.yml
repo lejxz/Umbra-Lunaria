@@ -187,12 +187,115 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  # Disposable-Postgres integration suite (docs/2026-09-14-ci-integration-
+  # and-smoke.md). The long-deferred assessment §8 recommendation: run the
+  # real migrations + the purge SQL + the windowed queries against seeded
+  # data. The suite refuses to run against any non-localhost URL, so the
+  # service container is the only possible target.
+  integration:
+    name: Integration (disposable Postgres)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        # PG 18 — matches the version the suite was validated against
+        # (embedded-postgres 18.4 locally).
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      # The suite applies the drizzle migrations itself in beforeAll and
+      # asserts the journal against the shipped SQL files — so this step
+      # covers migration integrity too. It ONLY connects to the service
+      # container: INTEGRATION_DATABASE_URL is localhost-only enforced in
+      # test code, and DATABASE_URL (which lib/db reads) is set from it by
+      # the test before any app module loads.
+      - name: Integration tests
+        id: integration
+        run: >
+          INTEGRATION_DATABASE_URL=postgres://ci:ci@localhost:5432/ci
+          bunx vitest run tests/integration
+          --reporter=default --reporter=json --outputFile=integration-results.json
+          2>&1 | tee integration.log
+
+      - name: Integration summary
+        if: always()
+        run: |
+          mark() { [ "$1" = "success" ] && echo "✅" || echo "❌"; }
+
+          {
+            echo "### Integration — disposable Postgres"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| Migrations + purge SQL + windowed queries | $(mark '${{ steps.integration.outcome }}') ${{ steps.integration.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -f integration-results.json ]; then
+            node -e '
+              const fs = require("fs");
+              let r;
+              try { r = JSON.parse(fs.readFileSync("integration-results.json", "utf8")); }
+              catch (e) { process.exit(0); }
+              const out = [];
+              out.push("", "**Tests:**", "", "| Test files | Tests | Passed | Failed | Skipped |", "|---:|---:|---:|---:|---:|");
+              const numFiles = Array.isArray(r.testResults) ? r.testResults.length : (r.numTotalTestSuites ?? "?");
+              out.push("| " + [numFiles, r.numTotalTests, r.numPassedTests, r.numFailedTests, r.numPendingTests].join(" | ") + " |");
+              const failures = [];
+              for (const suite of r.testResults ?? []) {
+                for (const a of suite.assertionResults ?? []) {
+                  if (a.status === "failed") failures.push(a.fullName ?? a.title ?? "unnamed");
+                }
+              }
+              if (failures.length > 0) {
+                out.push("", "**Failed (" + failures.length + "):**", "");
+                for (const f of failures.slice(0, 10)) out.push("- `" + f + "`");
+              }
+              fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+            '
+          else
+            echo "_No integration-results.json produced — the suite likely failed before the reporter ran (see artifact)." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-logs
+          path: |
+            integration.log
+            integration-results.json
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Final stage (docs/2026-09-11-implementation-plan.md §Phase 6): one
   # always-run job that renders the complete job status when the run page is
   # opened, and fails the run's overall conclusion if any check failed.
   report:
     name: CI status report
-    needs: [quality, route-modes]
+    needs: [quality, route-modes, integration]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -202,6 +305,7 @@ jobs:
         run: |
           quality='${{ needs.quality.result }}'
           routes='${{ needs.route-modes.result }}'
+          integration='${{ needs.integration.result }}'
 
           mark() {
             case "$1" in
@@ -216,6 +320,7 @@ jobs:
           verdict=success
           [ "$quality" = "success" ] || verdict=failure
           [ "$routes" = "success" ] || verdict=failure
+          [ "$integration" = "success" ] || verdict=failure
 
           {
             echo "# CI — complete job status"
@@ -226,10 +331,11 @@ jobs:
             echo "|---|---|"
             echo "| 1. Quality — Typecheck + Lint + Test | $(mark "$quality") $quality |"
             echo "| 2. Route modes — Build + ISR assertion | $(mark "$routes") $routes |"
-            echo "| 3. CI status report | $(mark "$verdict") $verdict |"
+            echo "| 3. Integration — disposable Postgres | $(mark "$integration") $integration |"
+            echo "| 4. CI status report | $(mark "$verdict") $verdict |"
             echo ""
             if [ "$verdict" = "success" ]; then
-              echo "**All checks passed.** Per-step details (test table, asserted route table) are in each job's summary; failed runs additionally attach raw-log artifacts."
+              echo "**All checks passed.** Per-step details (test table, asserted route table, integration results) are in each job's summary; failed runs additionally attach raw-log artifacts."
             else
               echo "**CI failed.** Open the ❌ job above — its step summary contains the failure detail, and its raw logs are attached as artifacts (7-day retention)."
             fi

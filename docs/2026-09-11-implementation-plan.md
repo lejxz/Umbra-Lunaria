@@ -142,7 +142,7 @@ Owner requirement: "a proper complete job status or log of the CI/CD when the ac
 3. **Final `report` job** (`if: always()`, `needs: [quality, route-modes]`) — renders the complete job matrix (each job's conclusion), the commit, and a headline verdict; the run page opens to a single readable status card.
 4. **Log artifacts** — on any failure, the raw logs (`tee`'d per step) are uploaded with 7-day retention for post-mortem without re-running.
 
-Documented as future CI work (not this session): a disposable-Postgres integration job (still pending an environment decision per `tests/README.md`), a nightly poll smoke test against the deployment URL, and branch-protection requiring the `report` job.
+Follow-ups **executed 2026-09-14** — disposable-Postgres integration job (service container), nightly deployment smoke (`smoke.yml`), and branch protection requiring the `report` job: see [`2026-09-14-ci-integration-and-smoke.md`](./2026-09-14-ci-integration-and-smoke.md).
 
 ---
 

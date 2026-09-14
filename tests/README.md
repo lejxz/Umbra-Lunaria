@@ -55,25 +55,27 @@ donation reset handling, wrong analysis math) without needing a database.
 | `tests/lib/activity-score.test.ts` | Member Activity Score computation | Step 1.1.B |
 | `tests/lib/windows.test.ts` | time-window boundary computation — exact 24h windows, clan-midnight anchoring for 7d/30d, day-key primitives | Step 1.1.B |
 | `tests/lib/login-streak.test.ts` | HoF "dedicated" streak — Manila-midnight boundary cases (the extracted B-1 regression suite) | — |
-| `tests/lib/unit-icon-map.test.ts` | unit-name-to-asset mapping + on-disk existence of every mapped asset | Step 1.0.B |
+| `tests/lib/clan-pulse.test.ts` | Clan Pulse — combined Activity × Roster panel engine: clan-TZ day alignment + carry-forward, engagement rate, verdict matrix, end-to-end scenarios | — |
+| `tests/integration/db.test.ts` | **Integration** (only with `INTEGRATION_DATABASE_URL`, localhost-refused-otherwise): migrations journal, purge SQL == pure model, departed-member purge, war pruning, roster-size day bucketing, activity timeline window counts | assessment §8.3 |
+
+## Integration tests (disposable Postgres)
+
+`tests/integration/db.test.ts` runs the real migrations and the real SQL against a disposable Postgres — the upgrade path the original strategy deferred. It activates **only** when `INTEGRATION_DATABASE_URL` is set, and the URL must be localhost (the suite refuses anything else, so it can never touch a deployment database). CI runs it in a `postgres:18-alpine` service container (`.github/workflows/ci.yml` → `integration` job). Locally:
+
+```bash
+docker run -d --name ul-int -p 5433:5432 -e POSTGRES_PASSWORD=ci -e POSTGRES_USER=ci -e POSTGRES_DB=ci postgres:18-alpine
+INTEGRATION_DATABASE_URL=postgres://ci:ci@localhost:5433/ci bunx vitest run tests/integration
+```
 
 ## What's NOT tested (and why)
 
-The thin DB I/O layer — the actual Drizzle queries (SELECT/INSERT/UPDATE) —
-is not unit-tested. This is the tradeoff of Option 1:
+The remaining thin DB I/O layer — the Drizzle queries the integration suite doesn't yet cover (ingest-side writes, war sync, capital sync) — is verified by:
 
-- **SQL-shape regressions** (a wrong join, a NULL-handling bug) aren't caught
-  by pure-logic tests. These are verified by:
-  - Live manual verification against the production Supabase DB (Node scripts +
-    Agent Browser).
-  - The query functions' return types (TypeScript catches shape mismatches
-  at compile time).
-- **DB-constraint behavior** (unique indexes, FK cascades) is verified by
-  the schema definition + migration, not by tests.
+- Live manual verification against the production Supabase DB (Node scripts + Agent Browser).
+- The query functions' return types (TypeScript catches shape mismatches at compile time).
+- DB-constraint behavior (unique indexes, FK cascades) via the schema definition + migration — and the migration journal itself is now asserted by the integration suite.
 
-If SQL-shape regressions become a real risk, the upgrade path is to add a
-disposable test database (Option 2 — a Supabase staging project or a
-dockerized Postgres in CI; see the assessment §8.3) — still deferred.
+The highest-risk SQL (purge passes, roster/day bucketing, activity windows) is covered by `tests/integration/db.test.ts`. Extending that suite to the ingest write path is the natural next increment if SQL-shape regressions appear there.
 
 ## Running the tests
 

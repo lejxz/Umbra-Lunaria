@@ -1811,8 +1811,9 @@ export async function getWarPerformanceTrend(
  */
 export async function getRosterSizeTrend(
   days = 30,
+  now: Date = new Date(),
 ): Promise<RosterSizeTrend> {
-  const since = new Date();
+  const since = new Date(now);
   since.setDate(since.getDate() - days);
 
   // Bucket by calendar day in the CLAN TIMEZONE (not UTC). Without this, day
