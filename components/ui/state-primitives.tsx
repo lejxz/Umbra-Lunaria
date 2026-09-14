@@ -1,10 +1,9 @@
-import type { ReactNode } from "react";
 import { IconLoader, IconSync, IconAlert } from "@/components/ui/icons";
 
 /**
  * State primitives — the small display atoms used across the dashboard,
  * member detail sheet, and any surface that has to communicate a value with a
- * source, a loading indicator, an error, or an explicit "this is unavailable"
+ * loading indicator, an error, or an explicit "this is unavailable"
  * state. See docs/concept/05-dashboard.md §Interaction and state rules:
  *
  *   3. Missing values use an em dash or an explicit unavailable label, never a
@@ -12,60 +11,6 @@ import { IconLoader, IconSync, IconAlert } from "@/components/ui/icons";
  *
  * All primitives are server components (no client interactivity required).
  */
-
-type MetricSource = "api" | "tracked" | "derived";
-
-const sourceMeta: Record<MetricSource, { label: string; tone: string }> = {
-  api: {
-    label: "API",
-    tone: "border-umbra-purple/40 bg-umbra-purple/15 text-umbra-purple",
-  },
-  tracked: {
-    label: "Tracked",
-    tone: "border-emerald-400/30 bg-emerald-400/10 text-emerald-400",
-  },
-  derived: {
-    label: "Derived",
-    tone: "border-amber-400/30 bg-amber-400/10 text-amber-400",
-  },
-};
-
-/**
- * MetricState — a labeled metric with an optional source badge. Use this
- * anywhere the dashboard surfaces a single number that came from the CoC API
- * ("api"), was reconstructed from snapshots ("tracked"), or was computed from
- * other fields ("derived"). The source badge keeps the user honest about what
- * they are looking at — see docs/concept/05-dashboard.md §2 (win-rate is derived).
- */
-export function MetricState({
-  label,
-  value,
-  source,
-}: {
-  label: string;
-  value: ReactNode;
-  source?: MetricSource;
-}) {
-  const meta = source ? sourceMeta[source] : null;
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wider text-umbra-muted">
-          {label}
-        </span>
-        {meta && (
-          <span
-            className={`inline-flex rounded-full border px-2 py-0.5 font-mono text-label font-semibold uppercase tracking-wider ${meta.tone}`}
-            title={`Source: ${meta.label}`}
-          >
-            {meta.label}
-          </span>
-        )}
-      </div>
-      <div className="text-2xl font-semibold text-umbra-lilac">{value}</div>
-    </div>
-  );
-}
 
 /**
  * LoadingState — a spinner + optional label, styled for the dark moonlit

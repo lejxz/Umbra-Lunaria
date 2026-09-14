@@ -65,18 +65,13 @@ export function UpgradeTimeline({
       <div className="mt-4">
         {history.isColdStart ? (
           <EmptyState
-            title={history.events.length === 0 ? "Tracking just started" : "No upgrades observed yet"}
-            description={
-              history.trackingStart
-                ? `District levels were first captured ${formatRelative(history.trackingStart)}. Upgrade events will appear here after the next daily batch observes a level increase.`
-                : "Upgrade history will begin after the next daily batch observes a level increase."
-            }
+            title="No upgrades yet"
+            description="Upgrades will appear as districts level up."
             icon={<IconCapital className="h-10 w-10" />}
           />
         ) : filteredEvents.length === 0 ? (
           <EmptyState
             title="No upgrades for this district"
-            description="No level increases have been observed for the selected district."
             icon={<IconCapital className="h-10 w-10" />}
           />
         ) : (
@@ -123,12 +118,4 @@ function FilterChip({ active, onClick, label }: { active: boolean; onClick: () =
       {label}
     </button>
   );
-}
-
-function formatRelative(date: Date): string {
-  const seconds = Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 1000));
-  if (seconds < 60) return "just now";
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
-  return `${Math.floor(seconds / 86400)}d ago`;
 }

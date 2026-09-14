@@ -118,7 +118,6 @@ export function ClanPulsePanel({
               <EmptyState
                 icon={<IconActivityEmpty />}
                 title="No activity yet"
-                description="Observed activity will appear once members change donations or trophies between updates."
               />
             </div>
           )}

@@ -81,9 +81,9 @@ export function Footer({
     <footer className="mt-auto border-t border-umbra-line bg-umbra-ink/60 px-5 py-3 backdrop-blur-sm sm:px-8 lg:px-10">
       <div className="mx-auto flex max-w-[1380px] flex-wrap items-center justify-center gap-x-5 gap-y-1.5">
         <Chip label="Last update" value={fmt(lastPoll)} />
-        <Chip label="Daily batch" value={fmt(lastBatch)} />
-        <Chip label="Tracking" value={fmt(trackingStart)} />
-        <Chip label="War synced" value={fmt(warSynced)} />
+        <Chip label="Records updated" value={fmt(lastBatch)} />
+        <Chip label="Tracked since" value={fmt(trackingStart)} />
+        <Chip label="War updated" value={fmt(warSynced)} />
         {/* Next poll countdown */}
         <div className="flex items-center gap-1.5 border-l border-umbra-line/50 pl-5">
           <span className="font-mono text-label uppercase tracking-wider text-umbra-muted">

@@ -43,9 +43,7 @@ export default async function DashboardPage() {
           message="The dashboard couldn&apos;t load."
         />
         <p className="mt-4 max-w-xl text-sm text-umbra-muted">
-          {message}. This usually means the database isn&apos;t reachable or the
-          ingest hasn&apos;t populated the clan data yet. Try again in a few minutes,
-          or trigger a manual poll from GitHub Actions.
+          {message}. Try again in a few minutes.
         </p>
       </div>
     );

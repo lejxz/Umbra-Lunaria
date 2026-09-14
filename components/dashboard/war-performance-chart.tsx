@@ -29,7 +29,6 @@ export function WarPerformanceChart({ trend }: { trend: WarPerformanceTrend }) {
       <div className="flex h-full items-center justify-center">
         <EmptyState
           title="No war history yet"
-          description="Performance trends appear once completed wars are tracked."
           icon={<IconWarEmpty className="h-8 w-8" />}
         />
       </div>

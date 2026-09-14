@@ -27,7 +27,7 @@
  * sw.js itself is served with Cache-Control: no-cache (next.config.ts), so
  * the browser's update check always sees the current bytes.
  */
-const SW_VERSION = 1;
+const SW_VERSION = 2;
 const CACHE = `umbra-lunaria-v${SW_VERSION}`;
 const OFFLINE_URL = "/offline";
 

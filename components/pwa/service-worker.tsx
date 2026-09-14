@@ -28,7 +28,7 @@
 import { useEffect } from "react";
 import { clanConfig } from "@/config/clan.config";
 
-const REGISTRATION_VERSION = "1";
+const REGISTRATION_VERSION = "2";
 const VERSION_KEY = "umbra-lunaria:sw-registration-version";
 const CACHE_PREFIX = "umbra-lunaria-v";
 

@@ -182,13 +182,6 @@ export function TargetingPanel({
           </div>
         </>
       )}
-
-      {/* Honest coverage note (implementation-plan §3.3) */}
-      <p className="mt-3 text-2xs text-umbra-muted/50">
-        Based on the {targeting.coveredWars} most recent live-tracked wars —
-        war-log backfilled wars lack defender detail and are excluded. Best Δ
-        needs at least 2 attacks in a bucket.
-      </p>
     </section>
   );
 }

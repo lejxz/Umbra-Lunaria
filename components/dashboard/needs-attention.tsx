@@ -57,7 +57,6 @@ export function AttentionPanel({
         <div className="mt-4 flex flex-1 items-center justify-center">
           <EmptyState
             title="All clear"
-            description="No members found for this queue."
           />
         </div>
       ) : (

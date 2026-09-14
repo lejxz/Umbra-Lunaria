@@ -215,13 +215,10 @@ export function CwlLeagueView({
         </table>
       </div>
 
-      {/* Honest caveat: standings scope + trajectory thresholds */}
+      {/* Trajectory legend */}
       <p className="mt-3 text-2xs text-umbra-muted/50">
-        Standings aggregate every war in the league group — ours and other clans&apos;
-        (both sides of every round, synced each poll). ↑ marks the current
-        promotion candidate and ↓ the bottom-two relegation risk; exact
-        thresholds vary by league tier (most leagues run two up / two down), so
-        treat them as the live trajectory, not the final verdict.
+        ↑ marks the current promotion candidate · ↓ the bottom-two relegation
+        risk.
       </p>
     </section>
   );

@@ -26,7 +26,6 @@ export function WarAttackDistributionChart({
       <div className="flex h-full flex-col items-center justify-center">
         <EmptyState
           title="No attack data yet"
-          description="Attack distribution appears once live-tracked wars have attacks."
           icon={<IconSwords className="h-8 w-8" />}
         />
       </div>

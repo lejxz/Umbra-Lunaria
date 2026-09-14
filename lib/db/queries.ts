@@ -1089,7 +1089,7 @@ export async function getNeedsAttention(): Promise<NeedsAttention> {
         role: member.role,
         townHallLevel: member.townHallLevel,
         reason: "Opted out of wars",
-        detail: "Informational — not an error",
+        detail: null,
       });
     }
 

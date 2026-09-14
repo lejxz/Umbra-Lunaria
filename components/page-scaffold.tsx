@@ -4,13 +4,11 @@ export function PageScaffold({
   section,
   title,
   description,
-  eyebrow,
   children,
 }: {
   section: string;
   title: string;
   description?: string;
-  eyebrow?: string;
   children: React.ReactNode;
 }) {
   return (
@@ -18,7 +16,7 @@ export function PageScaffold({
       <header className="mb-8 flex flex-wrap items-start justify-between gap-5">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            {section}{eyebrow ? ` / ${eyebrow}` : ""}
+            {section}
           </p>
           <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
             {title}
@@ -36,41 +34,5 @@ export function PageScaffold({
       </header>
       {children}
     </div>
-  );
-}
-
-export function ComingSoon({
-  label,
-  description,
-}: {
-  label: string;
-  description: string;
-}) {
-  return (
-    <section className="glass rounded-2xl p-5 sm:p-10">
-      <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-        {label}
-      </p>
-      <h2 className="mt-3 font-display text-2xl text-umbra-lilac">
-        The observatory is ready.
-      </h2>
-      <p className="mt-3 max-w-xl text-sm leading-6 text-umbra-muted">
-        {description}
-      </p>
-      <div className="mt-8 grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg bg-white/[.03] p-4">
-          <p className="text-xs uppercase tracking-wider text-umbra-muted">Data source</p>
-          <p className="mt-2 text-sm text-umbra-lilac">Postgres snapshots</p>
-        </div>
-        <div className="rounded-lg bg-white/[.03] p-4">
-          <p className="text-xs uppercase tracking-wider text-umbra-muted">Status</p>
-          <p className="mt-2 text-sm text-emerald-300">Ready for build</p>
-        </div>
-        <div className="rounded-lg bg-white/[.03] p-4">
-          <p className="text-xs uppercase tracking-wider text-umbra-muted">Next signal</p>
-          <p className="mt-2 text-sm text-umbra-lilac">Coming soon</p>
-        </div>
-      </div>
-    </section>
   );
 }

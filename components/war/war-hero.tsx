@@ -51,10 +51,6 @@ export function WarHero({
             <IconWarEmpty className="h-14 w-14" />
           </div>
           <p className="font-display text-lg text-umbra-lilac">No active war</p>
-          <p className="mt-1 max-w-sm text-center text-sm text-umbra-muted">
-            The clan isn&apos;t in a war right now. The most recent result appears in the
-            history below.
-          </p>
           {lastResult && (
             <div className="mt-5 w-full max-w-md rounded-lg border border-umbra-line bg-white/[.03] px-4 py-3">
               <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
@@ -138,17 +134,16 @@ export function WarHero({
           <WarRefreshButton ttlSeconds={refreshTtlSeconds} />
           {currentWar.lastSyncedAt && (
             <p className="text-2xs text-umbra-muted">
-              Synced <TimeAgo date={currentWar.lastSyncedAt} />
+              Updated <TimeAgo date={currentWar.lastSyncedAt} />
             </p>
           )}
         </div>
       </div>
 
-      {/* Stale-capture notice */}
+      {/* Stale-data notice */}
       {stale && (
         <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-2xs text-amber-400">
-          This capture is over an hour old — it may not reflect the live war
-          state. The next scheduled sync will refresh it.
+          This data is over an hour old and may not reflect the live war state.
         </p>
       )}
 
