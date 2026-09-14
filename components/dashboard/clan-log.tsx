@@ -49,7 +49,6 @@ export function ClanLogPanel({
         <div className="mt-4 flex flex-1 items-center justify-center">
           <EmptyState
             title="No membership events yet"
-            description="Joins, departures, and rejoins will appear here once the tracker observes them."
           />
         </div>
       ) : (

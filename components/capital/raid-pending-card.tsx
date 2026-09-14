@@ -38,7 +38,7 @@ export function RaidPendingCard({ available }: { available: boolean }) {
         <EmptyState
           icon={<IconCapital className="h-10 w-10 text-umbra-purple/40" />}
           title="Coming soon"
-          description="Completed raid-weekend results, the per-member contribution leaderboard, and participation rates will appear here once raid-season ingestion is active."
+          description="Raid results appear after each raid weekend."
         />
       </div>
 

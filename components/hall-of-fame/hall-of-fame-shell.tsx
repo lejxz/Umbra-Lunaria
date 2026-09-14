@@ -215,10 +215,10 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
 
   return (
     <PageScaffold section="Hall of Fame" title="Hall of Fame">
-      {/* ── Last-computed freshness stamp ──────────────────────────────── */}
+      {/* ── Freshness stamp ─────────────────────────────────────────── */}
       {lastComputedAt && (
         <p className="mb-6 font-mono text-xs text-umbra-muted">
-          Cached awards last recomputed{" "}
+          Updated{" "}
           <span className="text-umbra-lilac">
             {lastComputedAt.toLocaleString("en-US", {
               month: "short",
@@ -228,7 +228,7 @@ export function HallOfFameShell({ data }: { data: HallOfFamePageData }) {
               hour12: true,
             })}
           </span>
-          . Live records are fresh at page load.
+          .
         </p>
       )}
 

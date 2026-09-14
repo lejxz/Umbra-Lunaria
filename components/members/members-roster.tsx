@@ -264,7 +264,7 @@ export function MembersRoster({
       {sorted.length === 0 ? (
         <EmptyState
           title="No members found"
-          description="Try adjusting your filters. The roster may also be empty if tracking hasn't started."
+          description="Try adjusting your filters."
         />
       ) : (
         <>

@@ -16,7 +16,6 @@ export { Tabs } from "./tabs";
 export { TimeAgo } from "./time-ago";
 export { Modal } from "./modal";
 export {
-  MetricState,
   LoadingState,
   ErrorState,
   UnavailableValue,

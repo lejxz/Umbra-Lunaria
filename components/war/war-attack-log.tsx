@@ -32,8 +32,10 @@ export function WarAttackLog({
         <h3 id="war-attacks-title" className="mt-1 font-display text-lg text-umbra-lilac">Attacks</h3>
         <div className="mt-4">
           <EmptyState
-            title={warState === "preparation" ? "No attacks yet" : "No attacks recorded"}
-            description={warState === "preparation" ? "Attacks appear here once the battle day begins." : "No attacks were observed for this war."}
+            title={warState === "preparation" ? "No attacks yet" : "No attacks in this war"}
+            description={
+              warState === "preparation" ? "Attacks appear here once the battle day begins." : undefined
+            }
           />
         </div>
       </section>

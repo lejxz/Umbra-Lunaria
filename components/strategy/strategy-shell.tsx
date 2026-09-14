@@ -38,9 +38,7 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
     <PageScaffold
       section="Strategy"
       title="War Strategy"
-      description="Automatic ranking of suggested war participants and members needing review."
     >
-      {/* ── Section 1: Suggested Participants ────────────────────────────── */}
       {/* ── Section 1: Suggested Participants ────────────────────────────── */}
       <section className="glass rounded-2xl p-5 mb-8">
         <div className="mb-4 flex items-center gap-3">
@@ -85,7 +83,6 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
             <EmptyState
               icon={<IconSwords className="h-10 w-10 text-umbra-purple/40" />}
               title="No participants ranked yet"
-              description="Members will appear here once the tracker has accumulated enough data."
             />
           </div>
         )}
@@ -130,7 +127,6 @@ export function StrategyShell({ data }: { data: StrategyPageData }) {
             <EmptyState
               icon={<IconUsers className="h-10 w-10 text-umbra-purple/40" />}
               title="Everyone looks good"
-              description="No members currently flagged for review."
             />
           </div>
         )}

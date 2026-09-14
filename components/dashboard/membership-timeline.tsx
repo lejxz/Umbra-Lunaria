@@ -185,7 +185,6 @@ export function MembershipTimelinePanel({
           <div className="flex h-full items-center justify-center">
             <EmptyState
               title="No membership events yet"
-              description="Joins, departures, TH upgrades, and capital contributions will chart here once the tracker observes them."
             />
           </div>
         ) : (

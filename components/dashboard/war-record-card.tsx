@@ -44,11 +44,6 @@ export function WarRecordCard({ record }: { record: WarRecordView }) {
           <p className="mt-1 font-display text-3xl font-bold text-white">
             {winRatePct ?? <UnavailableValue />}
           </p>
-          {record.winRate === null && (
-            <p className="mt-1 text-label text-umbra-muted">
-              Requires W/T/L from API
-            </p>
-          )}
         </div>
       </div>
     </section>

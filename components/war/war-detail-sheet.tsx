@@ -150,7 +150,7 @@ function WarDetailContent({
           {w.endTime && (
             <p className="mt-1 text-2xs text-umbra-muted">
               Ended <TimeAgo date={w.endTime} />
-              {w.lastSyncedAt && <> · synced <TimeAgo date={w.lastSyncedAt} /></>}
+              {w.lastSyncedAt && <> · updated <TimeAgo date={w.lastSyncedAt} /></>}
             </p>
           )}
         </div>

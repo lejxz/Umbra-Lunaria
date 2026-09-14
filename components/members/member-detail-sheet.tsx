@@ -230,9 +230,6 @@ function WarSection({ detail }: { detail: MemberDetailView }) {
           {/* Crossed swords icon (dimmed) */}
           <IconSwords className="h-10 w-10 opacity-30" />
           <p className="mt-2 text-sm text-umbra-muted">No wars tracked yet</p>
-          <p className="mt-0.5 text-2xs text-umbra-muted/60">
-            War history will appear here once the tracker observes a war.
-          </p>
         </div>
       </div>
     );
@@ -430,8 +427,7 @@ function ProgressSection({ detail }: { detail: MemberDetailView }) {
           <h3 className="font-display text-sm font-semibold text-umbra-lilac">Progress</h3>
         </div>
         <p className="text-xs text-umbra-muted">
-          No career snapshots recorded yet — the first daily batch creates the
-          baseline, and per-window deltas appear from the next one.
+          No progress data yet.
         </p>
       </div>
     );
@@ -451,7 +447,7 @@ function ProgressSection({ detail }: { detail: MemberDetailView }) {
 
       {w.partial && (
         <p className="mb-2 rounded-lg bg-amber-400/10 px-3 py-1.5 text-2xs text-amber-400">
-          ⚠ Tracking started {fmtDate(p.trackingStartedAt, { month: "short", day: "numeric", year: "numeric" })} — deltas are measured from then; earlier gains aren&apos;t captured.
+          ⚠ Data starts {fmtDate(p.trackingStartedAt, { month: "short", day: "numeric", year: "numeric" })} — earlier gains aren&apos;t included.
         </p>
       )}
 
@@ -673,7 +669,7 @@ function ProgressionSection({ detail }: { detail: MemberDetailView }) {
     return (
       <div>
         <SectionLabel>Progression</SectionLabel>
-        <p className="text-xs text-umbra-muted">Progression data pending first daily batch.</p>
+        <p className="text-xs text-umbra-muted">No progression data yet.</p>
       </div>
     );
   }

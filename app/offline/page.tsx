@@ -26,7 +26,7 @@ export default function OfflinePage() {
           Offline
         </p>
         <h1 className="mt-2 font-display text-3xl font-semibold tracking-wide text-umbra-lilac sm:text-4xl">
-          You are offline — showing your last visit
+          You are offline
         </h1>
       </header>
 
@@ -42,27 +42,8 @@ export default function OfflinePage() {
                 The clan dashboard can&apos;t reach the network right now.
               </p>
               <p className="mt-2 text-sm leading-relaxed text-umbra-muted">
-                Pages you visited while online may still open from this device —
-                what you see is the version from your last visit, not live
-                data. Anything you never opened needs a connection.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-4">
-            <span
-              aria-hidden="true"
-              className="mt-1 inline-block h-3 w-3 shrink-0 rounded-full bg-umbra-muted"
-            />
-            <div>
-              <p className="font-medium text-umbra-lilac">
-                Live values are never served offline.
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-umbra-muted">
-                The offline shell deliberately does not cache API responses:
-                war states, activity and freshness counters are only shown
-                when they can actually be checked against the server. No
-                stale numbers pretending to be current.
+                Pages you already visited may still open from this device —
+                anything else needs a connection.
               </p>
             </div>
           </div>
@@ -72,7 +53,7 @@ export default function OfflinePage() {
               href="/"
               className="rounded-full border border-umbra-line px-4 py-2 font-mono text-label uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/50 hover:text-umbra-lilac"
             >
-              Try the dashboard
+              Go to dashboard
             </Link>
             {/* Plain anchor (not next/link): a same-URL navigation is a full
                 reload in every browser, which re-runs the SW's network-first

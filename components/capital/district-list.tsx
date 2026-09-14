@@ -43,7 +43,6 @@ export function DistrictList({
         <div className="mt-4">
           <EmptyState
             title="No district data yet"
-            description="Districts appear here after the first daily batch captures the clan's Capital state."
             icon={<IconCapital className="h-10 w-10" />}
           />
         </div>

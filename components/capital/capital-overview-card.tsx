@@ -21,7 +21,7 @@ export function CapitalOverviewCard({ overview }: { overview: CapitalOverview })
         </p>
         {overview.lastCaptureAt && (
           <Badge tone="info">
-            Captured <TimeAgo date={overview.lastCaptureAt} />
+            Updated <TimeAgo date={overview.lastCaptureAt} />
           </Badge>
         )}
       </div>

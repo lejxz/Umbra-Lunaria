@@ -66,7 +66,7 @@ export function WarHistory({
 
       {warLogPublic === false && (
         <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-2xs text-amber-400">
-          This clan&apos;s war log is private — history before tracking may be incomplete.
+          This clan&apos;s war log is private — older wars may be missing.
         </p>
       )}
 
@@ -88,7 +88,6 @@ export function WarHistory({
                 <td colSpan={6} className="px-3 py-8">
                   <EmptyState
                     title="No war history yet"
-                    description="Completed wars appear here once the tracker observes them, or after the public war log is backfilled."
                     icon={<IconWarEmpty className="h-10 w-10" />}
                   />
                 </td>
@@ -215,7 +214,7 @@ function WarHistoryRow({ w, onViewDetail }: { w: WarHistoryEntry; onViewDetail: 
         ) : (
           <span
             className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider text-umbra-muted/40"
-            title="No roster/attack detail available for this backfilled war"
+            title="No attack details for this war"
           >
             —
           </span>

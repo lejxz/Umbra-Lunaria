@@ -28,7 +28,7 @@ export function NavSummaries({
           </h3>
           {warSummary.state === null ? (
             <p className="mt-1 text-sm text-umbra-muted">
-              No war data yet — the tracker will capture wars when they start.
+              No war data yet
             </p>
           ) : warSummary.state === "notInWar" ? (
             <p className="mt-1 text-sm text-umbra-muted">
@@ -96,7 +96,7 @@ export function NavSummaries({
             </span>
           </div>
           <p className="mt-1 text-xs text-umbra-muted">
-            Raid-weekend history appears after completed seasons are ingested.
+            Raid history appears after each raid weekend.
           </p>
         </div>
         <Link

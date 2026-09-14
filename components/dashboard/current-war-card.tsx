@@ -62,9 +62,6 @@ export function CurrentWarCard({
           <p className="text-sm text-umbra-muted">
             {warSummary.state === null ? "No war data yet" : "Clan is at peace"}
           </p>
-          <p className="mt-1 text-xs text-umbra-muted">
-            Wars appear here when they start
-          </p>
         </div>
       ) : (
         <>

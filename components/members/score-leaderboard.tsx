@@ -36,7 +36,7 @@ export function ScoreLeaderboard({
       <div className="flex items-center justify-between mb-8">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Observed clan support
+            Clan support
           </p>
           <h3
             id="score-leaderboard-title"
