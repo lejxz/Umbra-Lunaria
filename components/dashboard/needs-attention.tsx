@@ -1,7 +1,5 @@
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { memberProfileHref } from "@/lib/member-links";
 import {
   IconClock,
   IconSwords,
@@ -13,6 +11,7 @@ export function AttentionPanel({
   title,
   subtitle,
   groups,
+  onMemberClick,
 }: {
   title: string;
   subtitle: string;
@@ -29,6 +28,7 @@ export function AttentionPanel({
       detail: string | null;
     }>;
   }>;
+  onMemberClick: (playerTag: string) => void;
 }) {
   const totalSignals = groups.reduce((acc, group) => acc + group.members.length, 0);
 
@@ -71,6 +71,7 @@ export function AttentionPanel({
                 tone={group.tone}
                 icon={group.icon}
                 members={group.members}
+                onMemberClick={onMemberClick}
               />
             );
           })}
@@ -85,6 +86,7 @@ function AttentionGroup({
   tone,
   icon,
   members,
+  onMemberClick,
 }: {
   label: string;
   tone: "warning" | "danger" | "muted";
@@ -97,6 +99,7 @@ function AttentionGroup({
     reason: string;
     detail: string | null;
   }>;
+  onMemberClick: (playerTag: string) => void;
 }) {
   const color =
     tone === "warning"
@@ -112,13 +115,13 @@ function AttentionGroup({
       </p>
       <div className="space-y-1.5">
         {members.map((m) => (
-          // Phase 2.1: rows deep-link into the member's profile sheet on
-          // /members instead of opening a local popup — the target page owns
-          // the full detail view, and the URL is shareable.
-          <Link
+          // Rows open the dashboard-local member detail sheet (same as the
+          // donation/activity leaderboards) — no redirect to /members.
+          <button
             key={m.playerTag}
-            href={memberProfileHref(m.playerTag)}
-            className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
+            type="button"
+            onClick={() => onMemberClick(m.playerTag)}
+            className="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
           >
             <div className="flex min-w-0 items-center gap-2.5">
               <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/20 ${color}`}>
@@ -137,7 +140,7 @@ function AttentionGroup({
             {m.townHallLevel && (
               <Badge tone="brand">TH{m.townHallLevel}</Badge>
             )}
-          </Link>
+          </button>
         ))}
       </div>
     </div>

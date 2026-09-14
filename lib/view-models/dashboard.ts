@@ -131,6 +131,9 @@ export interface CustomAnalyticsView {
   totals: Omit<DonationTotals, "window">;
   timeline: Omit<DonationTimeline, "window">;
   leaderboard: Omit<DonationLeaderboard, "window">;
+  /** Phase 4 / F10: same day range, membership-event density — additive so
+   *  existing consumers of the donation fields are unaffected. */
+  membershipTimeline: MembershipTimeline;
 }
 
 // ---------------------------------------------------------------------------
@@ -352,6 +355,47 @@ export interface WarAttackDistribution {
 }
 
 // ---------------------------------------------------------------------------
+// Membership timeline (Phase 4 — F10 "clan history timeline")
+// ---------------------------------------------------------------------------
+
+/** Windows the clan-history panel offers. Precomputed server-side so tab
+ *  switches cost zero fetches (same pattern as the donation windows). */
+export type MembershipWindow = "30d" | "90d" | "all";
+
+export interface MembershipTimelinePoint {
+  /** Axis label, "Jul 22" — clan-TZ calendar day. */
+  label: string;
+  /** Clan-TZ day key "2026-07-22". */
+  day: string;
+  join: number;
+  rejoin: number;
+  leave: number;
+  thUpgrade: number;
+  rename: number;
+  /** Distinct members whose capital contribution rose that day. */
+  capitalContributors: number;
+  /** Total capital resources contributed that day (tooltip only). */
+  capitalAmount: number;
+}
+
+export interface MembershipTimelineTotals {
+  join: number;
+  rejoin: number;
+  leave: number;
+  thUpgrade: number;
+  rename: number;
+  capitalContributors: number;
+  /** join + rejoin − leave. */
+  netRosterChange: number;
+}
+
+export interface MembershipTimeline {
+  window: MembershipWindow | "custom";
+  points: MembershipTimelinePoint[]; // oldest-first, one per clan-TZ day
+  totals: MembershipTimelineTotals;
+}
+
+// ---------------------------------------------------------------------------
 
 export interface DashboardData {
   clan: DashboardClan;
@@ -387,5 +431,9 @@ export interface DashboardData {
   warPerformanceTrend: WarPerformanceTrend;
   rosterSizeTrend: RosterSizeTrend;
   warAttackDistribution: WarAttackDistribution;
+  // Clan history timeline (Phase 4 / F10) — all three windows precomputed
+  membershipTimeline30d: MembershipTimeline;
+  membershipTimeline90d: MembershipTimeline;
+  membershipTimelineAll: MembershipTimeline;
 }
 

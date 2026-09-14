@@ -12,6 +12,11 @@ import type {
 import { Tabs, UnavailableValue, EmptyState } from "@/components/ui";
 import { IconDonationEmpty } from "@/components/ui/icons";
 import { DonationChart } from "./donation-chart";
+import {
+  RangeControl,
+  dayKeyInTz,
+  formatRange,
+} from "./range-control";
 
 /**
  * Donation analytics — the largest primary panel on the dashboard.
@@ -23,44 +28,15 @@ import { DonationChart } from "./donation-chart";
  * chips) fetches GET /api/analytics?from=&to= and renders the panel over
  * that window instead of a preset. The dashboard page itself stays static
  * (ISR) — the range query is client-side, exactly like the member detail
- * sheet's /api/members/[tag] fetch.
+ * sheet's /api/members/[tag] fetch. Since Phase 4 the control itself lives
+ * in ./range-control.tsx, shared with the membership-timeline panel.
  */
-
-const TZ = "Asia/Manila"; // clan timezone — day keys for the quick chips
 
 type CustomState =
   | { status: "idle" }
   | { status: "loading"; from: string; to: string }
   | { status: "ready"; data: CustomAnalyticsView }
   | { status: "error"; message: string };
-
-/** "YYYY-MM-DD" for an instant in the clan timezone (client-side Intl). */
-function dayKeyInTz(date: Date): string {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    timeZone: TZ,
-  }).formatToParts(date);
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  return `${get("year")}-${get("month")}-${get("day")}`;
-}
-
-function firstOfMonth(offsetMonths: number): string {
-  // offsetMonths 0 = this month, -1 = last month
-  const now = new Date();
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
-  // Noon UTC keeps the clan-TZ date stable for any real timezone.
-  return dayKeyInTz(new Date(Date.UTC(y, m + offsetMonths, 1, 12, 0, 0)));
-}
-
-function lastOfMonth(offsetMonths: number): string {
-  const now = new Date();
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
-  return dayKeyInTz(new Date(Date.UTC(y, m + offsetMonths + 1, 0, 12, 0, 0)));
-}
 
 export function DonationAnalytics({
   dataByWindow,
@@ -114,7 +90,8 @@ export function DonationAnalytics({
     setToInput("");
   }, []);
 
-  const isCustomActive = custom.status === "ready" || custom.status === "loading";
+  const isCustomActive =
+    custom.status === "ready" || custom.status === "loading";
 
   // The panel renders either the custom range (when ready) or a preset — an
   // in-flight or failed range leaves the previous/preset data on screen
@@ -177,76 +154,27 @@ export function DonationAnalytics({
         </div>
       </div>
 
-      {/* ── Custom date-range control (Phase 3.2) ─────────────────────── */}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1.5">
-          <input
-            type="date"
-            value={fromInput}
-            max={todayKey}
-            onChange={(e) => setFromInput(e.target.value)}
-            aria-label="Range start (clan day)"
-            className="focus-ring rounded-lg border border-umbra-line/50 bg-white/[.03] px-2 py-1 font-mono text-2xs text-umbra-lilac [color-scheme:dark]"
-          />
-          <span className="text-umbra-muted/50">→</span>
-          <input
-            type="date"
-            value={toInput}
-            max={todayKey}
-            onChange={(e) => setToInput(e.target.value)}
-            aria-label="Range end (clan day)"
-            className="focus-ring rounded-lg border border-umbra-line/50 bg-white/[.03] px-2 py-1 font-mono text-2xs text-umbra-lilac [color-scheme:dark]"
-          />
-          <button
-            type="button"
-            disabled={!fromInput || !toInput || custom.status === "loading"}
-            onClick={() => applyRange(fromInput, toInput)}
-            className="focus-ring rounded-lg border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-1 font-mono text-2xs font-semibold uppercase tracking-wider text-umbra-purple transition hover:border-umbra-purple/50 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {custom.status === "loading" ? "Loading…" : "Apply"}
-          </button>
-        </div>
-
-        {/* Quick ranges */}
-        <div className="flex items-center gap-1">
-          {[
-            { label: "This month", from: firstOfMonth(0), to: todayKey },
-            { label: "Last month", from: firstOfMonth(-1), to: lastOfMonth(-1) },
-            { label: "Last 90d", from: daysAgoKey(89), to: todayKey },
-          ].map((chip) => (
-            <button
-              key={chip.label}
-              type="button"
-              onClick={() => {
-                setFromInput(chip.from);
-                setToInput(chip.to);
-                applyRange(chip.from, chip.to);
-              }}
-              className="focus-ring rounded-full border border-umbra-line bg-white/[.03] px-2 py-0.5 font-mono text-micro uppercase tracking-wider text-umbra-muted transition hover:border-umbra-purple/40 hover:text-umbra-lilac"
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Active custom range pill */}
-        {custom.status === "ready" && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-umbra-purple/40 bg-umbra-purple/10 px-2.5 py-0.5 font-mono text-micro font-semibold uppercase tracking-wider text-umbra-purple">
-            {formatRange(custom.data.from, custom.data.to)} · {custom.data.dayCount}d
-            <button
-              type="button"
-              onClick={clearCustom}
-              aria-label="Clear custom range"
-              className="ml-0.5 text-umbra-purple/70 transition hover:text-umbra-lilac"
-            >
-              ✕
-            </button>
-          </span>
-        )}
-        {custom.status === "error" && (
-          <span className="text-2xs text-red-400">{custom.message}</span>
-        )}
-      </div>
+      {/* ── Custom date-range control (Phase 3.2, shared since Phase 4) ── */}
+      <RangeControl
+        fromInput={fromInput}
+        toInput={toInput}
+        todayKey={todayKey}
+        onFromChange={setFromInput}
+        onToChange={setToInput}
+        onApply={(from, to) => applyRange(from ?? fromInput, to ?? toInput)}
+        onClear={clearCustom}
+        status={custom.status}
+        applied={
+          custom.status === "ready"
+            ? {
+                from: custom.data.from,
+                to: custom.data.to,
+                dayCount: custom.data.dayCount,
+              }
+            : null
+        }
+        error={custom.status === "error" ? custom.message : null}
+      />
 
       {/* Chart + Top donors — chart fills remaining height */}
       <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">
@@ -325,24 +253,6 @@ export function DonationAnalytics({
       </div>
     </section>
   );
-}
-
-/** "Jul 1 – Jul 31" from two ISO day keys (used in the active-range pill). */
-function formatRange(from: string, to: string): string {
-  const fmt = (day: string) => {
-    const d = new Date(`${day}T12:00:00Z`);
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      timeZone: TZ,
-    });
-  };
-  return `${fmt(from)} – ${fmt(to)}`;
-}
-
-function daysAgoKey(days: number): string {
-  const now = new Date();
-  return dayKeyInTz(new Date(now.getTime() - days * 86_400_000));
 }
 
 /** Compact inline total — label + value on one line, small */

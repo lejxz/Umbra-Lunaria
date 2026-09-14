@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-11
 **Inputs:** owner-selected feature list from [`2026-09-10-application-assessment.md`](./2026-09-10-application-assessment.md) §7 (items 1, 3, 5, 6, 8–12), the owner's priority question about activity tracking, and a read-only inspection of the production database (2026-09-11).
-**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), Phase 2 (quick wins), and Phase 3 (analytics features) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md), [`2026-09-13-phase3-analytics-features.md`](./2026-09-13-phase3-analytics-features.md). Phases 4–5 are specified here for execution in order.
+**Status:** Phase 6 (CI/CD), Phase 1 (activity signals), Phase 2 (quick wins), and Phase 3 (analytics features) are **implemented** — execution logs: [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md), [`2026-09-13-phase2-quick-wins.md`](./2026-09-13-phase2-quick-wins.md), [`2026-09-13-phase3-analytics-features.md`](./2026-09-13-phase3-analytics-features.md). Phase 4 (clan history timeline) is **implemented 2026-09-14** — execution log: [`2026-09-14-phase4-clan-history-timeline.md`](./2026-09-14-phase4-clan-history-timeline.md). Phase 5 remains.
 
 ---
 
@@ -123,7 +123,9 @@ Execution record + verification against the plan: [`2026-09-13-phase3-analytics-
 
 **3.4 Real CWL standings (F1).** `getCwlSeason` already stores the full league group (8 clans, 7 rounds) and all wars are synced per poll; `wars.involves_own_clan`/`own_clan_tag` (A-4) disambiguate sides. New `getCwlStandings(season)`: iterate the group's clan list; for each clan aggregate across the season's 28 CWL wars (match either `own_clan_tag` or `opponent_tag`): stars for/against, destruction for/against, attacks, wins/losses/ties, round-by-round grid. Standings table (rank, clan, played, stars±, destruction avg, record) with promotion/relegation indication (rank 1 ↑ candidate; bottom two ↓ risk — final group state per CWL rules). Replaces the current day-tabs-only CWL view with standings + round tabs. Data note: `cwl_seasons` is empty today (no CWL month observed since tracking began) — the feature ships ready for the next season and is verifiable against RoyaleAPI's published format.
 
-### Phase 4 — Clan history timeline (F10 · effort S-M)
+### Phase 4 — Clan history timeline (F10 · effort S-M) — **EXECUTED 2026-09-14**
+
+Execution record + verification against the plan: [`2026-09-14-phase4-clan-history-timeline.md`](./2026-09-14-phase4-clan-history-timeline.md). Amendment discovered during execution: the custom date-range control was extracted into a shared `components/dashboard/range-control.tsx` (used by both the donation panel and the new timeline panel), and `GET /api/analytics` now also returns `membershipTimeline` for the requested range — additive, inside the existing `withCache`.
 
 `getMembershipTimeline(from, to)` — `membership_events` grouped by clan-TZ day × `event_type` (join/rejoin/leave/thUpgrade/rename), plus capitalContribution density. Render as a stacked bar/area chart (recharts, matching `chart-theme.ts`) under the dashboard clan log with event-type legend and a window select (30d/90d/all — reuses 3.2's custom window). Pure query + one component; no migration; immutable source is already the design guarantee.
 

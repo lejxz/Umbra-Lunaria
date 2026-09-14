@@ -34,6 +34,11 @@ const WarAttackDistributionChart = dynamic(() => import("./war-attack-distributi
 const RosterSizeChart = dynamic(() => import("./roster-size-chart").then(m => m.RosterSizeChart), {
   loading: () => <ChartSkeleton />,
 });
+// Phase 4 / F10: membership-event timeline — lazy-loaded with the other
+// recharts consumers so it stays out of the initial dashboard bundle.
+const MembershipTimelinePanel = dynamic(() => import("./membership-timeline").then(m => m.MembershipTimelinePanel), {
+  loading: () => <ChartSkeleton />,
+});
 // MemberDetailSheet is only opened on click — lazy-load so its full UI
 // (progression cards, achievements, DonationChart) doesn't bloat the initial
 // dashboard bundle.
@@ -184,12 +189,13 @@ export function DashboardShell({
       </div>
 
       {/* Row 5: Needs Attention | Opted Out | Clan Log — 3 cols.
-          Phase 2.1: attention-queue + clan-log rows deep-link to
-          /members?tag=… instead of opening a dashboard-local popup. */}
+          Member rows open the dashboard-local MemberDetailSheet (same as the
+          donation/activity leaderboards) — no redirect to /members. */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <AttentionPanel
           title="Attention Queue"
           subtitle="Inactive & No-shows"
+          onMemberClick={setSelectedMember}
           groups={[
             {
               label: "No attacks in current war",
@@ -226,6 +232,7 @@ export function DashboardShell({
         <AttentionPanel
           title="Opted Out"
           subtitle="War Preference"
+          onMemberClick={setSelectedMember}
           groups={[
             {
               label: "Opted out of wars",
@@ -235,7 +242,20 @@ export function DashboardShell({
             }
           ]}
         />
-        <ClanLogPanel log={data.clanLog} />
+        <ClanLogPanel log={data.clanLog} onMemberClick={setSelectedMember} />
+      </div>
+
+      {/* Row 5b: Clan history timeline — membership-event density under the
+          clan log (Phase 4 / F10). The log above answers "what happened";
+          this answers "how often, over time". */}
+      <div className="mt-5">
+        <MembershipTimelinePanel
+          dataByWindow={{
+            "30d": data.membershipTimeline30d,
+            "90d": data.membershipTimeline90d,
+            all: data.membershipTimelineAll,
+          }}
+        />
       </div>
 
       {/* Row 6: Hall of Fame — link to the dedicated page */}

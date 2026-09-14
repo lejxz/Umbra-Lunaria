@@ -1,8 +1,6 @@
-import Link from "next/link";
 import type { ClanLog as ClanLogData, ClanLogEntry } from "@/lib/view-models/dashboard";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
-import { memberProfileHref } from "@/lib/member-links";
 import {
   IconUserPlus,
   IconUserMinus,
@@ -15,14 +13,18 @@ import {
  * rejoins, TH upgrades, and renames with name, player tag, event type, and
  * timestamp. Purged members show a "data removed" state. See docs/concept/05-dashboard.md §8.
  *
- * Phase 2.1: non-purged rows deep-link into the member's profile sheet on
- * /members (shareable URL, Back closes the sheet there) instead of opening
- * a local popup on the dashboard.
+ * Clicking a non-purged row opens the member's detail sheet in place on the
+ * dashboard (the same interaction as the donation/activity leaderboards) —
+ * no redirect away to /members. Departed-but-retained members open their
+ * profile here too, which the /members deep link cannot offer (its roster
+ * validation only knows current clan members).
  */
 export function ClanLogPanel({
   log,
+  onMemberClick,
 }: {
   log: ClanLogData;
+  onMemberClick: (playerTag: string) => void;
 }) {
   return (
     <section
@@ -90,13 +92,14 @@ export function ClanLogPanel({
                 {rowBody}
               </div>
             ) : (
-              <Link
+              <button
                 key={entry.id}
-                href={memberProfileHref(entry.playerTag)}
-                className="flex w-full items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
+                type="button"
+                onClick={() => onMemberClick(entry.playerTag)}
+                className="flex w-full cursor-pointer items-center justify-between gap-2.5 rounded-lg bg-white/[.03] px-3 py-2 text-left transition hover:bg-white/[.04] focus-ring"
               >
                 {rowBody}
-              </Link>
+              </button>
             );
           })}
         </div>

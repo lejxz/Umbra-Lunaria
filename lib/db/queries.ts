@@ -9,7 +9,7 @@
  * DATABASE_URL. Never call these from a client component.
  */
 
-import { and, desc, eq, gte, inArray, isNull, lte, ne, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lt, lte, ne, sql } from "drizzle-orm";
 import { cache as reactCache } from "react";
 import { withCache } from "@/lib/cache";
 import { db } from "@/lib/db";
@@ -55,7 +55,13 @@ import type {
   WarPerformanceTrend,
   RosterSizeTrend,
   WarAttackDistribution,
+  MembershipWindow,
+  MembershipTimeline,
 } from "@/lib/view-models/dashboard";
+import {
+  buildMembershipTimeline,
+  type MembershipEventRow,
+} from "@/lib/scoring/membership-timeline";
 import {
   calculateDonationWindow,
   type DonationSnapshot,
@@ -70,7 +76,7 @@ import {
 // stability — callers should keep importing from @/lib/db/queries.
 export { getWarRecord } from "@/lib/scoring/war-record";
 import { getWarRecord } from "@/lib/scoring/war-record";
-import { computeWindow, computeDayWindow, computeCustomWindow, generateBuckets, type TimeWindow } from "@/lib/time/windows";
+import { computeWindow, computeDayWindow, computeCustomWindow, generateBuckets, clanTzDayKey, type TimeWindow } from "@/lib/time/windows";
 import { getRuntimeSetting } from "@/lib/db/runtime-settings";
 import {
   DONATION_RATIO_SETTINGS_KEY,
@@ -516,12 +522,22 @@ export async function getCustomAnalytics(
   const data = await withCache(
     `analytics:${fromDay}:${toDay}`,
     async (): Promise<CustomAnalyticsView> => {
-      const [totals, timeline, leaderboard] = await Promise.all([
-        donationTotalsForWindow(window),
-        donationTimelineForWindow(window),
-        donationLeaderboardForWindow(window),
-      ]);
-      return { from: fromDay, to: toDay, dayCount, totals, timeline, leaderboard };
+      const [totals, timeline, leaderboard, membershipTimeline] =
+        await Promise.all([
+          donationTotalsForWindow(window),
+          donationTimelineForWindow(window),
+          donationLeaderboardForWindow(window),
+          membershipTimelineForWindow(window, "custom"),
+        ]);
+      return {
+        from: fromDay,
+        to: toDay,
+        dayCount,
+        totals,
+        timeline,
+        leaderboard,
+        membershipTimeline,
+      };
     },
     5 * 60 * 1000,
   );
@@ -1225,6 +1241,100 @@ export async function getClanLog(
 }
 
 // ---------------------------------------------------------------------------
+// Membership timeline (Phase 4 — F10 "clan history timeline")
+// ---------------------------------------------------------------------------
+
+/**
+ * Membership-event density per clan-TZ calendar day — the query behind the
+ * dashboard's "Clan history" panel (implementation-plan §Phase 4).
+ *
+ * One grouped query over the immutable `membership_events` log:
+ *   - day buckets via `date_trunc('day', event_time AT TIME ZONE '…')`
+ *     (same Supabase-pooler-safe literal pattern as getRosterSizeTrend);
+ *   - the five membership event types become stacked-bar counts;
+ *   - `capitalContribution` delta events (daily batch) become the density
+ *     overlay: distinct contributors + summed amounts per day.
+ *
+ * Days are zero-filled across the whole window by buildMembershipTimeline so
+ * the x-axis is honest calendar spacing. The "all" window starts at the
+ * first observed event day (no leading flat zero region since tracking began).
+ */
+export async function getMembershipTimeline(
+  windowKind: MembershipWindow,
+  now: Date = new Date(),
+): Promise<MembershipTimeline> {
+  const win: TimeWindow =
+    windowKind === "30d"
+      ? computeWindow("30d", now)
+      : windowKind === "90d"
+        ? computeDayWindow(90, now)
+        : { from: new Date(0), to: now, kind: "all" };
+  return membershipTimelineForWindow(win, windowKind);
+}
+
+/** Shared core: also used by getCustomAnalytics for custom day ranges. */
+async function membershipTimelineForWindow(
+  win: TimeWindow,
+  windowKind: MembershipWindow | "custom",
+): Promise<MembershipTimeline> {
+  // Group by clan-TZ calendar day × event type. The timezone is inlined as a
+  // raw literal (config constant, not user input) — parameterized
+  // `AT TIME ZONE $1` fails on Supabase's PgBouncer pooler (see fix in
+  // getRosterSizeTrend). `to_char` returns a plain day key, sidestepping
+  // pg's naive-timestamp → JS Date timezone handling entirely.
+  const tzLit = sql.raw(`'${clanConfig.timezone}'`);
+  const dayExpr = sql`date_trunc('day', ${membershipEvents.eventTime} AT TIME ZONE ${tzLit})`;
+
+  const rows = await db
+    .select({
+      dayKey: sql<string>`to_char(${dayExpr}, 'YYYY-MM-DD')`,
+      eventType: membershipEvents.eventType,
+      count: sql<number>`count(*)`,
+      contributors: sql<number>`count(distinct ${membershipEvents.playerTag})`,
+      amount: sql<
+        number | null
+      >`sum((${membershipEvents.metadata} ->> 'amount')::bigint)`,
+    })
+    .from(membershipEvents)
+    .where(
+      and(
+        gte(membershipEvents.eventTime, win.from),
+        lt(membershipEvents.eventTime, win.to),
+      ),
+    )
+    .groupBy(dayExpr, membershipEvents.eventType);
+
+  const eventRows: MembershipEventRow[] = rows.map((r) => ({
+    dayKey: r.dayKey,
+    eventType: r.eventType,
+    count: Number(r.count),
+    contributors: Number(r.contributors),
+    amount: r.amount === null ? null : Number(r.amount),
+  }));
+
+  // The day range to zero-fill: window start → the window's LAST day (clan-TZ).
+  // For "all", clamp the start to the first observed event so the chart
+  // doesn't open with months of empty leading days once the tracker ages.
+  // (win.to is an exclusive bound for custom windows and "now" for presets —
+  // minus 1ms lands on the final day the window actually covers.)
+  const toDay = clanTzDayKey(new Date(win.to.getTime() - 1));
+  const fromDay =
+    windowKind === "all" && eventRows.length > 0
+      ? eventRows.reduce(
+          (min, r) => (r.dayKey < min ? r.dayKey : min),
+          eventRows[0]!.dayKey,
+        )
+      : clanTzDayKey(win.from);
+
+  const { points, totals } = buildMembershipTimeline(eventRows, {
+    fromDay,
+    toDay,
+  });
+
+  return { window: windowKind, points, totals };
+}
+
+// ---------------------------------------------------------------------------
 // War summary
 // ---------------------------------------------------------------------------
 
@@ -1388,6 +1498,9 @@ export async function getDashboard(): Promise<DashboardData> {
     warPerformanceTrend,
     rosterSizeTrend,
     warAttackDistribution,
+    membershipTimeline30d,
+    membershipTimeline90d,
+    membershipTimelineAll,
   ] = await Promise.all([
     getCapitalSummary(),
     getDonationTotals("24h", lastPolledAt),
@@ -1414,6 +1527,9 @@ export async function getDashboard(): Promise<DashboardData> {
     getWarPerformanceTrend(),
     getRosterSizeTrend(),
     getWarAttackDistribution(),
+    getMembershipTimeline("30d", lastPolledAt),
+    getMembershipTimeline("90d", lastPolledAt),
+    getMembershipTimeline("all", lastPolledAt),
   ]);
 
   return {
@@ -1449,6 +1565,10 @@ export async function getDashboard(): Promise<DashboardData> {
     warPerformanceTrend,
     rosterSizeTrend,
     warAttackDistribution,
+    // Clan history timeline (Phase 4 / F10) — all three windows precomputed
+    membershipTimeline30d,
+    membershipTimeline90d,
+    membershipTimelineAll,
   };
 }
 

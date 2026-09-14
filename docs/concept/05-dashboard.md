@@ -102,10 +102,16 @@ Each entry is clickable and opens the member detail sheet, same as every other m
 
 Render a most-recent-first feed of joins and departures with name, player tag, event type, and timestamp — sourced from `membership_events` (`03-data-model-and-database.md`), not the mutable `members` row directly. That distinction is what makes the click behavior below actually work: the event log is immutable and never pruned, so a "left 20 days ago" entry stays visible and correct even after the member's own row has been purged. A click opens:
 
-1. The retained player's profile on `/members` via a `?tag=` deep link (Phase 2.1 — the members page owns the member detail sheet, and the resulting URL is shareable).
+1. The retained player's profile in the dashboard-local member detail sheet (2026-09-14: the same interaction as the donation/activity leaderboards — `GET /api/members/[tag]` serves any non-purged member, **departed members included**, which a `/members?tag=` redirect cannot do since that page's roster validation only knows current clan members).
 2. A purpose-built "data removed under the retention policy" state for a purged player (no link — there is no profile to open).
 
-The default feed is the latest 20 events or 30 days, whichever is smaller.
+The default feed is the latest 20 events or 30 days, whichever is smaller. The `/members?tag=` deep-link URL contract itself remains (the members page opens the sheet for a `?tag=` on load) for shareable links — see `lib/member-links.ts`.
+
+### 9b. Clan history timeline (Phase 4 / F10)
+
+Directly under the clan log: the same `membership_events` data as a daily density chart — one stacked bar per clan-timezone calendar day (join / rejoin / leave / TH upgrade / rename) with the capital-contribution density overlaid (distinct members whose contributions rose that day, from the daily batch's delta events). The log answers "what happened"; the timeline answers "how often, over time" — the 2026-07-20 mass departure and raid-weekend contribution spikes read at a glance.
+
+Window select: 30d / 90d / all (precomputed server-side, tab switches cost zero fetches) plus a custom day range through the same shared range control and `GET /api/analytics` endpoint the donation panel uses. Days without events render as gaps (zero-filled x-axis); the "all" window starts at the first observed event day. A header badge shows the window's net roster change (joins + rejoins − leaves).
 
 ### 10. Navigation summaries
 
