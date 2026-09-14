@@ -69,9 +69,17 @@ Rules:
 4. Members marked `warPreference = out` are not penalized by the score; war preference is an explicit planning decision.
 5. Rankings are clickable and open the reusable member detail sheet.
 
-### 6. Activity timeline
+### 6. Clan Pulse — activity × roster (combined panel)
 
-Show active-member count and percent of the retained roster for 24-hour, 7-day, and 30-day windows. Label it as observed activity and use an explicit empty/partial state rather than an empty graph.
+One panel answers both "how many members are active?" and "is the clan growing or shrinking?" (2026-09-14: replaces the separate Activity timeline + Roster growth panels). For 24-hour, 7-day, and 30-day windows it shows, on one chart:
+
+1. **Bars** — active members per bucket (observed activity; hourly buckets for 24h, daily for 7d/30d).
+2. **Roster line** — distinct members per clan-timezone day, carried forward onto the activity buckets (a step line).
+3. **Engagement rate line** — active ÷ roster per bucket, on a 0–100% right axis: the normalization that separates a *big* clan from an *engaged* one (growth from 30 → 45 while "active" goes 12 → 15 is disengagement, not health).
+4. **Verdict pill** — the growth × engagement 2×2, computed by the pure engine `lib/scoring/clan-pulse.ts`: Thriving (both up) · Growing, diluting (roster up, engagement down) · Tightening core (roster down, engagement up) · Fading (both down) · Steady / Steady roster / Steady engagement (within thresholds: roster |Δ| < max(1, 5% of window-start roster); engagement |trend| < 5pp) · Warming up (not enough history — never a false "Steady"). The pill's tooltip carries a plain-language one-liner.
+5. **Stat chips** — `Active X/Y` · `Roster N (Δ)` · `Engagement R% avg (±Tpp)`, each delta colored.
+
+Label it as observed activity and use an explicit empty/partial state rather than an empty graph. The Top-5 Member Activity Score leaderboard sits in the panel's right column (section 5) — one window state drives both the chart and the leaderboard. Data assembly: `getDashboard` composes the already-fetched activity timelines with the single roster-trend query (zero extra queries); `member_snapshots` day keys come from `to_char(..., 'YYYY-MM-DD')` so alignment never round-trips a naive pg timestamp through a Date.
 
 ### 7. Needs attention
 

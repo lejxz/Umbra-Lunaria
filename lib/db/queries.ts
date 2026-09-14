@@ -76,6 +76,7 @@ import {
 // stability — callers should keep importing from @/lib/db/queries.
 export { getWarRecord } from "@/lib/scoring/war-record";
 import { getWarRecord } from "@/lib/scoring/war-record";
+import { buildClanPulse } from "@/lib/scoring/clan-pulse";
 import { computeWindow, computeDayWindow, computeCustomWindow, generateBuckets, clanTzDayKey, type TimeWindow } from "@/lib/time/windows";
 import { getRuntimeSetting } from "@/lib/db/runtime-settings";
 import {
@@ -1486,6 +1487,7 @@ export async function getDashboard(): Promise<DashboardData> {
     activityTimeline24h,
     activityTimeline7d,
     activityTimeline30d,
+    rosterSizeTrend,
     activityScore24h,
     activityScore7d,
     activityScore30d,
@@ -1496,7 +1498,6 @@ export async function getDashboard(): Promise<DashboardData> {
     trackingStart,
     hallOfFame,
     warPerformanceTrend,
-    rosterSizeTrend,
     warAttackDistribution,
     membershipTimeline30d,
     membershipTimeline90d,
@@ -1515,6 +1516,8 @@ export async function getDashboard(): Promise<DashboardData> {
     getActivityTimeline("24h", lastPolledAt),
     getActivityTimeline("7d", lastPolledAt),
     getActivityTimeline("30d", lastPolledAt),
+    // Roster trend feeds buildClanPulse for all 3 windows (one query, used 3×)
+    getRosterSizeTrend(),
     getMemberActivityScore("24h", lastPolledAt),
     getMemberActivityScore("7d", lastPolledAt),
     getMemberActivityScore("30d", lastPolledAt),
@@ -1525,7 +1528,6 @@ export async function getDashboard(): Promise<DashboardData> {
     getTrackingStart(),
     getHallOfFame(),
     getWarPerformanceTrend(),
-    getRosterSizeTrend(),
     getWarAttackDistribution(),
     getMembershipTimeline("30d", lastPolledAt),
     getMembershipTimeline("90d", lastPolledAt),
@@ -1548,10 +1550,12 @@ export async function getDashboard(): Promise<DashboardData> {
     donations30d,
     donationTimeline30d,
     donationLeaderboard30d,
-    // Activity
-    activityTimeline: activityTimeline24h,
-    activityTimeline7d,
-    activityTimeline30d,
+    // Clan Pulse — activity × roster merged per window (pure composition of
+    // the two results above; zero extra queries — replaces the two separate
+    // Activity Analytics + Roster growth panels)
+    clanPulse: buildClanPulse(activityTimeline24h, rosterSizeTrend),
+    clanPulse7d: buildClanPulse(activityTimeline7d, rosterSizeTrend),
+    clanPulse30d: buildClanPulse(activityTimeline30d, rosterSizeTrend),
     activityScore: activityScore24h,
     activityScore7d,
     activityScore30d,
@@ -1563,7 +1567,6 @@ export async function getDashboard(): Promise<DashboardData> {
     trackingStart,
     // Analytical graphs
     warPerformanceTrend,
-    rosterSizeTrend,
     warAttackDistribution,
     // Clan history timeline (Phase 4 / F10) — all three windows precomputed
     membershipTimeline30d,
@@ -1824,14 +1827,18 @@ export async function getRosterSizeTrend(
   // PgBouncer pooler.
   const tzLit = sql.raw(`'${clanConfig.timezone}'`);
   const dayExpr = sql<Date>`date_trunc('day', ${memberSnapshots.capturedAt} AT TIME ZONE ${tzLit})`;
+  // Plain day key straight from the DB (Phase 4 sidestep — a naive pg
+  // timestamp round-tripped through a JS Date shifts with the server's TZ).
+  const dayKeyExpr = sql<string>`to_char(${dayExpr}, 'YYYY-MM-DD')`;
   const rows = await db
     .select({
       day: dayExpr,
+      dayKey: dayKeyExpr,
       count: sql<number>`count(distinct ${memberSnapshots.playerTag})`,
     })
     .from(memberSnapshots)
     .where(gte(memberSnapshots.capturedAt, since))
-    .groupBy(dayExpr)
+    .groupBy(dayExpr, dayKeyExpr)
     .orderBy(dayExpr);
 
   const points = rows.map((r) => ({
@@ -1839,6 +1846,7 @@ export async function getRosterSizeTrend(
     // back a string from raw SQL — normalize so chart code can safely call
     // .getTime().
     timestamp: r.day instanceof Date ? r.day : new Date(r.day as string),
+    dayKey: r.dayKey,
     count: Number(r.count),
   }));
 

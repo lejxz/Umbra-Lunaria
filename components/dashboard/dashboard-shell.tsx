@@ -6,7 +6,6 @@ import Link from "next/link";
 import type { DashboardData } from "@/lib/view-models/dashboard";
 import { ClanIdentityCard } from "./clan-identity-card";
 import { WarRecordCard } from "./war-record-card";
-import { Badge } from "@/components/ui/badge";
 import { CurrentWarCard } from "./current-war-card";
 import { CapitalSummaryCard } from "./capital-summary-card";
 import { AttentionPanel } from "./needs-attention";
@@ -22,16 +21,15 @@ import { IconTrophy, IconChevronRight } from "@/components/ui/icons";
 const DonationAnalytics = dynamic(() => import("./donation-analytics").then(m => m.DonationAnalytics), {
   loading: () => <ChartSkeleton />,
 });
-const ActivityAnalytics = dynamic(() => import("./activity-analytics").then(m => m.ActivityAnalytics), {
+// Clan Pulse (2026-09-14): the combined Activity × Roster panel — replaces
+// the separate ActivityAnalytics + RosterSizeChart rows.
+const ClanPulsePanel = dynamic(() => import("./clan-pulse").then(m => m.ClanPulsePanel), {
   loading: () => <ChartSkeleton />,
 });
 const WarPerformanceChart = dynamic(() => import("./war-performance-chart").then(m => m.WarPerformanceChart), {
   loading: () => <ChartSkeleton />,
 });
 const WarAttackDistributionChart = dynamic(() => import("./war-attack-distribution").then(m => m.WarAttackDistributionChart), {
-  loading: () => <ChartSkeleton />,
-});
-const RosterSizeChart = dynamic(() => import("./roster-size-chart").then(m => m.RosterSizeChart), {
   loading: () => <ChartSkeleton />,
 });
 // Phase 4 / F10: membership-event timeline — lazy-loaded with the other
@@ -149,13 +147,16 @@ export function DashboardShell({
         />
       </div>
 
-      {/* Row 4: Unified Activity Analytics (Timeline + Score) */}
+      {/* Row 4: Clan Pulse — combined Activity × Roster panel (replaces the
+          separate Activity Analytics row + Roster growth row). Bars = active
+          members, line = roster size, dashed line = engagement rate; verdict
+          pill summarizes growth × engagement. */}
       <div className="mt-5">
-        <ActivityAnalytics
-          dataByWindow={{
-            "24h": data.activityTimeline,
-            "7d": data.activityTimeline7d,
-            "30d": data.activityTimeline30d,
+        <ClanPulsePanel
+          pulseByWindow={{
+            "24h": data.clanPulse,
+            "7d": data.clanPulse7d,
+            "30d": data.clanPulse30d,
           }}
           leaderboardByWindow={{
             "24h": data.activityScore,
@@ -164,28 +165,6 @@ export function DashboardShell({
           }}
           onMemberClick={setSelectedMember}
         />
-      </div>
-
-      {/* Row 4b: Roster size trend — full width */}
-      <div className="mt-5">
-        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="roster-trend-title">
-          <div className="flex items-center justify-between">
-            <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-              Roster size · 30 days
-            </p>
-            <Badge tone="brand">
-              {data.rosterSizeTrend.points.length > 0
-                ? `${data.rosterSizeTrend.points[data.rosterSizeTrend.points.length - 1]?.count ?? 0} current`
-                : "—"}
-            </Badge>
-          </div>
-          <h3 id="roster-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
-            Roster growth
-          </h3>
-          <div className="mt-3 h-40">
-            <RosterSizeChart trend={data.rosterSizeTrend} />
-          </div>
-        </section>
       </div>
 
       {/* Row 5: Needs Attention | Opted Out | Clan Log — 3 cols.

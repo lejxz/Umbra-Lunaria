@@ -338,6 +338,10 @@ export interface WarPerformanceTrend {
 
 export interface RosterSizePoint {
   timestamp: Date;
+  /** Clan-TZ day key "2026-09-14" — from to_char in SQL, so day alignment
+   *  never round-trips a naive pg timestamp through a Date (the Phase 4
+   *  sidestep). Consumed by lib/scoring/clan-pulse.ts. */
+  dayKey: string;
   count: number;
 }
 
@@ -352,6 +356,54 @@ export interface WarAttackDistribution {
   oneStar: number;
   zeroStar: number;
   total: number;
+}
+
+// ---------------------------------------------------------------------------
+// Clan Pulse — combined Activity × Roster panel (2026-09-14, user request:
+// "combine Activity Analytics and Roster growth and improve it"). Pure
+// assembly in lib/scoring/clan-pulse.ts; query-layer composition only.
+// ---------------------------------------------------------------------------
+
+export type PulseDirection = "up" | "down" | "flat";
+
+export interface ClanPulsePoint {
+  /** Axis label from the activity bucket ("14:00" / "Mon" / "Jul 1"). */
+  label: string;
+  /** Distinct members with an activity-flagged snapshot in the bucket. */
+  active: number;
+  /** Roster size on the bucket's clan-TZ day (carry-forward), null before
+   *  the first roster day. */
+  roster: number | null;
+  /** active ÷ roster × 100 — null when roster is unknown/zero. */
+  rate: number | null;
+}
+
+export interface ClanPulseVerdict {
+  growth: PulseDirection | null;
+  engagement: PulseDirection | null;
+  /** "Thriving", "Growing, diluting", "Tightening core", "Fading",
+   *  "Steady…", or "Warming up". */
+  label: string;
+  /** One-liner for the pill tooltip. */
+  description: string;
+  tone: "success" | "warning" | "danger" | "muted";
+}
+
+export interface ClanPulse {
+  window: DonationWindow;
+  points: ClanPulsePoint[];
+  totalActiveMembers: number;
+  totalMembers: number;
+  hasPartialData: boolean;
+  /** Roster size on the last bucket's day (null = no roster days yet). */
+  rosterNow: number | null;
+  /** Last day's roster − window-start roster (null when unknown). */
+  rosterDelta: number | null;
+  /** Mean of the per-bucket engagement rates (null when none measurable). */
+  avgRate: number | null;
+  /** Second-half mean − first-half mean, in percentage points. */
+  rateTrendPp: number | null;
+  verdict: ClanPulseVerdict;
 }
 
 // ---------------------------------------------------------------------------
@@ -413,10 +465,11 @@ export interface DashboardData {
   donations30d: DonationTotals;
   donationTimeline30d: DonationTimeline;
   donationLeaderboard30d: DonationLeaderboard;
-  // Activity timelines for all 3 windows
-  activityTimeline: ActivityTimeline;
-  activityTimeline7d: ActivityTimeline;
-  activityTimeline30d: ActivityTimeline;
+  // Clan Pulse — combined Activity × Roster panel, all 3 windows
+  // (activity timelines + roster trend merged by lib/scoring/clan-pulse.ts)
+  clanPulse: ClanPulse;
+  clanPulse7d: ClanPulse;
+  clanPulse30d: ClanPulse;
   // Activity scores for all 3 windows (tabs switch between them)
   activityScore: ActivityScoreLeaderboard;
   activityScore7d: ActivityScoreLeaderboard;
@@ -429,7 +482,6 @@ export interface DashboardData {
   trackingStart: Date | null; // earliest member_snapshots.captured_at across the clan
   // Analytical graphs
   warPerformanceTrend: WarPerformanceTrend;
-  rosterSizeTrend: RosterSizeTrend;
   warAttackDistribution: WarAttackDistribution;
   // Clan history timeline (Phase 4 / F10) — all three windows precomputed
   membershipTimeline30d: MembershipTimeline;
