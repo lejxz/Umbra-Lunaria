@@ -138,6 +138,9 @@ export interface CustomAnalyticsView {
    *  dashboard's war performance panel renders, so a custom range swaps in
    *  with zero client-side translation. */
   warPerformanceTrend: WarPerformanceTrend;
+  /** Attack-quality aggregates for wars ended inside the day range — the
+   *  star-distribution card's slice of the same request. */
+  warAttackQuality: WarAttackQualityTrend;
 }
 
 // ---------------------------------------------------------------------------
@@ -346,6 +349,38 @@ export interface WarPerformanceTrend {
   points: WarPerformancePoint[]; // oldest-first for left-to-right charts
 }
 
+// ---------------------------------------------------------------------------
+// Attack quality — per-war own-attack aggregates for the star-distribution
+// card (2026-09-16: windowed redesign; replaces the all-time WarAttackDistribution)
+// ---------------------------------------------------------------------------
+
+export interface WarAttackQualityPoint {
+  endTime: Date;
+  /** Roster size per side (5v5 → 5); null on legacy rows. */
+  teamSize: number | null;
+  /** Attacks recorded for this war (own clan only — the ingest only writes
+   *  rows for our attackers). */
+  attacks: number;
+  /** Sum of stars across those attacks. */
+  starsSum: number;
+  /** Sum of destruction % across those attacks. */
+  destructionSum: number;
+  /** Per-tier attack counts (3★ tier folds stars ≥ 3). */
+  threeStar: number;
+  twoStar: number;
+  oneStar: number;
+  zeroStar: number;
+  /** Per-tier destruction sums — avg destruction per tier in the tooltip. */
+  destSumThreeStar: number;
+  destSumTwoStar: number;
+  destSumOneStar: number;
+  destSumZeroStar: number;
+}
+
+export interface WarAttackQualityTrend {
+  points: WarAttackQualityPoint[]; // oldest-first, same contract as performance
+}
+
 export interface RosterSizePoint {
   timestamp: Date;
   /** Clan-TZ day key "2026-09-14" — from to_char in SQL, so day alignment
@@ -360,13 +395,6 @@ export interface RosterSizeTrend {
   windowDays: number;
 }
 
-export interface WarAttackDistribution {
-  threeStar: number;
-  twoStar: number;
-  oneStar: number;
-  zeroStar: number;
-  total: number;
-}
 
 // ---------------------------------------------------------------------------
 // Clan Pulse — combined Activity × Roster panel (2026-09-14, user request:
@@ -492,7 +520,7 @@ export interface DashboardData {
   trackingStart: Date | null; // earliest member_snapshots.captured_at across the clan
   // Analytical graphs
   warPerformanceTrend: WarPerformanceTrend;
-  warAttackDistribution: WarAttackDistribution;
+  warAttackQuality: WarAttackQualityTrend;
   // Clan history timeline (Phase 4 / F10) — all three windows precomputed
   membershipTimeline30d: MembershipTimeline;
   membershipTimeline90d: MembershipTimeline;

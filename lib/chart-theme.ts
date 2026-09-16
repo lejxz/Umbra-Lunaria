@@ -9,8 +9,8 @@
  * The values are kept as plain strings (not CSS variables) because
  * Recharts renders to SVG, not to the Tailwind cascade.
  *
- * Used by: donation-chart, war-performance-chart, war-attack-distribution,
- * roster-size-chart, activity-analytics.
+ * Used by: donation-chart, war-performance, war-attack-quality,
+ * clan-pulse, membership-timeline.
  */
 
 // ── Color constants (mirror tailwind.config.ts umbra.* tokens) ──────────

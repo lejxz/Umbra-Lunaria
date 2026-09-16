@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, type ReactNode } from "react";
 import {
   LineChart,
   Line,
@@ -10,11 +10,8 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import type {
-  WarPerformancePoint,
-  CustomAnalyticsView,
-} from "@/lib/view-models/dashboard";
-import { WindowPicker, Badge, EmptyState } from "@/components/ui";
+import type { WarPerformancePoint } from "@/lib/view-models/dashboard";
+import { Badge, EmptyState } from "@/components/ui";
 import { IconWarEmpty } from "@/components/ui/icons";
 import { CHART_COLORS, axisTickStyle, tooltipContentStyle } from "@/lib/chart-theme";
 import {
@@ -38,19 +35,10 @@ import {
  * same palette as the war record card and attack donut), with a 3-war
  * rolling average for the "are we getting better?" read.
  *
- * Windows: last 10 / 20 / all sliced client-side from the precomputed trend
- * (tab switches cost zero fetches), plus a custom date range via GET
- * /api/analytics — the same shared WindowPicker and endpoint the donation
- * and membership panels use.
+ * Purely presentational: the war-analytics row owns the window state and
+ * renders the shared WindowPicker into this panel's `headerControl` slot,
+ * so this card and the attack-quality card always show the same wars.
  */
-
-type WarWindow = "10" | "20" | "all";
-
-type CustomState =
-  | { status: "idle" }
-  | { status: "loading"; from: string; to: string }
-  | { status: "ready"; data: CustomAnalyticsView }
-  | { status: "error"; message: string };
 
 /** Result palette — matches WarRecordCard stats + attack-distribution donut. */
 const RESULT_COLORS = {
@@ -82,62 +70,24 @@ interface ChartDatum {
   max: number | null;
 }
 
-export function WarPerformancePanel({ points }: { points: WarPerformancePoint[] }) {
-  const [window, setWindow] = useState<WarWindow>("20");
-  const [custom, setCustom] = useState<CustomState>({ status: "idle" });
-
-  const applyRange = useCallback(
-    async (from: string, to: string) => {
-      if (!from || !to) return;
-      setCustom({ status: "loading", from, to });
-      try {
-        const res = await fetch(
-          `/api/analytics?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`,
-        );
-        const body = (await res.json()) as CustomAnalyticsView | { error: string };
-        if (!res.ok || "error" in body) {
-          setCustom({
-            status: "error",
-            message: "error" in body ? body.error : `Request failed (${res.status})`,
-          });
-          return;
-        }
-        setCustom({ status: "ready", data: body });
-      } catch {
-        setCustom({ status: "error", message: "Network error — try again." });
-      }
-    },
-    [],
-  );
-
-  const clearCustom = useCallback(() => {
-    setCustom({ status: "idle" });
-  }, []);
-
-  const isCustomActive =
-    custom.status === "ready" || custom.status === "loading";
-
-  // Preset slice — points arrive oldest-first, so the last N are the most
-  // recent N. Custom range swaps the dataset (JSON Dates → real Dates).
-  const presetPoints = useMemo(
-    () => (window === "all" ? points : points.slice(-Number(window))),
-    [points, window],
-  );
-  const customPoints = useMemo(() => {
-    if (custom.status !== "ready") return null;
-    return custom.data.warPerformanceTrend.points.map((p) => ({
-      ...p,
-      endTime: new Date(p.endTime),
-    }));
-  }, [custom]);
-  const activePoints = customPoints ?? presetPoints;
-
-  const summary = useMemo(() => summarizeWarPerformance(activePoints), [activePoints]);
+export function WarPerformancePanel({
+  points,
+  headerControl,
+  hasCustomRange,
+}: {
+  points: WarPerformancePoint[];
+  /** The row's shared window control — rendered in the header slot where
+   *  this panel used to own its own picker. */
+  headerControl?: ReactNode;
+  /** True while a custom range is active — steers the empty-state copy. */
+  hasCustomRange?: boolean;
+}) {
+  const summary = useMemo(() => summarizeWarPerformance(points), [points]);
 
   const data = useMemo<ChartDatum[]>(() => {
-    const ownEff = activePoints.map((p) => starEfficiency(p.ownStars, p.teamSize));
+    const ownEff = points.map((p) => starEfficiency(p.ownStars, p.teamSize));
     const avg3 = rollingAverage(ownEff, 3);
-    return activePoints.map((p, i) => ({
+    return points.map((p, i) => ({
       label: shortDate(p.endTime),
       opponent: p.opponentName,
       warType: p.warType,
@@ -152,11 +102,11 @@ export function WarPerformancePanel({ points }: { points: WarPerformancePoint[] 
       result: p.result,
       max: maxStars(p.teamSize),
     }));
-  }, [activePoints]);
+  }, [points]);
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="glass flex h-full flex-col rounded-2xl p-5"
       aria-labelledby="war-trend-title"
     >
       {/* Header + record badge + window picker */}
@@ -180,46 +130,17 @@ export function WarPerformancePanel({ points }: { points: WarPerformancePoint[] 
             </Badge>
           )}
 
-          <WindowPicker
-            presets={[
-              { value: "10", label: "10" },
-              { value: "20", label: "20" },
-              { value: "all", label: "all" },
-            ]}
-            activePreset={isCustomActive ? null : window}
-            onPresetChange={(v) => {
-              setWindow(v as WarWindow);
-              clearCustom();
-            }}
-            custom={{
-              status: custom.status,
-              from:
-                custom.status === "ready"
-                  ? custom.data.from
-                  : custom.status === "loading"
-                    ? custom.from
-                    : undefined,
-              to:
-                custom.status === "ready"
-                  ? custom.data.to
-                  : custom.status === "loading"
-                    ? custom.to
-                    : undefined,
-              error: custom.status === "error" ? custom.message : null,
-            }}
-            onApplyCustom={applyRange}
-            onClearCustom={clearCustom}
-            label="War performance window"
-          />
+          {headerControl}
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="mt-4 h-56">
+      {/* Chart — flexes to fill the row height so both cards in the grid
+          row stay visually balanced (lg only; fixed height on small screens) */}
+      <div className="mt-4 h-56 lg:h-auto lg:min-h-[14rem] lg:flex-1">
         {data.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <EmptyState
-              title={custom.status === "ready" ? "No wars in this range" : "No war history yet"}
+              title={hasCustomRange ? "No wars in this range" : "No war history yet"}
               icon={<IconWarEmpty className="h-8 w-8" />}
             />
           </div>

@@ -26,11 +26,10 @@ const DonationAnalytics = dynamic(() => import("./donation-analytics").then(m =>
 const ClanPulsePanel = dynamic(() => import("./clan-pulse").then(m => m.ClanPulsePanel), {
   loading: () => <ChartSkeleton />,
 });
-const WarPerformancePanel = dynamic(() => import("./war-performance").then(m => m.WarPerformancePanel), {
-  loading: () => <ChartSkeleton />,
-});
-const WarAttackDistributionChart = dynamic(() => import("./war-attack-distribution").then(m => m.WarAttackDistributionChart), {
-  loading: () => <ChartSkeleton />,
+// War analytics row (2026-09-16): performance panel + attack-quality card
+// over ONE shared window — one lazy chunk for the whole row.
+const WarAnalyticsRow = dynamic(() => import("./war-analytics-row").then(m => m.WarAnalyticsRow), {
+  loading: () => <WarRowSkeleton />,
 });
 // Phase 4 / F10: membership-event timeline — lazy-loaded with the other
 // recharts consumers so it stays out of the initial dashboard bundle.
@@ -53,6 +52,18 @@ function ChartSkeleton() {
       <div className="mt-6 flex flex-1 items-center justify-center">
         <div className="h-3 w-3 animate-pulse rounded-full bg-umbra-purple/30" />
       </div>
+    </div>
+  );
+}
+
+/** Skeleton matching the war-analytics row's two-card layout. */
+function WarRowSkeleton() {
+  return (
+    <div className="mt-5 grid gap-5 lg:grid-cols-3">
+      <div className="lg:col-span-2">
+        <ChartSkeleton />
+      </div>
+      <ChartSkeleton />
     </div>
   );
 }
@@ -97,23 +108,12 @@ export function DashboardShell({
         <CapitalSummaryCard capital={data.capital} />
       </div>
 
-      {/* Row 2b: War analytics — performance panel (2/3) + attack distribution donut (1/3) */}
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <WarPerformancePanel points={data.warPerformanceTrend.points} />
-        </div>
-        <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="attack-dist-title">
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            Attack quality
-          </p>
-          <h3 id="attack-dist-title" className="mt-1 font-display text-lg text-umbra-lilac">
-            Star distribution
-          </h3>
-          <div className="mt-3 h-48 sm:h-56 lg:h-auto lg:flex-1">
-            <WarAttackDistributionChart distribution={data.warAttackDistribution} />
-          </div>
-        </section>
-      </div>
+      {/* Row 2b: War analytics — performance panel + attack-quality card over
+          one shared window (the row's WindowPicker drives both). */}
+      <WarAnalyticsRow
+        performance={data.warPerformanceTrend.points}
+        attackQuality={data.warAttackQuality.points}
+      />
 
       {/* Row 3: Clan donations — full width (primary analytical panel) */}
       <div className="mt-5">

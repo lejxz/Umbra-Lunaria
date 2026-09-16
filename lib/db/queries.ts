@@ -55,7 +55,8 @@ import type {
   WarPerformanceTrend,
   WarPerformancePoint,
   RosterSizeTrend,
-  WarAttackDistribution,
+  WarAttackQualityTrend,
+  WarAttackQualityPoint,
   MembershipWindow,
   MembershipTimeline,
 } from "@/lib/view-models/dashboard";
@@ -524,14 +525,21 @@ export async function getCustomAnalytics(
   const data = await withCache(
     `analytics:${fromDay}:${toDay}`,
     async (): Promise<CustomAnalyticsView> => {
-      const [totals, timeline, leaderboard, membershipTimeline, warPerformanceTrend] =
-        await Promise.all([
-          donationTotalsForWindow(window),
-          donationTimelineForWindow(window),
-          donationLeaderboardForWindow(window),
-          membershipTimelineForWindow(window, "custom"),
-          warPerformanceTrendForWindow(window),
-        ]);
+      const [
+        totals,
+        timeline,
+        leaderboard,
+        membershipTimeline,
+        warPerformanceTrend,
+        warAttackQuality,
+      ] = await Promise.all([
+        donationTotalsForWindow(window),
+        donationTimelineForWindow(window),
+        donationLeaderboardForWindow(window),
+        membershipTimelineForWindow(window, "custom"),
+        warPerformanceTrendForWindow(window),
+        warAttackQualityTrendForWindow(window),
+      ]);
       return {
         from: fromDay,
         to: toDay,
@@ -541,6 +549,7 @@ export async function getCustomAnalytics(
         leaderboard,
         membershipTimeline,
         warPerformanceTrend,
+        warAttackQuality,
       };
     },
     5 * 60 * 1000,
@@ -1501,7 +1510,7 @@ export async function getDashboard(): Promise<DashboardData> {
     trackingStart,
     hallOfFame,
     warPerformanceTrend,
-    warAttackDistribution,
+    warAttackQuality,
     membershipTimeline30d,
     membershipTimeline90d,
     membershipTimelineAll,
@@ -1531,7 +1540,7 @@ export async function getDashboard(): Promise<DashboardData> {
     getTrackingStart(),
     getHallOfFame(),
     getWarPerformanceTrend(),
-    getWarAttackDistribution(),
+    getWarAttackQualityTrend(),
     getMembershipTimeline("30d", lastPolledAt),
     getMembershipTimeline("90d", lastPolledAt),
     getMembershipTimeline("all", lastPolledAt),
@@ -1570,7 +1579,7 @@ export async function getDashboard(): Promise<DashboardData> {
     trackingStart,
     // Analytical graphs
     warPerformanceTrend,
-    warAttackDistribution,
+    warAttackQuality,
     // Clan history timeline (Phase 4 / F10) — all three windows precomputed
     membershipTimeline30d,
     membershipTimeline90d,
@@ -1917,34 +1926,104 @@ export async function getRosterSizeTrend(
 }
 
 /**
- * War attack distribution — count of attacks by star value (0-3) across all
- * live-tracked wars. Powers the attack-distribution donut chart. Returns
- * zero-filled counts so the chart always renders all four segments. Sparse
- * until more wars are live-tracked (backfilled wars have no attack detail).
+ * War attack quality — per-war aggregates of OUR attacks (the ingest only
+ * writes war_attacks rows for own-clan attackers), one row per ended
+ * own-clan war that has attack detail. Backfilled warlog wars and wars
+ * where every attacker missed have no rows and drop out via the inner
+ * join. Powers the star-distribution card, which slices windows client-side
+ * (10 / 20 / all) from this precomputed trend — the same pattern as the
+ * war-performance panel, so the shared window switches cost zero fetches.
  */
-export async function getWarAttackDistribution(): Promise<WarAttackDistribution> {
-  const rows = await db
-    .select({
-      stars: warAttacks.stars,
-      count: sql<number>`count(*)`,
-    })
-    .from(warAttacks)
-    .groupBy(warAttacks.stars);
+export async function getWarAttackQualityTrend(
+  limit?: number,
+): Promise<WarAttackQualityTrend> {
+  const rows = await warAttackQualityRows(undefined, limit ?? ALL_ROWS);
+  return { points: mapWarAttackQualityRows(rows) };
+}
 
-  const dist: WarAttackDistribution = {
-    threeStar: 0,
-    twoStar: 0,
-    oneStar: 0,
-    zeroStar: 0,
-    total: 0,
-  };
-  for (const r of rows) {
-    const count = Number(r.count);
-    dist.total += count;
-    if (r.stars >= 3) dist.threeStar += count;
-    else if (r.stars === 2) dist.twoStar += count;
-    else if (r.stars === 1) dist.oneStar += count;
-    else dist.zeroStar += count;
-  }
-  return dist;
+/** Wars whose end time falls inside the window — the /api/analytics custom
+ *  date-range view of the same attack-quality trend. */
+export async function warAttackQualityTrendForWindow(
+  win: TimeWindow,
+): Promise<WarAttackQualityTrend> {
+  const rows = await warAttackQualityRows(win, ALL_ROWS);
+  return { points: mapWarAttackQualityRows(rows) };
+}
+
+interface WarAttackQualityRow {
+  endTime: Date | null;
+  teamSize: number | null;
+  attacks: number | string | null;
+  starsSum: number | string | null;
+  destructionSum: number | string | null;
+  threeStar: number | string | null;
+  twoStar: number | string | null;
+  oneStar: number | string | null;
+  zeroStar: number | string | null;
+  destSumThreeStar: number | string | null;
+  destSumTwoStar: number | string | null;
+  destSumOneStar: number | string | null;
+  destSumZeroStar: number | string | null;
+}
+
+/** Shared SELECT for both the preset trend and the custom-window variant —
+ *  only the endTime predicate differs. Postgres FILTER aggregates keep it
+ *  one grouped pass over the join. */
+function warAttackQualityRows(win: TimeWindow | undefined, limit: number) {
+  return db
+    .select({
+      endTime: wars.endTime,
+      teamSize: wars.teamSize,
+      attacks: sql<number>`count(${warAttacks.id})`,
+      starsSum: sql<number>`coalesce(sum(${warAttacks.stars}), 0)`,
+      destructionSum: sql<number>`coalesce(sum(${warAttacks.destructionPercentage}), 0)`,
+      threeStar: sql<number>`count(*) filter (where ${warAttacks.stars} >= 3)`,
+      twoStar: sql<number>`count(*) filter (where ${warAttacks.stars} = 2)`,
+      oneStar: sql<number>`count(*) filter (where ${warAttacks.stars} = 1)`,
+      zeroStar: sql<number>`count(*) filter (where ${warAttacks.stars} < 1)`,
+      destSumThreeStar: sql<number>`coalesce(sum(${warAttacks.destructionPercentage}) filter (where ${warAttacks.stars} >= 3), 0)`,
+      destSumTwoStar: sql<number>`coalesce(sum(${warAttacks.destructionPercentage}) filter (where ${warAttacks.stars} = 2), 0)`,
+      destSumOneStar: sql<number>`coalesce(sum(${warAttacks.destructionPercentage}) filter (where ${warAttacks.stars} = 1), 0)`,
+      destSumZeroStar: sql<number>`coalesce(sum(${warAttacks.destructionPercentage}) filter (where ${warAttacks.stars} < 1), 0)`,
+    })
+    .from(wars)
+    .innerJoin(warAttacks, eq(warAttacks.warId, wars.id))
+    .where(
+      and(
+        eq(wars.state, "warEnded"),
+        eq(wars.involvesOwnClan, true),
+        ...(win
+          ? [gte(wars.endTime, win.from), lt(wars.endTime, win.to)]
+          : []),
+      ),
+    )
+    .groupBy(wars.id, wars.endTime, wars.teamSize)
+    .orderBy(desc(wars.endTime))
+    .limit(limit);
+}
+
+function mapWarAttackQualityRows(
+  rows: WarAttackQualityRow[],
+): WarAttackQualityPoint[] {
+  return rows
+    .filter((r) => r.endTime !== null)
+    .reverse()
+    .map((r) => {
+      const n = (v: number | string | null) => Number(v ?? 0);
+      return {
+        endTime: r.endTime!,
+        teamSize: r.teamSize,
+        attacks: n(r.attacks),
+        starsSum: n(r.starsSum),
+        destructionSum: n(r.destructionSum),
+        threeStar: n(r.threeStar),
+        twoStar: n(r.twoStar),
+        oneStar: n(r.oneStar),
+        zeroStar: n(r.zeroStar),
+        destSumThreeStar: n(r.destSumThreeStar),
+        destSumTwoStar: n(r.destSumTwoStar),
+        destSumOneStar: n(r.destSumOneStar),
+        destSumZeroStar: n(r.destSumZeroStar),
+      };
+    });
 }

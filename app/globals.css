@@ -65,6 +65,20 @@ body > * {
   .glass {
     @apply border border-umbra-line/10 bg-white/[.02] shadow-2xl backdrop-blur-[2px] transition-all duration-300 hover:border-umbra-purple/30 hover:shadow-[0_0_15px_rgba(168,85,247,0.25)];
   }
+  /* Chart tooltips render inside their card's own stacking context (.glass
+     creates one via backdrop-filter), so a tooltip that crosses the card
+     edge — e.g. the war chart's tooltip reaching into the neighboring
+     attack-quality card — is painted over by later sibling cards. While a
+     chart card is hovered (the only time its tooltip is visible), lift the
+     whole card above its row so the tooltip floats above neighboring cards
+     and their text. :has() keeps this opt-in per chart-bearing card without
+     touching every component. */
+  .glass:has(.recharts-wrapper) {
+    position: relative;
+  }
+  .glass:has(.recharts-wrapper):hover {
+    z-index: 30;
+  }
   /* Level 2 — inner tile (stat box, row background inside a card). */
   .tile {
     @apply rounded-lg border border-white/[.04] bg-white/[.03];
