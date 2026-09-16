@@ -53,6 +53,7 @@ import type {
   HallOfFameLeaderboard,
   HallOfFameAwardKey,
   WarPerformanceTrend,
+  WarPerformancePoint,
   RosterSizeTrend,
   WarAttackDistribution,
   MembershipWindow,
@@ -523,12 +524,13 @@ export async function getCustomAnalytics(
   const data = await withCache(
     `analytics:${fromDay}:${toDay}`,
     async (): Promise<CustomAnalyticsView> => {
-      const [totals, timeline, leaderboard, membershipTimeline] =
+      const [totals, timeline, leaderboard, membershipTimeline, warPerformanceTrend] =
         await Promise.all([
           donationTotalsForWindow(window),
           donationTimelineForWindow(window),
           donationLeaderboardForWindow(window),
           membershipTimelineForWindow(window, "custom"),
+          warPerformanceTrendForWindow(window),
         ]);
       return {
         from: fromDay,
@@ -538,6 +540,7 @@ export async function getCustomAnalytics(
         timeline,
         leaderboard,
         membershipTimeline,
+        warPerformanceTrend,
       };
     },
     5 * 60 * 1000,
@@ -1763,17 +1766,24 @@ export { getRetainedMembers as getMembers };
 // ===========================================================================
 
 /**
- * War performance trend — the last N ended wars with stars, destruction, and
- * result. Powers the war-performance line chart on the dashboard. Returns
- * oldest-first so the chart reads left-to-right chronologically.
+ * War performance trend — ended own-clan wars with stars, destruction,
+ * result, and team size. Powers the war-performance panel on the dashboard.
+ * Returns oldest-first so the chart reads left-to-right chronologically.
+ *
+ * Default: every ended own-clan war (the panel slices windows client-side —
+ * 10 / 20 / all — so tab switches cost zero fetches, matching the donation
+ * and membership panels' precomputed-window pattern). Pass a limit for a
+ * last-N view.
  */
 export async function getWarPerformanceTrend(
-  limit = 20,
+  limit?: number,
 ): Promise<WarPerformanceTrend> {
   const rows = await db
     .select({
       endTime: wars.endTime,
       opponentName: wars.opponentName,
+      warType: wars.warType,
+      teamSize: wars.teamSize,
       ownStars: wars.ownStars,
       opponentStars: wars.opponentStars,
       ownDestruction: wars.ownDestructionPercentage,
@@ -1785,22 +1795,74 @@ export async function getWarPerformanceTrend(
     // are foreign-clan numbers and would pollute our performance chart.
     .where(and(eq(wars.state, "warEnded"), eq(wars.involvesOwnClan, true)))
     .orderBy(desc(wars.endTime))
-    .limit(limit);
+    .limit(limit ?? ALL_ROWS);
 
-  // Reverse to oldest-first for the chart.
-  const points = rows
+  return { points: mapWarPerformanceRows(rows) };
+}
+
+/** Wars whose end time falls inside the window — the /api/analytics custom
+ *  date-range view of the same trend. */
+export async function warPerformanceTrendForWindow(
+  win: TimeWindow,
+): Promise<WarPerformanceTrend> {
+  const rows = await db
+    .select({
+      endTime: wars.endTime,
+      opponentName: wars.opponentName,
+      warType: wars.warType,
+      teamSize: wars.teamSize,
+      ownStars: wars.ownStars,
+      opponentStars: wars.opponentStars,
+      ownDestruction: wars.ownDestructionPercentage,
+      opponentDestruction: wars.opponentDestructionPercentage,
+      result: wars.result,
+    })
+    .from(wars)
+    .where(
+      and(
+        eq(wars.state, "warEnded"),
+        eq(wars.involvesOwnClan, true),
+        gte(wars.endTime, win.from),
+        lt(wars.endTime, win.to),
+      ),
+    )
+    .orderBy(desc(wars.endTime));
+
+  return { points: mapWarPerformanceRows(rows) };
+}
+
+/** Postgres LIMIT ALL — no bound. */
+const ALL_ROWS = 999_999;
+
+type WarPerformanceRow = {
+  endTime: Date | null;
+  opponentName: string | null;
+  warType: string;
+  teamSize: number | null;
+  ownStars: number | null;
+  opponentStars: number | null;
+  ownDestruction: number | null;
+  opponentDestruction: number | null;
+  result: string | null;
+};
+
+/** Shared row → view-model mapping: newest-first rows in, oldest-first
+ *  points out. */
+function mapWarPerformanceRows(rows: WarPerformanceRow[]): WarPerformancePoint[] {
+  return rows
     .filter((r) => r.endTime !== null)
     .reverse()
     .map((r) => ({
       endTime: r.endTime!,
       opponentName: r.opponentName ?? "Unknown",
+      warType: r.warType,
+      teamSize: r.teamSize,
       ownStars: r.ownStars ?? 0,
       opponentStars: r.opponentStars ?? 0,
       ownDestruction: r.ownDestruction ?? 0,
-      result: r.result as "win" | "loss" | "tie" | null,
+      opponentDestruction: r.opponentDestruction ?? 0,
+      result: r.result as WarPerformancePoint["result"],
     }));
-
-  return { points };
 }
 
 /**

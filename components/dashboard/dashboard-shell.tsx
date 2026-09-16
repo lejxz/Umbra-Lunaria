@@ -26,7 +26,7 @@ const DonationAnalytics = dynamic(() => import("./donation-analytics").then(m =>
 const ClanPulsePanel = dynamic(() => import("./clan-pulse").then(m => m.ClanPulsePanel), {
   loading: () => <ChartSkeleton />,
 });
-const WarPerformanceChart = dynamic(() => import("./war-performance-chart").then(m => m.WarPerformanceChart), {
+const WarPerformancePanel = dynamic(() => import("./war-performance").then(m => m.WarPerformancePanel), {
   loading: () => <ChartSkeleton />,
 });
 const WarAttackDistributionChart = dynamic(() => import("./war-attack-distribution").then(m => m.WarAttackDistributionChart), {
@@ -97,19 +97,11 @@ export function DashboardShell({
         <CapitalSummaryCard capital={data.capital} />
       </div>
 
-      {/* Row 2b: War analytics — performance trend (2/3) + attack distribution donut (1/3) */}
+      {/* Row 2b: War analytics — performance panel (2/3) + attack distribution donut (1/3) */}
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
-        <section className="glass flex flex-col rounded-2xl p-5 lg:col-span-2" aria-labelledby="war-trend-title">
-          <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
-            War performance · last 20
-          </p>
-          <h3 id="war-trend-title" className="mt-1 font-display text-lg text-umbra-lilac">
-            Stars per war
-          </h3>
-          <div className="mt-3 h-56">
-            <WarPerformanceChart trend={data.warPerformanceTrend} />
-          </div>
-        </section>
+        <div className="lg:col-span-2">
+          <WarPerformancePanel points={data.warPerformanceTrend.points} />
+        </div>
         <section className="glass flex flex-col rounded-2xl p-5" aria-labelledby="attack-dist-title">
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
             Attack quality

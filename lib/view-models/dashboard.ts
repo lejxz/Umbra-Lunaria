@@ -134,6 +134,10 @@ export interface CustomAnalyticsView {
   /** Phase 4 / F10: same day range, membership-event density — additive so
    *  existing consumers of the donation fields are unaffected. */
   membershipTimeline: MembershipTimeline;
+  /** Wars ended inside the day range (oldest-first) — the same shape the
+   *  dashboard's war performance panel renders, so a custom range swaps in
+   *  with zero client-side translation. */
+  warPerformanceTrend: WarPerformanceTrend;
 }
 
 // ---------------------------------------------------------------------------
@@ -326,9 +330,15 @@ export interface HallOfFame {
 export interface WarPerformancePoint {
   endTime: Date;
   opponentName: string;
+  /** "regular" | "cwl" — DB text. */
+  warType: string;
+  /** Roster size per side (5v5 → 5). Drives star-efficiency normalization;
+   *  null on legacy rows without a size. */
+  teamSize: number | null;
   ownStars: number;
   opponentStars: number;
   ownDestruction: number;
+  opponentDestruction: number;
   result: "win" | "loss" | "tie" | null;
 }
 
