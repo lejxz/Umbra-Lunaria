@@ -27,6 +27,38 @@ wins / (wins + ties + losses)
 
 If an API value is absent, show `Unavailable` and suppress a misleading win-rate calculation. Link the card to the War Center.
 
+### 2b. War analytics row — performance + attack quality, one shared window
+
+A 2/3 + 1/3 row directly under the summary cards (2026-09-16): the wide
+**war performance** panel and the narrow **attack quality** card describe the
+same wars, driven by ONE window — a `WindowPicker` in the wide panel's header
+(10 / 20 / all presets, plus a custom day range through one
+`GET /api/analytics` request that feeds both datasets). The narrow card shows
+a passive window badge instead of a second control: one row, one window.
+Preset slices happen client-side from the precomputed trends, so tab
+switches cost zero fetches.
+
+**War performance — star efficiency.** Per-war own and opponent star
+efficiency (stars ÷ teamSize × 3) on one 0–100 scale, oldest left → newest
+right. Efficiency, not raw stars, because the clan's wars mix 5v5–40v40
+lineups and raw stars track lineup size, not performance. Win/loss/tie is
+encoded on the Us line's dots (emerald/red/muted — the same palette as the
+war record card and the attack donut), with a 3-war rolling average for the
+"are we getting better?" read; a W-T-L + average-efficiency badge summarizes
+the active window. The hover tooltip carries war size, raw stars vs max,
+both destruction percentages, and the star margin.
+
+**Attack quality — star distribution.** A donut (center: 3★ rate) for
+shape-at-a-glance plus always-visible tier rows — count, share, and a mini
+bar per star tier (3/2/1/0★, best → worst) — so the distribution reads
+without a pointer; the tooltip adds each tier's average destruction. A delta
+chip compares the 3★ rate against the preceding window of equal size (count
+presets only — "all" has no predecessor, and a custom range's "before" would
+need a second fetch). Aggregates cover own-clan attackers only, and wars
+without attack detail (backfilled warlog wars) are excluded by an inner join
+so they cannot dilute the rates. Pure math lives in `lib/war/star-efficiency.ts`
+and `lib/war/attack-quality.ts`.
+
 ### 3. Clan Capital card
 
 Show Capital Hall level, Capital points, Capital league, district count, and the latest district snapshot. Include a raid-weekend status:
@@ -40,7 +72,7 @@ Show Capital Hall level, Capital points, Capital league, district count, and the
 
 This is the largest analytical panel. It contains:
 
-1. A 24-hour / 7-day / 30-day control.
+1. A 24-hour / 7-day / 30-day preset control plus a custom day range — one shared `WindowPicker` (`components/ui/window-picker.tsx`, 2026-09-16: presets and the themed-calendar custom-range trigger in a single pill, in the standard filter spot; custom ranges resolve through `GET /api/analytics`).
 2. Total donations given and received for the selected window.
 3. Donation ratio and selected-window comparison.
 4. Hourly buckets for 24 hours; daily buckets for 7 and 30 days.
@@ -119,7 +151,7 @@ The default feed is the latest 20 events or 30 days, whichever is smaller. The `
 
 Directly under the clan log: the same `membership_events` data as a daily density chart — one stacked bar per clan-timezone calendar day (join / rejoin / leave / TH upgrade / rename) with the capital-contribution density overlaid (distinct members whose contributions rose that day, from the daily batch's delta events). The log answers "what happened"; the timeline answers "how often, over time" — the 2026-07-20 mass departure and raid-weekend contribution spikes read at a glance.
 
-Window select: 30d / 90d / all (precomputed server-side, tab switches cost zero fetches) plus a custom day range through the same shared range control and `GET /api/analytics` endpoint the donation panel uses. Days without events render as gaps (zero-filled x-axis); the "all" window starts at the first observed event day. A header badge shows the window's net roster change (joins + rejoins − leaves).
+Window select: 30d / 90d / all (precomputed server-side, tab switches cost zero fetches) plus a custom day range through the same shared `WindowPicker` and `GET /api/analytics` endpoint the donation panel uses. Days without events render as gaps (zero-filled x-axis); the "all" window starts at the first observed event day. A header badge shows the window's net roster change (joins + rejoins − leaves).
 
 ### 10. Navigation summaries
 

@@ -175,14 +175,9 @@ export function WarAttackQualityCard({
         ))}
       </ul>
 
-      {/* Footer — attack volume, averages, and the window-over-window read */}
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-white/5 pt-3 font-mono text-[0.65rem] uppercase tracking-wider text-umbra-muted">
-        <span>
-          {summary.wars} wars · {summary.attacks} atk ·{" "}
-          {summary.avgStars?.toFixed(1) ?? "—"}★ avg ·{" "}
-          {summary.avgDestruction ?? "—"}% dest
-        </span>
-        {delta != null && (
+      {/* Footer — the window-over-window read (3★ rate vs prior window) */}
+      {delta != null && (
+        <div className="mt-4 flex flex-wrap items-center justify-end border-t border-white/5 pt-3 font-mono text-[0.65rem] uppercase tracking-wider text-umbra-muted">
           <span
             className={
               delta > 0
@@ -195,8 +190,8 @@ export function WarAttackQualityCard({
             3★ {delta > 0 ? "+" : ""}
             {delta}% vs prior
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </section>
   );
 }

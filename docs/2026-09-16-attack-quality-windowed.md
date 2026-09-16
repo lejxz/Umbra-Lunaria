@@ -40,10 +40,9 @@ now float above neighboring glass cards instead of being painted over by them.
   view model retired.
 - `components/dashboard/war-attack-quality.tsx` (replaces
   `war-attack-distribution.tsx`) — donut for shape (center: 3★ rate) +
-  always-visible tier rows (color dot, count, share, mini bar) + footer
-  (wars · attacks · avg★ · avg dest) + 3★ delta chip vs prior window +
-  passive window badge; custom themed tooltip (tier, count of total, share,
-  avg destruction).
+  always-visible tier rows (color dot, count, share, mini bar) + 3★ delta
+  chip vs prior window + passive window badge; custom themed tooltip (tier,
+  count of total, share, avg destruction).
 - `components/dashboard/war-analytics-row.tsx` (new) — owns ONE shared window
   for the row: the performance panel's existing WindowPicker slot drives both
   cards, one `/api/analytics` fetch feeds both datasets, and the narrow card
@@ -71,6 +70,17 @@ now float above neighboring glass cards instead of being painted over by them.
   custom range's "before" would need a second fetch.
 - Pre-existing (not fixed here, out of scope): Row 5's `h-[450px]`
   Attention/Log cards overflow horizontally at mobile widths.
+
+## Revision — 2026-09-16 (same day, follow-up)
+The stats footer (`8 wars · 48 atk · 2.9★ avg · 97% dest`) was removed at
+the owner's request — the same production-copy principle as the 09-14 pass:
+every number in it was already readable elsewhere (attack count = sum of the
+tier-row counts, averages derive from the rows, war count is implied by the
+window badge), so the line was meta text restating the chart. The footer now
+renders only when a window-over-window comparison exists, holding just the
+`3★ ±N% vs prior` chip (right-aligned). `summarizeAttackQuality` still
+computes `wars`/`avgStars`/`avgDestruction` — they remain pinned by unit
+tests and available for future cards.
 
 ## Next Action
 Nothing blocking. Possible follow-ups: attack usage rate (attacks used ÷

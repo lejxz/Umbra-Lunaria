@@ -125,7 +125,7 @@ Execution record + verification against the plan: [`2026-09-13-phase3-analytics-
 
 ### Phase 4 — Clan history timeline (F10 · effort S-M) — **EXECUTED 2026-09-14**
 
-Execution record + verification against the plan: [`2026-09-14-phase4-clan-history-timeline.md`](./2026-09-14-phase4-clan-history-timeline.md). Amendment discovered during execution: the custom date-range control was extracted into a shared `components/dashboard/range-control.tsx` (used by both the donation panel and the new timeline panel), and `GET /api/analytics` now also returns `membershipTimeline` for the requested range — additive, inside the existing `withCache`.
+Execution record + verification against the plan: [`2026-09-14-phase4-clan-history-timeline.md`](./2026-09-14-phase4-clan-history-timeline.md). Amendment discovered during execution: the custom date-range control was extracted into a shared `components/dashboard/range-control.tsx` (used by both the donation panel and the new timeline panel), and `GET /api/analytics` now also returns `membershipTimeline` for the requested range — additive, inside the existing `withCache`. *(Superseded 2026-09-16: `range-control.tsx` was replaced by the shared `WindowPicker` — `components/ui/window-picker.tsx`, see [`2026-09-16-window-picker.md`](./2026-09-16-window-picker.md).)*
 
 `getMembershipTimeline(from, to)` — `membership_events` grouped by clan-TZ day × `event_type` (join/rejoin/leave/thUpgrade/rename), plus capitalContribution density. Render as a stacked bar/area chart (recharts, matching `chart-theme.ts`) under the dashboard clan log with event-type legend and a window select (30d/90d/all — reuses 3.2's custom window). Pure query + one component; no migration; immutable source is already the design guarantee.
 
@@ -183,3 +183,20 @@ Recommended execution order: **1 → 2.1 → 2.2 → 3.1 → 3.4 → 2.3 → 3.2
 4. Read-only DB inspection script (`scripts/investigate-db.mjs` outside the repo — not committed) — findings in §1.3.
 
 (Phase 1's execution — same day, separate session — is recorded in [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md).)
+
+## 6. Post-plan refinement pass (2026-09-14 → 2026-09-16, owner-driven)
+
+After the six-phase roadmap completed, the owner drove a UI-consistency and
+production-polish pass over the dashboard. Every change has its own execution
+log:
+
+| Date | Change | Commit | Log |
+|---|---|---|---|
+| 09-14 | Production copy polish — meta/over-explanation text stripped app-wide | `c1af109` | [`2026-09-14-production-copy-polish.md`](./2026-09-14-production-copy-polish.md) |
+| 09-16 | `WindowPicker` — one unified window filter with a themed calendar popover, replacing preset-Tabs + `RangeControl` | `566e570` | [`2026-09-16-window-picker.md`](./2026-09-16-window-picker.md) |
+| 09-16 | War performance → star efficiency (0–100 normalization across mixed lineup sizes) | `a33d1d7` | [`2026-09-16-war-performance-star-efficiency.md`](./2026-09-16-war-performance-star-efficiency.md) |
+| 09-16 | Attack quality → windowed star distribution + chart-tooltip z-index fix | `8bc89e6` | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
+| 09-16 | Attack-quality stats footer removed (production-copy follow-up; revision section in the attack-quality log) | — | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
+
+Concept doc `05-dashboard.md` §2b/§4/§9b were updated to match the shipped
+window-filter and war-analytics architecture.
