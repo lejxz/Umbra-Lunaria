@@ -11,7 +11,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import type { WarPerformancePoint } from "@/lib/view-models/dashboard";
-import { Badge, EmptyState } from "@/components/ui";
+import { Badge, ChartLegend, EmptyState } from "@/components/ui";
 import { IconWarEmpty } from "@/components/ui/icons";
 import { CHART_COLORS, axisTickStyle, tooltipContentStyle } from "@/lib/chart-theme";
 import {
@@ -213,16 +213,21 @@ export function WarPerformancePanel({
         )}
       </div>
 
-      {/* Legend — series + result encoding */}
+      {/* Legend — the shared pattern: below the chart, one swatch per
+          series, same component every other graph card uses */}
       {data.length > 0 && (
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[0.6rem] uppercase tracking-wider text-umbra-muted">
-          <LegendDot color={RESULT_COLORS.win} label="win" />
-          <LegendDot color={RESULT_COLORS.loss} label="loss" />
-          <LegendDot color={RESULT_COLORS.tie} label="tie" />
-          <LegendLine color={CHART_COLORS.purple} label="us" />
-          <LegendLine color="rgba(239,68,68,0.5)" label="them" dashed />
-          <LegendLine color="rgba(182,120,255,0.45)" label="3-war avg" dotted />
-        </div>
+        <ChartLegend
+          className="mt-2.5"
+          label="War performance series"
+          items={[
+            { label: "win", color: RESULT_COLORS.win, shape: "dot" },
+            { label: "loss", color: RESULT_COLORS.loss, shape: "dot" },
+            { label: "tie", color: RESULT_COLORS.tie, shape: "dot" },
+            { label: "us", color: CHART_COLORS.purple, shape: "line" },
+            { label: "them", color: "rgba(239,68,68,0.5)", shape: "dashed" },
+            { label: "3-war avg", color: "rgba(182,120,255,0.45)", shape: "dotted" },
+          ]}
+        />
       )}
     </section>
   );
@@ -364,42 +369,6 @@ function TooltipRow({
 
 function fmtPct(v: number | null): string {
   return v == null ? "—" : `${Math.round(v)}%`;
-}
-
-// ── Legend bits ────────────────────────────────────────────────────────────
-
-function LegendDot({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
-      {label}
-    </span>
-  );
-}
-
-function LegendLine({
-  color,
-  label,
-  dashed,
-  dotted,
-}: {
-  color: string;
-  label: string;
-  dashed?: boolean;
-  dotted?: boolean;
-}) {
-  return (
-    <span className="flex items-center gap-1.5">
-      <span
-        className="h-px w-3.5"
-        style={{
-          background: dashed || dotted ? "transparent" : color,
-          borderTop: `2px ${dashed ? "dashed" : dotted ? "dotted" : "solid"} ${color}`,
-        }}
-      />
-      {label}
-    </span>
-  );
 }
 
 function shortDate(d: Date): string {

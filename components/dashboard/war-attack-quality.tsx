@@ -143,12 +143,13 @@ export function WarAttackQualityCard({
         </div>
       </div>
 
-      {/* Tier rows — the distribution, readable without hovering */}
+      {/* Tier rows — the distribution, readable without hovering; same
+          mono text-label language as the shared ChartLegend */}
       <ul className="mt-4 space-y-1.5">
         {tiers.map((t) => (
           <li
             key={t.tier}
-            className="flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-wider"
+            className="flex items-center gap-2 font-mono text-label uppercase tracking-wider"
           >
             <span
               className="h-1.5 w-1.5 shrink-0 rounded-full"
@@ -177,7 +178,7 @@ export function WarAttackQualityCard({
 
       {/* Footer — the window-over-window read (3★ rate vs prior window) */}
       {delta != null && (
-        <div className="mt-4 flex flex-wrap items-center justify-end border-t border-white/5 pt-3 font-mono text-[0.65rem] uppercase tracking-wider text-umbra-muted">
+        <div className="mt-4 flex flex-wrap items-center justify-end border-t border-white/5 pt-3 font-mono text-label uppercase tracking-wider text-umbra-muted">
           <span
             className={
               delta > 0

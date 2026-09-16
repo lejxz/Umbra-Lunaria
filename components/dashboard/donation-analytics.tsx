@@ -14,8 +14,10 @@ import {
   formatRange,
   UnavailableValue,
   EmptyState,
+  ChartLegend,
 } from "@/components/ui";
 import { IconDonationEmpty } from "@/components/ui/icons";
+import { CHART_COLORS } from "@/lib/chart-theme";
 import { DonationChart } from "./donation-chart";
 
 /**
@@ -103,9 +105,8 @@ export function DonationAnalytics({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="glass flex min-h-[420px] flex-col rounded-2xl p-5"
       aria-labelledby="donation-title"
-      style={{ minHeight: "380px" }}
     >
       {/* Header + Stats + Tabs */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -171,14 +172,26 @@ export function DonationAnalytics({
         </div>
       </div>
 
-      {/* Chart + Top donors — chart fills remaining height */}
+      {/* Chart + Top donors — the standard plot height shared by every
+          full-width graph card, legend below the chart (h-56 / h-64 up) */}
       <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">
-        {/* Chart — fills remaining height of the card */}
-        <div className="min-h-[180px]">
+        <div className="flex flex-col">
           {timeline.buckets.length > 0 ? (
-            <DonationChart buckets={timeline.buckets} />
+            <>
+              <div className="h-56 sm:h-64">
+                <DonationChart buckets={timeline.buckets} />
+              </div>
+              <ChartLegend
+                className="mt-2.5"
+                label="Donation series"
+                items={[
+                  { label: "Given", color: CHART_COLORS.purple, shape: "bar" },
+                  { label: "Received", color: "#7552DF", shape: "bar" },
+                ]}
+              />
+            </>
           ) : (
-            <div className="flex h-full min-h-[180px] items-center justify-center">
+            <div className="flex h-56 items-center justify-center sm:h-64">
               <EmptyState
                 icon={<IconDonationEmpty />}
                 title="No donation activity yet"

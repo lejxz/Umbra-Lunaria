@@ -197,6 +197,7 @@ log:
 | 09-16 | War performance → star efficiency (0–100 normalization across mixed lineup sizes) | `a33d1d7` | [`2026-09-16-war-performance-star-efficiency.md`](./2026-09-16-war-performance-star-efficiency.md) |
 | 09-16 | Attack quality → windowed star distribution + chart-tooltip z-index fix | `8bc89e6` | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
 | 09-16 | Attack-quality stats footer removed (production-copy follow-up; revision section in the attack-quality log) | — | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
+| 09-16 | `ChartLegend` — one shared legend pattern + 420px graph card size standard; timeline footnote + pulse stat strip removed | — | [`2026-09-16-chart-legend-unification.md`](./2026-09-16-chart-legend-unification.md) |
 
-Concept doc `05-dashboard.md` §2b/§4/§9b were updated to match the shipped
-window-filter and war-analytics architecture.
+Concept doc `05-dashboard.md` §2b/§4/§6/§9b were updated to match the shipped
+window-filter, war-analytics, and legend/size-standard architecture.

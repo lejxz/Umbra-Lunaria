@@ -7,7 +7,7 @@ import type {
   DonationWindow,
   ActivityScoreLeaderboard,
 } from "@/lib/view-models/dashboard";
-import { Tabs, EmptyState } from "@/components/ui";
+import { Tabs, ChartLegend, EmptyState } from "@/components/ui";
 import {
   ComposedChart,
   Bar,
@@ -52,11 +52,10 @@ export function ClanPulsePanel({
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="glass flex min-h-[420px] flex-col rounded-2xl p-5"
       aria-labelledby="pulse-title"
-      style={{ minHeight: "380px" }}
     >
-      {/* Header: title + verdict pill | tabs */}
+      {/* Header: title + verdict pill | partial flag + tabs */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-label uppercase tracking-[.16em] text-umbra-purple">
@@ -70,51 +69,26 @@ export function ClanPulsePanel({
           </div>
         </div>
 
-        <Tabs
-          items={["24h", "7d", "30d"]}
-          active={window}
-          onChange={(v) => setWindow(v as DonationWindow)}
-          label="Pulse window"
-        />
-      </div>
-
-      {/* Stat strip — the combined story in three chips */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-        <StatChip
-          label={`Active · ${window}`}
-          value={`${pulse.totalActiveMembers}/${pulse.totalMembers}`}
-          detail={
-            pulse.totalMembers > 0
-              ? `${((pulse.totalActiveMembers / pulse.totalMembers) * 100).toFixed(0)}%`
-              : undefined
-          }
-        />
-        <Divider />
-        <StatChip
-          label="Roster"
-          value={pulse.rosterNow !== null ? `${pulse.rosterNow}` : "—"}
-          detail={formatDelta(pulse.rosterDelta)}
-          detailTone={deltaTone(pulse.rosterDelta)}
-        />
-        <Divider />
-        <StatChip
-          label="Engagement"
-          value={pulse.avgRate !== null ? `${pulse.avgRate.toFixed(0)}% avg` : "—"}
-          detail={formatTrend(pulse.rateTrendPp)}
-          detailTone={trendTone(pulse.rateTrendPp)}
-        />
-        {pulse.hasPartialData && (
-          <span className="text-label text-amber-400">⚠ Partial</span>
-        )}
+        <div className="flex flex-wrap items-center gap-4">
+          {pulse.hasPartialData && (
+            <span className="text-label text-amber-400">⚠ Partial</span>
+          )}
+          <Tabs
+            items={["24h", "7d", "30d"]}
+            active={window}
+            onChange={(v) => setWindow(v as DonationWindow)}
+            label="Pulse window"
+          />
+        </div>
       </div>
 
       {/* Chart + Leaderboard */}
       <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">
-        <div className="min-h-[200px]">
+        <div className="flex flex-col">
           {pulse.points.length > 0 ? (
             <PulseChart pulse={pulse} />
           ) : (
-            <div className="flex h-full min-h-[200px] items-center justify-center">
+            <div className="flex h-56 items-center justify-center sm:h-64">
               <EmptyState
                 icon={<IconActivityEmpty />}
                 title="No activity yet"
@@ -187,19 +161,16 @@ export function ClanPulsePanel({
 // ── Chart ────────────────────────────────────────────────────────────────
 
 const RATE_COLOR = "#34D399"; // emerald — the derived "engagement" signal
+const ACTIVE_COLOR = "#7552DF"; // matches the chart's bar fill
 
 function PulseChart({ pulse }: { pulse: ClanPulse }) {
   const data = pulse.points;
 
   return (
     <div className="flex h-full flex-col">
-      {/* Compact legend — Recharts <Legend> fights the layout; hand-roll it */}
-      <div className="mb-1 flex flex-wrap items-center gap-4 px-1">
-        <LegendSwatch shape="bar" color="#7552DF" label="Active members" />
-        <LegendSwatch shape="line" color={CHART_COLORS.lilac} label="Roster size" />
-        <LegendSwatch shape="dashed" color={RATE_COLOR} label="Engagement rate" />
-      </div>
-      <div className="min-h-[180px] flex-1">
+      {/* Plot — the standard chart height shared by every full-width
+          graph card (h-56 mobile / h-64 up) */}
+      <div className="h-56 sm:h-64">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap="20%">
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(190,151,255,0.06)" vertical={false} />
@@ -287,35 +258,43 @@ function PulseChart({ pulse }: { pulse: ClanPulse }) {
           </ComposedChart>
         </ResponsiveContainer>
       </div>
-    </div>
-  );
-}
 
-function LegendSwatch({
-  shape,
-  color,
-  label,
-}: {
-  shape: "bar" | "line" | "dashed";
-  color: string;
-  label: string;
-}) {
-  return (
-    <span className="flex items-center gap-1.5">
-      {shape === "bar" ? (
-        <span className="inline-block h-2.5 w-2.5 rounded-[2px]" style={{ background: color }} aria-hidden />
-      ) : (
-        <span
-          className="inline-block h-0 w-4 border-t-2"
-          style={{
-            borderColor: color,
-            borderTopStyle: shape === "dashed" ? "dashed" : "solid",
-          }}
-          aria-hidden
-        />
-      )}
-      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{label}</span>
-    </span>
+      {/* Legend + stats — one row: each series' key AND its current value,
+          replacing the separate stat strip above the chart (six labels for
+          three series → three). Same shared component as every other card. */}
+      <ChartLegend
+        className="mt-2.5"
+        label="Clan pulse series"
+        items={[
+          {
+            label: "Active",
+            color: ACTIVE_COLOR,
+            shape: "bar",
+            value: `${pulse.totalActiveMembers}/${pulse.totalMembers}`,
+            detail:
+              pulse.totalMembers > 0
+                ? `${((pulse.totalActiveMembers / pulse.totalMembers) * 100).toFixed(0)}%`
+                : undefined,
+          },
+          {
+            label: "Roster",
+            color: CHART_COLORS.lilac,
+            shape: "line",
+            value: pulse.rosterNow !== null ? `${pulse.rosterNow}` : "—",
+            detail: formatDelta(pulse.rosterDelta),
+            detailTone: deltaTone(pulse.rosterDelta),
+          },
+          {
+            label: "Engagement",
+            color: RATE_COLOR,
+            shape: "dashed",
+            value: pulse.avgRate !== null ? `${pulse.avgRate.toFixed(0)}% avg` : "—",
+            detail: formatTrend(pulse.rateTrendPp),
+            detailTone: trendTone(pulse.rateTrendPp),
+          },
+        ]}
+      />
+    </div>
   );
 }
 
@@ -345,32 +324,6 @@ function VerdictPill({ verdict }: { verdict: ClanPulse["verdict"] }) {
       {verdict.label}
     </span>
   );
-}
-
-function StatChip({
-  label,
-  value,
-  detail,
-  detailTone = "muted",
-}: {
-  label: string;
-  value: string;
-  detail?: string;
-  detailTone?: "up" | "down" | "muted";
-}) {
-  const detailColor =
-    detailTone === "up" ? "text-emerald-400" : detailTone === "down" ? "text-red-400" : "text-umbra-muted";
-  return (
-    <div className="flex items-center gap-1.5">
-      <span className="font-mono text-micro uppercase tracking-wider text-umbra-muted">{label}</span>
-      <span className="font-display text-xs font-bold text-white">{value}</span>
-      {detail && <span className={`font-mono text-micro ${detailColor}`}>{detail}</span>}
-    </div>
-  );
-}
-
-function Divider() {
-  return <div className="hidden h-4 w-px bg-white/10 sm:block" aria-hidden />;
 }
 
 /** "+3" / "−2" / "±0" for roster momentum. */

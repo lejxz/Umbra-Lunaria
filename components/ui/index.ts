@@ -9,6 +9,7 @@
 
 export { Badge } from "./badge";
 export { Button } from "./button";
+export { ChartLegend, type LegendItem, type LegendShape } from "./chart-legend";
 export { EmptyState } from "./empty-state";
 export { StatCard } from "./stat-card";
 export { Select } from "./select";

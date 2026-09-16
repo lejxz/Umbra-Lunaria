@@ -36,7 +36,8 @@ same wars, driven by ONE window — a `WindowPicker` in the wide panel's header
 `GET /api/analytics` request that feeds both datasets). The narrow card shows
 a passive window badge instead of a second control: one row, one window.
 Preset slices happen client-side from the precomputed trends, so tab
-switches cost zero fetches.
+switches cost zero fetches. A shared legend below the perf chart keys the
+series (win/loss/tie dots, us/them/3-war-avg line strokes).
 
 **War performance — star efficiency.** Per-war own and opponent star
 efficiency (stars ÷ teamSize × 3) on one 0–100 scale, oldest left → newest
@@ -79,6 +80,16 @@ This is the largest analytical panel. It contains:
 5. Accessible hover/focus detail for each bucket.
 6. Reset-aware totals from `04-activity-tracking-and-polling.md`.
 7. A tracking-start or partial-history state when data is insufficient.
+8. A Given/Received legend below the chart (`ChartLegend`).
+
+**Graph card standard (2026-09-16):** every dashboard chart card uses the
+shared `components/ui/chart-legend.tsx` below its plot — swatch shapes that
+mirror the series (bar / dot / line / dashed / dotted / area), one
+mono `text-label` uppercase typography — and all graph card rows share one
+height on lg (420px) with one standard plot height (h-56 mobile / h-64 up on
+full-width cards). A legend item may carry a live value + toned detail when
+the panel's story is those numbers (Clan Pulse); otherwise the header badge
+summarizes and the legend stays a pure key.
 
 ### 5. Member Activity Score leaderboard
 
@@ -109,7 +120,7 @@ One panel answers both "how many members are active?" and "is the clan growing o
 2. **Roster line** — distinct members per clan-timezone day, carried forward onto the activity buckets (a step line).
 3. **Engagement rate line** — active ÷ roster per bucket, on a 0–100% right axis: the normalization that separates a *big* clan from an *engaged* one (growth from 30 → 45 while "active" goes 12 → 15 is disengagement, not health).
 4. **Verdict pill** — the growth × engagement 2×2, computed by the pure engine `lib/scoring/clan-pulse.ts`: Thriving (both up) · Growing, diluting (roster up, engagement down) · Tightening core (roster down, engagement up) · Fading (both down) · Steady / Steady roster / Steady engagement (within thresholds: roster |Δ| < max(1, 5% of window-start roster); engagement |trend| < 5pp) · Warming up (not enough history — never a false "Steady"). The pill's tooltip carries a plain-language one-liner.
-5. **Stat chips** — `Active X/Y` · `Roster N (Δ)` · `Engagement R% avg (±Tpp)`, each delta colored.
+5. **Stat-legend** (2026-09-16 redesign) — one row below the chart, the shared `ChartLegend` with live values: `■ Active 1/7 · 14% ─ Roster 7 · ±0 ┄ Engagement 1% avg · ±0pp` — each item's swatch keys the series and its value/delta carries the readout, replacing the separate stat strip that printed the same three series twice. `⚠ Partial` sits with the window tabs in the header.
 
 Label it as observed activity and use an explicit empty/partial state rather than an empty graph. The Top-5 Member Activity Score leaderboard sits in the panel's right column (section 5) — one window state drives both the chart and the leaderboard. Data assembly: `getDashboard` composes the already-fetched activity timelines with the single roster-trend query (zero extra queries); `member_snapshots` day keys come from `to_char(..., 'YYYY-MM-DD')` so alignment never round-trips a naive pg timestamp through a Date.
 
@@ -151,7 +162,7 @@ The default feed is the latest 20 events or 30 days, whichever is smaller. The `
 
 Directly under the clan log: the same `membership_events` data as a daily density chart — one stacked bar per clan-timezone calendar day (join / rejoin / leave / TH upgrade / rename) with the capital-contribution density overlaid (distinct members whose contributions rose that day, from the daily batch's delta events). The log answers "what happened"; the timeline answers "how often, over time" — the 2026-07-20 mass departure and raid-weekend contribution spikes read at a glance.
 
-Window select: 30d / 90d / all (precomputed server-side, tab switches cost zero fetches) plus a custom day range through the same shared `WindowPicker` and `GET /api/analytics` endpoint the donation panel uses. Days without events render as gaps (zero-filled x-axis); the "all" window starts at the first observed event day. A header badge shows the window's net roster change (joins + rejoins − leaves).
+Window select: 30d / 90d / all (precomputed server-side, tab switches cost zero fetches) plus a custom day range through the same shared `WindowPicker` and `GET /api/analytics` endpoint the donation panel uses. Days without events render as gaps (zero-filled x-axis); the "all" window starts at the first observed event day. A header badge shows the window's net roster change (joins + rejoins − leaves). The series legend (Joined · Rejoined · Left · TH up · Renamed bar swatches + Capital contributors area swatch) is the shared `ChartLegend` below the chart — no explanation footnote (2026-09-16: the "Stacked/Overlay/Range" meta text was removed; the legend names every series and the picker shows the range).
 
 ### 10. Navigation summaries
 

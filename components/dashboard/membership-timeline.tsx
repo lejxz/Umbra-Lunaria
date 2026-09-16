@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
@@ -18,7 +17,7 @@ import type {
   MembershipTimelinePoint,
   CustomAnalyticsView,
 } from "@/lib/view-models/dashboard";
-import { WindowPicker, Badge, EmptyState } from "@/components/ui";
+import { WindowPicker, Badge, ChartLegend, EmptyState } from "@/components/ui";
 import { CHART_COLORS, axisTickStyle, tooltipProps } from "@/lib/chart-theme";
 
 /**
@@ -108,14 +107,10 @@ export function MembershipTimelinePanel({
   }, []);
 
   const { totals } = timeline;
-  const hasAnyEvents =
-    totals.join + totals.rejoin + totals.leave + totals.thUpgrade +
-      totals.rename >
-    0;
 
   return (
     <section
-      className="glass flex flex-col rounded-2xl p-5"
+      className="glass flex min-h-[420px] flex-col rounded-2xl p-5"
       aria-labelledby="membership-timeline-title"
     >
       {/* Header + window tabs */}
@@ -174,8 +169,9 @@ export function MembershipTimelinePanel({
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="mt-4 h-64">
+      {/* Chart — the standard plot height shared by every full-width
+          graph card (h-56 mobile / h-64 up) */}
+      <div className="mt-4 h-56 sm:h-64">
         {timeline.points.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <EmptyState
@@ -220,10 +216,6 @@ export function MembershipTimelinePanel({
                 allowDecimals={false}
               />
               <Tooltip {...tooltipProps} content={<TimelineTooltip />} />
-              <Legend
-                wrapperStyle={{ fontSize: "11px", fontFamily: "JetBrains Mono" }}
-                iconSize={9}
-              />
               {/* Density overlay first so the bars render above it. */}
               <Area
                 type="monotone"
@@ -252,19 +244,22 @@ export function MembershipTimelinePanel({
         )}
       </div>
 
-      {/* Footnote — what feeds this chart */}
-      <p className="mt-3 text-2xs text-umbra-muted">
-        {hasAnyEvents
-          ? "Stacked: membership events per clan day. Overlay: members whose capital contributions rose that day."
-          : "No membership events in this window — bars appear when someone joins, leaves, rejoin, upgrades their TH, or is renamed."}
-        {timeline.points.length > 0 && (
-          <>
-            {" "}
-            Range: {timeline.points[0]!.day} →{" "}
-            {timeline.points[timeline.points.length - 1]!.day}.
-          </>
-        )}
-      </p>
+      {/* Legend — the shared pattern: below the chart, one swatch per
+          series, same component every other graph card uses */}
+      {timeline.points.length > 0 && (
+        <ChartLegend
+          className="mt-2.5"
+          label="Membership timeline series"
+          items={[
+            ...BAR_SERIES.map((series) => ({
+              label: series.label,
+              color: series.color,
+              shape: "bar" as const,
+            })),
+            { label: CAPITAL.label, color: CAPITAL.color, shape: "area" as const },
+          ]}
+        />
+      )}
     </section>
   );
 }

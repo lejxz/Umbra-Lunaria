@@ -135,8 +135,11 @@ export function WarAnalyticsRow({
       : `last ${window} wars`;
 
   return (
+    /* All four graph card rows share one height standard on lg (420px) —
+       the wrapper's min-height stretches the grid row, which stretches both
+       cards (the perf panel via h-full) and their flex-1 charts with it. */
     <div className="mt-5 grid gap-5 lg:grid-cols-3">
-      <div className="lg:col-span-2">
+      <div className="lg:col-span-2 lg:min-h-[420px]">
         <WarPerformancePanel
           points={activePerformance}
           hasCustomRange={custom.status === "ready"}
