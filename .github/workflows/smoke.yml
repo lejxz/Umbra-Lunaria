@@ -71,7 +71,7 @@ jobs:
           check "/capital" 200 "grep:Clan capital:capital h1"
           check "/hall-of-fame" 200 "grep:Hall of Fame:hall-of-fame h1"
           check "/strategy" 200 "grep:War Strategy:strategy h1"
-          check "/offline" 200 "grep:showing your last visit:offline shell"
+          check "/offline" 200 "grep:You are offline:offline shell"
           # PWA shell assets (Phase 5) — headers matter as much as the code.
           check "/manifest.webmanifest" 200 "grep:name:manifest body"
           check "/sw.js" 200 "grep:umbra-lunaria:sw cache name"
