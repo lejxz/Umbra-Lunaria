@@ -8,6 +8,7 @@
  */
 
 export { Badge } from "./badge";
+export { Button } from "./button";
 export { EmptyState } from "./empty-state";
 export { StatCard } from "./stat-card";
 export { Select } from "./select";
@@ -15,6 +16,7 @@ export { Toggle } from "./toggle";
 export { Tabs } from "./tabs";
 export { TimeAgo } from "./time-ago";
 export { Modal } from "./modal";
+export { WindowPicker, formatRange } from "./window-picker";
 export {
   LoadingState,
   ErrorState,

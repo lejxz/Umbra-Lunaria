@@ -20,6 +20,7 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronsUpDown,
+  CalendarDays,
   X,
   Loader2,
   RefreshCw,
@@ -67,6 +68,7 @@ export const IconShieldOff = (props: LucideProps) => <ShieldOff {...props} />;
 export const IconChevronDown = (props: LucideProps) => <ChevronDown {...props} />;
 export const IconChevronUp = (props: LucideProps) => <ChevronUp {...props} />;
 export const IconChevronsUpDown = (props: LucideProps) => <ChevronsUpDown {...props} />;
+export const IconCalendar = (props: LucideProps) => <CalendarDays {...props} />;
 export const IconX = (props: LucideProps) => <X {...props} />;
 export const IconLoader = (props: LucideProps) => <Loader2 {...props} />;
 export const IconSync = (props: LucideProps) => <RefreshCw {...props} />;

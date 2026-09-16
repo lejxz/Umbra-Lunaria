@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import Image from "next/image";
 import type {
   DonationTotals,
@@ -9,14 +9,14 @@ import type {
   DonationWindow,
   CustomAnalyticsView,
 } from "@/lib/view-models/dashboard";
-import { Tabs, UnavailableValue, EmptyState } from "@/components/ui";
+import {
+  WindowPicker,
+  formatRange,
+  UnavailableValue,
+  EmptyState,
+} from "@/components/ui";
 import { IconDonationEmpty } from "@/components/ui/icons";
 import { DonationChart } from "./donation-chart";
-import {
-  RangeControl,
-  dayKeyInTz,
-  formatRange,
-} from "./range-control";
 
 /**
  * Donation analytics — the largest primary panel on the dashboard.
@@ -24,12 +24,12 @@ import {
  * on the left (fills remaining height) and top donors on the right.
  * See docs/concept/05-dashboard.md §4.
  *
- * Phase 3.2 (F11): a custom date-range control (two date inputs + quick
- * chips) fetches GET /api/analytics?from=&to= and renders the panel over
- * that window instead of a preset. The dashboard page itself stays static
- * (ISR) — the range query is client-side, exactly like the member detail
- * sheet's /api/members/[tag] fetch. Since Phase 4 the control itself lives
- * in ./range-control.tsx, shared with the membership-timeline panel.
+ * Phase 3.2 (F11): a custom date range fetches GET /api/analytics?from=&to=
+ * and renders the panel over that window instead of a preset. The dashboard
+ * page itself stays static (ISR) — the range query is client-side, exactly
+ * like the member detail sheet's /api/members/[tag] fetch. Since this pass
+ * the preset tabs and the custom-range trigger are one WindowPicker in the
+ * card header — no separate filter row.
  */
 
 type CustomState =
@@ -54,10 +54,7 @@ export function DonationAnalytics({
 }) {
   const [window, setWindow] = useState<DonationWindow>("24h");
   const [custom, setCustom] = useState<CustomState>({ status: "idle" });
-  const [fromInput, setFromInput] = useState("");
-  const [toInput, setToInput] = useState("");
 
-  const todayKey = useMemo(() => dayKeyInTz(new Date()), []);
   const preset = dataByWindow[window];
 
   const applyRange = useCallback(
@@ -86,8 +83,6 @@ export function DonationAnalytics({
 
   const clearCustom = useCallback(() => {
     setCustom({ status: "idle" });
-    setFromInput("");
-    setToInput("");
   }, []);
 
   const isCustomActive =
@@ -95,7 +90,7 @@ export function DonationAnalytics({
 
   // The panel renders either the custom range (when ready) or a preset — an
   // in-flight or failed range leaves the previous/preset data on screen
-  // (the error message renders inline next to the Apply button).
+  // (the error message renders inside the picker's popover).
   const totals = custom.status === "ready" ? custom.data.totals : preset.totals;
   const timeline =
     custom.status === "ready" ? custom.data.timeline : preset.timeline;
@@ -142,39 +137,39 @@ export function DonationAnalytics({
             )}
           </div>
 
-          <Tabs
-            items={["24h", "7d", "30d"]}
-            active={isCustomActive ? null : window}
-            onChange={(v) => {
+          <WindowPicker
+            presets={[
+              { value: "24h", label: "24h" },
+              { value: "7d", label: "7d" },
+              { value: "30d", label: "30d" },
+            ]}
+            activePreset={isCustomActive ? null : window}
+            onPresetChange={(v) => {
               setWindow(v as DonationWindow);
               clearCustom();
             }}
+            custom={{
+              status: custom.status,
+              from:
+                custom.status === "ready"
+                  ? custom.data.from
+                  : custom.status === "loading"
+                    ? custom.from
+                    : undefined,
+              to:
+                custom.status === "ready"
+                  ? custom.data.to
+                  : custom.status === "loading"
+                    ? custom.to
+                    : undefined,
+              error: custom.status === "error" ? custom.message : null,
+            }}
+            onApplyCustom={applyRange}
+            onClearCustom={clearCustom}
             label="Donation window"
           />
         </div>
       </div>
-
-      {/* ── Custom date-range control (Phase 3.2, shared since Phase 4) ── */}
-      <RangeControl
-        fromInput={fromInput}
-        toInput={toInput}
-        todayKey={todayKey}
-        onFromChange={setFromInput}
-        onToChange={setToInput}
-        onApply={(from, to) => applyRange(from ?? fromInput, to ?? toInput)}
-        onClear={clearCustom}
-        status={custom.status}
-        applied={
-          custom.status === "ready"
-            ? {
-                from: custom.data.from,
-                to: custom.data.to,
-                dayCount: custom.data.dayCount,
-              }
-            : null
-        }
-        error={custom.status === "error" ? custom.message : null}
-      />
 
       {/* Chart + Top donors — chart fills remaining height */}
       <div className="mt-4 grid flex-1 gap-6 lg:grid-cols-[1fr_280px]">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   ComposedChart,
   Bar,
@@ -18,9 +18,8 @@ import type {
   MembershipTimelinePoint,
   CustomAnalyticsView,
 } from "@/lib/view-models/dashboard";
-import { Tabs, Badge, EmptyState } from "@/components/ui";
+import { WindowPicker, Badge, EmptyState } from "@/components/ui";
 import { CHART_COLORS, axisTickStyle, tooltipProps } from "@/lib/chart-theme";
-import { RangeControl, dayKeyInTz } from "./range-control";
 
 /**
  * Clan history timeline (Phase 4 — F10, docs/2026-09-11-implementation-plan.md
@@ -35,7 +34,8 @@ import { RangeControl, dayKeyInTz } from "./range-control";
  *
  * Windows: 30d / 90d / all precomputed server-side (tab switches cost zero
  * fetches) plus a custom day range via GET /api/analytics — the same shared
- * RangeControl and endpoint the donation panel uses (Phase 3.2 machinery).
+ * WindowPicker and endpoint the donation panel uses. Presets and the custom
+ * range live in one control in the card header.
  */
 
 type CustomState =
@@ -69,10 +69,7 @@ export function MembershipTimelinePanel({
 }) {
   const [window, setWindow] = useState<MembershipWindow>("30d");
   const [custom, setCustom] = useState<CustomState>({ status: "idle" });
-  const [fromInput, setFromInput] = useState("");
-  const [toInput, setToInput] = useState("");
 
-  const todayKey = useMemo(() => dayKeyInTz(new Date()), []);
   const preset = dataByWindow[window];
   const isCustomActive =
     custom.status === "ready" || custom.status === "loading";
@@ -108,8 +105,6 @@ export function MembershipTimelinePanel({
 
   const clearCustom = useCallback(() => {
     setCustom({ status: "idle" });
-    setFromInput("");
-    setToInput("");
   }, []);
 
   const { totals } = timeline;
@@ -145,39 +140,39 @@ export function MembershipTimelinePanel({
             {totals.leave} out
           </Badge>
 
-          <Tabs
-            items={["30d", "90d", "all"]}
-            active={isCustomActive ? null : window}
-            onChange={(v) => {
+          <WindowPicker
+            presets={[
+              { value: "30d", label: "30d" },
+              { value: "90d", label: "90d" },
+              { value: "all", label: "all" },
+            ]}
+            activePreset={isCustomActive ? null : window}
+            onPresetChange={(v) => {
               setWindow(v as MembershipWindow);
               clearCustom();
             }}
+            custom={{
+              status: custom.status,
+              from:
+                custom.status === "ready"
+                  ? custom.data.from
+                  : custom.status === "loading"
+                    ? custom.from
+                    : undefined,
+              to:
+                custom.status === "ready"
+                  ? custom.data.to
+                  : custom.status === "loading"
+                    ? custom.to
+                    : undefined,
+              error: custom.status === "error" ? custom.message : null,
+            }}
+            onApplyCustom={applyRange}
+            onClearCustom={clearCustom}
             label="Membership timeline window"
           />
         </div>
       </div>
-
-      {/* ── Custom date-range control (shared with the donation panel) ── */}
-      <RangeControl
-        fromInput={fromInput}
-        toInput={toInput}
-        todayKey={todayKey}
-        onFromChange={setFromInput}
-        onToChange={setToInput}
-        onApply={(from, to) => applyRange(from ?? fromInput, to ?? toInput)}
-        onClear={clearCustom}
-        status={custom.status}
-        applied={
-          custom.status === "ready"
-            ? {
-                from: custom.data.from,
-                to: custom.data.to,
-                dayCount: custom.data.dayCount,
-              }
-            : null
-        }
-        error={custom.status === "error" ? custom.message : null}
-      />
 
       {/* Chart */}
       <div className="mt-4 h-64">
