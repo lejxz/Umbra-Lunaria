@@ -1,7 +1,7 @@
 # Commit Authorship Repair — Every Commit Under the Owner's Identity
 
 **Date:** 2026-09-17
-**Time:** 08:10 PM (+08:00)
+**Time:** 11:55 AM (+08:00)
 
 ## Summary of Session
 The owner reported — with a screenshot of three `main` commits showing gray
@@ -32,9 +32,10 @@ were re-authored in place and force-pushed.
   `c1af109 → fe4e373`, `566e570 → 7f6732a`, `7261f4a → 9970202`,
   `a33d1d7 → 70e7f0b`, `8bc89e6 → da652aa`, `97a85a5 → e286cc7`,
   `825d7dc → e1faab9`. The other 411 commits kept their SHAs.
-- Force-pushed the rewritten `main` (branch protection handling below), let
-  CI re-run, and re-verified attribution through the API: 418/418 commits
-  attributed to `gh:lejxz` — zero unattributed.
+- Force-pushed the rewritten `main` (branch protection handling below); CI
+  re-ran green on the rewritten head (run 35179787305) and on this log's
+  commit (run 35179881285). Re-verified attribution through the API:
+  418/418 commits attributed to `gh:lejxz` — zero unattributed.
 
 ## Decisions Made
 - **Rewrite scope = the 7 assistant commits only.** The owner's 411
