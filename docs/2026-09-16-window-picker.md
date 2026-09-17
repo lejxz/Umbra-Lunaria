@@ -4,7 +4,7 @@
 **Time:** 01:05 PM (+08:00)
 
 > Documentation note: this execution log was written retroactively the same
-> day — the commit (`566e570`) landed before a documentation audit caught
+> day — the commit (`7f6732a`) landed before a documentation audit caught
 > that it had no log entry. Content follows the shipped code.
 
 ## Summary of Session
@@ -51,7 +51,7 @@ off. One filter, one placement, one component for every custom-window panel.
   its position style lands — the `setState` inside the layout effect
   flushes before paint, making the focus deterministic.
 - Later the same day, two more panels adopted it: the war-performance
-  panel (`a33d1d7`) and the war-analytics row (`8bc89e6`) — see
+  panel (`70e7f0b`) and the war-analytics row (`da652aa`) — see
  [`2026-09-16-war-performance-star-efficiency.md`](./2026-09-16-war-performance-star-efficiency.md)
  and
  [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md).

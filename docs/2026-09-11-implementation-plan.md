@@ -184,7 +184,7 @@ Recommended execution order: **1 → 2.1 → 2.2 → 3.1 → 3.4 → 2.3 → 3.2
 
 (Phase 1's execution — same day, separate session — is recorded in [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md).)
 
-## 6. Post-plan refinement pass (2026-09-14 → 2026-09-16, owner-driven)
+## 6. Post-plan refinement pass (2026-09-14 → 2026-09-17, owner-driven)
 
 After the six-phase roadmap completed, the owner drove a UI-consistency and
 production-polish pass over the dashboard. Every change has its own execution
@@ -192,12 +192,13 @@ log:
 
 | Date | Change | Commit | Log |
 |---|---|---|---|
-| 09-14 | Production copy polish — meta/over-explanation text stripped app-wide | `c1af109` | [`2026-09-14-production-copy-polish.md`](./2026-09-14-production-copy-polish.md) |
-| 09-16 | `WindowPicker` — one unified window filter with a themed calendar popover, replacing preset-Tabs + `RangeControl` | `566e570` | [`2026-09-16-window-picker.md`](./2026-09-16-window-picker.md) |
-| 09-16 | War performance → star efficiency (0–100 normalization across mixed lineup sizes) | `a33d1d7` | [`2026-09-16-war-performance-star-efficiency.md`](./2026-09-16-war-performance-star-efficiency.md) |
-| 09-16 | Attack quality → windowed star distribution + chart-tooltip z-index fix | `8bc89e6` | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
+| 09-14 | Production copy polish — meta/over-explanation text stripped app-wide | `fe4e373` | [`2026-09-14-production-copy-polish.md`](./2026-09-14-production-copy-polish.md) |
+| 09-16 | `WindowPicker` — one unified window filter with a themed calendar popover, replacing preset-Tabs + `RangeControl` | `7f6732a` | [`2026-09-16-window-picker.md`](./2026-09-16-window-picker.md) |
+| 09-16 | War performance → star efficiency (0–100 normalization across mixed lineup sizes) | `70e7f0b` | [`2026-09-16-war-performance-star-efficiency.md`](./2026-09-16-war-performance-star-efficiency.md) |
+| 09-16 | Attack quality → windowed star distribution + chart-tooltip z-index fix | `da652aa` | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
 | 09-16 | Attack-quality stats footer removed (production-copy follow-up; revision section in the attack-quality log) | — | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
 | 09-16 | `ChartLegend` — one shared legend pattern + 420px graph card size standard; timeline footnote + pulse stat strip removed | — | [`2026-09-16-chart-legend-unification.md`](./2026-09-16-chart-legend-unification.md) |
+| 09-17 | Commit authorship repair — 7 assistant commits re-authored under `lejxz <lejxz.dev@gmail.com>` (3 had been unattributed "Z User"); stale SHA references refreshed | — | [`2026-09-17-commit-authorship-repair.md`](./2026-09-17-commit-authorship-repair.md) |
 
 Concept doc `05-dashboard.md` §2b/§4/§6/§9b were updated to match the shipped
 window-filter, war-analytics, and legend/size-standard architecture.
