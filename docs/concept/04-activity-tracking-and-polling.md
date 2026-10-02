@@ -110,3 +110,5 @@ Needs-attention alignment: the inactive queue judges "last seen" as the newest o
 3. A failed poll retains existing data and records a failure for observability; it must not mark members inactive or departed.
 4. A member detail view can show current API data even when historical sections are not ready.
 5. Rank and auto-select views show “limited data” when their required observation period is incomplete.
+6. Ingest health is monitored independently of deployment health: `/api/health` reports the age of `clans.last_polled_at` (HTTP 200 fresh, HTTP 503 when older than 30 minutes or the database is unreachable), and the `watchdog.yml` Actions workflow checks it every 30 minutes and fails red. ISR pages serving cached content must never mask a dead pipeline — the 2026-10-01 outage proved they can (docs/2026-10-02-ingest-outage-watchdog.md).
+7. Outage evidence comes from the database, not provider dashboards: `scripts/db-freshness.ts` prints the poll cadence per hour, daily-capture presence, and war-sync recency, which pins any gap window exactly.

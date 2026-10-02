@@ -184,7 +184,7 @@ Recommended execution order: **1 → 2.1 → 2.2 → 3.1 → 3.4 → 2.3 → 3.2
 
 (Phase 1's execution — same day, separate session — is recorded in [`2026-09-11-phase1-activity-signals.md`](./2026-09-11-phase1-activity-signals.md).)
 
-## 6. Post-plan refinement pass (2026-09-14 → 2026-09-17, owner-driven)
+## 6. Post-plan refinement pass (2026-09-14 → 2026-10-02, owner-driven)
 
 After the six-phase roadmap completed, the owner drove a UI-consistency and
 production-polish pass over the dashboard. Every change has its own execution
@@ -199,6 +199,8 @@ log:
 | 09-16 | Attack-quality stats footer removed (production-copy follow-up; revision section in the attack-quality log) | — | [`2026-09-16-attack-quality-windowed.md`](./2026-09-16-attack-quality-windowed.md) |
 | 09-16 | `ChartLegend` — one shared legend pattern + 420px graph card size standard; timeline footnote + pulse stat strip removed | — | [`2026-09-16-chart-legend-unification.md`](./2026-09-16-chart-legend-unification.md) |
 | 09-17 | Commit authorship repair — 7 assistant commits re-authored under `lejxz <lejxz.dev@gmail.com>` (3 had been unattributed "Z User"); stale SHA references refreshed | — | [`2026-09-17-commit-authorship-repair.md`](./2026-09-17-commit-authorship-repair.md) |
+| 10-02 | React Native (Expo) adaptation guide for the course-project fork — root-level planning doc; production tracker untouched | `0518f5c` | [`../REACT-NATIVE-ADAPTATION.md`](../REACT-NATIVE-ADAPTATION.md) |
+| 10-02 | Data watchdog — `/api/health` freshness endpoint (503-on-stale) + 30-min Actions monitor + `db-freshness` diagnostic; postmortem of the Oct-1 Supabase-latency ingest outage | — | [`2026-10-02-ingest-outage-watchdog.md`](./2026-10-02-ingest-outage-watchdog.md) |
 
 Concept doc `05-dashboard.md` §2b/§4/§6/§9b were updated to match the shipped
 window-filter, war-analytics, and legend/size-standard architecture.

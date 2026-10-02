@@ -63,6 +63,7 @@ assert_static "/war" "5m"
 
 assert_dynamic "/api/analytics"
 assert_dynamic "/api/cron/purge"
+assert_dynamic "/api/health"
 assert_dynamic "/api/ingest"
 assert_dynamic "/api/members/[tag]"
 assert_dynamic "/api/war/[id]"

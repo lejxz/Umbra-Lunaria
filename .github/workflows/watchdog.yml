@@ -1,0 +1,99 @@
+# Data watchdog — ingest freshness monitor.
+#
+# Born from the 2026-10-01 outage (docs/2026-10-02-ingest-outage-watchdog.md):
+# the third-party cron service's polls failed for ~4 hours during a Supabase
+# us-east-1 latency incident while every existing signal stayed quiet — the
+# nightly smoke passes because ISR pages serve cached HTML, and cron-job.org
+# failure emails are easy to miss. Ingest death was invisible from inside the
+# repo.
+#
+# This workflow closes that gap: every 30 minutes it GETs /api/health, which
+# reports the age of the last successful poll (clans.last_polled_at — written
+# by every light poll). Fresh = HTTP 200; stale or unreachable = HTTP 503 →
+# this run fails red, and GitHub emails the repo owner. Public repo →
+# scheduled Actions minutes are free.
+#
+# When this workflow fails, follow the runbook in
+# docs/2026-10-02-ingest-outage-watchdog.md (check provider status pages,
+# check the cron service, then run the poll.yml manual fallback).
+name: Data watchdog
+
+on:
+  schedule:
+    - cron: "*/30 * * * *" # every 30 min; the light poll itself runs every 5
+  workflow_dispatch: {}
+
+concurrency:
+  group: data-watchdog
+  cancel-in-progress: true
+
+jobs:
+  freshness:
+    name: Ingest freshness
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - name: Resolve base URL
+        id: url
+        env:
+          VERCEL_APP_URL: ${{ secrets.VERCEL_APP_URL }}
+        run: |
+          if [ -z "$VERCEL_APP_URL" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            base="$(printf '%s' "$VERCEL_APP_URL" | sed -e 's|^https\?://||' -e 's|/$||')"
+            echo "base=https://${base}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check data freshness (/api/health)
+        id: health
+        if: steps.url.outputs.skip == 'false'
+        run: |
+          base="${{ steps.url.outputs.base }}"
+          response="$(curl -sS -w "\n%{http_code}" --max-time 30 "$base/api/health" || printf '\n000')"
+          code="$(printf '%s' "$response" | tail -n1)"
+          body="$(printf '%s' "$response" | sed '$d')"
+
+          echo "http_code=$code" >> "$GITHUB_OUTPUT"
+          {
+            echo "body<<HEALTH_BODY_EOF"
+            echo "$body"
+            echo "HEALTH_BODY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "HTTP $code"
+          echo "$body"
+
+          if [ "$code" != "200" ]; then
+            echo "::error::GET /api/health -> HTTP $code (503 = data stale, 000 = endpoint unreachable). Runbook: docs/2026-10-02-ingest-outage-watchdog.md"
+            exit 1
+          fi
+
+      - name: Write run summary
+        if: always()
+        run: |
+          code="${{ steps.health.outputs.http_code }}"
+          body="${{ steps.health.outputs.body }}"
+          age="n/a"
+          last="n/a"
+          if [ -n "$body" ]; then
+            age="$(printf '%s' "$body" | jq -r '.ageSeconds // "n/a"' 2>/dev/null || echo n/a)"
+            last="$(printf '%s' "$body" | jq -r '.lastPolledAt // "n/a"' 2>/dev/null || echo n/a)"
+          fi
+          {
+            echo "### Data watchdog"
+            echo ""
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Endpoint | \`/api/health\` |"
+            echo "| HTTP status | \`${code:-not run}\` |"
+            echo "| Last successful poll | \`${last}\` |"
+            echo "| Data age | \`${age} s\` |"
+            echo "| Stale threshold | \`1800 s\` (light poll runs every 300 s) |"
+            echo ""
+            if [ -z "$code" ]; then
+              echo "The \`VERCEL_APP_URL\` secret is not set on this repository, so there is no deployment URL to check. Add it (same value \`poll.yml\` and \`smoke.yml\` use) to enable the watchdog."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
